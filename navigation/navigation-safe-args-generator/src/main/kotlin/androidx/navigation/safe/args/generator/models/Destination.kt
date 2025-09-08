@@ -26,22 +26,24 @@ data class Destination(
     val args: List<Argument>,
     val actions: List<Action>,
     val nested: List<Destination> = emptyList(),
-    val included: List<IncludedDestination> = emptyList()
+    val included: List<IncludedDestination> = emptyList(),
 ) {
 
     companion object {
-        fun createName(id: ResReference?, name: String, applicationId: String): ClassName? = when {
-            name.isNotEmpty() -> {
-                val specifiedPackage = name.substringBeforeLast('.', "")
-                val classPackage = if (name.startsWith(".")) {
-                    "$applicationId$specifiedPackage"
-                } else {
-                    specifiedPackage
+        fun createName(id: ResReference?, name: String, applicationId: String): ClassName? =
+            when {
+                name.isNotEmpty() -> {
+                    val specifiedPackage = name.substringBeforeLast('.', "")
+                    val classPackage =
+                        if (name.startsWith(".")) {
+                            "$applicationId$specifiedPackage"
+                        } else {
+                            specifiedPackage
+                        }
+                    ClassName.get(classPackage, name.replace("\\\$", "_").substringAfterLast('.'))
                 }
-                ClassName.get(classPackage, name.substringAfterLast('.'))
+                id != null -> ClassName.get(id.packageName, id.javaIdentifier.toCamelCase())
+                else -> null
             }
-            id != null -> ClassName.get(id.packageName, id.javaIdentifier.toCamelCase())
-            else -> null
-        }
     }
 }

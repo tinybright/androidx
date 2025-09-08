@@ -32,74 +32,95 @@ class ObservedTableStatesTest {
 
     @Test
     fun basicAdd() = runTest {
-        tableStates.onObserverAdded(intArrayOf(2, 3))
-        assertThat(tableStates.getTablesToSync()).isEqualTo(
-            createSyncResult(
-                mapOf(2 to ObserveOp.ADD, 3 to ObserveOp.ADD)
-            )
-        )
+        assertThat(tableStates.onObserverAdded(intArrayOf(2, 3))).isTrue()
+        tableStates.onSync { ops ->
+            assertThat(ops)
+                .isEqualTo(createSyncResult(mapOf(2 to ObserveOp.ADD, 3 to ObserveOp.ADD)))
+        }
     }
 
     @Test
     fun basicRemove() = runTest {
         tableStates.onObserverAdded(intArrayOf(2, 3))
-        tableStates.getTablesToSync()
+        tableStates.onSync {}
 
-        tableStates.onObserverRemoved(intArrayOf(3))
-        assertThat(tableStates.getTablesToSync()).isEqualTo(
-            createSyncResult(
-                mapOf(3 to ObserveOp.REMOVE)
-            )
-        )
+        assertThat(tableStates.onObserverRemoved(intArrayOf(3))).isTrue()
+        tableStates.onSync { ops ->
+            assertThat(ops).isEqualTo(createSyncResult(mapOf(3 to ObserveOp.REMOVE)))
+        }
     }
 
     @Test
     fun noChange() = runTest {
         tableStates.onObserverAdded(intArrayOf(1, 3))
-        tableStates.getTablesToSync()
+        tableStates.onSync {}
 
-        tableStates.onObserverAdded(intArrayOf(3))
-        assertNull(tableStates.getTablesToSync())
+        assertThat(tableStates.onObserverAdded(intArrayOf(3))).isFalse()
+        tableStates.onSync { ops -> assertNull(ops) }
+    }
+
+    @Test
+    fun addAndDeleteNetMoChange() = runTest {
+        tableStates.onObserverAdded(intArrayOf(1, 3))
+        tableStates.onSync {}
+
+        assertThat(tableStates.onObserverRemoved(intArrayOf(1, 3))).isTrue()
+        assertThat(tableStates.onObserverAdded(intArrayOf(1, 3))).isTrue()
+        tableStates.onSync { ops -> assertNull(ops) }
+    }
+
+    @Test
+    fun multipleAddPendingChange() = runTest {
+        assertThat(tableStates.onObserverAdded(intArrayOf(2))).isTrue()
+        assertThat(tableStates.onObserverAdded(intArrayOf(2))).isTrue()
+        tableStates.onSync { ops ->
+            assertThat(ops).isEqualTo(createSyncResult(mapOf(2 to ObserveOp.ADD)))
+        }
+
+        assertThat(tableStates.onObserverAdded(intArrayOf(2))).isFalse()
+        tableStates.onSync { ops -> assertThat(ops).isNull() }
     }
 
     @Test
     fun multipleAdditionsDeletions() = runTest {
         tableStates.onObserverAdded(intArrayOf(2, 4))
-        tableStates.getTablesToSync()
+        tableStates.onSync {}
 
-        tableStates.onObserverAdded(intArrayOf(2))
-        assertNull(tableStates.getTablesToSync())
+        assertThat(tableStates.onObserverAdded(intArrayOf(2))).isFalse()
+        tableStates.onSync { ops -> assertNull(ops) }
 
-        tableStates.onObserverAdded(intArrayOf(2, 4))
-        assertNull(tableStates.getTablesToSync())
+        assertThat(tableStates.onObserverAdded(intArrayOf(2, 4))).isFalse()
+        tableStates.onSync { ops -> assertNull(ops) }
 
-        tableStates.onObserverRemoved(intArrayOf(2))
-        assertNull(tableStates.getTablesToSync())
+        assertThat(tableStates.onObserverRemoved(intArrayOf(2))).isFalse()
+        tableStates.onSync { ops -> assertNull(ops) }
 
-        tableStates.onObserverRemoved(intArrayOf(2, 4))
-        assertNull(tableStates.getTablesToSync())
+        assertThat(tableStates.onObserverRemoved(intArrayOf(2, 4))).isFalse()
+        tableStates.onSync { ops -> assertNull(ops) }
 
-        tableStates.onObserverAdded(intArrayOf(1, 3))
-        tableStates.onObserverRemoved(intArrayOf(2, 4))
-        assertThat(tableStates.getTablesToSync()).isEqualTo(
-            createSyncResult(
-                mapOf(
-                    1 to ObserveOp.ADD,
-                    2 to ObserveOp.REMOVE,
-                    3 to ObserveOp.ADD,
-                    4 to ObserveOp.REMOVE
+        assertThat(tableStates.onObserverAdded(intArrayOf(1, 3))).isTrue()
+        assertThat(tableStates.onObserverRemoved(intArrayOf(2, 4))).isTrue()
+        tableStates.onSync { ops ->
+            assertThat(ops)
+                .isEqualTo(
+                    createSyncResult(
+                        mapOf(
+                            1 to ObserveOp.ADD,
+                            2 to ObserveOp.REMOVE,
+                            3 to ObserveOp.ADD,
+                            4 to ObserveOp.REMOVE,
+                        )
+                    )
                 )
-            )
-        )
+            true
+        }
     }
 
     companion object {
         private const val TABLE_COUNT = 5
 
         private fun createSyncResult(tuples: Map<Int, ObserveOp>): Array<ObserveOp> {
-            return Array(TABLE_COUNT) { i ->
-                tuples[i] ?: ObserveOp.NO_OP
-            }
+            return Array(TABLE_COUNT) { i -> tuples[i] ?: ObserveOp.NO_OP }
         }
     }
 }

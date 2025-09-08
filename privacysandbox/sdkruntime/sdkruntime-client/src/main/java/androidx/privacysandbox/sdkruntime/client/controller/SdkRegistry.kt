@@ -19,10 +19,10 @@ package androidx.privacysandbox.sdkruntime.client.controller
 import android.os.Bundle
 import androidx.privacysandbox.sdkruntime.core.LoadSdkCompatException
 import androidx.privacysandbox.sdkruntime.core.SandboxedSdkCompat
+import androidx.privacysandbox.sdkruntime.core.controller.LoadSdkCallback
+import java.util.concurrent.Executor
 
-/**
- * Responsible for lifecycle of particular SDKs (local, sandbox, test, etc).
- */
+/** Responsible for lifecycle of particular SDKs (local, sandbox, test, etc). */
 internal interface SdkRegistry {
 
     /**
@@ -37,12 +37,14 @@ internal interface SdkRegistry {
      * Loads SDK.
      *
      * @param sdkName name of the SDK to be loaded.
-     * @param params additional parameters to be passed to the SDK in the form of a [Bundle]
-     *  as agreed between the client and the SDK.
+     * @param params additional parameters to be passed to the SDK in the form of a [Bundle] as
+     *   agreed between the client and the SDK.
+     * @param executor Executor for running callback
+     * @param callback Callback for SDK loading result
      * @return [SandboxedSdkCompat] from SDK on a successful run.
      * @throws [LoadSdkCompatException] on fail or when SdkRegistry not responsible for this SDK.
      */
-    fun loadSdk(sdkName: String, params: Bundle): SandboxedSdkCompat
+    fun loadSdk(sdkName: String, params: Bundle, executor: Executor, callback: LoadSdkCallback)
 
     /**
      * Unloads an SDK that has been previously loaded by SdkRegistry.

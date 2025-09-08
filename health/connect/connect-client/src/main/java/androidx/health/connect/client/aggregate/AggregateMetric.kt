@@ -15,6 +15,7 @@
  */
 package androidx.health.connect.client.aggregate
 
+import androidx.annotation.RestrictTo
 import java.time.Duration
 
 /**
@@ -36,12 +37,13 @@ internal constructor(
     /**
      * Field name of the aggregation metric, such as `vitaminC`, `speed` etc. Internal to SDK only.
      */
-    internal val aggregationField: String?
+    internal val aggregationField: String?,
 ) {
 
     /** Converts a raw type [T] to a resulting type [R]. Internal for SDK use only. */
     internal sealed interface Converter<in T : Any, out R : Any> : (T) -> R {
         fun interface FromLong<out R : Any> : Converter<Long, R>
+
         fun interface FromDouble<out R : Any> : Converter<Double, R>
     }
 
@@ -74,7 +76,7 @@ internal constructor(
         internal fun durationMetric(
             dataTypeName: String,
             aggregationType: AggregationType,
-            fieldName: String
+            fieldName: String,
         ): AggregateMetric<Duration> =
             AggregateMetric(
                 converter = Converter.FromLong(Duration::ofMillis),
@@ -87,7 +89,7 @@ internal constructor(
         internal fun doubleMetric(
             dataTypeName: String,
             aggregationType: AggregationType,
-            fieldName: String
+            fieldName: String,
         ): AggregateMetric<Double> =
             AggregateMetric(
                 converter = Converter.FromDouble { it },
@@ -113,7 +115,7 @@ internal constructor(
         internal fun longMetric(
             dataTypeName: String,
             aggregationType: AggregationType,
-            fieldName: String
+            fieldName: String,
         ): AggregateMetric<Long> =
             AggregateMetric(
                 converter = Converter.FromLong { it },
@@ -134,7 +136,8 @@ internal constructor(
             )
     }
 
-    internal val metricKey: String
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val metricKey: String
         get() {
             val aggregationTypeString = aggregationType.aggregationTypeString
             return if (aggregationField == null) {

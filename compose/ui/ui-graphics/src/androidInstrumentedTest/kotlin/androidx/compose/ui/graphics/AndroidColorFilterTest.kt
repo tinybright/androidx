@@ -40,7 +40,7 @@ class AndroidColorFilterTest {
     fun testBlendModeColorFilterEquals() {
         assertEquals(
             BlendModeColorFilter(Color.Yellow, BlendMode.Softlight),
-            BlendModeColorFilter(Color.Yellow, BlendMode.Softlight)
+            BlendModeColorFilter(Color.Yellow, BlendMode.Softlight),
         )
     }
 
@@ -48,7 +48,7 @@ class AndroidColorFilterTest {
     fun testColorMatrixColorFilterEquals() {
         assertEquals(
             ColorMatrixColorFilter(ColorMatrix(FloatArray(20) { i -> i.toFloat() })),
-            ColorMatrixColorFilter(ColorMatrix(FloatArray(20) { i -> i.toFloat() }))
+            ColorMatrixColorFilter(ColorMatrix(FloatArray(20) { i -> i.toFloat() })),
         )
     }
 
@@ -56,17 +56,18 @@ class AndroidColorFilterTest {
     fun testLightingColorFilterEquals() {
         assertEquals(
             LightingColorFilter(Color.Blue, Color.Yellow),
-            LightingColorFilter(Color.Blue, Color.Yellow)
+            LightingColorFilter(Color.Blue, Color.Yellow),
         )
     }
 
     @SdkSuppress(minSdkVersion = Build.VERSION_CODES.Q)
     @Test
     fun testAndroidBlendModeColorFilterToCompose() {
-        val androidFilter = AndroidBlendModeColorFilter(
-            android.graphics.Color.RED,
-            android.graphics.BlendMode.COLOR_DODGE
-        )
+        val androidFilter =
+            AndroidBlendModeColorFilter(
+                android.graphics.Color.RED,
+                android.graphics.BlendMode.COLOR_DODGE,
+            )
 
         val composeFilter = androidFilter.asComposeColorFilter()
         assertTrue(composeFilter is BlendModeColorFilter)
@@ -85,10 +86,8 @@ class AndroidColorFilterTest {
     @SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
     @Test
     fun testAndroidLightingColorFilterToCompose() {
-        val androidFilter = AndroidLightingColorFilter(
-            android.graphics.Color.RED,
-            android.graphics.Color.BLUE
-        )
+        val androidFilter =
+            AndroidLightingColorFilter(android.graphics.Color.RED, android.graphics.Color.BLUE)
 
         val composeFilter = androidFilter.asComposeColorFilter()
         assertTrue(composeFilter is LightingColorFilter)
@@ -129,22 +128,19 @@ class AndroidColorFilterTest {
     @SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
     @Test
     fun testAndroidColorMatrixColorFilterAsComposeColorFilterEquals() {
-        val androidColorMatrixFilter = android.graphics.ColorMatrixColorFilter(
-            FloatArray(20) { i -> i.toFloat() }
-        )
+        val androidColorMatrixFilter =
+            android.graphics.ColorMatrixColorFilter(FloatArray(20) { i -> i.toFloat() })
         assertEquals(
             ColorMatrixColorFilter(ColorMatrix(FloatArray(20) { i -> i.toFloat() })),
-            androidColorMatrixFilter.asComposeColorFilter()
+            androidColorMatrixFilter.asComposeColorFilter(),
         )
     }
 
     @SdkSuppress(maxSdkVersion = Build.VERSION_CODES.N_MR1)
     @Test
     fun testAndroidLightingColorFilterToComposeFallback() {
-        val androidFilter = AndroidLightingColorFilter(
-            android.graphics.Color.RED,
-            android.graphics.Color.BLUE
-        )
+        val androidFilter =
+            AndroidLightingColorFilter(android.graphics.Color.RED, android.graphics.Color.BLUE)
 
         val composeFilter = androidFilter.asComposeColorFilter()
         // Returns an opaque ColorFilter instance as LightingColorFilter parameters
@@ -155,10 +151,8 @@ class AndroidColorFilterTest {
     @SdkSuppress(maxSdkVersion = Build.VERSION_CODES.Q)
     @Test
     fun testAndroidBlendModeColorFilterToComposeFallback() {
-        val androidFilter = AndroidPorterDuffColorFilter(
-            android.graphics.Color.RED,
-            PorterDuff.Mode.XOR
-        )
+        val androidFilter =
+            AndroidPorterDuffColorFilter(android.graphics.Color.RED, PorterDuff.Mode.XOR)
 
         val composeFilter = androidFilter.asComposeColorFilter()
         // Returns an opaque ColorFilter instance as PorterDuffColorFilter is not
@@ -169,9 +163,7 @@ class AndroidColorFilterTest {
     @SdkSuppress(maxSdkVersion = Build.VERSION_CODES.N_MR1)
     @Test
     fun testAndroidColorMatrixColorFilterToComposeFallback() {
-        val androidFilter = AndroidColorMatrixColorFilter(
-            FloatArray(20) { i -> i.toFloat() }
-        )
+        val androidFilter = AndroidColorMatrixColorFilter(FloatArray(20) { i -> i.toFloat() })
 
         val composeFilter = androidFilter.asComposeColorFilter()
         // Returns an opaque ColorFilter instance as ColorMatrixColorFilter is not

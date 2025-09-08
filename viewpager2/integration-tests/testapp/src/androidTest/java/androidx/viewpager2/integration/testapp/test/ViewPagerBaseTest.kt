@@ -39,13 +39,13 @@ import org.junit.runners.Parameterized
  */
 abstract class ViewPagerBaseTest<T : BaseCardActivity>(
     clazz: Class<T>,
-    private val config: TestConfig
+    private val config: TestConfig,
 ) : BaseTest<T>(clazz) {
     data class TestConfig(
         val orientation: Int,
         val animateRotate: Boolean,
         val animateTranslate: Boolean,
-        val animateScale: Boolean
+        val animateScale: Boolean,
     )
 
     companion object {
@@ -64,7 +64,8 @@ abstract class ViewPagerBaseTest<T : BaseCardActivity>(
         }
     }
 
-    override val layoutId get() = R.id.view_pager
+    override val layoutId
+        get() = R.id.view_pager
 
     private val twoOfSpades = "2\n♣"
     private val threeOfSpades = "3\n♣"
@@ -104,7 +105,7 @@ abstract class ViewPagerBaseTest<T : BaseCardActivity>(
         verify(
             expectRotation = config.animateRotate,
             expectTranslation = config.animateTranslate,
-            expectScale = config.animateScale
+            expectScale = config.animateScale,
         )
     }
 }

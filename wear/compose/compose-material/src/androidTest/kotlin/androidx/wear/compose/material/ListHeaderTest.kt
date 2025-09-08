@@ -18,6 +18,9 @@ package androidx.wear.compose.material
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -32,17 +35,12 @@ import org.junit.runner.RunWith
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 class ListHeaderTest {
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     @Test
     fun supports_testtag() {
         rule.setContentWithTheme {
-            ListHeader(
-                modifier = Modifier.testTag(TEST_TAG)
-            ) {
-                Text(text = "List Header")
-            }
+            ListHeader(modifier = Modifier.testTag(TEST_TAG)) { Text(text = "List Header") }
         }
 
         rule.onNodeWithTag(TEST_TAG).assertExists()
@@ -51,14 +49,10 @@ class ListHeaderTest {
     @Test
     fun listHeader_has_semantic_heading_property() {
         rule.setContentWithTheme {
-            ListHeader(
-                modifier = Modifier.testTag(TEST_TAG)
-            ) {
-                Text("Title")
-            }
+            ListHeader(modifier = Modifier.testTag(TEST_TAG)) { Text("Title") }
         }
 
-        rule.onNode(isHeading())
+        rule.onNode(isHeading()).assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
     }
 
     @Test
@@ -68,9 +62,7 @@ class ListHeaderTest {
 
         rule.setContentWithTheme {
             expectedTextStyle = MaterialTheme.typography.button
-            ListHeader {
-                actualTextStyle = LocalTextStyle.current
-            }
+            ListHeader { actualTextStyle = LocalTextStyle.current }
         }
         Assert.assertEquals(expectedTextStyle, actualTextStyle)
     }

@@ -32,34 +32,37 @@ import androidx.compose.ui.unit.Constraints
 fun HeaderFooterLayout(
     header: @Composable () -> Unit,
     footer: @Composable () -> Unit,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     Layout({
         Box(Modifier.layoutId("header")) { header() }
         Box(Modifier.layoutId("footer")) { footer() }
         content()
     }) { measurables, constraints ->
-        val headerPlaceable = measurables.first { it.layoutId == "header" }.measure(
-            Constraints.fixed(constraints.maxWidth, 100)
-        )
+        val headerPlaceable =
+            measurables
+                .first { it.layoutId == "header" }
+                .measure(Constraints.fixed(constraints.maxWidth, 100))
         val footerPadding = 50
-        val footerPlaceable = measurables.first { it.layoutId == "footer" }.measure(
-            Constraints.fixed(constraints.maxWidth - footerPadding * 2, 100)
-        )
+        val footerPlaceable =
+            measurables
+                .first { it.layoutId == "footer" }
+                .measure(Constraints.fixed(constraints.maxWidth - footerPadding * 2, 100))
 
         val contentMeasurables = measurables.filter { it.layoutId == null }
         val itemHeight =
             (constraints.maxHeight - headerPlaceable.height - footerPlaceable.height) /
                 contentMeasurables.size
-        val contentPlaceables = contentMeasurables.map { measurable ->
-            measurable.measure(Constraints.fixed(constraints.maxWidth, itemHeight))
-        }
+        val contentPlaceables =
+            contentMeasurables.map { measurable ->
+                measurable.measure(Constraints.fixed(constraints.maxWidth, itemHeight))
+            }
 
         layout(constraints.maxWidth, constraints.maxHeight) {
             headerPlaceable.placeRelative(0, 0)
             footerPlaceable.placeRelative(
                 footerPadding,
-                constraints.maxHeight - footerPlaceable.height
+                constraints.maxHeight - footerPlaceable.height,
             )
             var top = headerPlaceable.height
             contentPlaceables.forEach { placeable ->
@@ -72,12 +75,10 @@ fun HeaderFooterLayout(
 
 @Composable
 fun MultipleCollectTest() {
-    val header = @Composable {
-        Box(Modifier.fillMaxSize().background(Color(android.graphics.Color.GRAY)))
-    }
-    val footer = @Composable {
-        Box(Modifier.fillMaxSize().background(Color(android.graphics.Color.BLUE)))
-    }
+    val header =
+        @Composable { Box(Modifier.fillMaxSize().background(Color(android.graphics.Color.GRAY))) }
+    val footer =
+        @Composable { Box(Modifier.fillMaxSize().background(Color(android.graphics.Color.BLUE))) }
     HeaderFooterLayout(header = header, footer = footer) {
         Box(Modifier.fillMaxSize().background(Color(android.graphics.Color.GREEN)))
         Box(Modifier.fillMaxSize().background(Color(android.graphics.Color.YELLOW)))

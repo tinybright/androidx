@@ -33,11 +33,8 @@ import org.junit.runners.Parameterized
 
 @LargeTest
 @RunWith(Parameterized::class)
-class ScrollBenchmark(
-    private val compilationMode: CompilationMode
-) {
-    @get:Rule
-    val benchmarkRule = MacrobenchmarkRule()
+class ScrollBenchmark(private val compilationMode: CompilationMode) {
+    @get:Rule val benchmarkRule = MacrobenchmarkRule()
 
     @Before
     fun setUp() {
@@ -60,7 +57,7 @@ class ScrollBenchmark(
                 val intent = Intent()
                 intent.action = ACTION
                 startActivityAndWait(intent)
-            }
+            },
         ) {
             val list = device.findObject(By.res(PACKAGE_NAME, RESOURCE_ID))
             // Setting a gesture margin is important otherwise gesture nav is triggered.

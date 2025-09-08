@@ -20,6 +20,7 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.util.Log
 import android.widget.RemoteViews
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,54 +46,59 @@ import androidx.glance.text.TextStyle
 import kotlin.math.roundToInt
 
 /**
- * Demonstrates different methods of handling errors. A widget can use either
- * the default Glance error ui, provide a custom layout, or ignore the error
- * and not make any change to the ui state.
+ * Demonstrates different methods of handling errors. A widget can use either the default Glance
+ * error ui, provide a custom layout, or ignore the error and not make any change to the ui state.
  */
 class ErrorUiAppWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Exact
 
-    override suspend fun provideGlance(
-        context: Context,
-        id: GlanceId
-    ) {
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
         val repo = ErrorUiAppWidgetConfigurationRepo(context = context, glanceId = id)
 
         provideContent {
-            val size = LocalSize.current
             val errorBehavior = repo.getOnErrorBehavior()
 
-            Column(
-                modifier = GlanceModifier.fillMaxSize()
+            Content(errorBehavior)
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        provideContent { Content() }
+    }
+
+    @Composable
+    private fun Content(errorBehavior: OnErrorBehavior = OnErrorBehavior.Default) {
+        val size = LocalSize.current
+        Column(
+            modifier =
+                GlanceModifier.fillMaxSize()
                     .background(day = Color.LightGray, night = Color.DarkGray)
-                    .padding(8.dp),
-            ) {
-                Text(
-                    "Error UI Demo. Method: $errorBehavior",
-                    modifier = GlanceModifier.fillMaxWidth().wrapContentHeight(),
-                    style = TextStyle(
+                    .padding(8.dp)
+        ) {
+            Text(
+                "Error UI Demo. Method: $errorBehavior",
+                modifier = GlanceModifier.fillMaxWidth().wrapContentHeight(),
+                style =
+                    TextStyle(
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
-                        textAlign = TextAlign.Center
-                    )
-                )
-                Box(
-                    modifier = GlanceModifier.fillMaxWidth().defaultWeight(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "Error UI triggers if width or height reach 400 dp in any orientation.",
-                        style = TextStyle(fontWeight = FontWeight.Medium, fontSize = 15.sp)
-                    )
-                    check(size.width < 400.dp && size.height < 400.dp) {
-                        "Too large now!"
-                    }
-                }
+                        textAlign = TextAlign.Center,
+                    ),
+            )
+            Box(
+                modifier = GlanceModifier.fillMaxWidth().defaultWeight(),
+                contentAlignment = Alignment.Center,
+            ) {
                 Text(
-                    " Current size: ${size.width.value.roundToInt()} dp x " +
-                        "${size.height.value.roundToInt()} dp"
+                    "Error UI triggers if width or height reach 400 dp in any orientation.",
+                    style = TextStyle(fontWeight = FontWeight.Medium, fontSize = 15.sp),
                 )
+                check(size.width < 400.dp && size.height < 400.dp) { "Too large now!" }
             }
+            Text(
+                " Current size: ${size.width.value.roundToInt()} dp x " +
+                    "${size.height.value.roundToInt()} dp"
+            )
         }
     }
 
@@ -100,14 +106,14 @@ class ErrorUiAppWidget : GlanceAppWidget() {
         context: Context,
         glanceId: GlanceId,
         appWidgetId: Int,
-        throwable: Throwable
+        throwable: Throwable,
     ) {
         fun showCustomError() {
             // Optionally, a custom error view can also be created.
             val rv = RemoteViews(context.packageName, R.layout.error_ui_app_widget_on_error_layout)
             rv.setTextViewText(
                 R.id.error_text_view,
-                "Error was thrown. \nThis is a custom view \nError Message: `${throwable.message}`"
+                "Error was thrown. \nThis is a custom view \nError Message: `${throwable.message}`",
             )
             AppWidgetManager.getInstance(context).updateAppWidget(appWidgetId, rv)
         }
@@ -115,13 +121,8 @@ class ErrorUiAppWidget : GlanceAppWidget() {
         val repo = ErrorUiAppWidgetConfigurationRepo(context = context, glanceId = glanceId)
 
         when (repo.getOnErrorBehavior()) {
-            OnErrorBehavior.Default -> super.onCompositionError(
-                context,
-                glanceId,
-                appWidgetId,
-                throwable
-            )
-
+            OnErrorBehavior.Default ->
+                super.onCompositionError(context, glanceId, appWidgetId, throwable)
             OnErrorBehavior.Custom -> showCustomError()
             OnErrorBehavior.Ignore -> Unit // do nothing beyond the logging
         }

@@ -28,25 +28,28 @@ internal fun Modifier.rangeSemantics(
     enabled: Boolean,
     onValueChange: (Float) -> Unit,
     valueRange: ClosedFloatingPointRange<Float>,
-    steps: Int
+    steps: Int,
 ): Modifier {
     val step = RangeDefaults.snapValueToStep(value, valueRange, steps)
     return semantics(mergeDescendants = true) {
-        if (!enabled) disabled()
-        setProgress(
-            action = { targetValue ->
-                val newStepIndex = RangeDefaults.snapValueToStep(targetValue, valueRange, steps)
-                if (step == newStepIndex) {
-                    false
-                } else {
-                    onValueChange(targetValue)
-                    true
+            if (!enabled) disabled()
+            setProgress(
+                action = { targetValue ->
+                    val newStepIndex = RangeDefaults.snapValueToStep(targetValue, valueRange, steps)
+                    if (step == newStepIndex) {
+                        false
+                    } else {
+                        onValueChange(targetValue)
+                        true
+                    }
                 }
-            }
+            )
+        }
+        .progressSemantics(
+            RangeDefaults.calculateCurrentStepValue(step, steps, valueRange),
+            valueRange,
+            steps,
         )
-    }.progressSemantics(
-        RangeDefaults.calculateCurrentStepValue(step, steps, valueRange), valueRange, steps
-    )
 }
 
 internal fun IntProgression.stepsNumber(): Int = (last - first) / step - 1

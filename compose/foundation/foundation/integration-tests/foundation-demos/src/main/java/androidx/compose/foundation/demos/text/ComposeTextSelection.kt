@@ -18,6 +18,7 @@ package androidx.compose.foundation.demos.text
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,10 +30,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -46,9 +55,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 
-val textBorderModifier = Modifier
-    .border(1.dp, Color.LightGray)
-    .padding(1.dp)
+val textBorderModifier = Modifier.border(1.dp, Color.LightGray).padding(1.dp)
 const val defaultText = "Line1\nLine2 text1 text2\nLine3"
 
 @Preview
@@ -58,20 +65,21 @@ fun TextSelectionDemo() {
         item {
             Text(
                 modifier = textBorderModifier,
-                text = buildAnnotatedString {
-                    appendWithColor(Color.Green, "Green")
-                    append(" borders represent a ")
-                    appendCode("SelectionContainer")
-                    append(". ")
-                    appendWithColor(Color.Red, "Red")
-                    append(" borders represent a ")
-                    appendCode("DisableSelection")
-                    append(". ")
-                    appendWithColor(Color.Gray, "Light gray")
-                    append(" borders represent a single ")
-                    appendCode("Text/BasicText")
-                    append(".")
-                },
+                text =
+                    buildAnnotatedString {
+                        appendWithColor(Color.Green, "Green")
+                        append(" borders represent a ")
+                        appendCode("SelectionContainer")
+                        append(". ")
+                        appendWithColor(Color.Red, "Red")
+                        append(" borders represent a ")
+                        appendCode("DisableSelection")
+                        append(". ")
+                        appendWithColor(Color.Gray, "Light gray")
+                        append(" borders represent a single ")
+                        appendCode("Text/BasicText")
+                        append(".")
+                    },
             )
         }
         item {
@@ -103,11 +111,31 @@ fun TextSelectionDemo() {
             OutlinedSelectionContainer {
                 Text(
                     text = "Hello World\nHello",
-                    modifier = Modifier.fillMaxWidth()
-                        .border(BorderStroke(1.dp, color = Color.Black))
-                        .height(80.dp)
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .border(BorderStroke(1.dp, color = Color.Black))
+                            .height(80.dp),
                 )
             }
+        }
+        item {
+            TagLine(tag = "smart selection demo(Android only)")
+            OutlinedSelectionContainer {
+                Text(
+                    text =
+                        "This is a demo for smart selection. " +
+                            "Try long press selection on following text. \n" +
+                            "address: 1600 Amphitheatre Pkwy, Mountain View, CA 94043 \n" +
+                            "phone number: 123-456-0000\n" +
+                            "email: example_email@email.com\n",
+                    modifier =
+                        Modifier.fillMaxWidth().border(BorderStroke(1.dp, color = Color.Black)),
+                )
+            }
+        }
+        item {
+            TagLine(tag = "Clickable children")
+            TextDemoClickableChildrenSelection()
         }
     }
 }
@@ -134,7 +162,7 @@ fun TextDemoMultiTextSelection() {
                 BasicText(
                     style = TextStyle(fontSize = fontSize8),
                     text = it,
-                    modifier = textBorderModifier.fillMaxWidth()
+                    modifier = textBorderModifier.fillMaxWidth(),
                 )
             }
         }
@@ -149,38 +177,40 @@ fun TextDemoSelection() {
     OutlinedSelectionContainer {
         Text(
             modifier = textBorderModifier,
-            style = TextStyle(
-                color = Color(0xFFFF0000),
-                fontSize = fontSize6,
-                fontWeight = FontWeight.W200,
-                fontStyle = FontStyle.Italic
-            ),
-            text = buildAnnotatedString {
-                append(text = "$displayText   ")
-                append(text = "$displayTextArabic   ")
-                append(text = "$displayTextChinese   ")
+            style =
+                TextStyle(
+                    color = Color(0xFFFF0000),
+                    fontSize = fontSize6,
+                    fontWeight = FontWeight.W200,
+                    fontStyle = FontStyle.Italic,
+                ),
+            text =
+                buildAnnotatedString {
+                    append(text = "$displayText   ")
+                    append(text = "$displayTextArabic   ")
+                    append(text = "$displayTextChinese   ")
 
-                withStyle(
-                    SpanStyle(
-                        color = Color(0xFF0000FF),
-                        fontSize = fontSize10,
-                        fontWeight = FontWeight.W800,
-                        fontStyle = FontStyle.Normal
-                    )
-                ) {
-                    append(displayTextHindi)
-                }
+                    withStyle(
+                        SpanStyle(
+                            color = Color(0xFF0000FF),
+                            fontSize = fontSize10,
+                            fontWeight = FontWeight.W800,
+                            fontStyle = FontStyle.Normal,
+                        )
+                    ) {
+                        append(displayTextHindi)
+                    }
 
-                append(text = arabicSentence)
+                    append(text = arabicSentence)
 
-                withStyle(SpanStyle(localeList = LocaleList("zh-CN"))) {
-                    append("\n先帝创业未半而中道崩殂，今天下三分，益州疲弊，此诚危急存亡之秋也。")
-                }
+                    withStyle(SpanStyle(localeList = LocaleList("zh-CN"))) {
+                        append("\n先帝创业未半而中道崩殂，今天下三分，益州疲弊，此诚危急存亡之秋也。")
+                    }
 
-                withStyle(SpanStyle(localeList = LocaleList("ja-JP"))) {
-                    append("\nまず、現在天下が魏・呉・蜀に分れており、そのうち蜀は疲弊していることを指摘する。")
-                }
-            }
+                    withStyle(SpanStyle(localeList = LocaleList("ja-JP"))) {
+                        append("\nまず、現在天下が魏・呉・蜀に分れており、そのうち蜀は疲弊していることを指摘する。")
+                    }
+                },
         )
     }
 }
@@ -208,17 +238,18 @@ fun TextDemoSelection2DArrayVertical() {
         text = "$text$displayText" + "\n"
     }
 
-    val colorList = listOf(
-        Color(0xFFFF0000),
-        Color(0xFF00FF00),
-        Color(0xFF0000FF),
-        Color(0xFF00FFFF),
-        Color(0xFFFF00FF),
-        Color(0xFFFFFF00),
-        Color(0xFF0000FF),
-        Color(0xFF00FF00),
-        Color(0xFFFF0000)
-    )
+    val colorList =
+        listOf(
+            Color(0xFFFF0000),
+            Color(0xFF00FF00),
+            Color(0xFF0000FF),
+            Color(0xFF00FFFF),
+            Color(0xFFFF00FF),
+            Color(0xFFFFFF00),
+            Color(0xFF0000FF),
+            Color(0xFF00FF00),
+            Color(0xFFFF0000),
+        )
 
     OutlinedSelectionContainer {
         Column(Modifier.fillMaxHeight()) {
@@ -228,11 +259,7 @@ fun TextDemoSelection2DArrayVertical() {
                         Text(
                             text = text,
                             modifier = textBorderModifier,
-                            style = TextStyle(
-                                color = colorList[i * 3 + j],
-                                fontSize = fontSize6
-                            )
-
+                            style = TextStyle(color = colorList[i * 3 + j], fontSize = fontSize6),
                         )
                     }
                 }
@@ -246,42 +273,61 @@ fun TextDemoSelection2DArrayVertical() {
 fun TextDemoSelectionEnableAndDisable() {
     val textSelectable = "This text is selectable."
     val textNotSelectable = "This text is not selectable."
+    var textEditable by remember { mutableStateOf("This text is editable.") }
+    var clickCount by remember { mutableIntStateOf(0) }
 
     OutlinedSelectionContainer {
         Column(Modifier.fillMaxHeight()) {
             Text(
                 text = textSelectable,
                 modifier = textBorderModifier,
-                style = TextStyle(fontSize = fontSize8)
+                style = TextStyle(fontSize = fontSize8),
             )
             OutlinedDisableSelection {
                 Text(
                     text = textNotSelectable,
                     modifier = textBorderModifier,
-                    style = TextStyle(fontSize = fontSize8)
+                    style = TextStyle(fontSize = fontSize8),
                 )
             }
             Text(
                 text = textSelectable,
                 modifier = textBorderModifier,
-                style = TextStyle(fontSize = fontSize8)
+                style = TextStyle(fontSize = fontSize8),
+            )
+            TextField(
+                value = textEditable,
+                onValueChange = { textEditable = it },
+                modifier = textBorderModifier,
+                textStyle = TextStyle(fontSize = fontSize8),
+            )
+            Row {
+                OutlinedDisableSelection {
+                    OutlinedButton(onClick = { clickCount++ }) { Text("Clicks Count: $clickCount") }
+                }
+                OutlinedButton(onClick = { clickCount++ }) { Text("Clicks Count: $clickCount") }
+            }
+            Text(
+                text = textSelectable + "\n" + textSelectable,
+                modifier = textBorderModifier,
+                style = TextStyle(fontSize = fontSize8),
             )
             OutlinedDisableSelection {
                 Text(
                     text = textNotSelectable,
                     modifier = textBorderModifier,
-                    style = TextStyle(fontSize = fontSize8)
+                    style = TextStyle(fontSize = fontSize8),
                 )
                 Text(
                     text = textNotSelectable,
                     modifier = textBorderModifier,
-                    style = TextStyle(fontSize = fontSize8)
+                    style = TextStyle(fontSize = fontSize8),
                 )
             }
             Text(
                 text = textSelectable,
                 modifier = textBorderModifier,
-                style = TextStyle(fontSize = fontSize8)
+                style = TextStyle(fontSize = fontSize8),
             )
         }
     }
@@ -290,32 +336,31 @@ fun TextDemoSelectionEnableAndDisable() {
 @Composable
 fun OutlinedSelectionContainer(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     SelectionContainer(
-        modifier = modifier
-            .border(1.dp, Color.Green)
-            .padding(1.dp),
-        content = content
+        modifier = modifier.border(1.dp, Color.Green).padding(1.dp),
+        content = content,
     )
 }
 
 @Composable
 fun OutlinedDisableSelection(content: @Composable () -> Unit) {
-    Box(
-        Modifier
-            .border(1.dp, Color.Red)
-            .padding(1.dp)
-    ) {
-        DisableSelection(content)
+    Box(Modifier.border(1.dp, Color.Red).padding(1.dp)) { DisableSelection(content) }
+}
+
+@Preview
+@Composable
+fun TextDemoClickableChildrenSelection() {
+    SelectionContainer {
+        BasicText(
+            "This text has a click handler. ".repeat(5),
+            modifier = Modifier.pointerInput(Unit) { detectTapGestures(onTap = {}) },
+        )
     }
 }
 
 internal fun AnnotatedString.Builder.appendWithColor(color: Color, text: String) {
-    withStyle(SpanStyle(color = color)) {
-        append(text)
-    }
+    withStyle(SpanStyle(color = color)) { append(text) }
 }
 
 internal fun AnnotatedString.Builder.appendCode(text: String) {
-    withStyle(SpanStyle(fontFamily = FontFamily.Monospace)) {
-        append(text)
-    }
+    withStyle(SpanStyle(fontFamily = FontFamily.Monospace)) { append(text) }
 }

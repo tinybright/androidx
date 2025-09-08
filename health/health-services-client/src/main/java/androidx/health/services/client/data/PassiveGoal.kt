@@ -26,7 +26,8 @@ import androidx.health.services.client.proto.DataProto.PassiveGoal as PassiveGoa
  * repeat daily.
  */
 @Suppress("ParcelCreator")
-class PassiveGoal private constructor(
+class PassiveGoal
+private constructor(
     /** [DataTypeCondition] which must be met for the passive goal to be triggered. */
     val dataTypeCondition: DataTypeCondition<out Number, out DeltaDataType<out Number, *>>,
     /** Frequency this goal should trigger, which is expected to be a [TriggerFrequency]. */
@@ -46,12 +47,14 @@ class PassiveGoal private constructor(
         proto: PassiveGoalProto
     ) : this(
         DataTypeCondition.deltaFromProto(proto.condition),
-        TriggerFrequency.fromProto(proto.triggerFrequency)
+        TriggerFrequency.fromProto(proto.triggerFrequency),
     )
 
     internal val proto: PassiveGoalProto =
-        PassiveGoalProto.newBuilder().setCondition(dataTypeCondition.proto)
-            .setTriggerFrequency(triggerFrequency.toProto()).build()
+        PassiveGoalProto.newBuilder()
+            .setCondition(dataTypeCondition.proto)
+            .setTriggerFrequency(triggerFrequency.toProto())
+            .build()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -71,15 +74,9 @@ class PassiveGoal private constructor(
     override fun toString(): String =
         "PassiveGoal(dataTypeCondition=$dataTypeCondition, triggerFrequency=$triggerFrequency)"
 
-    /**
-     * The frequency at which passive goals should be triggered.
-     *
-     */
+    /** The frequency at which passive goals should be triggered. */
     @Retention(AnnotationRetention.SOURCE)
-    @IntDef(
-        TriggerFrequency.ONCE,
-        TriggerFrequency.REPEATED,
-    )
+    @IntDef(TriggerFrequency.ONCE, TriggerFrequency.REPEATED)
     internal annotation class TriggerFrequency {
 
         companion object {
@@ -96,8 +93,8 @@ class PassiveGoal private constructor(
             const val REPEATED: Int = 2
 
             @RestrictTo(RestrictTo.Scope.LIBRARY)
-            internal fun @receiver:TriggerFrequency
-            Int.toProto(): PassiveGoalProto.TriggerFrequency =
+            internal fun @receiver:TriggerFrequency Int.toProto():
+                PassiveGoalProto.TriggerFrequency =
                 PassiveGoalProto.TriggerFrequency.forNumber(this)
                     ?: PassiveGoalProto.TriggerFrequency.TRIGGER_FREQUENCY_UNKNOWN
 

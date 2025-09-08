@@ -21,9 +21,8 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 
-class TestingSerializer(
-    private val config: TestingSerializerConfig = TestingSerializerConfig(),
-) : Serializer<Byte> {
+class TestingSerializer(private val config: TestingSerializerConfig = TestingSerializerConfig()) :
+    Serializer<Byte> {
     override suspend fun readFrom(input: InputStream): Byte {
         // hack to make failReadWithCorruptionException during runtime
         var failReadWithCorruptionException = config.failReadWithCorruptionException
@@ -33,10 +32,7 @@ class TestingSerializer(
                 config.listOfFailReadWithCorruptionException.drop(1)
         }
         if (failReadWithCorruptionException) {
-            throw CorruptionException(
-                "CorruptionException",
-                IOException()
-            )
+            throw CorruptionException("CorruptionException", IOException())
         }
 
         if (config.failingRead) {

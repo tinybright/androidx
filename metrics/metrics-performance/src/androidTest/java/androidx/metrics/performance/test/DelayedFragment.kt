@@ -23,9 +23,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
 
-/**
- * A simple [Fragment] subclass as the default destination in the navigation.
- */
+/** A simple [Fragment] subclass as the default destination in the navigation. */
 public class DelayedFragment : Fragment() {
 
     lateinit var delayedView: DelayedView
@@ -33,7 +31,7 @@ public class DelayedFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         val view = inflater.inflate(R.layout.delayed_fragment, container, false)
         delayedView = view.findViewById(R.id.delayedView)

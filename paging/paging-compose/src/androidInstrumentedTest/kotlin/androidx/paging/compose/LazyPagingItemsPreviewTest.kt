@@ -39,27 +39,20 @@ import org.junit.Test
 
 class LazyPagingItemsPreviewTest {
 
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<PreviewActivity>()
+    @get:Rule val composeTestRule = createAndroidComposeRule<PreviewActivity>()
 
     @Test
     fun pagingPreviewTest() {
-        composeTestRule.setContent {
-            PagingPreview()
-        }
+        composeTestRule.setContent { PagingPreview() }
         for (i in 0..9) {
-            composeTestRule.onNodeWithTag("$i")
-                .assertIsDisplayed()
+            composeTestRule.onNodeWithTag("$i").assertIsDisplayed()
         }
     }
 
     @Test
     fun emptyPreview() {
-        composeTestRule.setContent {
-            EmptyPreview()
-        }
-        composeTestRule.onNodeWithTag("0")
-            .assertDoesNotExist()
+        composeTestRule.setContent { EmptyPreview() }
+        composeTestRule.onNodeWithTag("0").assertDoesNotExist()
     }
 }
 
@@ -69,9 +62,7 @@ class LazyPagingItemsPreviewTest {
 fun PagingPreview() {
     val data = List(50) { it }
     val flow = MutableStateFlow(PagingData.from(data))
-    CompositionLocalProvider(
-        LocalInspectionMode provides true,
-    ) {
+    CompositionLocalProvider(LocalInspectionMode provides true) {
         // Use StandardTestDispatcher so we don't start collecting on PagingData
         val lazyPagingItems = flow.collectAsLazyPagingItems(StandardTestDispatcher())
         LazyColumn(Modifier.height(500.dp)) {
@@ -89,9 +80,7 @@ fun PagingPreview() {
 fun EmptyPreview() {
     val data = emptyList<Int>()
     val flow = MutableStateFlow(PagingData.from(data))
-    CompositionLocalProvider(
-        LocalInspectionMode provides true,
-    ) {
+    CompositionLocalProvider(LocalInspectionMode provides true) {
         // Use StandardTestDispatcher so we don't start collecting on PagingData
         val lazyPagingItems = flow.collectAsLazyPagingItems(StandardTestDispatcher())
         LazyColumn(Modifier.height(500.dp)) {

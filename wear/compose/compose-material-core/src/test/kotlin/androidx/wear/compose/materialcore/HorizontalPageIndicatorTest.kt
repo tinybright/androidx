@@ -23,15 +23,8 @@ import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 
 /**
- * Pager might be represented as following ASCII Art:
- * *LS* o O O X O o _ RS
- * where:
- * LS - left spacer
- * o - small dot
- * O - big dot
- * _ - invisible dot
- * RS - right spacer
- * ** - size of the spacer
+ * Pager might be represented as following ASCII Art: *LS* o O O X O o _ RS where: LS - left spacer
+ * o - small dot O - big dot _ - invisible dot RS - right spacer ** - size of the spacer
  */
 @RunWith(JUnit4::class)
 class HorizontalPageIndicatorTest {
@@ -44,15 +37,10 @@ class HorizontalPageIndicatorTest {
 
         pagesState.recalculateState(selectedPage = 0, offset = 0f)
         pagesState.testAllDots(
-            listOf(
-                TestDot(selectedRatio = 1f),
-                TestDot(),
-                TestDot(),
-                TestDot()
-            ),
+            listOf(TestDot(selectedRatio = 1f), TestDot(), TestDot(), TestDot()),
             offset = 0f,
             leftSpacerSize = 1f,
-            rightSpacerSize = 0f
+            rightSpacerSize = 0f,
         )
     }
 
@@ -62,15 +50,10 @@ class HorizontalPageIndicatorTest {
 
         pagesState.recalculateState(selectedPage = 2, offset = 0f)
         pagesState.testAllDots(
-            listOf(
-                TestDot(),
-                TestDot(),
-                TestDot(selectedRatio = 1f),
-                TestDot()
-            ),
+            listOf(TestDot(), TestDot(), TestDot(selectedRatio = 1f), TestDot()),
             offset = 0f,
             leftSpacerSize = 1f,
-            rightSpacerSize = 0f
+            rightSpacerSize = 0f,
         )
     }
 
@@ -80,15 +63,10 @@ class HorizontalPageIndicatorTest {
 
         pagesState.recalculateState(selectedPage = 3, offset = 0f)
         pagesState.testAllDots(
-            listOf(
-                TestDot(),
-                TestDot(),
-                TestDot(),
-                TestDot(selectedRatio = 1f)
-            ),
+            listOf(TestDot(), TestDot(), TestDot(), TestDot(selectedRatio = 1f)),
             offset = 0f,
             leftSpacerSize = 1f,
-            rightSpacerSize = 0f
+            rightSpacerSize = 0f,
         )
     }
 
@@ -141,10 +119,8 @@ class HorizontalPageIndicatorTest {
     }
 
     /**
-     * totalPages: 12 , selected page: 4, shifting right
-     * Visually :
-     *     *LS* O O O O X o _ RS
-     * >>> LS _ o O O O X o *RS*
+     * totalPages: 12 , selected page: 4, shifting right Visually : *LS* O O O O X o _ RS >>> LS _ o
+     * O O O X o *RS*
      */
     @Test
     fun shift_right_when_last_on_screen_dot_shifted_right_first_shift() {
@@ -164,16 +140,14 @@ class HorizontalPageIndicatorTest {
                 ),
                 offset = offset,
                 leftSpacerSize = 1 - offset,
-                rightSpacerSize = offset
+                rightSpacerSize = offset,
             )
         }
     }
 
     /**
-     * totalPages: 12 , selected page: 8, shifting right
-     * Visually :
-     *     *LS* o O O O X o _ RS
-     * >>> LS _ o O O O X o *RS*
+     * totalPages: 12 , selected page: 8, shifting right Visually : *LS* o O O O X o _ RS >>> LS _ o
+     * O O O X o *RS*
      */
     @Test
     fun shift_right_when_last_on_screen_dot_shifted_right_mid_shift() {
@@ -194,16 +168,14 @@ class HorizontalPageIndicatorTest {
                 ),
                 offset = offset,
                 leftSpacerSize = 1 - offset,
-                rightSpacerSize = offset
+                rightSpacerSize = offset,
             )
         }
     }
 
     /**
-     * totalPages: 12 , selected page: 9, shifting right
-     * Visually :
-     *     *LS* o O O O X o _ RS
-     * >>> LS _ o O O O X O *RS*
+     * totalPages: 12 , selected page: 9, shifting right Visually : *LS* o O O O X o _ RS >>> LS _ o
+     * O O O X O *RS*
      */
     @Test
     fun shift_right_when_last_on_screen_dot_shifted_right_last_shift() {
@@ -224,16 +196,14 @@ class HorizontalPageIndicatorTest {
                 ),
                 offset = offset,
                 leftSpacerSize = 1 - offset,
-                rightSpacerSize = offset
+                rightSpacerSize = offset,
             )
         }
     }
 
     /**
-     * totalPages: 12 , selected page: 10, shifting right
-     * Visually :
-     *     *LS* o O O O X O _ RS
-     * >>> *LS* o O O O O X _ RS
+     * totalPages: 12 , selected page: 10, shifting right Visually : *LS* o O O O X O _ RS >>> *LS*
+     * o O O O O X _ RS
      */
     @Test
     fun dont_shift_right_when_last_but_one_dot_shifted_right_to_last_page() {
@@ -254,17 +224,14 @@ class HorizontalPageIndicatorTest {
                 ),
                 offset = offset,
                 leftSpacerSize = 1f,
-                rightSpacerSize = 0f
+                rightSpacerSize = 0f,
             )
         }
     }
 
     /**
-     * totalPages: 12 , selected page: 7, shifting left
-     * Visually :
-     *     *LS* o X O O O O _ RS
-     * >>> LS _ x O O O O O *RS*
-     * >>> *LS* o X O O O o _ RS
+     * totalPages: 12 , selected page: 7, shifting left Visually : *LS* o X O O O O _ RS >>> LS _ x
+     * O O O O O *RS* >>> *LS* o X O O O o _ RS
      */
     @Test
     fun shift_left_when_second_on_screen_dot_shifted_left_last_pages() {
@@ -287,7 +254,7 @@ class HorizontalPageIndicatorTest {
             ),
             offset = 0f,
             leftSpacerSize = 1f,
-            rightSpacerSize = 0f
+            rightSpacerSize = 0f,
         )
 
         // Test during shift
@@ -306,7 +273,7 @@ class HorizontalPageIndicatorTest {
                 ),
                 offset = offset,
                 leftSpacerSize = 1 - offset,
-                rightSpacerSize = offset
+                rightSpacerSize = offset,
             )
         }
 
@@ -325,16 +292,13 @@ class HorizontalPageIndicatorTest {
             ),
             offset = 0f,
             leftSpacerSize = 1f,
-            rightSpacerSize = 0f
+            rightSpacerSize = 0f,
         )
     }
 
     /**
-     * totalPages: 12 , selected page: 4, shifting left
-     * Visually :
-     *     *LS* o X O O O o _ RS
-     * >>> LS _ x O O O O o *RS*
-     * >>> *LS* o X O O O o _ RS
+     * totalPages: 12 , selected page: 4, shifting left Visually : *LS* o X O O O o _ RS >>> LS _ x
+     * O O O O o *RS* >>> *LS* o X O O O o _ RS
      */
     @Test
     fun shift_left_when_second_on_screen_dot_shifted_left_mid_pages() {
@@ -357,7 +321,7 @@ class HorizontalPageIndicatorTest {
             ),
             offset = 0f,
             leftSpacerSize = 1f,
-            rightSpacerSize = 0f
+            rightSpacerSize = 0f,
         )
 
         // Test during shift
@@ -376,7 +340,7 @@ class HorizontalPageIndicatorTest {
                 ),
                 offset = offset,
                 leftSpacerSize = 1 - offset,
-                rightSpacerSize = offset
+                rightSpacerSize = offset,
             )
         }
 
@@ -395,16 +359,13 @@ class HorizontalPageIndicatorTest {
             ),
             offset = 0f,
             leftSpacerSize = 1f,
-            rightSpacerSize = 0f
+            rightSpacerSize = 0f,
         )
     }
 
     /**
-     * totalPages: 12 , selected page: 2, shifting left
-     * Visually :
-     *     *LS* o X O O O o _ RS
-     * >>> LS _ x O O O O o *RS*
-     * >>> *LS* O X O O O o _ RS
+     * totalPages: 12 , selected page: 2, shifting left Visually : *LS* o X O O O o _ RS >>> LS _ x
+     * O O O O o *RS* >>> *LS* O X O O O o _ RS
      */
     @Test
     fun shift_left_when_second_on_screen_dot_shifted_left_start_pages() {
@@ -427,7 +388,7 @@ class HorizontalPageIndicatorTest {
             ),
             offset = 0f,
             leftSpacerSize = 1f,
-            rightSpacerSize = 0f
+            rightSpacerSize = 0f,
         )
 
         // Test during shift
@@ -446,7 +407,7 @@ class HorizontalPageIndicatorTest {
                 ),
                 offset = offset,
                 leftSpacerSize = 1 - offset,
-                rightSpacerSize = offset
+                rightSpacerSize = offset,
             )
         }
 
@@ -465,15 +426,13 @@ class HorizontalPageIndicatorTest {
             ),
             offset = 0f,
             leftSpacerSize = 1f,
-            rightSpacerSize = 0f
+            rightSpacerSize = 0f,
         )
     }
 
     /**
-     * Pages count: 12 , selected page: 10, shifting right
-     * Visually :
-     *     *LS* o O O O X O _ RS
-     * >>> *LS* o O O O O X _ RS
+     * Pages count: 12 , selected page: 10, shifting right Visually : *LS* o O O O X O _ RS >>> *LS*
+     * o O O O O X _ RS
      */
     @Test
     fun dont_shift_left_when_first_dot_shifted_left_to_zero_page() {
@@ -498,7 +457,7 @@ class HorizontalPageIndicatorTest {
                 ),
                 offset = offset,
                 leftSpacerSize = 1f,
-                rightSpacerSize = 0f
+                rightSpacerSize = 0f,
             )
         }
     }
@@ -507,52 +466,45 @@ class HorizontalPageIndicatorTest {
         testDots: List<TestDot>,
         offset: Float,
         leftSpacerSize: Float,
-        rightSpacerSize: Float
+        rightSpacerSize: Float,
     ) {
 
-        testDots.forEachIndexed { index, testDot ->
-            testDot(index, testDot, offset)
-        }
+        testDots.forEachIndexed { index, testDot -> testDot(index, testDot, offset) }
         Assert.assertEquals("Left spacer:", leftSpacerSize, leftSpacerSizeRatio)
         Assert.assertEquals("Right spacer", rightSpacerSize, rightSpacerSizeRatio)
     }
 
-    private fun PagesState.testDot(
-        index: Int,
-        testDot: TestDot,
-        offset: Float
-    ) {
+    private fun PagesState.testDot(index: Int, testDot: TestDot, offset: Float) {
 
         Assert.assertEquals("Page $index, alpha:", testDot.alpha lerp offset, alpha(index))
         Assert.assertEquals(
             "Page $index, size ratio:",
             testDot.sizeRatio lerp offset,
-            sizeRatio(index)
+            sizeRatio(index),
         )
         Assert.assertEquals(
             "Page $index, select ratio:",
             testDot.selectedRatio lerp offset,
             calculateSelectedRatio(index, offset),
-            0.002f
+            0.002f,
         )
     }
 
     private class TestDot(
         val alpha: Pair<Float, Float>,
         val sizeRatio: Pair<Float, Float>,
-        val selectedRatio: Pair<Float, Float>
+        val selectedRatio: Pair<Float, Float>,
     ) {
         constructor(
             alpha: Float = 1f,
             sizeRatio: Float = 1f,
-            selectedRatio: Float = 0f
+            selectedRatio: Float = 0f,
         ) : this(
             alpha = alpha to alpha,
             sizeRatio = sizeRatio to sizeRatio,
-            selectedRatio = selectedRatio to selectedRatio
+            selectedRatio = selectedRatio to selectedRatio,
         )
     }
 }
 
-private infix fun Pair<Float, Float>.lerp(fraction: Float): Float =
-    lerp(first, second, fraction)
+private infix fun Pair<Float, Float>.lerp(fraction: Float): Float = lerp(first, second, fraction)

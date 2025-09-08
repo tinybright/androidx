@@ -25,9 +25,7 @@ import androidx.room.compiler.processing.XProcessingStep
 import androidx.room.compiler.processing.XTypeElement
 import javax.tools.Diagnostic
 
-/**
- * Processing step that generates code enabling assisted injection of Workers using Hilt.
- */
+/** Processing step that generates code enabling assisted injection of Workers using Hilt. */
 class WorkerStep : XProcessingStep {
 
     override fun annotations() = setOf(ClassNames.HILT_WORKER.canonicalName())
@@ -35,7 +33,7 @@ class WorkerStep : XProcessingStep {
     override fun process(
         env: XProcessingEnv,
         elementsByAnnotation: Map<String, Set<XElement>>,
-        isLastRound: Boolean
+        isLastRound: Boolean,
     ): Set<XElement> {
         elementsByAnnotation[ClassNames.HILT_WORKER.canonicalName()]
             ?.filterIsInstance<XTypeElement>()
@@ -44,6 +42,8 @@ class WorkerStep : XProcessingStep {
         return emptySet()
     }
 
+    // usage of findTypeElement and requireType with -Pandroidx.maxDepVersions=true
+    @Suppress("DEPRECATION")
     private fun parse(env: XProcessingEnv, workerTypeElement: XTypeElement): WorkerElement? {
         var valid = true
 
@@ -61,39 +61,42 @@ class WorkerStep : XProcessingStep {
             env.error(
                 "@HiltWorker is only supported on types that subclass " +
                     "${ClassNames.LISTENABLE_WORKER}.",
-                workerTypeElement
+                workerTypeElement,
             )
             valid = false
         }
 
-        val constructors = workerTypeElement.getConstructors().filter {
-            if (it.hasAnnotation(ClassNames.INJECT)) {
-                env.error(
-                    "Worker constructor should be annotated with @AssistedInject instead of " +
-                        "@Inject.",
-                    it
-                )
-                valid = false
+        val constructors =
+            workerTypeElement.getConstructors().filter {
+                if (it.hasAnnotation(ClassNames.INJECT)) {
+                    env.error(
+                        "Worker constructor should be annotated with @AssistedInject instead of " +
+                            "@Inject.",
+                        it,
+                    )
+                    valid = false
+                }
+                it.hasAnnotation(ClassNames.ASSISTED_INJECT)
             }
-            it.hasAnnotation(ClassNames.ASSISTED_INJECT)
-        }
         if (constructors.size != 1) {
             env.error(
                 "@HiltWorker annotated class should contain exactly one @AssistedInject " +
                     "annotated constructor.",
-                workerTypeElement
+                workerTypeElement,
             )
             valid = false
         }
-        constructors.filter { it.isPrivate() }.forEach {
-            env.error("@AssistedInject annotated constructors must not be private.", it)
-            valid = false
-        }
+        constructors
+            .filter { it.isPrivate() }
+            .forEach {
+                env.error("@AssistedInject annotated constructors must not be private.", it)
+                valid = false
+            }
 
         if (workerTypeElement.isNested() && !workerTypeElement.isStatic()) {
             env.error(
                 "@HiltWorker may only be used on inner classes if they are static.",
-                workerTypeElement
+                workerTypeElement,
             )
             valid = false
         }
@@ -123,7 +126,7 @@ class WorkerStep : XProcessingStep {
             env.error(
                 "The 'Context' parameter must be declared before the 'WorkerParameters' in the " +
                     "@AssistedInject constructor of a @HiltWorker annotated class.",
-                injectConstructor
+                injectConstructor,
             )
             valid = false
         }
@@ -142,6 +145,7 @@ class WorkerStep : XProcessingStep {
     }
 
     companion object {
+        @Suppress("DATA_CLASS_INVISIBLE_COPY_USAGE_WARNING")
         val ENV_CONFIG = XProcessingEnvConfig.DEFAULT.copy(disableAnnotatedElementValidation = true)
     }
 }

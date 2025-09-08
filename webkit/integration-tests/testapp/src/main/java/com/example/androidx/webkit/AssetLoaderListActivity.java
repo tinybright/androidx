@@ -22,8 +22,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ListView;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import org.jspecify.annotations.Nullable;
 
 /**
  * An {@link Activity} for exercising various WebView functionality. This Activity is a {@link
@@ -38,6 +39,7 @@ public class AssetLoaderListActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_asset_loader_list);
         setTitle(R.string.asset_loader_list_activity_title);
+        WebkitHelpers.enableEdgeToEdge(this);
         WebkitHelpers.appendWebViewVersionToTitle(this);
 
         final Context activityContext = this;

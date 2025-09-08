@@ -16,9 +16,7 @@
 
 package androidx.viewpager2.widget
 
-import android.os.Build
 import android.view.accessibility.AccessibilityNodeInfo
-import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
@@ -38,10 +36,7 @@ class AccessibilityTest(private val config: TestConfig) : BaseTest() {
     private val enhancedA11yEnabled = ViewPager2.sFeatureEnhancedA11yEnabled
     private var uiDevice: Any? = null
 
-    data class TestConfig(
-        @ViewPager2.Orientation val orientation: Int,
-        val rtl: Boolean
-    )
+    data class TestConfig(@ViewPager2.Orientation val orientation: Int, val rtl: Boolean)
 
     companion object {
         @JvmStatic
@@ -73,18 +68,19 @@ class AccessibilityTest(private val config: TestConfig) : BaseTest() {
             val initialPage = viewPager.currentItem
             assertBasicState(initialPage)
 
-            listOf(1, 2, 3, 2, 3, 2, 3, 4, 5, 4, 5, 4, 3, 2, 1, 0, 1).forEach {
-                targetPage ->
+            listOf(1, 2, 3, 2, 3, 2, 3, 4, 5, 4, 5, 4, 3, 2, 1, 0, 1).forEach { targetPage ->
                 val currentPage = viewPager.currentItem
                 val latch = viewPager.addWaitForScrolledLatch(targetPage)
                 runOnUiThreadSync {
                     if (targetPage - currentPage == 1) {
                         viewPager.performAccessibilityAction(
-                            getNextPageAction(config.orientation, viewPager.isRtl), null
+                            getNextPageAction(config.orientation, viewPager.isRtl),
+                            null,
                         )
                     } else {
                         viewPager.performAccessibilityAction(
-                            getPreviousPageAction(config.orientation, viewPager.isRtl), null
+                            getPreviousPageAction(config.orientation, viewPager.isRtl),
+                            null,
                         )
                     }
                 }
@@ -111,9 +107,7 @@ class AccessibilityTest(private val config: TestConfig) : BaseTest() {
             assertBasicState(viewPager.currentItem, null)
 
             var node = AccessibilityNodeInfo.obtain()
-            runOnUiThreadSync {
-                viewPager.onInitializeAccessibilityNodeInfo(node)
-            }
+            runOnUiThreadSync { viewPager.onInitializeAccessibilityNodeInfo(node) }
             var collectionInfo = node.collectionInfo
             if (config.orientation == ORIENTATION_VERTICAL) {
                 assertThat(collectionInfo.rowCount, equalTo(numberOfItems))
@@ -123,9 +117,7 @@ class AccessibilityTest(private val config: TestConfig) : BaseTest() {
                 assertThat(collectionInfo.rowCount, equalTo(1))
             }
             assertThat(collectionInfo.isHierarchical, equalTo(false))
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                assertThat(collectionInfo.selectionMode, equalTo(0))
-            }
+            assertThat(collectionInfo.selectionMode, equalTo(0))
         }
     }
 
@@ -139,9 +131,7 @@ class AccessibilityTest(private val config: TestConfig) : BaseTest() {
                 assertBasicState(targetPage)
                 var nodeChild = AccessibilityNodeInfo.obtain()
                 val item = viewPager.linearLayoutManager.findViewByPosition(targetPage)
-                runOnUiThreadSync {
-                    item!!.onInitializeAccessibilityNodeInfo(nodeChild)
-                }
+                runOnUiThreadSync { item!!.onInitializeAccessibilityNodeInfo(nodeChild) }
                 var collectionItemInfo = nodeChild.collectionItemInfo
                 if (config.orientation == ORIENTATION_VERTICAL) {
                     assertThat(collectionItemInfo.rowIndex, equalTo(targetPage))
@@ -170,31 +160,25 @@ class AccessibilityTest(private val config: TestConfig) : BaseTest() {
     }
 
     private fun getNextPageAction(orientation: Int, isRtl: Boolean): Int {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            if (orientation == ViewPager2.ORIENTATION_HORIZONTAL) {
-                if (isRtl) {
-                    return ACTION_ID_PAGE_LEFT
-                } else {
-                    return ACTION_ID_PAGE_RIGHT
-                }
+        if (orientation == ViewPager2.ORIENTATION_HORIZONTAL) {
+            if (isRtl) {
+                return ACTION_ID_PAGE_LEFT
+            } else {
+                return ACTION_ID_PAGE_RIGHT
             }
-            return ACTION_ID_PAGE_DOWN
         }
-        return AccessibilityNodeInfoCompat.ACTION_SCROLL_FORWARD
+        return ACTION_ID_PAGE_DOWN
     }
 
     private fun getPreviousPageAction(orientation: Int, isRtl: Boolean): Int {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            if (orientation == ViewPager2.ORIENTATION_HORIZONTAL) {
-                if (isRtl) {
-                    return ACTION_ID_PAGE_RIGHT
-                } else {
-                    return ACTION_ID_PAGE_LEFT
-                }
+        if (orientation == ViewPager2.ORIENTATION_HORIZONTAL) {
+            if (isRtl) {
+                return ACTION_ID_PAGE_RIGHT
+            } else {
+                return ACTION_ID_PAGE_LEFT
             }
-            return ACTION_ID_PAGE_UP
         }
-        return AccessibilityNodeInfoCompat.ACTION_SCROLL_BACKWARD
+        return ACTION_ID_PAGE_UP
     }
 
     private fun getOppositeOrientation(orientation: Int): Int {
@@ -210,9 +194,7 @@ class AccessibilityTest(private val config: TestConfig) : BaseTest() {
 
 private fun createTestSet(): List<AccessibilityTest.TestConfig> {
     return listOf(ORIENTATION_HORIZONTAL, ORIENTATION_VERTICAL).flatMap { orientation ->
-        listOf(true, false).map { rtl ->
-            AccessibilityTest.TestConfig(orientation, rtl)
-        }
+        listOf(true, false).map { rtl -> AccessibilityTest.TestConfig(orientation, rtl) }
     }
 }
 

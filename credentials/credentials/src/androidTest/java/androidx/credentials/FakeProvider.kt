@@ -23,15 +23,13 @@ import androidx.credentials.exceptions.CreateCredentialException
 import androidx.credentials.exceptions.GetCredentialException
 import java.util.concurrent.Executor
 
-class FakeProvider(
-    private val success: Boolean
-) : CredentialProvider {
+class FakeProvider(private val success: Boolean) : CredentialProvider {
     override fun onGetCredential(
         context: Context,
         request: GetCredentialRequest,
         cancellationSignal: CancellationSignal?,
         executor: Executor,
-        callback: CredentialManagerCallback<GetCredentialResponse, GetCredentialException>
+        callback: CredentialManagerCallback<GetCredentialResponse, GetCredentialException>,
     ) {
         TODO("Not yet implemented")
     }
@@ -41,7 +39,7 @@ class FakeProvider(
         request: CreateCredentialRequest,
         cancellationSignal: CancellationSignal?,
         executor: Executor,
-        callback: CredentialManagerCallback<CreateCredentialResponse, CreateCredentialException>
+        callback: CredentialManagerCallback<CreateCredentialResponse, CreateCredentialException>,
     ) {
         TODO("Not yet implemented")
     }
@@ -54,7 +52,7 @@ class FakeProvider(
         request: ClearCredentialStateRequest,
         cancellationSignal: CancellationSignal?,
         executor: Executor,
-        callback: CredentialManagerCallback<Void?, ClearCredentialException>
+        callback: CredentialManagerCallback<Void?, ClearCredentialException>,
     ) {
         TODO("Not yet implemented")
     }

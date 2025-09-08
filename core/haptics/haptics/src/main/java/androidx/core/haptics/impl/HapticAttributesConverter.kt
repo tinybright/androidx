@@ -20,16 +20,13 @@ import android.annotation.SuppressLint
 import android.media.AudioAttributes
 import android.os.Build
 import android.os.VibrationAttributes
-import androidx.annotation.DoNotInline
 import androidx.annotation.RequiresApi
 import androidx.core.haptics.AttributesWrapper
 import androidx.core.haptics.AudioAttributesWrapper
 import androidx.core.haptics.HapticAttributes
 import androidx.core.haptics.VibrationAttributesWrapper
 
-/**
- * Helper class to convert haptic attributes to platform types based on SDK support available.
- */
+/** Helper class to convert haptic attributes to platform types based on SDK support available. */
 internal object HapticAttributesConverter {
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -42,7 +39,6 @@ internal object HapticAttributesConverter {
     internal fun flagsFromVibrationAttributes(attrs: VibrationAttributes): Int =
         Api30Impl.fromVibrationAttributesFlags(attrs)
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     @HapticAttributes.Usage
     internal fun usageFromAudioAttributes(attrs: AudioAttributes): Int =
         if (Build.VERSION.SDK_INT >= 26) {
@@ -65,7 +61,6 @@ internal object HapticAttributesConverter {
             )
         }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     internal fun toAudioAttributes(attrs: HapticAttributes): AudioAttributes =
         if (Build.VERSION.SDK_INT >= 33) {
             Api21Impl.createAudioAttributes(
@@ -79,14 +74,12 @@ internal object HapticAttributesConverter {
             )
         }
 
-    internal fun toAttributes(attrs: HapticAttributes): AttributesWrapper? =
+    internal fun toAttributes(attrs: HapticAttributes): AttributesWrapper =
         if (Build.VERSION.SDK_INT >= 33) {
             // Vibrator only accepts VibrationAttributes from Android T+.
             VibrationAttributesWrapper(toVibrationAttributes(attrs))
-        } else if (Build.VERSION.SDK_INT >= 21) {
-            AudioAttributesWrapper(toAudioAttributes(attrs))
         } else {
-            null
+            AudioAttributesWrapper(toAudioAttributes(attrs))
         }
 
     /** Version-specific static inner class. */
@@ -94,13 +87,11 @@ internal object HapticAttributesConverter {
     private object Api33Impl {
 
         @JvmStatic
-        @DoNotInline
         fun toVibrationAttributesUsage(@HapticAttributes.Usage usage: Int): Int =
             when (usage) {
                 // Check this usage constant exists in this SDK level.
                 HapticAttributes.USAGE_ACCESSIBILITY,
                 HapticAttributes.USAGE_MEDIA -> usage
-
                 else -> Api30Impl.toVibrationAttributesUsage(usage)
             }
 
@@ -112,7 +103,6 @@ internal object HapticAttributesConverter {
                 // converted automatically to USAGE_NOTIFICATION by AudioAttributes.
                 HapticAttributes.USAGE_COMMUNICATION_REQUEST ->
                     AudioAttributes.USAGE_VOICE_COMMUNICATION
-
                 else -> Api21Impl.toAudioAttributesUsage(usage)
             }
     }
@@ -122,22 +112,19 @@ internal object HapticAttributesConverter {
     private object Api30Impl {
 
         @JvmStatic
-        @DoNotInline
         @SuppressLint("WrongConstant") // custom conversion between jetpack and framework
         @HapticAttributes.Usage
         fun fromVibrationAttributesUsage(attrs: VibrationAttributes): Int = attrs.usage
 
         @JvmStatic
-        @DoNotInline
         @SuppressLint("WrongConstant") // custom conversion between jetpack and framework
         @HapticAttributes.Flag
         fun fromVibrationAttributesFlags(attrs: VibrationAttributes): Int = attrs.flags
 
         @JvmStatic
-        @DoNotInline
         fun createVibrationAttributes(
             vibrationUsage: Int,
-            vibrationFlags: Int
+            vibrationFlags: Int,
         ): VibrationAttributes {
             return VibrationAttributes.Builder()
                 .setUsage(vibrationUsage)
@@ -146,7 +133,6 @@ internal object HapticAttributesConverter {
         }
 
         @JvmStatic
-        @DoNotInline
         fun toVibrationAttributesUsage(@HapticAttributes.Usage usage: Int): Int =
             when (usage) {
                 // Check this usage constant exists in this SDK level.
@@ -157,12 +143,10 @@ internal object HapticAttributesConverter {
                 HapticAttributes.USAGE_PHYSICAL_EMULATION,
                 HapticAttributes.USAGE_RINGTONE,
                 HapticAttributes.USAGE_TOUCH -> usage
-
                 else -> VibrationAttributes.USAGE_UNKNOWN
             }
 
         @JvmStatic
-        @DoNotInline
         fun toVibrationAttributesFlags(@HapticAttributes.Flag flags: Int): Int =
             flags and VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY
     }
@@ -172,70 +156,46 @@ internal object HapticAttributesConverter {
     private object Api26Impl {
 
         @JvmStatic
-        @DoNotInline
         @HapticAttributes.Usage
         fun fromAudioAttributesUsage(attrs: AudioAttributes): Int =
             when (attrs.usage) {
-                AudioAttributes.USAGE_ASSISTANT ->
-                    HapticAttributes.USAGE_COMMUNICATION_REQUEST
-
+                AudioAttributes.USAGE_ASSISTANT -> HapticAttributes.USAGE_COMMUNICATION_REQUEST
                 else -> Api21Impl.fromAudioAttributesUsage(attrs)
             }
     }
 
     /** Version-specific static inner class. */
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private object Api21Impl {
 
         @JvmStatic
-        @DoNotInline
         @Suppress("DEPRECATION") // ApkVariant for compatibility
         @HapticAttributes.Usage
         fun fromAudioAttributesUsage(attrs: AudioAttributes): Int =
             when (attrs.usage) {
                 AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY ->
                     HapticAttributes.USAGE_ACCESSIBILITY
-
-                AudioAttributes.USAGE_ASSISTANCE_SONIFICATION ->
-                    HapticAttributes.USAGE_TOUCH
-
-                AudioAttributes.USAGE_ALARM ->
-                    HapticAttributes.USAGE_ALARM
-
+                AudioAttributes.USAGE_ASSISTANCE_SONIFICATION -> HapticAttributes.USAGE_TOUCH
+                AudioAttributes.USAGE_ALARM -> HapticAttributes.USAGE_ALARM
                 AudioAttributes.USAGE_MEDIA,
-                AudioAttributes.USAGE_GAME ->
-                    HapticAttributes.USAGE_MEDIA
-
+                AudioAttributes.USAGE_GAME -> HapticAttributes.USAGE_MEDIA
                 AudioAttributes.USAGE_NOTIFICATION,
                 AudioAttributes.USAGE_NOTIFICATION_EVENT,
                 AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_DELAYED,
                 AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_INSTANT,
                 AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST ->
                     HapticAttributes.USAGE_NOTIFICATION
-
-                AudioAttributes.USAGE_NOTIFICATION_RINGTONE ->
-                    HapticAttributes.USAGE_RINGTONE
-
+                AudioAttributes.USAGE_NOTIFICATION_RINGTONE -> HapticAttributes.USAGE_RINGTONE
                 AudioAttributes.USAGE_VOICE_COMMUNICATION,
                 AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING,
                 AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE,
-                AudioAttributes.USAGE_ASSISTANT ->
-                    HapticAttributes.USAGE_COMMUNICATION_REQUEST
-
+                AudioAttributes.USAGE_ASSISTANT -> HapticAttributes.USAGE_COMMUNICATION_REQUEST
                 else -> HapticAttributes.USAGE_UNKNOWN
             }
 
-        @JvmStatic
-        @DoNotInline
-        @HapticAttributes.Flag
-        fun fromAudioAttributesFlags(): Int = 0
+        @JvmStatic @HapticAttributes.Flag fun fromAudioAttributesFlags(): Int = 0
 
         @JvmStatic
-        @DoNotInline
-        fun createAudioAttributes(
-            usage: Int,
-            contentType: Int,
-        ): AudioAttributes =
+        fun createAudioAttributes(usage: Int, contentType: Int): AudioAttributes =
             AudioAttributes.Builder().setUsage(usage).setContentType(contentType).build()
 
         @JvmStatic
@@ -244,27 +204,15 @@ internal object HapticAttributesConverter {
             when (usage) {
                 HapticAttributes.USAGE_ACCESSIBILITY ->
                     AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY
-
-                HapticAttributes.USAGE_ALARM ->
-                    AudioAttributes.USAGE_ALARM
-
+                HapticAttributes.USAGE_ALARM -> AudioAttributes.USAGE_ALARM
                 HapticAttributes.USAGE_COMMUNICATION_REQUEST ->
                     AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST
-
-                HapticAttributes.USAGE_MEDIA ->
-                    AudioAttributes.USAGE_MEDIA
-
-                HapticAttributes.USAGE_NOTIFICATION ->
-                    AudioAttributes.USAGE_NOTIFICATION
-
-                HapticAttributes.USAGE_RINGTONE ->
-                    AudioAttributes.USAGE_NOTIFICATION_RINGTONE
-
+                HapticAttributes.USAGE_MEDIA -> AudioAttributes.USAGE_MEDIA
+                HapticAttributes.USAGE_NOTIFICATION -> AudioAttributes.USAGE_NOTIFICATION
+                HapticAttributes.USAGE_RINGTONE -> AudioAttributes.USAGE_NOTIFICATION_RINGTONE
                 HapticAttributes.USAGE_HARDWARE_FEEDBACK,
                 HapticAttributes.USAGE_PHYSICAL_EMULATION,
-                HapticAttributes.USAGE_TOUCH ->
-                    AudioAttributes.USAGE_ASSISTANCE_SONIFICATION
-
+                HapticAttributes.USAGE_TOUCH -> AudioAttributes.USAGE_ASSISTANCE_SONIFICATION
                 else -> AudioAttributes.USAGE_UNKNOWN
             }
 
@@ -273,9 +221,7 @@ internal object HapticAttributesConverter {
             when (usage) {
                 HapticAttributes.USAGE_HARDWARE_FEEDBACK,
                 HapticAttributes.USAGE_PHYSICAL_EMULATION,
-                HapticAttributes.USAGE_TOUCH ->
-                    AudioAttributes.CONTENT_TYPE_SONIFICATION
-
+                HapticAttributes.USAGE_TOUCH -> AudioAttributes.CONTENT_TYPE_SONIFICATION
                 else -> AudioAttributes.CONTENT_TYPE_UNKNOWN
             }
     }

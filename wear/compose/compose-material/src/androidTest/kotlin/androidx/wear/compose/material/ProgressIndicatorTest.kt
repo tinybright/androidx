@@ -33,8 +33,7 @@ import org.junit.Test
 
 class CircularIndeterminateProgressIndicatorTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     @Test
     fun supports_testtag() {
@@ -62,23 +61,26 @@ class CircularIndeterminateProgressIndicatorTest {
             CircularProgressIndicator(
                 modifier = Modifier.testTag(TEST_TAG),
                 indicatorColor = Color.Yellow,
-                trackColor = Color.Red
+                trackColor = Color.Red,
             )
         }
         rule.waitForIdle()
         rule.mainClock.advanceTimeBy(300)
 
-        rule.onNodeWithTag(TEST_TAG).captureToImage()
+        rule
+            .onNodeWithTag(TEST_TAG)
+            .captureToImage()
             .assertColorInPercentageRange(Color.Yellow, 12f..20f)
-        rule.onNodeWithTag(TEST_TAG).captureToImage()
+        rule
+            .onNodeWithTag(TEST_TAG)
+            .captureToImage()
             .assertColorInPercentageRange(Color.Red, 5f..15f)
     }
 }
 
 class CircularDeterminateProgressIndicatorTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     @Test
     fun supports_testtag() {
@@ -96,19 +98,15 @@ class CircularDeterminateProgressIndicatorTest {
         rule.setContentWithTheme {
             CircularProgressIndicator(
                 modifier = Modifier.testTag(TEST_TAG),
-                progress = progress.value
+                progress = progress.value,
             )
         }
 
-        rule.onNodeWithTag(TEST_TAG)
-            .assertRangeInfoEquals(ProgressBarRangeInfo(0f, 0f..1f))
+        rule.onNodeWithTag(TEST_TAG).assertRangeInfoEquals(ProgressBarRangeInfo(0f, 0f..1f))
 
-        rule.runOnIdle {
-            progress.value = 0.5f
-        }
+        rule.runOnIdle { progress.value = 0.5f }
 
-        rule.onNodeWithTag(TEST_TAG)
-            .assertRangeInfoEquals(ProgressBarRangeInfo(0.5f, 0f..1f))
+        rule.onNodeWithTag(TEST_TAG).assertRangeInfoEquals(ProgressBarRangeInfo(0.5f, 0f..1f))
     }
 
     @SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
@@ -119,12 +117,14 @@ class CircularDeterminateProgressIndicatorTest {
                 modifier = Modifier.testTag(TEST_TAG),
                 progress = 1f,
                 indicatorColor = Color.Yellow,
-                trackColor = Color.Red
+                trackColor = Color.Red,
             )
         }
         rule.waitForIdle()
         // by default fully filled progress approximately takes 23-27% of the control
-        rule.onNodeWithTag(TEST_TAG).captureToImage()
+        rule
+            .onNodeWithTag(TEST_TAG)
+            .captureToImage()
             .assertColorInPercentageRange(Color.Yellow, 23f..27f)
         rule.onNodeWithTag(TEST_TAG).captureToImage().assertDoesNotContainColor(Color.Red)
     }
@@ -137,13 +137,15 @@ class CircularDeterminateProgressIndicatorTest {
                 modifier = Modifier.testTag(TEST_TAG),
                 progress = 0f,
                 indicatorColor = Color.Yellow,
-                trackColor = Color.Red
+                trackColor = Color.Red,
             )
         }
         rule.waitForIdle()
         rule.onNodeWithTag(TEST_TAG).captureToImage().assertDoesNotContainColor(Color.Yellow)
         // by default progress track approximately takes 23-27% of the control
-        rule.onNodeWithTag(TEST_TAG).captureToImage()
+        rule
+            .onNodeWithTag(TEST_TAG)
+            .captureToImage()
             .assertColorInPercentageRange(Color.Red, 23f..27f)
     }
 
@@ -157,15 +159,19 @@ class CircularDeterminateProgressIndicatorTest {
                 startAngle = 0f,
                 endAngle = 180f,
                 indicatorColor = Color.Yellow,
-                trackColor = Color.Red
+                trackColor = Color.Red,
             )
         }
         rule.waitForIdle()
         // Color should take approximately a quarter of what it normally takes
         // (a little bit less), eg 25% / 4 ≈ 6%
-        rule.onNodeWithTag(TEST_TAG).captureToImage()
+        rule
+            .onNodeWithTag(TEST_TAG)
+            .captureToImage()
             .assertColorInPercentageRange(Color.Yellow, 5f..8f)
-        rule.onNodeWithTag(TEST_TAG).captureToImage()
+        rule
+            .onNodeWithTag(TEST_TAG)
+            .captureToImage()
             .assertColorInPercentageRange(Color.Red, 5f..8f)
     }
 
@@ -176,16 +182,13 @@ class CircularDeterminateProgressIndicatorTest {
         rule.setContentWithTheme {
             CircularProgressIndicator(
                 modifier = Modifier.testTag(TEST_TAG),
-                progress = progress.value
+                progress = progress.value,
             )
         }
 
-        rule.runOnIdle {
-            progress.value = 1.5f
-        }
+        rule.runOnIdle { progress.value = 1.5f }
 
-        rule.onNodeWithTag(TEST_TAG)
-            .assertRangeInfoEquals(ProgressBarRangeInfo(1f, 0f..1f))
+        rule.onNodeWithTag(TEST_TAG).assertRangeInfoEquals(ProgressBarRangeInfo(1f, 0f..1f))
     }
 
     @Test
@@ -195,16 +198,13 @@ class CircularDeterminateProgressIndicatorTest {
         rule.setContentWithTheme {
             CircularProgressIndicator(
                 modifier = Modifier.testTag(TEST_TAG),
-                progress = progress.value
+                progress = progress.value,
             )
         }
 
-        rule.runOnIdle {
-            progress.value = -1.5f
-        }
+        rule.runOnIdle { progress.value = -1.5f }
 
-        rule.onNodeWithTag(TEST_TAG)
-            .assertRangeInfoEquals(ProgressBarRangeInfo(0f, 0f..1f))
+        rule.onNodeWithTag(TEST_TAG).assertRangeInfoEquals(ProgressBarRangeInfo(0f, 0f..1f))
     }
 
     @SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
@@ -216,13 +216,17 @@ class CircularDeterminateProgressIndicatorTest {
                 progress = 0.5f,
                 strokeWidth = 2.dp,
                 indicatorColor = Color.Yellow,
-                trackColor = Color.Red
+                trackColor = Color.Red,
             )
         }
         rule.waitForIdle()
-        rule.onNodeWithTag(TEST_TAG).captureToImage()
+        rule
+            .onNodeWithTag(TEST_TAG)
+            .captureToImage()
             .assertColorInPercentageRange(Color.Yellow, 5f..7f)
-        rule.onNodeWithTag(TEST_TAG).captureToImage()
+        rule
+            .onNodeWithTag(TEST_TAG)
+            .captureToImage()
             .assertColorInPercentageRange(Color.Red, 5f..7f)
     }
 
@@ -235,14 +239,18 @@ class CircularDeterminateProgressIndicatorTest {
                 progress = 0.5f,
                 strokeWidth = 8.dp,
                 indicatorColor = Color.Yellow,
-                trackColor = Color.Red
+                trackColor = Color.Red,
             )
         }
         rule.waitForIdle()
         // Because of the stroke cap, progress color takes a little bit more space than track color
-        rule.onNodeWithTag(TEST_TAG).captureToImage()
+        rule
+            .onNodeWithTag(TEST_TAG)
+            .captureToImage()
             .assertColorInPercentageRange(Color.Yellow, 24f..28f)
-        rule.onNodeWithTag(TEST_TAG).captureToImage()
+        rule
+            .onNodeWithTag(TEST_TAG)
+            .captureToImage()
             .assertColorInPercentageRange(Color.Red, 18f..23f)
     }
 }

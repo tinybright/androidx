@@ -54,21 +54,18 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.SettableFuture
 import java.util.concurrent.Executor
 
-/**
- * [ExerciseClient] implementation that is backed by Health Services.
- *
- */
+/** [ExerciseClient] implementation that is backed by Health Services. */
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 internal class ServiceBackedExerciseClient(
     private val context: Context,
-    connectionManager: ConnectionManager = HsConnectionManager.getInstance(context)
+    connectionManager: ConnectionManager = HsConnectionManager.getInstance(context),
 ) :
     ExerciseClient,
     Client<IExerciseApiService>(
         CLIENT_CONFIGURATION,
         connectionManager,
         { binder -> IExerciseApiService.Stub.asInterface(binder) },
-        { service -> service.apiVersion }
+        { service -> service.apiVersion },
     ) {
 
     private val requestedDataTypesLock = Any()
@@ -88,7 +85,7 @@ internal class ServiceBackedExerciseClient(
                         }
                         super.onSuccess()
                     }
-                }
+                },
             )
         }
 
@@ -104,7 +101,7 @@ internal class ServiceBackedExerciseClient(
                         }
                         super.onSuccess()
                     }
-                }
+                },
             )
         }
 
@@ -141,19 +138,14 @@ internal class ServiceBackedExerciseClient(
         setUpdateCallback(ContextCompat.getMainExecutor(context), callback)
     }
 
-    override fun setUpdateCallback(
-        executor: Executor,
-        callback: ExerciseUpdateCallback
-    ) {
+    override fun setUpdateCallback(executor: Executor, callback: ExerciseUpdateCallback) {
         val listenerStub =
             ExerciseUpdateListenerStub.ExerciseUpdateListenerCache.INSTANCE.create(
                 callback,
                 executor,
                 requestedDataTypesProvider = {
-                    synchronized(requestedDataTypesLock) {
-                        requestedDataTypes.toSet()
-                    }
-                }
+                    synchronized(requestedDataTypesLock) { requestedDataTypes.toSet() }
+                },
             )
         val future =
             registerListener(listenerStub.listenerKey) { service, result: SettableFuture<Void?> ->
@@ -170,7 +162,8 @@ internal class ServiceBackedExerciseClient(
                     callback.onRegistrationFailed(t)
                 }
             },
-            executor)
+            executor,
+        )
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -188,20 +181,19 @@ internal class ServiceBackedExerciseClient(
 
     override fun addGoalToActiveExerciseAsync(
         exerciseGoal: ExerciseGoal<*>
-    ): ListenableFuture<Void> =
-        execute { service, resultFuture ->
-            service.addGoalToActiveExercise(
-                ExerciseGoalRequest(packageName, exerciseGoal),
-                StatusCallback(resultFuture)
-            )
-        }
+    ): ListenableFuture<Void> = execute { service, resultFuture ->
+        service.addGoalToActiveExercise(
+            ExerciseGoalRequest(packageName, exerciseGoal),
+            StatusCallback(resultFuture),
+        )
+    }
 
     override fun removeGoalFromActiveExerciseAsync(
         exerciseGoal: ExerciseGoal<*>
     ): ListenableFuture<Void> = execute { service, resultFuture ->
         service.removeGoalFromActiveExercise(
             ExerciseGoalRequest(packageName, exerciseGoal),
-            StatusCallback(resultFuture)
+            StatusCallback(resultFuture),
         )
     }
 
@@ -210,7 +202,7 @@ internal class ServiceBackedExerciseClient(
     ): ListenableFuture<Void> = execute { service, resultFuture ->
         service.overrideAutoPauseAndResumeForActiveExercise(
             AutoPauseAndResumeConfigRequest(packageName, enabled),
-            StatusCallback(resultFuture)
+            StatusCallback(resultFuture),
         )
     }
 
@@ -221,10 +213,10 @@ internal class ServiceBackedExerciseClient(
             { service, resultFuture ->
                 service.overrideBatchingModesForActiveExercise(
                     BatchingModeConfigRequest(packageName, batchingModes),
-                    StatusCallback(resultFuture)
+                    StatusCallback(resultFuture),
                 )
             },
-            /* minApiVersion= */ 4
+            /* minApiVersion= */ 4,
         )
     }
 
@@ -232,7 +224,7 @@ internal class ServiceBackedExerciseClient(
         Futures.transform(
             execute { service -> service.getCapabilities(CapabilitiesRequest(packageName)) },
             { response -> response!!.exerciseCapabilities },
-            ContextCompat.getMainExecutor(context)
+            ContextCompat.getMainExecutor(context),
         )
 
     override fun updateExerciseTypeConfigAsync(
@@ -242,10 +234,10 @@ internal class ServiceBackedExerciseClient(
             { service, resultFuture ->
                 service.updateExerciseTypeConfigForActiveExercise(
                     UpdateExerciseTypeConfigRequest(packageName, exerciseTypeConfig),
-                    StatusCallback(resultFuture)
+                    StatusCallback(resultFuture),
                 )
             },
-            3
+            3,
         )
     }
 

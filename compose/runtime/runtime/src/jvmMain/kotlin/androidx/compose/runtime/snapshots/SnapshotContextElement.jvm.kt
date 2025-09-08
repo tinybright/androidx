@@ -16,19 +16,16 @@
 
 package androidx.compose.runtime.snapshots
 
-import androidx.compose.runtime.ExperimentalComposeApi
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.ThreadContextElement
 
-@OptIn(ExperimentalComposeApi::class)
-internal actual class SnapshotContextElementImpl actual constructor(
-    private val snapshot: Snapshot
-) : SnapshotContextElement, ThreadContextElement<Snapshot?> {
-    override val key: CoroutineContext.Key<*>
+internal actual class SnapshotContextElementImpl
+actual constructor(private val snapshot: Snapshot) :
+    SnapshotContextElement, ThreadContextElement<Snapshot?> {
+    actual override val key: CoroutineContext.Key<*>
         get() = SnapshotContextElement
 
-    override fun updateThreadContext(context: CoroutineContext): Snapshot? =
-        snapshot.unsafeEnter()
+    override fun updateThreadContext(context: CoroutineContext): Snapshot? = snapshot.unsafeEnter()
 
     override fun restoreThreadContext(context: CoroutineContext, oldState: Snapshot?) {
         snapshot.unsafeLeave(oldState)

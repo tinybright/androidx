@@ -89,66 +89,49 @@ private fun OuterComposeWithNestedScroll(factory: (Context) -> View) {
     }
 
     // Compose Scrollable
-    Box(
-        Modifier
-            .fillMaxSize()
-            .nestedScroll(nestedScrollConnection)
-    ) {
-
+    Box(Modifier.fillMaxSize().nestedScroll(nestedScrollConnection)) {
         TopAppBar(
-            modifier = Modifier
-                .height(ToolbarHeight)
-                .offset { IntOffset(x = 0, y = toolbarOffsetHeightPx.roundToInt()) },
-            title = { Text("toolbar offset is $toolbarOffsetHeightPx") }
+            modifier =
+                Modifier.height(ToolbarHeight).offset {
+                    IntOffset(x = 0, y = toolbarOffsetHeightPx.roundToInt())
+                },
+            title = { Text("toolbar offset is $toolbarOffsetHeightPx") },
         )
 
         // Android View
-        AndroidView(
-            factory = { context -> factory(context) },
-            modifier = Modifier.fillMaxWidth()
-        )
+        AndroidView(factory = { context -> factory(context) }, modifier = Modifier.fillMaxWidth())
     }
 }
 
 private fun AndroidViewWithNestedScrollEnabled(context: Context): View {
     return LayoutInflater.from(context)
-        .inflate(R.layout.android_in_compose_nested_scroll_interop, null).apply {
+        .inflate(R.layout.android_in_compose_nested_scroll_interop, null)
+        .apply {
             with(findViewById<RecyclerView>(R.id.main_list)) {
-                layoutManager =
-                    LinearLayoutManager(context, RecyclerView.VERTICAL, false)
+                layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
                 adapter = NestedScrollInteropAdapter()
             }
-        }.also {
-            ViewCompat.setNestedScrollingEnabled(it, true)
         }
+        .also { ViewCompat.setNestedScrollingEnabled(it, true) }
 }
 
 @Composable
 internal fun NestedScrollInteropComposeParentWithAndroidChild() {
-    OuterComposeWithNestedScroll { context ->
-        AndroidViewWithNestedScrollEnabled(context)
-    }
+    OuterComposeWithNestedScroll { context -> AndroidViewWithNestedScrollEnabled(context) }
 }
 
 @Composable
 private fun LazyColumnWithNestedScrollInteropEnabled() {
     LazyColumn(
-        modifier = Modifier.nestedScroll(
-            rememberNestedScrollInteropConnection()
-        ),
-        contentPadding = PaddingValues(top = ToolbarHeight)
+        modifier = Modifier.nestedScroll(rememberNestedScrollInteropConnection()),
+        contentPadding = PaddingValues(top = ToolbarHeight),
     ) {
-        item {
-            Text("This is a Lazy Column")
-        }
+        item { Text("This is a Lazy Column") }
         items(40) { item ->
             Box(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .height(56.dp)
-                    .fillMaxWidth()
-                    .background(Color.Gray),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier.padding(16.dp).height(56.dp).fillMaxWidth().background(Color.Gray),
+                contentAlignment = Alignment.Center,
             ) {
                 Text(item.toString())
             }
@@ -157,22 +140,16 @@ private fun LazyColumnWithNestedScrollInteropEnabled() {
 }
 
 @Composable
-private fun ScrollableColumnWithNestedScrollInteropEnabled(
-    state: ScrollState,
-    hostView: View
-) {
+private fun ScrollableColumnWithNestedScrollInteropEnabled(state: ScrollState, hostView: View) {
     Column(
-        modifier = Modifier
-            .nestedScroll(rememberNestedScrollInteropConnection(hostView))
-            .verticalScroll(state)
+        modifier =
+            Modifier.nestedScroll(rememberNestedScrollInteropConnection(hostView))
+                .verticalScroll(state)
     ) {
         repeat(100) { item ->
             Box(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .size(56.dp)
-                    .background(Color.Gray),
-                contentAlignment = Alignment.Center
+                modifier = Modifier.padding(16.dp).size(56.dp).background(Color.Gray),
+                contentAlignment = Alignment.Center,
             ) {
                 Text(item.toString())
             }
@@ -184,22 +161,23 @@ private fun ScrollableColumnWithNestedScrollInteropEnabled(
 internal fun ComposeViewComposeNestedInterop() {
     OuterComposeWithNestedScroll { context ->
         LayoutInflater.from(context)
-            .inflate(R.layout.three_fold_nested_scroll_interop, null).apply {
+            .inflate(R.layout.three_fold_nested_scroll_interop, null)
+            .apply {
                 with(findViewById<ComposeView>(R.id.compose_view)) {
                     setContent { LazyColumnWithNestedScrollInteropEnabled() }
                 }
-            }.also {
-                ViewCompat.setNestedScrollingEnabled(it, true)
             }
+            .also { ViewCompat.setNestedScrollingEnabled(it, true) }
     }
 }
 
 private class NestedScrollInteropAdapter :
     RecyclerView.Adapter<NestedScrollInteropAdapter.NestedScrollInteropViewHolder>() {
     val items = (1..100).map { it.toString() }
+
     override fun onCreateViewHolder(
         parent: ViewGroup,
-        viewType: Int
+        viewType: Int,
     ): NestedScrollInteropViewHolder {
         return NestedScrollInteropViewHolder(
             LayoutInflater.from(parent.context)
@@ -248,7 +226,7 @@ internal class ComposeInSwipeToRefreshLayout : ComponentActivity() {
                     it.setContent {
                         ScrollableColumnWithNestedScrollInteropEnabled(
                             state = scrollState,
-                            hostView = this
+                            hostView = this,
                         )
                     }
                 }
@@ -258,16 +236,14 @@ internal class ComposeInSwipeToRefreshLayout : ComponentActivity() {
 }
 
 /**
- * A host view that uses [ScrollableState] to check if its inner scrollable can scroll
- * and to communicate with outer View world mechanisms that use [canScrollHorizontally] or
+ * A host view that uses [ScrollableState] to check if its inner scrollable can scroll and to
+ * communicate with outer View world mechanisms that use [canScrollHorizontally] or
  * [canScrollVertically] to take actions. (e.g.
  * [com.google.android.material.bottomsheet.BottomSheetBehavior],
  * [androidx.slidingpanelayout.widget.SlidingPaneLayout])
  */
-internal class NestedScrollableView(
-    context: Context,
-    attributeSet: AttributeSet
-) : FrameLayout(context, attributeSet) {
+internal class NestedScrollableView(context: Context, attributeSet: AttributeSet) :
+    FrameLayout(context, attributeSet) {
 
     var scrollableState: ScrollableState? = null
 
@@ -291,9 +267,10 @@ internal class ViewComposeViewNestedScrollInteropDemo : ComponentActivity() {
             setContent {
                 val nestedScrollInterop = rememberNestedScrollInteropConnection()
                 Box(modifier = Modifier.nestedScroll(nestedScrollInterop)) {
-                    AndroidView({ context ->
-                        AndroidViewWithNestedScrollEnabled(context)
-                    }, modifier = Modifier.fillMaxWidth())
+                    AndroidView(
+                        { context -> AndroidViewWithNestedScrollEnabled(context) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                 }
             }
         }
@@ -305,9 +282,7 @@ internal class BottomSheetFragmentNestedScrollInteropDemo : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.bottom_sheet_fragment_nestedscrollinterop_demo)
 
-        findViewById<Button>(R.id.button).setOnClickListener {
-            openFragment()
-        }
+        findViewById<Button>(R.id.button).setOnClickListener { openFragment() }
     }
 
     private fun openFragment() {
@@ -320,15 +295,13 @@ internal class LazyListBottomSheetDialogFragment : BottomSheetDialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         val view = inflater.inflate(R.layout.fragment_bottom_sheet, container)
         view.findViewById<ComposeView>(R.id.compose_view).setContent {
             Box(Modifier.nestedScroll(rememberNestedScrollInteropConnection())) {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(100) {
-                        Text("Item $it", Modifier.fillMaxWidth(), Color.Black)
-                    }
+                    items(100) { Text("Item $it", Modifier.fillMaxWidth(), Color.Black) }
                 }
             }
         }

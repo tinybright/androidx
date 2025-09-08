@@ -59,13 +59,11 @@ import org.junit.rules.ExternalResource
  */
 open class ActivityScenarioResetRule<A : Activity>(
     private val scenario: ActivityScenario<A>,
-    private val predicate: (A) -> Unit
+    private val predicate: (A) -> Unit,
 ) : ExternalResource() {
     override fun before() {
         super.before()
-        scenario.onActivity {
-            predicate.invoke(it)
-        }
+        scenario.onActivity { predicate.invoke(it) }
         // reset has likely modified activity state, so allow state (e.g. layout/measure) to resolve
         scenario.onActivity {}
     }

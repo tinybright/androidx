@@ -30,7 +30,7 @@ class TwoPaneFragment : AbstractListDetailFragment() {
     override fun onCreateListPaneView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         return inflater.inflate(R.layout.list_pane, container, false)
     }
@@ -42,9 +42,10 @@ class TwoPaneFragment : AbstractListDetailFragment() {
     override fun onListPaneViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onListPaneViewCreated(view, savedInstanceState)
         val recyclerView = view as RecyclerView
-        recyclerView.adapter = TwoPaneAdapter(map.keys.toTypedArray()) {
-            map[it]?.let { destId -> openDetails(destId) }
-        }
+        recyclerView.adapter =
+            TwoPaneAdapter(map.keys.toTypedArray()) {
+                map[it]?.let { destId -> openDetails(destId) }
+            }
     }
 
     private fun openDetails(destinationId: Int) {
@@ -60,18 +61,19 @@ class TwoPaneFragment : AbstractListDetailFragment() {
                         setExitAnim(R.anim.nav_default_exit_anim)
                     }
                 }
-                .build()
+                .build(),
         )
         slidingPaneLayout.open()
     }
 
     companion object {
-        val map = mapOf(
-            "first" to R.id.first_fragment,
-            "second" to R.id.second_fragment,
-            "third" to R.id.third_fragment,
-            "fourth" to R.id.fourth_fragment,
-            "fifth" to R.id.fifth_fragment
-        )
+        val map =
+            mapOf(
+                "first" to R.id.first_fragment,
+                "second" to R.id.second_fragment,
+                "third" to R.id.third_fragment,
+                "fourth" to R.id.fourth_fragment,
+                "fifth" to R.id.fifth_fragment,
+            )
     }
 }

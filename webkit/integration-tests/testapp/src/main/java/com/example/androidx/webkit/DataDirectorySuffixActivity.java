@@ -22,11 +22,11 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.webkit.ProcessGlobalConfig;
 import androidx.webkit.WebViewFeature;
 
+import org.jspecify.annotations.Nullable;
 
 /**
  * An {@link Activity} which makes use of
@@ -49,6 +49,7 @@ public class DataDirectorySuffixActivity extends AppCompatActivity {
                 "data_directory_suffix_activity_suffix");
         ProcessGlobalConfig.apply(config);
         setContentView(R.layout.activity_data_directory_config);
+        WebkitHelpers.enableEdgeToEdge(this);
         WebView wv = findViewById(R.id.data_directory_config_webview);
         wv.getSettings().setJavaScriptEnabled(true);
         wv.setWebViewClient(new WebViewClient());

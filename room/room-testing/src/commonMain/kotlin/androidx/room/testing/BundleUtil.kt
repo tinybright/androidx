@@ -37,7 +37,7 @@ internal fun EntityBundle.toTableInfo(): TableInfo {
         name = this.tableName,
         columns = this.toColumnMap(),
         foreignKeys = this.foreignKeys.toForeignKeys(),
-        indices = this.indices.toIndices()
+        indices = this.indices.toIndices(),
     )
 }
 
@@ -45,29 +45,28 @@ internal fun FtsEntityBundle.toFtsTableInfo(): FtsTableInfo {
     return FtsTableInfo(
         name = this.tableName,
         columns = this.toColumnNamesSet(),
-        createSql = this.createSql
+        createSql = this.createSql,
     )
 }
 
 internal fun DatabaseViewBundle.toViewInfo(): ViewInfo {
-    return ViewInfo(
-        name = this.viewName,
-        sql = this.createView()
-    )
+    return ViewInfo(name = this.viewName, sql = this.createView())
 }
 
 private fun List<IndexBundle>?.toIndices(): Set<TableInfo.Index> {
     if (this == null) {
         return emptySet()
     }
-    val result = this.map { bundle ->
-        TableInfo.Index(
-            name = bundle.name,
-            unique = bundle.isUnique,
-            columns = bundle.columnNames ?: emptyList(),
-            orders = bundle.orders ?: emptyList()
-        )
-    }.toSet()
+    val result =
+        this.map { bundle ->
+                TableInfo.Index(
+                    name = bundle.name,
+                    unique = bundle.isUnique,
+                    columns = bundle.columnNames ?: emptyList(),
+                    orders = bundle.orders ?: emptyList(),
+                )
+            }
+            .toSet()
     return result
 }
 
@@ -75,15 +74,17 @@ private fun List<ForeignKeyBundle>?.toForeignKeys(): Set<TableInfo.ForeignKey> {
     if (this == null) {
         return emptySet()
     }
-    val result = this.map { bundle ->
-        TableInfo.ForeignKey(
-            referenceTable = bundle.table,
-            onDelete = bundle.onDelete,
-            onUpdate = bundle.onUpdate,
-            columnNames = bundle.columns,
-            referenceColumnNames = bundle.referencedColumns
-        )
-    }.toSet()
+    val result =
+        this.map { bundle ->
+                TableInfo.ForeignKey(
+                    referenceTable = bundle.table,
+                    onDelete = bundle.onDelete,
+                    onUpdate = bundle.onUpdate,
+                    columnNames = bundle.columns,
+                    referenceColumnNames = bundle.referencedColumns,
+                )
+            }
+            .toSet()
     return result
 }
 
@@ -107,7 +108,7 @@ private fun FieldBundle.toColumn(ownerEntity: EntityBundle): TableInfo.Column {
         notNull = this.isNonNull,
         primaryKeyPosition = findPrimaryKeyPosition(ownerEntity, this),
         defaultValue = this.defaultValue,
-        createdFrom = TableInfo.CREATED_FROM_ENTITY
+        createdFrom = TableInfo.CREATED_FROM_ENTITY,
     )
 }
 

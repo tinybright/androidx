@@ -16,7 +16,6 @@
 
 package androidx.compose.foundation.benchmark.pager
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -41,8 +40,7 @@ import org.junit.Rule
 import org.junit.Test
 
 class PagerBasicBenchmark {
-    @get:Rule
-    val benchmarkRule = ComposeBenchmarkRule()
+    @get:Rule val benchmarkRule = ComposeBenchmarkRule()
 
     private val fullPageBenchmark = { PagerTestCase() }
     private val multiPageBenchmark = { PagerTestCase(false) }
@@ -128,7 +126,6 @@ class PagerBasicBenchmark {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 class PagerTestCase(val fullPages: Boolean = true) : LayeredComposeTestCase() {
     @Composable
     override fun MeasuredContent() {
@@ -142,7 +139,7 @@ class PagerTestCase(val fullPages: Boolean = true) : LayeredComposeTestCase() {
         HorizontalPager(
             state = rememberPagerState { 100 },
             modifier = Modifier.size(400.dp),
-            pageSize = pageSize
+            pageSize = pageSize,
         ) {
             Box(modifier = Modifier.fillMaxSize())
         }

@@ -54,8 +54,7 @@ class LazyArrangementsTest {
 
     private val ContainerTag = "ContainerTag"
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     private var itemSize: Dp = Dp.Infinity
     private var smallerItemSize: Dp = Dp.Infinity
@@ -63,12 +62,8 @@ class LazyArrangementsTest {
 
     @Before
     fun before() {
-        with(rule.density) {
-            itemSize = 50.toDp()
-        }
-        with(rule.density) {
-            smallerItemSize = 40.toDp()
-        }
+        with(rule.density) { itemSize = 50.toDp() }
+        with(rule.density) { smallerItemSize = 40.toDp() }
         containerSize = itemSize * 5
     }
 
@@ -77,12 +72,8 @@ class LazyArrangementsTest {
     @Test
     fun column_defaultArrangementIsTop() {
         rule.setContent {
-            LazyColumn(
-                modifier = Modifier.requiredSize(containerSize)
-            ) {
-                items(2) {
-                    Box(Modifier.requiredSize(itemSize).testTag(it.toString()))
-                }
+            LazyColumn(modifier = Modifier.requiredSize(containerSize)) {
+                items(2) { Box(Modifier.requiredSize(itemSize).testTag(it.toString())) }
             }
         }
 
@@ -111,12 +102,8 @@ class LazyArrangementsTest {
     @Test
     fun row_defaultArrangementIsStart() {
         rule.setContent {
-            LazyRow(
-                modifier = Modifier.requiredSize(containerSize)
-            ) {
-                items(2) {
-                    Box(Modifier.requiredSize(itemSize).testTag(it.toString()))
-                }
+            LazyRow(modifier = Modifier.requiredSize(containerSize)) {
+                items(2) { Box(Modifier.requiredSize(itemSize).testTag(it.toString())) }
             }
         }
 
@@ -168,15 +155,14 @@ class LazyArrangementsTest {
         rule.setContent {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(itemSize),
-                modifier = Modifier.testTag(ContainerTag)
+                modifier = Modifier.testTag(ContainerTag),
             ) {
-                items(2) {
-                    Box(Modifier.requiredSize(itemSize))
-                }
+                items(2) { Box(Modifier.requiredSize(itemSize)) }
             }
         }
 
-        rule.onNodeWithTag(ContainerTag)
+        rule
+            .onNodeWithTag(ContainerTag)
             .assertWidthIsEqualTo(itemSize)
             .assertHeightIsEqualTo(itemSize * 3)
     }
@@ -186,15 +172,14 @@ class LazyArrangementsTest {
         rule.setContent {
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(itemSize),
-                modifier = Modifier.testTag(ContainerTag)
+                modifier = Modifier.testTag(ContainerTag),
             ) {
-                items(2) {
-                    Box(Modifier.requiredSize(itemSize))
-                }
+                items(2) { Box(Modifier.requiredSize(itemSize)) }
             }
         }
 
-        rule.onNodeWithTag(ContainerTag)
+        rule
+            .onNodeWithTag(ContainerTag)
             .assertWidthIsEqualTo(itemSize * 3)
             .assertHeightIsEqualTo(itemSize)
     }
@@ -206,19 +191,15 @@ class LazyArrangementsTest {
         rule.setContent {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(itemSize),
-                modifier = Modifier.requiredSize(itemSize * 3.5f)
+                modifier = Modifier.requiredSize(itemSize * 3.5f),
             ) {
-                items(3) {
-                    Box(Modifier.requiredSize(itemSize).testTag(it.toString()))
-                }
+                items(3) { Box(Modifier.requiredSize(itemSize).testTag(it.toString())) }
             }
         }
 
-        rule.onNodeWithTag("0")
-            .assertTopPositionInRootIsEqualTo(0.dp)
+        rule.onNodeWithTag("0").assertTopPositionInRootIsEqualTo(0.dp)
 
-        rule.onNodeWithTag("1")
-            .assertTopPositionInRootIsEqualTo(itemSize * 2)
+        rule.onNodeWithTag("1").assertTopPositionInRootIsEqualTo(itemSize * 2)
     }
 
     @Test
@@ -226,22 +207,17 @@ class LazyArrangementsTest {
         rule.setContentWithTestViewConfiguration {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(itemSize),
-                modifier = Modifier.requiredSize(itemSize * 3.5f).testTag(ContainerTag)
+                modifier = Modifier.requiredSize(itemSize * 3.5f).testTag(ContainerTag),
             ) {
-                items(3) {
-                    Box(Modifier.requiredSize(itemSize).testTag(it.toString()))
-                }
+                items(3) { Box(Modifier.requiredSize(itemSize).testTag(it.toString())) }
             }
         }
 
-        rule.onNodeWithTag(ContainerTag)
-            .scrollBy(y = itemSize * 2, density = rule.density)
+        rule.onNodeWithTag(ContainerTag).scrollBy(y = itemSize * 2, density = rule.density)
 
-        rule.onNodeWithTag("1")
-            .assertTopPositionInRootIsEqualTo(itemSize * 0.5f)
+        rule.onNodeWithTag("1").assertTopPositionInRootIsEqualTo(itemSize * 0.5f)
 
-        rule.onNodeWithTag("2")
-            .assertTopPositionInRootIsEqualTo(itemSize * 2.5f)
+        rule.onNodeWithTag("2").assertTopPositionInRootIsEqualTo(itemSize * 2.5f)
     }
 
     @Test
@@ -249,19 +225,15 @@ class LazyArrangementsTest {
         rule.setContent {
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(itemSize),
-                modifier = Modifier.requiredSize(itemSize * 3.5f)
+                modifier = Modifier.requiredSize(itemSize * 3.5f),
             ) {
-                items(3) {
-                    Box(Modifier.requiredSize(itemSize).testTag(it.toString()))
-                }
+                items(3) { Box(Modifier.requiredSize(itemSize).testTag(it.toString())) }
             }
         }
 
-        rule.onNodeWithTag("0")
-            .assertLeftPositionInRootIsEqualTo(0.dp)
+        rule.onNodeWithTag("0").assertLeftPositionInRootIsEqualTo(0.dp)
 
-        rule.onNodeWithTag("1")
-            .assertLeftPositionInRootIsEqualTo(itemSize * 2)
+        rule.onNodeWithTag("1").assertLeftPositionInRootIsEqualTo(itemSize * 2)
     }
 
     @Test
@@ -269,22 +241,17 @@ class LazyArrangementsTest {
         rule.setContentWithTestViewConfiguration {
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(itemSize),
-                modifier = Modifier.requiredSize(itemSize * 3.5f).testTag(ContainerTag)
+                modifier = Modifier.requiredSize(itemSize * 3.5f).testTag(ContainerTag),
             ) {
-                items(3) {
-                    Box(Modifier.requiredSize(itemSize).testTag(it.toString()))
-                }
+                items(3) { Box(Modifier.requiredSize(itemSize).testTag(it.toString())) }
             }
         }
 
-        rule.onNodeWithTag(ContainerTag)
-            .scrollBy(x = itemSize * 2, density = rule.density)
+        rule.onNodeWithTag(ContainerTag).scrollBy(x = itemSize * 2, density = rule.density)
 
-        rule.onNodeWithTag("1")
-            .assertLeftPositionInRootIsEqualTo(itemSize * 0.5f)
+        rule.onNodeWithTag("1").assertLeftPositionInRootIsEqualTo(itemSize * 0.5f)
 
-        rule.onNodeWithTag("2")
-            .assertLeftPositionInRootIsEqualTo(itemSize * 2.5f)
+        rule.onNodeWithTag("2").assertLeftPositionInRootIsEqualTo(itemSize * 2.5f)
     }
 
     @Test
@@ -298,24 +265,15 @@ class LazyArrangementsTest {
             LazyColumn(
                 Modifier.size(itemSize * 3),
                 state = rememberLazyListState().also { state = it },
-                verticalArrangement = Arrangement.spacedBy(spacingSize)
+                verticalArrangement = Arrangement.spacedBy(spacingSize),
             ) {
-                items(5) {
-                    Spacer(
-                        Modifier.size(itemSize).testTag("$it")
-                    )
-                }
+                items(5) { Spacer(Modifier.size(itemSize).testTag("$it")) }
             }
         }
 
-        rule.runOnIdle {
-            runBlocking {
-                state.scrollBy((itemSizePx + spacingSizePx).toFloat())
-            }
-        }
+        rule.runOnIdle { runBlocking { state.scrollBy((itemSizePx + spacingSizePx).toFloat()) } }
 
-        rule.onNodeWithTag("0")
-            .assertIsNotDisplayed()
+        rule.onNodeWithTag("0").assertIsNotDisplayed()
 
         rule.runOnIdle {
             assertThat(state.firstVisibleItemIndex).isEqualTo(1)
@@ -334,29 +292,21 @@ class LazyArrangementsTest {
             LazyColumn(
                 Modifier.size(itemSize * 3),
                 state = rememberLazyListState().also { state = it },
-                verticalArrangement = Arrangement.spacedBy(spacingSize)
+                verticalArrangement = Arrangement.spacedBy(spacingSize),
             ) {
-                items(5) {
-                    Spacer(
-                        Modifier.size(itemSize).testTag("$it")
-                    )
-                }
+                items(5) { Spacer(Modifier.size(itemSize).testTag("$it")) }
             }
         }
 
         rule.runOnIdle {
-            runBlocking {
-                state.scrollBy((itemSizePx + spacingSizePx / 2).toFloat())
-            }
+            runBlocking { state.scrollBy((itemSizePx + spacingSizePx / 2).toFloat()) }
         }
 
-        rule.onNodeWithTag("0")
-            .assertIsNotDisplayed()
+        rule.onNodeWithTag("0").assertIsNotDisplayed()
 
         rule.runOnIdle {
             assertThat(state.firstVisibleItemIndex).isEqualTo(0)
-            assertThat(state.firstVisibleItemScrollOffset)
-                .isEqualTo(itemSizePx + spacingSizePx / 2)
+            assertThat(state.firstVisibleItemScrollOffset).isEqualTo(itemSizePx + spacingSizePx / 2)
         }
     }
 
@@ -371,24 +321,15 @@ class LazyArrangementsTest {
             LazyRow(
                 Modifier.size(itemSize * 3),
                 state = rememberLazyListState().also { state = it },
-                horizontalArrangement = Arrangement.spacedBy(spacingSize)
+                horizontalArrangement = Arrangement.spacedBy(spacingSize),
             ) {
-                items(5) {
-                    Spacer(
-                        Modifier.size(itemSize).testTag("$it")
-                    )
-                }
+                items(5) { Spacer(Modifier.size(itemSize).testTag("$it")) }
             }
         }
 
-        rule.runOnIdle {
-            runBlocking {
-                state.scrollBy((itemSizePx + spacingSizePx).toFloat())
-            }
-        }
+        rule.runOnIdle { runBlocking { state.scrollBy((itemSizePx + spacingSizePx).toFloat()) } }
 
-        rule.onNodeWithTag("0")
-            .assertIsNotDisplayed()
+        rule.onNodeWithTag("0").assertIsNotDisplayed()
 
         rule.runOnIdle {
             assertThat(state.firstVisibleItemIndex).isEqualTo(1)
@@ -407,29 +348,21 @@ class LazyArrangementsTest {
             LazyRow(
                 Modifier.size(itemSize * 3),
                 state = rememberLazyListState().also { state = it },
-                horizontalArrangement = Arrangement.spacedBy(spacingSize)
+                horizontalArrangement = Arrangement.spacedBy(spacingSize),
             ) {
-                items(5) {
-                    Spacer(
-                        Modifier.size(itemSize).testTag("$it")
-                    )
-                }
+                items(5) { Spacer(Modifier.size(itemSize).testTag("$it")) }
             }
         }
 
         rule.runOnIdle {
-            runBlocking {
-                state.scrollBy((itemSizePx + spacingSizePx / 2).toFloat())
-            }
+            runBlocking { state.scrollBy((itemSizePx + spacingSizePx / 2).toFloat()) }
         }
 
-        rule.onNodeWithTag("0")
-            .assertIsNotDisplayed()
+        rule.onNodeWithTag("0").assertIsNotDisplayed()
 
         rule.runOnIdle {
             assertThat(state.firstVisibleItemIndex).isEqualTo(0)
-            assertThat(state.firstVisibleItemScrollOffset)
-                .isEqualTo(itemSizePx + spacingSizePx / 2)
+            assertThat(state.firstVisibleItemScrollOffset).isEqualTo(itemSizePx + spacingSizePx / 2)
         }
     }
 
@@ -438,13 +371,8 @@ class LazyArrangementsTest {
     @Test
     fun column_defaultArrangementIsBottomWithReverseLayout() {
         rule.setContent {
-            LazyColumn(
-                reverseLayout = true,
-                modifier = Modifier.requiredSize(containerSize)
-            ) {
-                items(2) {
-                    Item(it)
-                }
+            LazyColumn(reverseLayout = true, modifier = Modifier.requiredSize(containerSize)) {
+                items(2) { Item(it) }
             }
         }
 
@@ -454,19 +382,12 @@ class LazyArrangementsTest {
     @Test
     fun row_defaultArrangementIsEndWithReverseLayout() {
         rule.setContent {
-            LazyRow(
-                reverseLayout = true,
-                modifier = Modifier.requiredSize(containerSize)
-            ) {
-                items(2) {
-                    Item(it)
-                }
+            LazyRow(reverseLayout = true, modifier = Modifier.requiredSize(containerSize)) {
+                items(2) { Item(it) }
             }
         }
 
-        assertArrangementForTwoItems(
-            Arrangement.End, LayoutDirection.Ltr, reverseLayout = true
-        )
+        assertArrangementForTwoItems(Arrangement.End, LayoutDirection.Ltr, reverseLayout = true)
     }
 
     @Test
@@ -475,19 +396,15 @@ class LazyArrangementsTest {
         rule.setContent {
             LazyColumn(
                 modifier = Modifier.requiredSize(containerSize),
-                verticalArrangement = arrangement
+                verticalArrangement = arrangement,
             ) {
-                items(2) {
-                    Item(it)
-                }
+                items(2) { Item(it) }
             }
         }
 
         assertArrangementForTwoItems(Arrangement.Top)
 
-        rule.runOnIdle {
-            arrangement = Arrangement.Bottom
-        }
+        rule.runOnIdle { arrangement = Arrangement.Bottom }
 
         assertArrangementForTwoItems(Arrangement.Bottom)
     }
@@ -498,19 +415,15 @@ class LazyArrangementsTest {
         rule.setContent {
             LazyRow(
                 modifier = Modifier.requiredSize(containerSize),
-                horizontalArrangement = arrangement
+                horizontalArrangement = arrangement,
             ) {
-                items(2) {
-                    Item(it)
-                }
+                items(2) { Item(it) }
             }
         }
 
         assertArrangementForTwoItems(Arrangement.Start, LayoutDirection.Ltr)
 
-        rule.runOnIdle {
-            arrangement = Arrangement.End
-        }
+        rule.runOnIdle { arrangement = Arrangement.End }
 
         assertArrangementForTwoItems(Arrangement.End, LayoutDirection.Ltr)
     }
@@ -523,35 +436,27 @@ class LazyArrangementsTest {
             LazyColumn(
                 modifier = Modifier.requiredSize(itemSize),
                 verticalArrangement = Arrangement.spacedBy(-halfItemSize),
-                state = state
+                state = state,
             ) {
-                items(100) { index ->
-                    Box(Modifier.size(itemSize).testTag(index.toString()))
-                }
+                items(100) { index -> Box(Modifier.size(itemSize).testTag(index.toString())) }
             }
         }
 
-        rule.onNodeWithTag("0")
-            .assertTopPositionInRootIsEqualTo(0.dp)
-        rule.onNodeWithTag("1")
-            .assertTopPositionInRootIsEqualTo(halfItemSize)
+        rule.onNodeWithTag("0").assertTopPositionInRootIsEqualTo(0.dp)
+        rule.onNodeWithTag("1").assertTopPositionInRootIsEqualTo(halfItemSize)
 
         rule.runOnIdle {
             assertThat(state.firstVisibleItemIndex).isEqualTo(0)
             assertThat(state.firstVisibleItemScrollOffset).isEqualTo(0)
 
-            runBlocking {
-                state.scrollBy(with(rule.density) { halfItemSize.toPx() })
-            }
+            runBlocking { state.scrollBy(with(rule.density) { halfItemSize.toPx() }) }
 
             assertThat(state.firstVisibleItemIndex).isEqualTo(1)
             assertThat(state.firstVisibleItemScrollOffset).isEqualTo(0)
         }
 
-        rule.onNodeWithTag("0")
-            .assertTopPositionInRootIsEqualTo(-halfItemSize)
-        rule.onNodeWithTag("1")
-            .assertTopPositionInRootIsEqualTo(0.dp)
+        rule.onNodeWithTag("0").assertTopPositionInRootIsEqualTo(-halfItemSize)
+        rule.onNodeWithTag("1").assertTopPositionInRootIsEqualTo(0.dp)
     }
 
     @Test
@@ -562,35 +467,27 @@ class LazyArrangementsTest {
             LazyRow(
                 modifier = Modifier.requiredSize(itemSize),
                 horizontalArrangement = Arrangement.spacedBy(-halfItemSize),
-                state = state
+                state = state,
             ) {
-                items(100) { index ->
-                    Box(Modifier.size(itemSize).testTag(index.toString()))
-                }
+                items(100) { index -> Box(Modifier.size(itemSize).testTag(index.toString())) }
             }
         }
 
-        rule.onNodeWithTag("0")
-            .assertLeftPositionInRootIsEqualTo(0.dp)
-        rule.onNodeWithTag("1")
-            .assertLeftPositionInRootIsEqualTo(halfItemSize)
+        rule.onNodeWithTag("0").assertLeftPositionInRootIsEqualTo(0.dp)
+        rule.onNodeWithTag("1").assertLeftPositionInRootIsEqualTo(halfItemSize)
 
         rule.runOnIdle {
             assertThat(state.firstVisibleItemIndex).isEqualTo(0)
             assertThat(state.firstVisibleItemScrollOffset).isEqualTo(0)
 
-            runBlocking {
-                state.scrollBy(with(rule.density) { halfItemSize.toPx() })
-            }
+            runBlocking { state.scrollBy(with(rule.density) { halfItemSize.toPx() }) }
 
             assertThat(state.firstVisibleItemIndex).isEqualTo(1)
             assertThat(state.firstVisibleItemScrollOffset).isEqualTo(0)
         }
 
-        rule.onNodeWithTag("0")
-            .assertLeftPositionInRootIsEqualTo(-halfItemSize)
-        rule.onNodeWithTag("1")
-            .assertLeftPositionInRootIsEqualTo(0.dp)
+        rule.onNodeWithTag("0").assertLeftPositionInRootIsEqualTo(-halfItemSize)
+        rule.onNodeWithTag("1").assertLeftPositionInRootIsEqualTo(0.dp)
     }
 
     @Test
@@ -601,18 +498,13 @@ class LazyArrangementsTest {
             LazyColumn(
                 modifier = Modifier.requiredSize(itemSize),
                 verticalArrangement = Arrangement.spacedBy(-largerThanItemSize),
-                state = state
+                state = state,
             ) {
-                items(4) { index ->
-                    Box(Modifier.size(itemSize).testTag(index.toString()))
-                }
+                items(4) { index -> Box(Modifier.size(itemSize).testTag(index.toString())) }
             }
         }
 
-        repeat(4) {
-            rule.onNodeWithTag("$it")
-                .assertTopPositionInRootIsEqualTo(0.dp)
-        }
+        repeat(4) { rule.onNodeWithTag("$it").assertTopPositionInRootIsEqualTo(0.dp) }
 
         rule.runOnIdle {
             assertThat(state.firstVisibleItemIndex).isEqualTo(0)
@@ -628,18 +520,13 @@ class LazyArrangementsTest {
             LazyRow(
                 modifier = Modifier.requiredSize(itemSize),
                 horizontalArrangement = Arrangement.spacedBy(-largerThanItemSize),
-                state = state
+                state = state,
             ) {
-                items(4) { index ->
-                    Box(Modifier.size(itemSize).testTag(index.toString()))
-                }
+                items(4) { index -> Box(Modifier.size(itemSize).testTag(index.toString())) }
             }
         }
 
-        repeat(4) {
-            rule.onNodeWithTag("$it")
-                .assertLeftPositionInRootIsEqualTo(0.dp)
-        }
+        repeat(4) { rule.onNodeWithTag("$it").assertLeftPositionInRootIsEqualTo(0.dp) }
 
         rule.runOnIdle {
             assertThat(state.firstVisibleItemIndex).isEqualTo(0)
@@ -651,11 +538,9 @@ class LazyArrangementsTest {
         rule.setContent {
             LazyColumn(
                 verticalArrangement = arrangement,
-                modifier = Modifier.requiredSize(containerSize)
+                modifier = Modifier.requiredSize(containerSize),
             ) {
-                items(2) {
-                    Item(it)
-                }
+                items(2) { Item(it) }
             }
         }
     }
@@ -665,11 +550,9 @@ class LazyArrangementsTest {
             CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
                 LazyRow(
                     horizontalArrangement = arrangement,
-                    modifier = Modifier.requiredSize(containerSize)
+                    modifier = Modifier.requiredSize(containerSize),
                 ) {
-                    items(2) {
-                        Item(it)
-                    }
+                    items(2) { Item(it) }
                 }
             }
         }
@@ -684,20 +567,20 @@ class LazyArrangementsTest {
 
     fun assertArrangementForTwoItems(
         arrangement: Arrangement.Vertical,
-        reverseLayout: Boolean = false
+        reverseLayout: Boolean = false,
     ) {
         with(rule.density) {
-            val sizes = IntArray(2) {
-                val index = if (reverseLayout) if (it == 0) 1 else 0 else it
-                if (index == 0) itemSize.roundToPx() else smallerItemSize.roundToPx()
-            }
+            val sizes =
+                IntArray(2) {
+                    val index = if (reverseLayout) if (it == 0) 1 else 0 else it
+                    if (index == 0) itemSize.roundToPx() else smallerItemSize.roundToPx()
+                }
             val outPositions = IntArray(2) { 0 }
             with(arrangement) { arrange(containerSize.roundToPx(), sizes, outPositions) }
 
             outPositions.forEachIndexed { index, position ->
                 val realIndex = if (reverseLayout) if (index == 0) 1 else 0 else index
-                rule.onNodeWithTag("$realIndex")
-                    .assertTopPositionInRootIsEqualTo(position.toDp())
+                rule.onNodeWithTag("$realIndex").assertTopPositionInRootIsEqualTo(position.toDp())
             }
         }
     }
@@ -705,13 +588,14 @@ class LazyArrangementsTest {
     fun assertArrangementForTwoItems(
         arrangement: Arrangement.Horizontal,
         layoutDirection: LayoutDirection,
-        reverseLayout: Boolean = false
+        reverseLayout: Boolean = false,
     ) {
         with(rule.density) {
-            val sizes = IntArray(2) {
-                val index = if (reverseLayout) if (it == 0) 1 else 0 else it
-                if (index == 0) itemSize.roundToPx() else smallerItemSize.roundToPx()
-            }
+            val sizes =
+                IntArray(2) {
+                    val index = if (reverseLayout) if (it == 0) 1 else 0 else it
+                    if (index == 0) itemSize.roundToPx() else smallerItemSize.roundToPx()
+                }
             val outPositions = IntArray(2) { 0 }
             with(arrangement) {
                 arrange(containerSize.roundToPx(), sizes, layoutDirection, outPositions)
@@ -720,8 +604,7 @@ class LazyArrangementsTest {
             outPositions.forEachIndexed { index, position ->
                 val realIndex = if (reverseLayout) if (index == 0) 1 else 0 else index
                 val expectedPosition = position.toDp()
-                rule.onNodeWithTag("$realIndex")
-                    .assertLeftPositionInRootIsEqualTo(expectedPosition)
+                rule.onNodeWithTag("$realIndex").assertLeftPositionInRootIsEqualTo(expectedPosition)
             }
         }
     }

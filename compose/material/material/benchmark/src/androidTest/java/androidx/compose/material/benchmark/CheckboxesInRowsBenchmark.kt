@@ -33,9 +33,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
-/**
- * Benchmark that runs [CheckboxesInRowsTestCase].
- */
+/** Benchmark that runs [CheckboxesInRowsTestCase]. */
 @LargeTest
 @RunWith(Parameterized::class)
 class CheckboxesInRowsBenchmark(private val numberOfCheckboxes: Int) {
@@ -46,8 +44,7 @@ class CheckboxesInRowsBenchmark(private val numberOfCheckboxes: Int) {
         fun initParameters(): Array<Any> = arrayOf(1, 10)
     }
 
-    @get:Rule
-    val benchmarkRule = ComposeBenchmarkRule()
+    @get:Rule val benchmarkRule = ComposeBenchmarkRule()
 
     private val checkboxCaseFactory = { CheckboxesInRowsTestCase(numberOfCheckboxes) }
 
@@ -75,7 +72,7 @@ class CheckboxesInRowsBenchmark(private val numberOfCheckboxes: Int) {
     fun toggleCheckbox_recompose() {
         benchmarkRule.toggleStateBenchmarkRecompose(
             checkboxCaseFactory,
-            assertOneRecomposition = false
+            assertOneRecomposition = false,
         )
     }
 
@@ -83,7 +80,7 @@ class CheckboxesInRowsBenchmark(private val numberOfCheckboxes: Int) {
     fun toggleCheckbox_measure() {
         benchmarkRule.toggleStateBenchmarkMeasure(
             checkboxCaseFactory,
-            assertOneRecomposition = false
+            assertOneRecomposition = false,
         )
     }
 
@@ -91,7 +88,7 @@ class CheckboxesInRowsBenchmark(private val numberOfCheckboxes: Int) {
     fun toggleCheckbox_layout() {
         benchmarkRule.toggleStateBenchmarkLayout(
             checkboxCaseFactory,
-            assertOneRecomposition = false
+            assertOneRecomposition = false,
         )
     }
 

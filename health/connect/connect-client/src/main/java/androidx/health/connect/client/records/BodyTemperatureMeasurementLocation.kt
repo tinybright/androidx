@@ -57,7 +57,7 @@ public object BodyTemperatureMeasurementLocation {
             TOE to MEASUREMENT_LOCATION_TOE,
             EAR to MEASUREMENT_LOCATION_EAR,
             WRIST to MEASUREMENT_LOCATION_WRIST,
-            VAGINA to MEASUREMENT_LOCATION_VAGINA
+            VAGINA to MEASUREMENT_LOCATION_VAGINA,
         )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY)
@@ -65,9 +65,7 @@ public object BodyTemperatureMeasurementLocation {
     val MEASUREMENT_LOCATION_INT_TO_STRING_MAP = MEASUREMENT_LOCATION_STRING_TO_INT_MAP.reverse()
 }
 
-/**
- * Where on the user's body a temperature measurement was taken from.
- */
+/** Where on the user's body a temperature measurement was taken from. */
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.TYPE)
 @Retention(AnnotationRetention.SOURCE)
 @IntDef(
@@ -83,7 +81,7 @@ public object BodyTemperatureMeasurementLocation {
             BodyTemperatureMeasurementLocation.MEASUREMENT_LOCATION_TOE,
             BodyTemperatureMeasurementLocation.MEASUREMENT_LOCATION_EAR,
             BodyTemperatureMeasurementLocation.MEASUREMENT_LOCATION_WRIST,
-            BodyTemperatureMeasurementLocation.MEASUREMENT_LOCATION_VAGINA
+            BodyTemperatureMeasurementLocation.MEASUREMENT_LOCATION_VAGINA,
         ]
 )
 @RestrictTo(RestrictTo.Scope.LIBRARY)

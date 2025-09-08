@@ -16,6 +16,7 @@
 
 package androidx.camera.camera2.pipe.integration.compat.workaround
 
+import android.graphics.Rect
 import android.hardware.camera2.CameraCharacteristics
 import android.os.Build
 import android.util.Range
@@ -33,13 +34,18 @@ import androidx.camera.camera2.pipe.integration.internal.ZoomMath.nearZero
  * @param key the [CameraCharacteristics.Key] of the characteristic
  * @return the value of the characteristic
  */
-fun <T> CameraMetadata.getSafely(key: CameraCharacteristics.Key<T>): T? {
+public fun <T> CameraMetadata.getSafely(key: CameraCharacteristics.Key<T>): T? {
     if (
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
             key == CameraCharacteristics.CONTROL_ZOOM_RATIO_RANGE
     ) {
         @Suppress("UNCHECKED_CAST") // T is guaranteed to be Range<Float>
         return getControlZoomRatioRangeSafely() as T?
+    }
+
+    if (key == CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE) {
+        @Suppress("UNCHECKED_CAST") // T is guaranteed to be Rect
+        return getActiveArraySizeSafely() as T?
     }
 
     return get(key)
@@ -58,9 +64,9 @@ fun <T> CameraMetadata.getSafely(key: CameraCharacteristics.Key<T>): T? {
  * @return the CONTROL_ZOOM_RATIO_RANGE characteristic value, null in case of [AssertionError].
  */
 @RequiresApi(Build.VERSION_CODES.R)
-fun CameraMetadata.getControlZoomRatioRangeSafely(): Range<Float>? =
+public fun CameraMetadata.getControlZoomRatioRangeSafely(): Range<Float>? =
     try {
-        var range = get(CameraCharacteristics.CONTROL_ZOOM_RATIO_RANGE)
+        val range = get(CameraCharacteristics.CONTROL_ZOOM_RATIO_RANGE)
         if (range == null) {
             Log.warn { "Failed to read CONTROL_ZOOM_RATIO_RANGE for $camera!" }
             Range(1.0f, 1.0f)
@@ -107,3 +113,19 @@ fun CameraMetadata.getControlZoomRatioRangeSafely(): Range<Float>? =
         }
         null
     }
+
+/**
+ * Gets the value of [CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE] with additional error
+ * handling.
+ */
+// TODO(b/416325130): Remove the hardcoded rect for robolectric tests that don't verify zoom
+// functions.
+public fun CameraMetadata.getActiveArraySizeSafely(): Rect {
+    val sensorRect = get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
+    if (sensorRect == null) {
+        Log.warn { "Failed to read SENSOR_INFO_ACTIVE_ARRAY_SIZE for $camera!" }
+        return Rect(0, 0, 4000, 3000)
+    } else {
+        return sensorRect
+    }
+}

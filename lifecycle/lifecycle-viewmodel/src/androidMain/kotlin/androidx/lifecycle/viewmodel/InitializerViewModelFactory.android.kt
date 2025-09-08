@@ -35,14 +35,13 @@ actual constructor(
      */
     public constructor(
         clazz: Class<T>,
-        initializer: CreationExtras.() -> T
+        initializer: CreationExtras.() -> T,
     ) : this(clazz.kotlin, initializer)
 }
 
 internal actual class InitializerViewModelFactory
-actual constructor(
-    private vararg val initializers: ViewModelInitializer<*>
-) : ViewModelProvider.Factory {
+actual constructor(private vararg val initializers: ViewModelInitializer<*>) :
+    ViewModelProvider.Factory {
 
     override fun <VM : ViewModel> create(modelClass: Class<VM>, extras: CreationExtras): VM =
         ViewModelProviders.createViewModelFromInitializers(modelClass.kotlin, extras, *initializers)

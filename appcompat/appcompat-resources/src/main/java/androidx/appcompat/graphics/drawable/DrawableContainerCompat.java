@@ -35,10 +35,11 @@ import android.util.SparseArray;
 import android.view.View;
 
 import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.graphics.drawable.DrawableCompat;
+
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A helper class that contains several {@link Drawable}s and selects which one to use.
@@ -299,7 +300,7 @@ public class DrawableContainerCompat extends Drawable implements Drawable.Callba
     }
 
     @Override
-    protected boolean onStateChange(@NonNull int[] state) {
+    protected boolean onStateChange(int @NonNull [] state) {
         if (mLastDrawable != null) {
             return mLastDrawable.setState(state);
         }
@@ -519,8 +520,8 @@ public class DrawableContainerCompat extends Drawable implements Drawable.Callba
             }
             DrawableCompat.setAutoMirrored(d, mDrawableContainerState.mAutoMirrored);
             final Rect hotspotBounds = mHotspotBounds;
-            if (Build.VERSION.SDK_INT >= 21 && hotspotBounds != null) {
-                DrawableCompat.setHotspotBounds(d, hotspotBounds.left, hotspotBounds.top,
+            if (hotspotBounds != null) {
+                d.setHotspotBounds(hotspotBounds.left, hotspotBounds.top,
                         hotspotBounds.right, hotspotBounds.bottom);
             }
         } finally {
@@ -568,9 +569,8 @@ public class DrawableContainerCompat extends Drawable implements Drawable.Callba
         }
     }
 
-    @NonNull
     @Override
-    public Drawable getCurrent() {
+    public @NonNull Drawable getCurrent() {
         return mCurrDrawable;
     }
 
@@ -586,13 +586,11 @@ public class DrawableContainerCompat extends Drawable implements Drawable.Callba
     }
 
     @Override
-    @RequiresApi(21)
     public void applyTheme(@NonNull Theme theme) {
         mDrawableContainerState.applyTheme(theme);
     }
 
     @Override
-    @RequiresApi(21)
     public boolean canApplyTheme() {
         return mDrawableContainerState.canApplyTheme();
     }
@@ -1205,7 +1203,6 @@ public class DrawableContainerCompat extends Drawable implements Drawable.Callba
         return densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
     }
 
-    @RequiresApi(21)
     private static class Api21Impl {
         private Api21Impl() {
             // Non-instantiable.

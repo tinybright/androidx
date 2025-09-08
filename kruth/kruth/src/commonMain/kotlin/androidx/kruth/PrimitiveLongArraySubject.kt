@@ -16,20 +16,13 @@
 
 package androidx.kruth
 
-/**
- * A Subject for [Char] arrays.
- */
-class PrimitiveLongArraySubject internal constructor(
-    actual: LongArray?,
-    metadata: FailureMetadata = FailureMetadata(),
-) : Subject<LongArray?>(actual, metadata = metadata, typeDescriptionOverride = "array") {
+/** A Subject for [Char] arrays. */
+class PrimitiveLongArraySubject
+internal constructor(actual: LongArray?, metadata: FailureMetadata = FailureMetadata()) :
+    Subject<LongArray?>(actual, metadata = metadata, typeDescriptionOverride = "array") {
 
     private val helper =
-        HelperArraySubject(
-            actual = actual,
-            size = LongArray::size,
-            metadata = metadata,
-        )
+        HelperArraySubject(actual = actual, size = LongArray::size, metadata = metadata)
 
     /** Fails if the array is not empty (i.e. `array.size > 0`). */
     fun isEmpty() {
@@ -50,7 +43,7 @@ class PrimitiveLongArraySubject internal constructor(
         helper.hasLength(length)
     }
 
-    /** Converts this [PrimitiveBooleanArraySubject] to [IterableSubject].*/
+    /** Converts this [PrimitiveBooleanArraySubject] to [IterableSubject]. */
     fun asList(): IterableSubject<Long> {
         requireNonNull(actual)
         return IterableSubject(actual = actual.asList(), metadata = metadata)

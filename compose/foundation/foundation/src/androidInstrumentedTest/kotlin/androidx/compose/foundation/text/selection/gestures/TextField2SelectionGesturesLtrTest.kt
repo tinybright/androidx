@@ -16,20 +16,21 @@
 
 package androidx.compose.foundation.text.selection.gestures
 
+import androidx.compose.foundation.text.contextmenu.test.ContextMenuFlagFlipperRunner
 import androidx.compose.foundation.text.selection.fetchTextLayoutResult
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import org.junit.runner.RunWith
 
 @MediumTest
-@RunWith(AndroidJUnit4::class)
-internal class TextField2SelectionGesturesLtrTest : TextField2SelectionGesturesTest(
-    initialText = "line1\nline2 text1 text2\nline3",
-    layoutDirection = LayoutDirection.Ltr,
-) {
+@RunWith(ContextMenuFlagFlipperRunner::class)
+internal class TextField2SelectionGesturesLtrTest :
+    TextField2SelectionGesturesTest(
+        initialText = "line1\nline2 text1 text2\nline3",
+        layoutDirection = LayoutDirection.Ltr,
+    ) {
     override val word = "hello"
 
     override fun characterPosition(offset: Int): Offset {

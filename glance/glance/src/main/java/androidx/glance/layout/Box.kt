@@ -25,21 +25,23 @@ import androidx.glance.GlanceNode
 import androidx.glance.unit.Dimension
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class EmittableBox : EmittableWithChildren() {
+public class EmittableBox : EmittableWithChildren() {
     override var modifier: GlanceModifier = GlanceModifier
-    var contentAlignment: Alignment = Alignment.TopStart
+    public var contentAlignment: Alignment = Alignment.TopStart
 
-    override fun copy(): Emittable = EmittableBox().also {
-        it.modifier = modifier
-        it.contentAlignment = contentAlignment
-        it.children.addAll(children.map { it.copy() })
-    }
+    override fun copy(): Emittable =
+        EmittableBox().also {
+            it.modifier = modifier
+            it.contentAlignment = contentAlignment
+            it.children.addAll(children.map { it.copy() })
+        }
 
-    override fun toString(): String = "EmittableBox(" +
-        "modifier=$modifier, " +
-        "contentAlignment=$contentAlignment" +
-        "children=[\n${childrenToString()}\n]" +
-        ")"
+    override fun toString(): String =
+        "EmittableBox(" +
+            "modifier=$modifier, " +
+            "contentAlignment=$contentAlignment" +
+            "children=[\n${childrenToString()}\n]" +
+            ")"
 }
 
 /**
@@ -47,8 +49,8 @@ class EmittableBox : EmittableWithChildren() {
  *
  * By default, the [Box] will size itself to fit the content, unless a [Dimension] constraint has
  * been provided. When the children are smaller than the [Box], they will be placed within the box
- * subject to the [contentAlignment]. When the [content] has more than one layout child, all of
- * the children will be stacked on top of each other in the composition order.
+ * subject to the [contentAlignment]. When the [content] has more than one layout child, all of the
+ * children will be stacked on top of each other in the composition order.
  *
  * Note for App Widgets: [Box] supports up to 10 child elements. Any additional elements will be
  * truncated from the output.
@@ -58,10 +60,10 @@ class EmittableBox : EmittableWithChildren() {
  * @param content The content inside the [Box].
  */
 @Composable
-fun Box(
+public fun Box(
     modifier: GlanceModifier = GlanceModifier,
     contentAlignment: Alignment = Alignment.TopStart,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     GlanceNode(
         factory = ::EmittableBox,
@@ -69,6 +71,6 @@ fun Box(
             this.set(modifier) { this.modifier = it }
             this.set(contentAlignment) { this.contentAlignment = it }
         },
-        content = content
+        content = content,
     )
 }

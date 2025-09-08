@@ -28,8 +28,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Verifies that [androidx.viewpager2.adapter.FragmentStateAdapter] can handle [Fragment]s
- * having transient state.
+ * Verifies that [androidx.viewpager2.adapter.FragmentStateAdapter] can handle [Fragment]s having
+ * transient state.
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
@@ -69,7 +69,7 @@ class TransientStateFragmentTest : BaseTest() {
                 fm: FragmentManager,
                 f: Fragment,
                 v: View,
-                savedInstanceState: Bundle?
+                savedInstanceState: Bundle?,
             ) {
                 v.setHasTransientState(true)
             }

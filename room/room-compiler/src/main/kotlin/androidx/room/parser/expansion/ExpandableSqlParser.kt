@@ -32,7 +32,7 @@ class ExpandableQueryVisitor(
     private val original: String,
     private val syntaxErrors: List<String>,
     statement: ParseTree,
-    private val forRuntimeQuery: Boolean
+    private val forRuntimeQuery: Boolean,
 ) : SQLiteParserBaseVisitor<Void?>() {
     private val resultColumns = arrayListOf<SectionInfo>()
     private val explicitColumns = arrayListOf<String>()
@@ -43,29 +43,28 @@ class ExpandableQueryVisitor(
     private val queryType: QueryType
 
     init {
-        queryType = (0 until statement.childCount).map {
-            findQueryType(statement.getChild(it))
-        }.filterNot { it == QueryType.UNKNOWN }.firstOrNull() ?: QueryType.UNKNOWN
+        queryType =
+            (0 until statement.childCount)
+                .map { findQueryType(statement.getChild(it)) }
+                .filterNot { it == QueryType.UNKNOWN }
+                .firstOrNull() ?: QueryType.UNKNOWN
 
         statement.accept(this)
     }
 
     private fun findQueryType(statement: ParseTree): QueryType {
         return when (statement) {
-            is SQLiteParser.Select_stmtContext ->
-                QueryType.SELECT
+            is SQLiteParser.Select_stmtContext -> QueryType.SELECT
             is SQLiteParser.Delete_stmt_limitedContext,
-            is SQLiteParser.Delete_stmtContext ->
-                QueryType.DELETE
-            is SQLiteParser.Insert_stmtContext ->
-                QueryType.INSERT
+            is SQLiteParser.Delete_stmtContext -> QueryType.DELETE
+            is SQLiteParser.Insert_stmtContext -> QueryType.INSERT
             is SQLiteParser.Update_stmtContext,
-            is SQLiteParser.Update_stmt_limitedContext ->
-                QueryType.UPDATE
-            is TerminalNode -> when (statement.text) {
-                "EXPLAIN" -> QueryType.EXPLAIN
-                else -> QueryType.UNKNOWN
-            }
+            is SQLiteParser.Update_stmt_limitedContext -> QueryType.UPDATE
+            is TerminalNode ->
+                when (statement.text) {
+                    "EXPLAIN" -> QueryType.EXPLAIN
+                    else -> QueryType.UNKNOWN
+                }
             else -> QueryType.UNKNOWN
         }
     }
@@ -73,13 +72,13 @@ class ExpandableQueryVisitor(
     override fun visitResult_column(ctx: SQLiteParser.Result_columnContext?): Void? {
         fun addProjectionSection(
             c: SQLiteParser.Result_columnContext,
-            p: ExpandableSection.Projection
+            p: ExpandableSection.Projection,
         ) {
             resultColumns.add(
                 SectionInfo(
                     Position(c.start.line - 1, c.start.charPositionInLine),
                     Position(c.stop.line - 1, c.stop.charPositionInLine + c.stop.text.length),
-                    p
+                    p,
                 )
             )
         }
@@ -95,8 +94,8 @@ class ExpandableQueryVisitor(
                             c,
                             ExpandableSection.Projection.Table(
                                 c.table_name().text.trim('`'),
-                                original.substring(c.start.startIndex, c.stop.stopIndex + 1)
-                            )
+                                original.substring(c.start.startIndex, c.stop.stopIndex + 1),
+                            ),
                         )
                     }
                     c.column_alias() != null -> {
@@ -118,13 +117,13 @@ class ExpandableQueryVisitor(
                 SectionInfo(
                     Position(
                         bindParameter.symbol.line - 1,
-                        bindParameter.symbol.charPositionInLine
+                        bindParameter.symbol.charPositionInLine,
                     ),
                     Position(
                         bindParameter.symbol.line - 1,
-                        bindParameter.symbol.charPositionInLine + bindParameter.text.length
+                        bindParameter.symbol.charPositionInLine + bindParameter.text.length,
                     ),
-                    ExpandableSection.BindVar(bindParameter.text)
+                    ExpandableSection.BindVar(bindParameter.text),
                 )
             )
         }
@@ -140,7 +139,7 @@ class ExpandableQueryVisitor(
             inputs = bindingExpressions.toList(),
             tables = tableNames,
             syntaxErrors = syntaxErrors,
-            runtimeQueryPlaceholder = forRuntimeQuery
+            runtimeQueryPlaceholder = forRuntimeQuery,
         )
     }
 
@@ -162,7 +161,7 @@ class ExpandableQueryVisitor(
                 tableNames.add(
                     Table(
                         unescapeIdentifier(tableName),
-                        unescapeIdentifier(tableAlias ?: tableName)
+                        unescapeIdentifier(tableAlias ?: tableName),
                     )
                 )
             }
@@ -185,16 +184,11 @@ class ExpandableQueryVisitor(
     }
 }
 
-/**
- * Returns the parent of this [RuleContext] recursively as a [Sequence].
- */
-private fun RuleContext.ancestors(): Sequence<RuleContext> = generateSequence(parent) { c ->
-    c.parent
-}
+/** Returns the parent of this [RuleContext] recursively as a [Sequence]. */
+private fun RuleContext.ancestors(): Sequence<RuleContext> =
+    generateSequence(parent) { c -> c.parent }
 
-/**
- * Whether this [RuleContext] is the top SELECT statement.
- */
+/** Whether this [RuleContext] is the top SELECT statement. */
 internal val RuleContext.isCoreSelect: Boolean
     get() {
         return this is SQLiteParser.Select_coreContext &&
@@ -203,28 +197,30 @@ internal val RuleContext.isCoreSelect: Boolean
 
 class ExpandableSqlParser {
     companion object {
-        fun parse(input: String) = SingleQuerySqlParser.parse(
-            input = input,
-            visit = { statement, syntaxErrors ->
-                ExpandableQueryVisitor(
-                    original = input,
-                    syntaxErrors = syntaxErrors,
-                    statement = statement,
-                    forRuntimeQuery = false
-                ).createParsedQuery()
-            },
-            fallback = { syntaxErrors ->
-                ExpandableParsedQuery(
-                    original = input,
-                    type = QueryType.UNKNOWN,
-                    projections = emptyList(),
-                    explicitColumns = emptyList(),
-                    inputs = emptyList(),
-                    tables = emptySet(),
-                    syntaxErrors = syntaxErrors,
-                    runtimeQueryPlaceholder = false
-                )
-            }
-        )
+        fun parse(input: String) =
+            SingleQuerySqlParser.parse(
+                input = input,
+                visit = { statement, syntaxErrors ->
+                    ExpandableQueryVisitor(
+                            original = input,
+                            syntaxErrors = syntaxErrors,
+                            statement = statement,
+                            forRuntimeQuery = false,
+                        )
+                        .createParsedQuery()
+                },
+                fallback = { syntaxErrors ->
+                    ExpandableParsedQuery(
+                        original = input,
+                        type = QueryType.UNKNOWN,
+                        projections = emptyList(),
+                        explicitColumns = emptyList(),
+                        inputs = emptyList(),
+                        tables = emptySet(),
+                        syntaxErrors = syntaxErrors,
+                        runtimeQueryPlaceholder = false,
+                    )
+                },
+            )
     }
 }

@@ -17,10 +17,10 @@
 package androidx.inspection.gradle
 
 import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import com.android.build.api.variant.Variant
-import com.android.build.gradle.BaseExtension
 import java.io.ByteArrayOutputStream
-import java.io.File
 import java.nio.charset.Charset
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -32,7 +32,6 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
@@ -43,61 +42,47 @@ import org.gradle.process.ExecOperations
 
 @CacheableTask
 abstract class DexInspectorTask : DefaultTask() {
-    @get:Classpath
-    abstract val d8Executable: ConfigurableFileCollection
+    @get:Classpath abstract val d8Executable: ConfigurableFileCollection
 
-    @get:Classpath
-    @get:InputFile
-    abstract val androidJar: RegularFileProperty
+    @get:Classpath @get:InputFiles abstract val compileClasspath: ConfigurableFileCollection
 
-    @get:Classpath
-    @get:InputFiles
-    abstract val compileClasspath: ConfigurableFileCollection
+    @get:Classpath @get:InputFiles abstract val jars: ConfigurableFileCollection
 
-    @get:Classpath
-    @get:InputFiles
-    abstract val jars: ConfigurableFileCollection
+    @get:OutputFile abstract val outputFile: RegularFileProperty
 
-    @get:OutputFile
-    abstract val outputFile: RegularFileProperty
+    @get:Input abstract var minSdkVersion: Int
 
-    @get:Input
-    abstract var minSdkVersion: Int
-
-    @get:javax.inject.Inject
-    abstract val execOperations: ExecOperations
+    @get:javax.inject.Inject abstract val execOperations: ExecOperations
 
     @TaskAction
     fun exec() {
         val output = outputFile.get().asFile
         output.parentFile.mkdirs()
         val errorStream = ByteArrayOutputStream()
-        val executionResult = execOperations.javaexec {
-            it.classpath(d8Executable.files)
-            it.mainClass.set("com.android.tools.r8.D8")
-            it.allJvmArgs.add("-Xmx2G")
+        val executionResult =
+            execOperations.javaexec {
+                it.classpath(d8Executable.files)
+                it.mainClass.set("com.android.tools.r8.D8")
+                it.allJvmArgs.add("-Xmx2G")
 
-            val filesToDex = jars.map { file -> file.absolutePath }
+                val filesToDex = jars.map { file -> file.absolutePath }
 
-            // All runtime dependencies of the inspector are already jarjar-ed and packed in
-            // the single jar by previous steps. However, inspectors have compileOnly
-            // dependencies as well that are required by d8 for clean dexing.
-            // Those compileOnly libraries are inspected libraries, that are provided by an
-            // inspected app in the runtime. But it's hard to access compileOnly Configuration
-            // and easy to access the compileConfiguration and it's ok to pass extra libraries to
-            // d8, so we pass the entire compileConfiguration here.
-            // More on compileConfiguratioh, see here:
-            // https://docs.gradle.org/current/userguide/java_plugin.html#sec:java_plugin_and_dependency_management
-            val libArgs = compileClasspath.map {
-                listOf("--lib", it.absolutePath)
-            }.flatten()
-            val libSdk = listOf("--lib", androidJar.get().asFile.absolutePath)
-            val minApiArg = listOf("--min-api", "$minSdkVersion")
-            it.args = listOf("--output", output.absolutePath) + libArgs + libSdk + minApiArg +
-                filesToDex
-            it.errorOutput = errorStream
-            it.isIgnoreExitValue = true
-        }
+                // All runtime dependencies of the inspector are already jarjar-ed and packed in
+                // the single jar by previous steps. However, inspectors have compileOnly
+                // dependencies as well that are required by d8 for clean dexing.
+                // Those compileOnly libraries are inspected libraries, that are provided by an
+                // inspected app in the runtime. But it's hard to access compileOnly Configuration
+                // and easy to access the compileConfiguration and it's ok to pass extra libraries
+                // to
+                // d8, so we pass the entire compileConfiguration here.
+                // More on compileConfiguratioh, see here:
+                // https://docs.gradle.org/current/userguide/java_plugin.html#sec:java_plugin_and_dependency_management
+                val libArgs = compileClasspath.map { listOf("--lib", it.absolutePath) }.flatten()
+                val minApiArg = listOf("--min-api", "$minSdkVersion")
+                it.args = listOf("--output", output.absolutePath) + libArgs + minApiArg + filesToDex
+                it.errorOutput = errorStream
+                it.isIgnoreExitValue = true
+            }
         val errors = errorStream.toByteArray()
         val exitCode = executionResult.exitValue
         if (errors.isNotEmpty() || exitCode != 0) {
@@ -108,17 +93,9 @@ abstract class DexInspectorTask : DefaultTask() {
             )
         }
     }
-
-    fun setAndroidJar(sdkDir: File, compileSdk: String) {
-        // Preview SDK compileSdkVersions are prefixed with "android-", e.g. "android-S".
-        val platform = if (compileSdk.startsWith("android")) compileSdk else "android-$compileSdk"
-        androidJar.set(File(sdkDir, "platforms/$platform/android.jar"))
-    }
 }
 
-fun Project.registerUnzipTask(
-    variant: Variant
-): TaskProvider<Copy> {
+fun Project.registerUnzipTask(variant: Variant): TaskProvider<Copy> {
     return tasks.register(variant.taskName("unpackInspectorAAR"), Copy::class.java) {
         it.from(zipTree(variant.artifacts.get(SingleArtifact.AAR)))
         // Remove .get().asFile once https://github.com/gradle/gradle/issues/25824 is fixed
@@ -128,33 +105,39 @@ fun Project.registerUnzipTask(
 
 fun Project.registerBundleInspectorTask(
     variant: Variant,
-    extension: BaseExtension,
+    libraryExtension: LibraryExtension,
+    libraryComponentsExtension: LibraryAndroidComponentsExtension,
     jarName: String?,
-    jar: TaskProvider<out Jar>
+    jar: TaskProvider<out Jar>,
 ): TaskProvider<Zip> {
     val name = jarName ?: "${project.name}.jar"
     val output = taskWorkingDir(variant, "dexedInspector").map { it.file(name) }
-
-    val dex = tasks.register(variant.taskName("dexInspector"), DexInspectorTask::class.java) {
-        it.minSdkVersion = extension.defaultConfig.minSdk!!
-        it.d8Executable.setFrom(
-            configurations.detachedConfiguration(dependencies.create("com.android.tools:r8:8.2.47"))
-        )
-        it.setAndroidJar(extension.sdkDirectory, extension.compileSdkVersion!!)
-        it.jars.from(jar.get().archiveFile)
-        it.outputFile.set(output)
-        it.compileClasspath.from(
-            variant.compileConfiguration.incoming.artifactView {
-                it.attributes {
-                    it.attribute(
-                        Attribute.of("artifactType", String::class.java),
-                        "android-classes"
-                    )
-                }
-            }.artifacts.artifactFiles
-        )
-        it.dependsOn(jar)
-    }
+    val dex =
+        tasks.register(variant.taskName("dexInspector"), DexInspectorTask::class.java) { task ->
+            task.minSdkVersion = libraryExtension.defaultConfig.minSdk!!
+            task.d8Executable.setFrom(
+                configurations.detachedConfiguration(
+                    dependencies.create("com.android.tools:r8:8.2.47")
+                )
+            )
+            task.jars.from(jar.get().archiveFile)
+            task.outputFile.set(output)
+            task.compileClasspath.from(
+                files(libraryComponentsExtension.sdkComponents.bootClasspath),
+                variant.compileConfiguration.incoming
+                    .artifactView {
+                        it.attributes {
+                            it.attribute(
+                                Attribute.of("artifactType", String::class.java),
+                                "android-classes",
+                            )
+                        }
+                    }
+                    .artifacts
+                    .artifactFiles,
+            )
+            task.dependsOn(jar)
+        }
 
     return tasks.register(variant.taskName("assembleInspectorJar"), Zip::class.java) {
         it.from(zipTree(jar.map { it.archiveFile }))

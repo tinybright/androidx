@@ -60,17 +60,17 @@ class ServiceBackedMeasureClientTest {
     @Before
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Application>()
-        client =
-            ServiceBackedMeasureClient(context, ConnectionManager(context, context.mainLooper))
+        client = ServiceBackedMeasureClient(context, ConnectionManager(context, context.mainLooper))
         fakeService = FakeServiceStub()
 
         val packageName = ServiceBackedMeasureClient.CLIENT_CONFIGURATION.servicePackageName
         val action = ServiceBackedMeasureClient.CLIENT_CONFIGURATION.bindAction
-        shadowOf(context).setComponentNameAndServiceForBindServiceForIntent(
-            Intent().setPackage(packageName).setAction(action),
-            ComponentName(packageName, ServiceBackedMeasureClient.CLIENT),
-            fakeService
-        )
+        shadowOf(context)
+            .setComponentNameAndServiceForBindServiceForIntent(
+                Intent().setPackage(packageName).setAction(action),
+                ComponentName(packageName, ServiceBackedMeasureClient.CLIENT),
+                fakeService,
+            )
     }
 
     @After
@@ -90,6 +90,7 @@ class ServiceBackedMeasureClientTest {
         assertThat(fakeService.registerEvents[0].request.packageName)
             .isEqualTo("androidx.health.services.client.test")
     }
+
     @Test
     fun registerCallbackFailureReachesClient() {
         fakeService.statusCallbackAction = { it.onFailure("Measure twice, cut once.") }
@@ -115,27 +116,28 @@ class ServiceBackedMeasureClientTest {
     }
 
     @Test
-        fun unregisterCallback_callbackNotRegistered_noOp() {
-            val resultFuture = client.unregisterMeasureCallbackAsync(HEART_RATE_BPM, callback)
-            shadowOf(Looper.getMainLooper()).idle()
+    fun unregisterCallback_callbackNotRegistered_noOp() {
+        val resultFuture = client.unregisterMeasureCallbackAsync(HEART_RATE_BPM, callback)
+        shadowOf(Looper.getMainLooper()).idle()
 
-            assertThat(fakeService.unregisterEvents).isEmpty()
-            assertThat(resultFuture.get()).isNull()
-        }
+        assertThat(fakeService.unregisterEvents).isEmpty()
+        assertThat(resultFuture.get()).isNull()
+    }
 
     @Test
     fun dataPointsReachAppCallback() {
-        val event = MeasureCallbackEvent.createDataPointsUpdateEvent(
-            DataPointsResponse(
-                listOf(
-                    DataPoints.heartRate(
-                        50.0,
-                        Duration.ofSeconds(42),
-                        HeartRateAccuracy(ACCURACY_HIGH)
+        val event =
+            MeasureCallbackEvent.createDataPointsUpdateEvent(
+                DataPointsResponse(
+                    listOf(
+                        DataPoints.heartRate(
+                            50.0,
+                            Duration.ofSeconds(42),
+                            HeartRateAccuracy(ACCURACY_HIGH),
+                        )
                     )
                 )
             )
-        )
         client.registerMeasureCallback(HEART_RATE_BPM, callback)
         shadowOf(Looper.getMainLooper()).idle()
 
@@ -153,9 +155,10 @@ class ServiceBackedMeasureClientTest {
 
     @Test
     fun availabilityReachesAppCallback() {
-        val event = MeasureCallbackEvent.createAvailabilityUpdateEvent(
-            AvailabilityResponse(HEART_RATE_BPM, AVAILABLE)
-        )
+        val event =
+            MeasureCallbackEvent.createAvailabilityUpdateEvent(
+                AvailabilityResponse(HEART_RATE_BPM, AVAILABLE)
+            )
         client.registerMeasureCallback(HEART_RATE_BPM, callback)
         shadowOf(Looper.getMainLooper()).idle()
 
@@ -183,7 +186,7 @@ class ServiceBackedMeasureClientTest {
     class FakeCallback : MeasureCallback {
         data class AvailabilityChangeEvent(
             val dataType: DataType<*, *>,
-            val availability: Availability
+            val availability: Availability,
         )
 
         data class DataReceivedEvent(val data: DataPointContainer)
@@ -203,7 +206,7 @@ class ServiceBackedMeasureClientTest {
 
         override fun onAvailabilityChanged(
             dataType: DeltaDataType<*, *>,
-            availability: Availability
+            availability: Availability,
         ) {
             availabilityChangeEvents += AvailabilityChangeEvent(dataType, availability)
         }
@@ -218,13 +221,13 @@ class ServiceBackedMeasureClientTest {
         class RegisterEvent(
             val request: MeasureRegistrationRequest,
             val callback: IMeasureCallback,
-            val statusCallback: IStatusCallback
+            val statusCallback: IStatusCallback,
         )
 
         class UnregisterEvent(
             val request: MeasureUnregistrationRequest,
             val callback: IMeasureCallback,
-            val statusCallback: IStatusCallback
+            val statusCallback: IStatusCallback,
         )
 
         var statusCallbackAction: (IStatusCallback) -> Unit = { it.onSuccess() }
@@ -238,7 +241,7 @@ class ServiceBackedMeasureClientTest {
         override fun registerCallback(
             request: MeasureRegistrationRequest,
             callback: IMeasureCallback,
-            statusCallback: IStatusCallback
+            statusCallback: IStatusCallback,
         ) {
             registerEvents += RegisterEvent(request, callback, statusCallback)
             statusCallbackAction.invoke(statusCallback)
@@ -247,7 +250,7 @@ class ServiceBackedMeasureClientTest {
         override fun unregisterCallback(
             request: MeasureUnregistrationRequest,
             callback: IMeasureCallback,
-            statusCallback: IStatusCallback
+            statusCallback: IStatusCallback,
         ) {
             unregisterEvents += UnregisterEvent(request, callback, statusCallback)
             statusCallbackAction.invoke(statusCallback)

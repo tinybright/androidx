@@ -28,15 +28,13 @@ import androidx.navigation.dynamicfeatures.DynamicExtras
 import androidx.navigation.dynamicfeatures.DynamicInstallManager
 import androidx.navigation.fragment.FragmentNavigator
 
-/**
- * The [Navigator] that enables navigating to destinations within dynamic feature modules.
- */
+/** The [Navigator] that enables navigating to destinations within dynamic feature modules. */
 @Navigator.Name("fragment")
 public class DynamicFragmentNavigator(
     context: Context,
     manager: FragmentManager,
     containerId: Int,
-    private val installManager: DynamicInstallManager
+    private val installManager: DynamicInstallManager,
 ) : FragmentNavigator(context, manager, containerId) {
 
     override fun createDestination(): Destination = Destination(this)
@@ -44,7 +42,7 @@ public class DynamicFragmentNavigator(
     override fun navigate(
         entries: List<NavBackStackEntry>,
         navOptions: NavOptions?,
-        navigatorExtras: Navigator.Extras?
+        navigatorExtras: Navigator.Extras?,
     ) {
         for (entry in entries) {
             navigate(entry, navOptions, navigatorExtras)
@@ -54,7 +52,7 @@ public class DynamicFragmentNavigator(
     private fun navigate(
         entry: NavBackStackEntry,
         navOptions: NavOptions?,
-        navigatorExtras: Navigator.Extras?
+        navigatorExtras: Navigator.Extras?,
     ) {
         val destination = entry.destination
         val extras = navigatorExtras as? DynamicExtras
@@ -68,13 +66,11 @@ public class DynamicFragmentNavigator(
         super.navigate(
             listOf(entry),
             navOptions,
-            if (extras != null) extras.destinationExtras else navigatorExtras
+            if (extras != null) extras.destinationExtras else navigatorExtras,
         )
     }
 
-    /**
-     * Destination for dynamic feature navigator.
-     */
+    /** Destination for dynamic feature navigator. */
     public class Destination : FragmentNavigator.Destination {
         public var moduleName: String? = null
 

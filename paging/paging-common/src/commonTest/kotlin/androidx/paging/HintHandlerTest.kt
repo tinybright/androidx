@@ -44,233 +44,208 @@ class HintHandlerTest {
     }
 
     @Test
-    fun noStateForRefresh() = runTest(UnconfinedTestDispatcher()) {
-        val refreshHints = kotlin.runCatching {
-            hintHandler.hintFor(REFRESH)
+    fun noStateForRefresh() =
+        runTest(UnconfinedTestDispatcher()) {
+            val refreshHints = kotlin.runCatching { hintHandler.hintFor(REFRESH) }
+            assertThat(refreshHints.exceptionOrNull()).isInstanceOf<IllegalArgumentException>()
         }
-        assertThat(refreshHints.exceptionOrNull()).isInstanceOf<IllegalArgumentException>()
-    }
 
     @Test
     fun expandChecks() {
-        val initialHint = ViewportHint.Initial(
-            presentedItemsAfter = 0,
-            presentedItemsBefore = 0,
-            originalPageOffsetFirst = 0,
-            originalPageOffsetLast = 0
-        ).also(hintHandler::processHint)
-        hintHandler.assertValues(
-            prepend = initialHint,
-            append = initialHint,
-            lastAccessHint = null
-        )
+        runTest(UnconfinedTestDispatcher()) {
+            val initialHint =
+                ViewportHint.Initial(
+                        presentedItemsAfter = 0,
+                        presentedItemsBefore = 0,
+                        originalPageOffsetFirst = 0,
+                        originalPageOffsetLast = 0,
+                    )
+                    .also(hintHandler::processHint)
+            hintHandler.assertValues(
+                prepend = initialHint,
+                append = initialHint,
+                lastAccessHint = null,
+            )
 
-        // both hints get updated w/ access hint
-        val accessHint1 = ViewportHint.Access(
-            pageOffset = 0,
-            indexInPage = 1,
-            presentedItemsBefore = 100,
-            presentedItemsAfter = 100,
-            originalPageOffsetLast = 0,
-            originalPageOffsetFirst = 0
-        ).also(hintHandler::processHint)
+            // both hints get updated w/ access hint
+            val accessHint1 =
+                ViewportHint.Access(
+                        pageOffset = 0,
+                        indexInPage = 1,
+                        presentedItemsBefore = 100,
+                        presentedItemsAfter = 100,
+                        originalPageOffsetLast = 0,
+                        originalPageOffsetFirst = 0,
+                    )
+                    .also(hintHandler::processHint)
 
-        hintHandler.assertValues(
-            prepend = accessHint1,
-            append = accessHint1,
-            lastAccessHint = accessHint1
-        )
+            hintHandler.assertValues(
+                prepend = accessHint1,
+                append = accessHint1,
+                lastAccessHint = accessHint1,
+            )
 
-        // new access that only affects prepend
-        val accessHintPrepend = accessHint1.copy(
-            presentedItemsBefore = 70,
-            presentedItemsAfter = 110
-        ).also(hintHandler::processHint)
-        hintHandler.assertValues(
-            prepend = accessHintPrepend,
-            append = accessHint1,
-            lastAccessHint = accessHintPrepend
-        )
+            // new access that only affects prepend
+            val accessHintPrepend =
+                accessHint1
+                    .copy(presentedItemsBefore = 70, presentedItemsAfter = 110)
+                    .also(hintHandler::processHint)
+            hintHandler.assertValues(
+                prepend = accessHintPrepend,
+                append = accessHint1,
+                lastAccessHint = accessHintPrepend,
+            )
 
-        // new access hints that should be ignored
-        val ignoredPrependHint = accessHintPrepend.copy(
-            presentedItemsBefore = 90,
-        ).also(hintHandler::processHint)
-        hintHandler.assertValues(
-            prepend = accessHintPrepend,
-            append = accessHint1,
-            lastAccessHint = ignoredPrependHint
-        )
+            // new access hints that should be ignored
+            val ignoredPrependHint =
+                accessHintPrepend.copy(presentedItemsBefore = 90).also(hintHandler::processHint)
+            hintHandler.assertValues(
+                prepend = accessHintPrepend,
+                append = accessHint1,
+                lastAccessHint = ignoredPrependHint,
+            )
 
-        val accessHintAppend = accessHintPrepend.copy(
-            presentedItemsAfter = 80,
-        ).also(hintHandler::processHint)
-        hintHandler.assertValues(
-            prepend = accessHintPrepend,
-            append = accessHintAppend,
-            lastAccessHint = accessHintAppend
-        )
+            val accessHintAppend =
+                accessHintPrepend.copy(presentedItemsAfter = 80).also(hintHandler::processHint)
+            hintHandler.assertValues(
+                prepend = accessHintPrepend,
+                append = accessHintAppend,
+                lastAccessHint = accessHintAppend,
+            )
 
-        // more ignored access hints
-        hintHandler.processHint(
-            accessHint1
-        )
-        hintHandler.assertValues(
-            prepend = accessHintPrepend,
-            append = accessHintAppend,
-            lastAccessHint = accessHint1
-        )
-        hintHandler.processHint(
-            initialHint
-        )
-        hintHandler.assertValues(
-            prepend = accessHintPrepend,
-            append = accessHintAppend,
-            lastAccessHint = accessHint1
-        )
+            // more ignored access hints
+            hintHandler.processHint(accessHint1)
+            hintHandler.assertValues(
+                prepend = accessHintPrepend,
+                append = accessHintAppend,
+                lastAccessHint = accessHint1,
+            )
+            hintHandler.processHint(initialHint)
+            hintHandler.assertValues(
+                prepend = accessHintPrepend,
+                append = accessHintAppend,
+                lastAccessHint = accessHint1,
+            )
 
-        // try changing original page offsets
-        val newFirstOffset = accessHintPrepend.copy(
-            originalPageOffsetFirst = 2
-        ).also(hintHandler::processHint)
-        hintHandler.assertValues(
-            prepend = newFirstOffset,
-            append = newFirstOffset,
-            lastAccessHint = newFirstOffset
-        )
-        val newLastOffset = newFirstOffset.copy(
-            originalPageOffsetLast = 5
-        ).also(hintHandler::processHint)
-        hintHandler.assertValues(
-            prepend = newLastOffset,
-            append = newLastOffset,
-            lastAccessHint = newLastOffset
-        )
+            // try changing original page offsets
+            val newFirstOffset =
+                accessHintPrepend.copy(originalPageOffsetFirst = 2).also(hintHandler::processHint)
+            hintHandler.assertValues(
+                prepend = newFirstOffset,
+                append = newFirstOffset,
+                lastAccessHint = newFirstOffset,
+            )
+            val newLastOffset =
+                newFirstOffset.copy(originalPageOffsetLast = 5).also(hintHandler::processHint)
+            hintHandler.assertValues(
+                prepend = newLastOffset,
+                append = newLastOffset,
+                lastAccessHint = newLastOffset,
+            )
+        }
     }
 
     @Test
     fun reset() {
-        val initial = ViewportHint.Access(
-            pageOffset = 0,
-            indexInPage = 3,
-            presentedItemsBefore = 10,
-            presentedItemsAfter = 10,
-            originalPageOffsetFirst = 0,
-            originalPageOffsetLast = 0
-        )
-        hintHandler.processHint(initial)
+        runTest(UnconfinedTestDispatcher()) {
+            val initial =
+                ViewportHint.Access(
+                    pageOffset = 0,
+                    indexInPage = 3,
+                    presentedItemsBefore = 10,
+                    presentedItemsAfter = 10,
+                    originalPageOffsetFirst = 0,
+                    originalPageOffsetLast = 0,
+                )
+            hintHandler.processHint(initial)
 
-        val appendReset = initial.copy(
-            presentedItemsBefore = 20,
-            presentedItemsAfter = 5
-        )
-        hintHandler.forceSetHint(
-            APPEND,
-            appendReset
-        )
-        hintHandler.assertValues(
-            prepend = initial,
-            append = appendReset,
-            lastAccessHint = initial
-        )
-
-        val prependReset = initial.copy(
-            presentedItemsBefore = 4,
-            presentedItemsAfter = 19
-        )
-        hintHandler.forceSetHint(
-            PREPEND,
-            prependReset
-        )
-        hintHandler.assertValues(
-            prepend = prependReset,
-            append = appendReset,
-            lastAccessHint = initial
-        )
+            val appendReset = initial.copy(presentedItemsBefore = 20, presentedItemsAfter = 5)
+            hintHandler.forceSetHint(APPEND, appendReset)
+            hintHandler.assertValues(
+                prepend = initial,
+                append = appendReset,
+                lastAccessHint = initial,
+            )
+            val prependReset = initial.copy(presentedItemsBefore = 4, presentedItemsAfter = 19)
+            hintHandler.forceSetHint(PREPEND, prependReset)
+            hintHandler.assertValues(
+                prepend = prependReset,
+                append = appendReset,
+                lastAccessHint = initial,
+            )
+        }
     }
 
     @Test
-    fun resetCanReSendSameValues() = runTest(UnconfinedTestDispatcher()) {
-        val hint = ViewportHint.Access(
-            pageOffset = 0,
-            indexInPage = 1,
-            presentedItemsAfter = 10,
-            presentedItemsBefore = 10,
-            originalPageOffsetFirst = 0,
-            originalPageOffsetLast = 0,
-        )
-        val prependHints = collectAsync(
-            hintHandler.hintFor(PREPEND)
-        )
-        val appendHints = collectAsync(
-            hintHandler.hintFor(APPEND)
-        )
-        runCurrent()
-        assertThat(prependHints.values).isEmpty()
-        assertThat(appendHints.values).isEmpty()
-        hintHandler.processHint(hint)
-        runCurrent()
-        assertThat(prependHints.values).containsExactly(hint)
-        assertThat(appendHints.values).containsExactly(hint)
+    fun resetCanReSendSameValues() =
+        runTest(UnconfinedTestDispatcher()) {
+            val hint =
+                ViewportHint.Access(
+                    pageOffset = 0,
+                    indexInPage = 1,
+                    presentedItemsAfter = 10,
+                    presentedItemsBefore = 10,
+                    originalPageOffsetFirst = 0,
+                    originalPageOffsetLast = 0,
+                )
+            val prependHints = collectAsync(hintHandler.hintFor(PREPEND))
+            val appendHints = collectAsync(hintHandler.hintFor(APPEND))
+            runCurrent()
+            assertThat(prependHints.values).isEmpty()
+            assertThat(appendHints.values).isEmpty()
+            hintHandler.processHint(hint)
+            runCurrent()
+            assertThat(prependHints.values).containsExactly(hint)
+            assertThat(appendHints.values).containsExactly(hint)
 
-        // send same hint twice, it should not get dispatched
-        hintHandler.processHint(hint.copy())
-        runCurrent()
-        assertThat(prependHints.values).containsExactly(hint)
-        assertThat(appendHints.values).containsExactly(hint)
+            // send same hint twice, it should not get dispatched
+            hintHandler.processHint(hint.copy())
+            runCurrent()
+            assertThat(prependHints.values).containsExactly(hint)
+            assertThat(appendHints.values).containsExactly(hint)
 
-        // how send that hint as reset, now it should get dispatched
-        hintHandler.forceSetHint(PREPEND, hint)
-        runCurrent()
-        assertThat(prependHints.values).containsExactly(hint, hint)
-        assertThat(appendHints.values).containsExactly(hint)
-        hintHandler.forceSetHint(APPEND, hint)
-        runCurrent()
-        assertThat(prependHints.values).containsExactly(hint, hint)
-        assertThat(appendHints.values).containsExactly(hint, hint)
-    }
+            // how send that hint as reset, now it should get dispatched
+            hintHandler.forceSetHint(PREPEND, hint)
+            runCurrent()
+            assertThat(prependHints.values).containsExactly(hint, hint)
+            assertThat(appendHints.values).containsExactly(hint)
+            hintHandler.forceSetHint(APPEND, hint)
+            runCurrent()
+            assertThat(prependHints.values).containsExactly(hint, hint)
+            assertThat(appendHints.values).containsExactly(hint, hint)
+        }
 
     private fun HintHandler.assertValues(
         prepend: ViewportHint,
         append: ViewportHint,
-        lastAccessHint: ViewportHint.Access?
+        lastAccessHint: ViewportHint.Access?,
     ) {
         assertThat(currentValue(PREPEND)).isEqualTo(prepend)
         assertThat(currentValue(APPEND)).isEqualTo(append)
         assertThat(hintHandler.lastAccessHint).isEqualTo(lastAccessHint)
     }
 
-    private fun HintHandler.currentValue(
-        loadType: LoadType
-    ): ViewportHint? {
+    private fun HintHandler.currentValue(loadType: LoadType): ViewportHint? {
         var value: ViewportHint? = null
         runTest(UnconfinedTestDispatcher()) {
-            val job = launch {
-                this@currentValue.hintFor(loadType).take(1).collect {
-                    value = it
-                }
-            }
+            val job = launch { this@currentValue.hintFor(loadType).take(1).collect { value = it } }
             runCurrent()
             job.cancel()
         }
         return value
     }
 
-    private suspend fun CoroutineScope.collectAsync(
-        flow: Flow<ViewportHint>
-    ): TestCollection {
+    private suspend fun CoroutineScope.collectAsync(flow: Flow<ViewportHint>): TestCollection {
         val impl = TestCollectionImpl()
-        async(context = impl.job) {
-            flow.collect {
-                impl.values.add(it)
-            }
-        }
+        async(context = impl.job) { flow.collect { impl.values.add(it) } }
         return impl
     }
 
     private interface TestCollection {
         val values: List<ViewportHint>
+
         fun stop()
+
         val latest: ViewportHint?
             get() = values.lastOrNull()
     }
@@ -278,6 +253,7 @@ class HintHandlerTest {
     private class TestCollectionImpl : TestCollection {
         val job = Job()
         override val values = mutableListOf<ViewportHint>()
+
         override fun stop() {
             job.cancel()
         }
@@ -289,13 +265,14 @@ class HintHandlerTest {
         presentedItemsBefore: Int = this@copy.presentedItemsBefore,
         presentedItemsAfter: Int = this@copy.presentedItemsAfter,
         originalPageOffsetFirst: Int = this@copy.originalPageOffsetFirst,
-        originalPageOffsetLast: Int = this@copy.originalPageOffsetLast
-    ) = ViewportHint.Access(
-        pageOffset = pageOffset,
-        indexInPage = indexInPage,
-        presentedItemsBefore = presentedItemsBefore,
-        presentedItemsAfter = presentedItemsAfter,
-        originalPageOffsetFirst = originalPageOffsetFirst,
-        originalPageOffsetLast = originalPageOffsetLast
-    )
+        originalPageOffsetLast: Int = this@copy.originalPageOffsetLast,
+    ) =
+        ViewportHint.Access(
+            pageOffset = pageOffset,
+            indexInPage = indexInPage,
+            presentedItemsBefore = presentedItemsBefore,
+            presentedItemsAfter = presentedItemsAfter,
+            originalPageOffsetFirst = originalPageOffsetFirst,
+            originalPageOffsetLast = originalPageOffsetLast,
+        )
 }

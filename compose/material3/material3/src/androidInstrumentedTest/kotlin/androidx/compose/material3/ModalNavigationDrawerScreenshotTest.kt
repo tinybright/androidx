@@ -64,15 +64,12 @@ import org.junit.runner.RunWith
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalMaterial3Api::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 class ModalNavigationDrawerScreenshotTest {
 
-    @Suppress("DEPRECATION")
-    @get:Rule
-    val rule = createComposeRule()
+    @Suppress("DEPRECATION") @get:Rule val rule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL3)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL3)
 
     private fun ComposeContentTestRule.setnavigationDrawer(drawerValue: DrawerValue) {
         setMaterialContent(lightColorScheme()) {
@@ -80,15 +77,11 @@ class ModalNavigationDrawerScreenshotTest {
                 ModalNavigationDrawer(
                     drawerState = rememberDrawerState(drawerValue),
                     drawerContent = {
-                        ModalDrawerSheet {
-                          Spacer(modifier = Modifier.fillMaxSize())
-                        }
+                        ModalDrawerSheet { Spacer(modifier = Modifier.fillMaxSize()) }
                     },
                     content = {
-                        Box(
-                            Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
-                        )
-                    }
+                        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
+                    },
                 )
             }
         }
@@ -101,16 +94,14 @@ class ModalNavigationDrawerScreenshotTest {
                     ModalNavigationDrawer(
                         drawerState = rememberDrawerState(drawerValue),
                         drawerContent = {
-                            ModalDrawerSheet {
-                              Spacer(modifier = Modifier.fillMaxSize())
-                            }
+                            ModalDrawerSheet { Spacer(modifier = Modifier.fillMaxSize()) }
                         },
                         content = {
                             Box(
                                 Modifier.fillMaxSize()
                                     .background(MaterialTheme.colorScheme.background)
                             )
-                        }
+                        },
                     )
                 }
             }
@@ -136,7 +127,8 @@ class ModalNavigationDrawerScreenshotTest {
     }
 
     private fun assertScreenshotAgainstGolden(goldenName: String) {
-        rule.onNodeWithTag("container")
+        rule
+            .onNodeWithTag("container")
             .captureToImage()
             .assertAgainstGolden(screenshotRule, goldenName)
     }
@@ -226,23 +218,24 @@ class ModalNavigationDrawerScreenshotTest {
 
 private val ContainerTestTag = "container"
 
-private val items = listOf(
-    Icons.Default.AccountCircle,
-    Icons.Default.Build,
-    Icons.Default.Check,
-    Icons.Default.DateRange,
-    Icons.Default.Email,
-    Icons.Default.Favorite,
-    Icons.Default.Home,
-    Icons.Default.Info,
-    Icons.Default.Lock,
-    Icons.Default.Notifications,
-    Icons.Default.Place,
-    Icons.Default.Refresh,
-    Icons.Default.ShoppingCart,
-    Icons.Default.ThumbUp,
-    Icons.Default.Warning,
-)
+private val items =
+    listOf(
+        Icons.Default.AccountCircle,
+        Icons.Default.Build,
+        Icons.Default.Check,
+        Icons.Default.DateRange,
+        Icons.Default.Email,
+        Icons.Default.Favorite,
+        Icons.Default.Home,
+        Icons.Default.Info,
+        Icons.Default.Lock,
+        Icons.Default.Notifications,
+        Icons.Default.Place,
+        Icons.Default.Refresh,
+        Icons.Default.ShoppingCart,
+        Icons.Default.ThumbUp,
+        Icons.Default.Warning,
+    )
 
 @Composable
 private fun ModalNavigationDrawerPredictiveBack(progress: Float, swipeEdgeLeft: Boolean) {
@@ -255,16 +248,17 @@ private fun ModalNavigationDrawerPredictiveBack(progress: Float, swipeEdgeLeft: 
         maxScaleYDistance = PredictiveBackDrawerMaxScaleYDistance.toPx()
     }
 
-    val drawerPredictiveBackState = DrawerPredictiveBackState().apply {
-        update(
-            progress = progress,
-            swipeEdgeLeft = swipeEdgeLeft,
-            isRtl = false,
-            maxScaleXDistanceGrow = maxScaleXDistanceGrow,
-            maxScaleXDistanceShrink = maxScaleXDistanceShrink,
-            maxScaleYDistance = maxScaleYDistance
-        )
-    }
+    val drawerPredictiveBackState =
+        DrawerPredictiveBackState().apply {
+            update(
+                progress = progress,
+                swipeEdgeLeft = swipeEdgeLeft,
+                isRtl = false,
+                maxScaleXDistanceGrow = maxScaleXDistanceGrow,
+                maxScaleXDistanceShrink = maxScaleXDistanceShrink,
+                maxScaleYDistance = maxScaleYDistance,
+            )
+        }
 
     ModalNavigationDrawer(
         modifier = Modifier.testTag(ContainerTestTag),
@@ -279,7 +273,7 @@ private fun ModalNavigationDrawerPredictiveBack(progress: Float, swipeEdgeLeft: 
                 DrawerDefaults.shape,
                 DrawerDefaults.modalContainerColor,
                 contentColorFor(DrawerDefaults.modalContainerColor),
-                DrawerDefaults.ModalDrawerElevation
+                DrawerDefaults.ModalDrawerElevation,
             ) {
                 Column(Modifier.verticalScroll(rememberScrollState())) {
                     Spacer(Modifier.height(12.dp))
@@ -289,18 +283,12 @@ private fun ModalNavigationDrawerPredictiveBack(progress: Float, swipeEdgeLeft: 
                             label = { Text(item.name) },
                             selected = item == Icons.Default.AccountCircle,
                             onClick = {},
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                         )
                     }
                 }
             }
         },
-        content = {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-            )
-        }
+        content = { Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) },
     )
 }

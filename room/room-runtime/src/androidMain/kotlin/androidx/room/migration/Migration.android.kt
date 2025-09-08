@@ -17,31 +17,29 @@
 
 package androidx.room.migration
 
-import androidx.room.driver.SupportSQLiteConnection
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.driver.SupportSQLiteConnection
 
 /**
  * Base class for a database migration.
  *
- * Each migration can move between 2 versions that are defined by [startVersion] and
- * [endVersion].
+ * Each migration can move between 2 versions that are defined by [startVersion] and [endVersion].
  *
- * A migration can handle more than 1 version (e.g. if you have a faster path to choose when
- * going version 3 to 5 without going to version 4). If Room opens a database at version
- * 3 and latest version is 5, Room will use the migration object that can migrate from
- * 3 to 5 instead of 3 to 4 and 4 to 5.
+ * A migration can handle more than 1 version (e.g. if you have a faster path to choose when going
+ * version 3 to 5 without going to version 4). If Room opens a database at version 3 and latest
+ * version is 5, Room will use the migration object that can migrate from 3 to 5 instead of 3 to 4
+ * and 4 to 5.
  *
  * If there are not enough migrations provided to move from the current version to the latest
  * version, Room will might clear the database and recreate if destructive migrations are enabled.
  *
  * @constructor Creates a new migration between [startVersion] and [endVersion] inclusive.
  */
-actual abstract class Migration actual constructor(
-    @JvmField
-    actual val startVersion: Int,
-    @JvmField
-    actual val endVersion: Int
+public actual abstract class Migration
+actual constructor(
+    @JvmField public actual val startVersion: Int,
+    @JvmField public actual val endVersion: Int,
 ) {
     /**
      * Should run the necessary migrations.
@@ -51,10 +49,14 @@ actual abstract class Migration actual constructor(
      * This method is already called inside a transaction and that transaction might actually be a
      * composite transaction of all necessary `Migration`s.
      *
+     * This function is only called when Room is configured without a driver. If a driver is set
+     * using [androidx.room.RoomDatabase.Builder.setDriver], then only the version that receives a
+     * [SQLiteConnection] is called.
+     *
      * @param db The database instance
      * @throws NotImplementedError if migrate(SQLiteConnection) is not overridden.
      */
-    open fun migrate(db: SupportSQLiteDatabase) {
+    public open fun migrate(db: SupportSQLiteDatabase) {
         throw NotImplementedError(
             "Migration functionality with a SupportSQLiteDatabase " +
                 "(without a provided SQLiteDriver) requires overriding the " +
@@ -71,7 +73,7 @@ actual abstract class Migration actual constructor(
      * @param connection The database connection
      * @throws NotImplementedError if a driver is provided, but this function is not overridden.
      */
-    actual open fun migrate(connection: SQLiteConnection) {
+    public actual open fun migrate(connection: SQLiteConnection) {
         if (connection is SupportSQLiteConnection) {
             // Compatibility mode
             migrate(connection.db)
@@ -85,13 +87,13 @@ actual abstract class Migration actual constructor(
 }
 
 /**
- * Creates [Migration] from [startVersion] to [endVersion] that runs [migrate] to perform
- * the necessary migrations.
+ * Creates [Migration] from [startVersion] to [endVersion] that runs [migrate] to perform the
+ * necessary migrations.
  *
- * A migration can handle more than 1 version (e.g. if you have a faster path to choose when
- * going version 3 to 5 without going to version 4). If Room opens a database at version
- * 3 and latest version is < 5, Room will use the migration object that can migrate from
- * 3 to 5 instead of 3 to 4 and 4 to 5.
+ * A migration can handle more than 1 version (e.g. if you have a faster path to choose when going
+ * version 3 to 5 without going to version 4). If Room opens a database at version 3 and latest
+ * version is < 5, Room will use the migration object that can migrate from 3 to 5 instead of 3 to 4
+ * and 4 to 5.
  *
  * If there are not enough migrations provided to move from the current version to the latest
  * version, Room will clear the database and recreate so even if you have no changes between 2
@@ -99,19 +101,19 @@ actual abstract class Migration actual constructor(
  *
  * [migrate] cannot access any generated Dao in this method.
  *
- * [migrate] is already called inside a transaction and that transaction
- * might actually be a composite transaction of all necessary `Migration`s.
+ * [migrate] is already called inside a transaction and that transaction might actually be a
+ * composite transaction of all necessary `Migration`s.
  */
 public fun Migration(
     startVersion: Int,
     endVersion: Int,
-    migrate: (SupportSQLiteDatabase) -> Unit
+    migrate: (SupportSQLiteDatabase) -> Unit,
 ): Migration = MigrationImpl(startVersion, endVersion, migrate)
 
 private class MigrationImpl(
     startVersion: Int,
     endVersion: Int,
-    val migrateCallback: (SupportSQLiteDatabase) -> Unit
+    val migrateCallback: (SupportSQLiteDatabase) -> Unit,
 ) : Migration(startVersion, endVersion) {
     override fun migrate(db: SupportSQLiteDatabase) = migrateCallback(db)
 }

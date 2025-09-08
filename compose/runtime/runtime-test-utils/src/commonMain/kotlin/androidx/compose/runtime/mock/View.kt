@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:Suppress("ListIterator")
 
 package androidx.compose.runtime.mock
 
+import androidx.compose.runtime.ComposeNodeLifecycleCallback
 import androidx.compose.runtime.Stable
 
 fun indent(indent: Int, builder: StringBuilder) {
@@ -24,13 +26,17 @@ fun indent(indent: Int, builder: StringBuilder) {
 
 @Stable
 interface Modifier {
-    companion object : Modifier { }
+    companion object : Modifier {}
 }
 
-open class View {
+open class View : ComposeNodeLifecycleCallback {
     var name: String = ""
     val children = mutableListOf<View>()
     val attributes = mutableMapOf<String, Any>()
+    var onAttach = {}
+    var onDetach = {}
+    var active = true
+    var released = false
 
     // Used to validated insert/remove constraints
     private var parent: View? = null
@@ -57,19 +63,23 @@ open class View {
             )
         }
         view.parent = this
+        view.onAttach()
         children.add(index, view)
     }
 
     fun removeAt(index: Int, count: Int) {
-        if (index < children.count()) {
-            if (count == 1) {
-                val removedChild = children.removeAt(index)
-                removedChild.parent = null
-            } else {
-                val removedChildren = children.subList(index, index + count)
-                removedChildren.forEach { child -> child.parent = null }
-                removedChildren.clear()
+        check(index in 0 until children.size) { "Expected $index to be less than ${children.size}" }
+        if (count == 1) {
+            val removedChild = children.removeAt(index)
+            removedChild.onDetach()
+            removedChild.parent = null
+        } else {
+            val removedChildren = children.subList(index, index + count)
+            removedChildren.forEach { child ->
+                child.onDetach()
+                child.parent = null
             }
+            removedChildren.clear()
         }
     }
 
@@ -91,11 +101,15 @@ open class View {
         children.clear()
     }
 
-    fun attribute(name: String, value: Any) { attributes[name] = value }
+    fun attribute(name: String, value: Any) {
+        attributes[name] = value
+    }
 
     var value: String?
         get() = attributes["value"] as? String
         set(value) {
+            check(active) { "Node modified when it wasn't active: $this" }
+            check(!released) { "Node modified when it after release: $this" }
             if (value != null) {
                 attributes["value"] = value
             } else {
@@ -106,6 +120,8 @@ open class View {
     var text: String?
         get() = attributes["text"] as? String
         set(value) {
+            check(active) { "Node modified when it wasn't active: $this" }
+            check(!released) { "Node modified when it after release: $this" }
             if (value != null) {
                 attributes["text"] = value
             } else {
@@ -113,30 +129,53 @@ open class View {
             }
         }
 
-    private val attributesAsString get() =
-        if (attributes.isEmpty()) ""
-        else attributes.map { " ${it.key}='${it.value}'" }.joinToString()
-    private val childrenAsString: String get() =
-        children.map { it.toString() }.joinToString(" ")
+    private val attributesAsString
+        get() =
+            if (attributes.isEmpty()) ""
+            else attributes.map { " ${it.key}='${it.value}'" }.joinToString()
+
+    private val childrenAsString: String
+        get() = children.map { it.toString() }.joinToString(" ")
 
     override fun toString() =
-            if (children.isEmpty()) "<$name$attributesAsString>" else
-            "<$name$attributesAsString>$childrenAsString</$name>"
+        if (children.isEmpty()) "<$name$attributesAsString>"
+        else "<$name$attributesAsString>$childrenAsString</$name>"
 
-    fun toFmtString() = StringBuilder().let {
-        render(0, it)
-        it.toString()
-    }
+    fun toFmtString() =
+        StringBuilder().let {
+            render(0, it)
+            it.toString()
+        }
 
     private fun findFirstOrNull(predicate: (view: View) -> Boolean): View? {
         if (predicate(this)) return this
         for (child in children) {
-            child.findFirstOrNull(predicate)?.let { return it }
+            child.findFirstOrNull(predicate)?.let {
+                return it
+            }
         }
         return null
     }
 
     fun findFirst(predicate: (view: View) -> Boolean) =
         findFirstOrNull(predicate) ?: error("View not found")
+
+    override fun onReuse() {
+        // Nodes can be reused without being deactivated. After this call they should be considered
+        // active.
+        active = true
+    }
+
+    override fun onDeactivate() {
+        check(active) { "Node deactivated when it was already inactive: $this" }
+        active = false
+    }
+
+    override fun onRelease() {
+        // Re-enable this check when b/411129499 is fixed
+        // check(!released) { "Node was released twice: $this" }
+        released = true
+    }
 }
+
 fun View.flatten(): List<View> = listOf(this) + children.flatMap { it.flatten() }

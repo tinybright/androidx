@@ -49,21 +49,17 @@ fun ChipDemo() {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         LazyColumn(
             contentPadding = PaddingValues(DefaultSpace),
-            verticalArrangement = Arrangement.spacedBy(DefaultSpace)
+            verticalArrangement = Arrangement.spacedBy(DefaultSpace),
         ) {
-            item {
-                Chips(chipEnabledState.value)
-            }
-            item {
-                FilterChips(chipEnabledState.value)
-            }
+            item { Chips(chipEnabledState.value) }
+            item { FilterChips(chipEnabledState.value) }
         }
         Row(horizontalArrangement = Arrangement.Center) {
             Text("Enabled")
             Spacer(Modifier.size(8.dp))
             Switch(
                 checked = chipEnabledState.value,
-                onCheckedChange = { chipEnabledState.value = it }
+                onCheckedChange = { chipEnabledState.value = it },
             )
         }
     }
@@ -75,24 +71,13 @@ private fun Chips(enabled: Boolean) {
     Text("Action Chips")
     Spacer(Modifier.height(DefaultSpace))
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-        Chip(
-            onClick = { /* Do something! */ },
-            enabled = enabled
-        ) {
-            Text("Action chip")
-        }
+        Chip(onClick = { /* Do something! */ }, enabled = enabled) { Text("Action chip") }
         Chip(
             onClick = { /* Do something! */ },
             border = ChipDefaults.outlinedBorder,
             colors = ChipDefaults.outlinedChipColors(),
             enabled = enabled,
-            leadingIcon =
-            {
-                Icon(
-                    Icons.Filled.Settings,
-                    contentDescription = null
-                )
-            }
+            leadingIcon = { Icon(Icons.Filled.Settings, contentDescription = null) },
         ) {
             Text("Action chip")
         }
@@ -107,14 +92,16 @@ private fun FilterChips(enabled: Boolean) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
         val state1 = remember { mutableStateOf(false) }
         FilterChip(
-            selected = state1.value, onClick = { state1.value = !state1.value }, enabled = enabled,
+            selected = state1.value,
+            onClick = { state1.value = !state1.value },
+            enabled = enabled,
             selectedIcon = {
                 Icon(
                     imageVector = Icons.Filled.Done,
                     contentDescription = "Localized Description",
-                    modifier = Modifier.size(ChipDefaults.SelectedIconSize)
+                    modifier = Modifier.size(ChipDefaults.SelectedIconSize),
                 )
-            }
+            },
         ) {
             Text("Filter chip")
         }
@@ -129,16 +116,16 @@ private fun FilterChips(enabled: Boolean) {
                 Icon(
                     Icons.Filled.Home,
                     contentDescription = "Localized Description",
-                    modifier = Modifier.size(ChipDefaults.LeadingIconSize)
+                    modifier = Modifier.size(ChipDefaults.LeadingIconSize),
                 )
             },
             selectedIcon = {
                 Icon(
                     imageVector = Icons.Filled.Done,
                     contentDescription = "Localized Description",
-                    modifier = Modifier.size(ChipDefaults.SelectedIconSize)
+                    modifier = Modifier.size(ChipDefaults.SelectedIconSize),
                 )
-            }
+            },
         ) {
             Text("Filter chip")
         }

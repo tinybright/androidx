@@ -55,33 +55,27 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(
-    ExperimentalTestApi::class,
-    ExperimentalTvMaterial3Api::class
-)
+@OptIn(ExperimentalTestApi::class, ExperimentalTvMaterial3Api::class)
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class IconButtonTest {
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     @Test
     fun filledIconButton_DefaultSize() {
         rule.setContent {
-            IconButton(
-                modifier = Modifier
-                    .testTag(FilledIconButtonTag),
-                onClick = {}
-            ) {
+            IconButton(modifier = Modifier.testTag(FilledIconButtonTag), onClick = {}) {
                 Box(
-                    modifier = Modifier
-                        .size(FilledIconButtonIconSize)
-                        .semantics(mergeDescendants = true) {}
+                    modifier =
+                        Modifier.size(FilledIconButtonIconSize).semantics(
+                            mergeDescendants = true
+                        ) {}
                 )
             }
         }
 
-        rule.onNodeWithTag(FilledIconButtonTag)
+        rule
+            .onNodeWithTag(FilledIconButtonTag)
             .assertWidthIsEqualTo(40.dp)
             .assertHeightIsEqualTo(40.dp)
     }
@@ -90,20 +84,21 @@ class IconButtonTest {
     fun filledIconButton_SmallSize() {
         rule.setContent {
             IconButton(
-                modifier = Modifier
-                    .size(IconButtonDefaults.SmallButtonSize)
-                    .testTag(FilledIconButtonTag),
-                onClick = {}
+                modifier =
+                    Modifier.size(IconButtonDefaults.SmallButtonSize).testTag(FilledIconButtonTag),
+                onClick = {},
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(FilledIconButtonIconSize)
-                        .semantics(mergeDescendants = true) {}
+                    modifier =
+                        Modifier.size(FilledIconButtonIconSize).semantics(
+                            mergeDescendants = true
+                        ) {}
                 )
             }
         }
 
-        rule.onNodeWithTag(FilledIconButtonTag)
+        rule
+            .onNodeWithTag(FilledIconButtonTag)
             .assertWidthIsEqualTo(28.dp)
             .assertHeightIsEqualTo(28.dp)
     }
@@ -112,20 +107,21 @@ class IconButtonTest {
     fun filledIconButton_MediumSize() {
         rule.setContent {
             IconButton(
-                modifier = Modifier
-                    .size(IconButtonDefaults.MediumButtonSize)
-                    .testTag(FilledIconButtonTag),
-                onClick = {}
+                modifier =
+                    Modifier.size(IconButtonDefaults.MediumButtonSize).testTag(FilledIconButtonTag),
+                onClick = {},
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(FilledIconButtonIconSize)
-                        .semantics(mergeDescendants = true) {}
+                    modifier =
+                        Modifier.size(FilledIconButtonIconSize).semantics(
+                            mergeDescendants = true
+                        ) {}
                 )
             }
         }
 
-        rule.onNodeWithTag(FilledIconButtonTag)
+        rule
+            .onNodeWithTag(FilledIconButtonTag)
             .assertWidthIsEqualTo(40.dp)
             .assertHeightIsEqualTo(40.dp)
     }
@@ -134,20 +130,21 @@ class IconButtonTest {
     fun filledIconButton_LargeSize() {
         rule.setContent {
             IconButton(
-                modifier = Modifier
-                    .size(IconButtonDefaults.LargeButtonSize)
-                    .testTag(FilledIconButtonTag),
-                onClick = {}
+                modifier =
+                    Modifier.size(IconButtonDefaults.LargeButtonSize).testTag(FilledIconButtonTag),
+                onClick = {},
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(FilledIconButtonIconSize)
-                        .semantics(mergeDescendants = true) {}
+                    modifier =
+                        Modifier.size(FilledIconButtonIconSize).semantics(
+                            mergeDescendants = true
+                        ) {}
                 )
             }
         }
 
-        rule.onNodeWithTag(FilledIconButtonTag)
+        rule
+            .onNodeWithTag(FilledIconButtonTag)
             .assertWidthIsEqualTo(56.dp)
             .assertHeightIsEqualTo(56.dp)
     }
@@ -155,21 +152,18 @@ class IconButtonTest {
     @Test
     fun filledIconButton_CustomSize() {
         rule.setContent {
-            IconButton(
-                modifier = Modifier
-                    .size(64.dp)
-                    .testTag(FilledIconButtonTag),
-                onClick = {}
-            ) {
+            IconButton(modifier = Modifier.size(64.dp).testTag(FilledIconButtonTag), onClick = {}) {
                 Box(
-                    modifier = Modifier
-                        .size(FilledIconButtonIconSize)
-                        .semantics(mergeDescendants = true) {}
+                    modifier =
+                        Modifier.size(FilledIconButtonIconSize).semantics(
+                            mergeDescendants = true
+                        ) {}
                 )
             }
         }
 
-        rule.onNodeWithTag(FilledIconButtonTag)
+        rule
+            .onNodeWithTag(FilledIconButtonTag)
             .assertWidthIsEqualTo(64.dp)
             .assertHeightIsEqualTo(64.dp)
     }
@@ -180,20 +174,20 @@ class IconButtonTest {
         val height = 24.dp
         rule.setContent {
             IconButton(
-                modifier = Modifier
-                    .testTag(FilledIconButtonTag)
-                    .size(width, height),
-                onClick = {}
+                modifier = Modifier.testTag(FilledIconButtonTag).size(width, height),
+                onClick = {},
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(FilledIconButtonIconSize)
-                        .semantics(mergeDescendants = true) {}
+                    modifier =
+                        Modifier.size(FilledIconButtonIconSize).semantics(
+                            mergeDescendants = true
+                        ) {}
                 )
             }
         }
 
-        rule.onNodeWithTag(FilledIconButtonTag, useUnmergedTree = true)
+        rule
+            .onNodeWithTag(FilledIconButtonTag, useUnmergedTree = true)
             .assertWidthIsEqualTo(width)
             .assertHeightIsEqualTo(height)
     }
@@ -204,15 +198,17 @@ class IconButtonTest {
             Box {
                 IconButton(modifier = Modifier.testTag(FilledIconButtonTag), onClick = {}) {
                     Box(
-                        modifier = Modifier
-                            .size(IconButtonDefaults.MediumIconSize)
-                            .semantics(mergeDescendants = true) {}
+                        modifier =
+                            Modifier.size(IconButtonDefaults.MediumIconSize).semantics(
+                                mergeDescendants = true
+                            ) {}
                     )
                 }
             }
         }
 
-        rule.onNodeWithTag(FilledIconButtonTag)
+        rule
+            .onNodeWithTag(FilledIconButtonTag)
             .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
             .assertHasClickAction()
             .assertIsEnabled()
@@ -225,17 +221,20 @@ class IconButtonTest {
                 IconButton(
                     modifier = Modifier.testTag(FilledIconButtonTag),
                     onClick = {},
-                    onLongClick = {}) {
+                    onLongClick = {},
+                ) {
                     Box(
-                        modifier = Modifier
-                            .size(IconButtonDefaults.MediumIconSize)
-                            .semantics(mergeDescendants = true) {}
+                        modifier =
+                            Modifier.size(IconButtonDefaults.MediumIconSize).semantics(
+                                mergeDescendants = true
+                            ) {}
                     )
                 }
             }
         }
 
-        rule.onNodeWithTag(FilledIconButtonTag)
+        rule
+            .onNodeWithTag(FilledIconButtonTag)
             .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
             .assertHasClickAction()
             .assert(SemanticsMatcher.keyIsDefined(SemanticsActions.OnLongClick))
@@ -249,18 +248,20 @@ class IconButtonTest {
                 IconButton(
                     modifier = Modifier.testTag(FilledIconButtonTag),
                     onClick = {},
-                    enabled = false
+                    enabled = false,
                 ) {
                     Box(
-                        modifier = Modifier
-                            .size(IconButtonDefaults.MediumIconSize)
-                            .semantics(mergeDescendants = true) {}
+                        modifier =
+                            Modifier.size(IconButtonDefaults.MediumIconSize).semantics(
+                                mergeDescendants = true
+                            ) {}
                     )
                 }
             }
         }
 
-        rule.onNodeWithTag(FilledIconButtonTag)
+        rule
+            .onNodeWithTag(FilledIconButtonTag)
             .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
             .assertIsNotEnabled()
     }
@@ -272,24 +273,20 @@ class IconButtonTest {
 
         rule.setContent {
             Box {
-                IconButton(
-                    modifier = Modifier.testTag(FilledIconButtonTag),
-                    onClick = onClick
-                ) {
+                IconButton(modifier = Modifier.testTag(FilledIconButtonTag), onClick = onClick) {
                     Box(
-                        modifier = Modifier
-                            .size(IconButtonDefaults.MediumIconSize)
-                            .semantics(mergeDescendants = true) {}
+                        modifier =
+                            Modifier.size(IconButtonDefaults.MediumIconSize).semantics(
+                                mergeDescendants = true
+                            ) {}
                     )
                 }
             }
         }
-        rule.onNodeWithTag(FilledIconButtonTag)
-            .requestFocus()
-            .performKeyInput { pressKey(Key.DirectionCenter) }
-        rule.runOnIdle {
-            Truth.assertThat(counter).isEqualTo(1)
+        rule.onNodeWithTag(FilledIconButtonTag).requestFocus().performKeyInput {
+            pressKey(Key.DirectionCenter)
         }
+        rule.runOnIdle { Truth.assertThat(counter).isEqualTo(1) }
     }
 
     @Test
@@ -302,22 +299,22 @@ class IconButtonTest {
                 IconButton(
                     modifier = Modifier.testTag(FilledIconButtonTag),
                     onClick = {},
-                    onLongClick = onLongClick
+                    onLongClick = onLongClick,
                 ) {
                     Box(
-                        modifier = Modifier
-                            .size(IconButtonDefaults.MediumIconSize)
-                            .semantics(mergeDescendants = true) {}
+                        modifier =
+                            Modifier.size(IconButtonDefaults.MediumIconSize).semantics(
+                                mergeDescendants = true
+                            ) {}
                     )
                 }
             }
         }
-        rule.onNodeWithTag(FilledIconButtonTag)
+        rule
+            .onNodeWithTag(FilledIconButtonTag)
             .requestFocus()
             .performLongKeyPress(rule, Key.DirectionCenter)
-        rule.runOnIdle {
-            Truth.assertThat(counter).isEqualTo(1)
-        }
+        rule.runOnIdle { Truth.assertThat(counter).isEqualTo(1) }
     }
 
     @Test
@@ -328,17 +325,19 @@ class IconButtonTest {
                 IconButton(
                     modifier = Modifier.testTag(FilledIconButtonTag),
                     onClick = { enabled = false },
-                    enabled = enabled
+                    enabled = enabled,
                 ) {
                     Box(
-                        modifier = Modifier
-                            .size(IconButtonDefaults.MediumIconSize)
-                            .semantics(mergeDescendants = true) {}
+                        modifier =
+                            Modifier.size(IconButtonDefaults.MediumIconSize).semantics(
+                                mergeDescendants = true
+                            ) {}
                     )
                 }
             }
         }
-        rule.onNodeWithTag(FilledIconButtonTag)
+        rule
+            .onNodeWithTag(FilledIconButtonTag)
             // Confirm the button starts off enabled, with a click action
             .assertHasClickAction()
             .assertIsEnabled()
@@ -361,41 +360,40 @@ class IconButtonTest {
 
         rule.setContent {
             Column {
-                IconButton(
-                    modifier = Modifier.testTag(addButtonTag),
-                    onClick = addButtonOnClick
-                ) {
+                IconButton(modifier = Modifier.testTag(addButtonTag), onClick = addButtonOnClick) {
                     Box(
-                        modifier = Modifier
-                            .size(IconButtonDefaults.MediumIconSize)
-                            .semantics(mergeDescendants = true) {}
+                        modifier =
+                            Modifier.size(IconButtonDefaults.MediumIconSize).semantics(
+                                mergeDescendants = true
+                            ) {}
                     )
                 }
                 IconButton(
                     modifier = Modifier.testTag(phoneButtonTag),
-                    onClick = phoneButtonOnClick
+                    onClick = phoneButtonOnClick,
                 ) {
                     Box(
-                        modifier = Modifier
-                            .size(IconButtonDefaults.MediumIconSize)
-                            .semantics(mergeDescendants = true) {}
+                        modifier =
+                            Modifier.size(IconButtonDefaults.MediumIconSize).semantics(
+                                mergeDescendants = true
+                            ) {}
                     )
                 }
             }
         }
 
-        rule.onNodeWithTag(addButtonTag)
-            .requestFocus()
-            .performKeyInput { pressKey(Key.DirectionCenter) }
+        rule.onNodeWithTag(addButtonTag).requestFocus().performKeyInput {
+            pressKey(Key.DirectionCenter)
+        }
 
         rule.runOnIdle {
             Truth.assertThat(addButtonCounter).isEqualTo(1)
             Truth.assertThat(phoneButtonCounter).isEqualTo(0)
         }
 
-        rule.onNodeWithTag(phoneButtonTag)
-            .requestFocus()
-            .performKeyInput { pressKey(Key.DirectionCenter) }
+        rule.onNodeWithTag(phoneButtonTag).requestFocus().performKeyInput {
+            pressKey(Key.DirectionCenter)
+        }
 
         rule.runOnIdle {
             Truth.assertThat(addButtonCounter).isEqualTo(1)
@@ -407,16 +405,15 @@ class IconButtonTest {
     fun filledIconButton_buttonPositioningSmallSize() {
         rule.setContent {
             IconButton(
-                modifier = Modifier
-                    .size(IconButtonDefaults.SmallButtonSize)
-                    .testTag(FilledIconButtonTag),
-                onClick = {}
+                modifier =
+                    Modifier.size(IconButtonDefaults.SmallButtonSize).testTag(FilledIconButtonTag),
+                onClick = {},
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(IconButtonDefaults.SmallIconSize)
-                        .testTag(FilledIconButtonIconTag)
-                        .semantics(mergeDescendants = true) {}
+                    modifier =
+                        Modifier.size(IconButtonDefaults.SmallIconSize)
+                            .testTag(FilledIconButtonIconTag)
+                            .semantics(mergeDescendants = true) {}
                 )
             }
         }
@@ -426,37 +423,34 @@ class IconButtonTest {
 
         (iconBounds.left - buttonBounds.left).assertIsEqualTo(
             6.dp,
-            "padding between the start of the button and the start of the icon."
+            "padding between the start of the button and the start of the icon.",
         )
 
         (iconBounds.top - buttonBounds.top).assertIsEqualTo(
             6.dp,
-            "padding between the top of the button and the top of the icon."
+            "padding between the top of the button and the top of the icon.",
         )
 
         (buttonBounds.right - iconBounds.right).assertIsEqualTo(
             6.dp,
-            "padding between the end of the icon and the end of the button."
+            "padding between the end of the icon and the end of the button.",
         )
 
         (buttonBounds.bottom - iconBounds.bottom).assertIsEqualTo(
             6.dp,
-            "padding between the bottom of the button and the bottom of the icon."
+            "padding between the bottom of the button and the bottom of the icon.",
         )
     }
 
     @Test
     fun filledIconButton_buttonPositioningDefaultOrMediumSize() {
         rule.setContent {
-            IconButton(
-                modifier = Modifier.testTag(FilledIconButtonTag),
-                onClick = {}
-            ) {
+            IconButton(modifier = Modifier.testTag(FilledIconButtonTag), onClick = {}) {
                 Box(
-                    modifier = Modifier
-                        .size(IconButtonDefaults.MediumIconSize)
-                        .testTag(FilledIconButtonIconTag)
-                        .semantics(mergeDescendants = true) {}
+                    modifier =
+                        Modifier.size(IconButtonDefaults.MediumIconSize)
+                            .testTag(FilledIconButtonIconTag)
+                            .semantics(mergeDescendants = true) {}
                 )
             }
         }
@@ -466,22 +460,22 @@ class IconButtonTest {
 
         (iconBounds.left - buttonBounds.left).assertIsEqualTo(
             10.dp,
-            "padding between the start of the button and the start of the icon."
+            "padding between the start of the button and the start of the icon.",
         )
 
         (iconBounds.top - buttonBounds.top).assertIsEqualTo(
             10.dp,
-            "padding between the top of the button and the top of the icon."
+            "padding between the top of the button and the top of the icon.",
         )
 
         (buttonBounds.right - iconBounds.right).assertIsEqualTo(
             10.dp,
-            "padding between the end of the icon and the end of the button."
+            "padding between the end of the icon and the end of the button.",
         )
 
         (buttonBounds.bottom - iconBounds.bottom).assertIsEqualTo(
             10.dp,
-            "padding between the bottom of the button and the bottom of the icon."
+            "padding between the bottom of the button and the bottom of the icon.",
         )
     }
 
@@ -489,16 +483,15 @@ class IconButtonTest {
     fun filledIconButton_buttonPositioningLargeSize() {
         rule.setContent {
             IconButton(
-                modifier = Modifier
-                    .size(IconButtonDefaults.LargeButtonSize)
-                    .testTag(FilledIconButtonTag),
-                onClick = {}
+                modifier =
+                    Modifier.size(IconButtonDefaults.LargeButtonSize).testTag(FilledIconButtonTag),
+                onClick = {},
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(IconButtonDefaults.LargeIconSize)
-                        .testTag(FilledIconButtonIconTag)
-                        .semantics(mergeDescendants = true) {}
+                    modifier =
+                        Modifier.size(IconButtonDefaults.LargeIconSize)
+                            .testTag(FilledIconButtonIconTag)
+                            .semantics(mergeDescendants = true) {}
                 )
             }
         }
@@ -508,22 +501,22 @@ class IconButtonTest {
 
         (iconBounds.left - buttonBounds.left).assertIsEqualTo(
             14.dp,
-            "padding between the start of the button and the start of the icon."
+            "padding between the start of the button and the start of the icon.",
         )
 
         (iconBounds.top - buttonBounds.top).assertIsEqualTo(
             14.dp,
-            "padding between the top of the button and the top of the icon."
+            "padding between the top of the button and the top of the icon.",
         )
 
         (buttonBounds.right - iconBounds.right).assertIsEqualTo(
             14.dp,
-            "padding between the end of the icon and the end of the button."
+            "padding between the end of the icon and the end of the button.",
         )
 
         (buttonBounds.bottom - iconBounds.bottom).assertIsEqualTo(
             14.dp,
-            "padding between the bottom of the button and the bottom of the icon."
+            "padding between the bottom of the button and the bottom of the icon.",
         )
     }
 
@@ -533,17 +526,14 @@ class IconButtonTest {
         rule.setContent {
             Box {
                 IconButton(onClick = {}) {
-                    Box(
-                        Modifier
-                            .size(diameter)
-                            .testTag(FilledIconButtonIconTag)
-                    )
+                    Box(Modifier.size(diameter).testTag(FilledIconButtonIconTag))
                 }
             }
         }
 
         // Icon should be centered inside the FilledIconButton
-        rule.onNodeWithTag(FilledIconButtonIconTag, useUnmergedTree = true)
+        rule
+            .onNodeWithTag(FilledIconButtonIconTag, useUnmergedTree = true)
             .assertLeftPositionInRootIsEqualTo(20.dp / 2)
             .assertTopPositionInRootIsEqualTo(20.dp / 2)
     }
@@ -554,17 +544,14 @@ class IconButtonTest {
         rule.setContent {
             Box {
                 IconButton(onClick = {}) {
-                    Box(
-                        Modifier
-                            .size(diameter)
-                            .testTag(FilledIconButtonIconTag)
-                    )
+                    Box(Modifier.size(diameter).testTag(FilledIconButtonIconTag))
                 }
             }
         }
 
         // Icon should be centered inside the FilledIconButton
-        rule.onNodeWithTag(FilledIconButtonIconTag, useUnmergedTree = true)
+        rule
+            .onNodeWithTag(FilledIconButtonIconTag, useUnmergedTree = true)
             .assertLeftPositionInRootIsEqualTo(10.dp)
             .assertTopPositionInRootIsEqualTo(10.dp)
     }
@@ -572,20 +559,18 @@ class IconButtonTest {
     @Test
     fun outlinedIconButton_DefaultSize() {
         rule.setContent {
-            OutlinedIconButton(
-                modifier = Modifier
-                    .testTag(OutlinedIconButtonTag),
-                onClick = {}
-            ) {
+            OutlinedIconButton(modifier = Modifier.testTag(OutlinedIconButtonTag), onClick = {}) {
                 Box(
-                    modifier = Modifier
-                        .size(OutlinedIconButtonIconSize)
-                        .semantics(mergeDescendants = true) {}
+                    modifier =
+                        Modifier.size(OutlinedIconButtonIconSize).semantics(
+                            mergeDescendants = true
+                        ) {}
                 )
             }
         }
 
-        rule.onNodeWithTag(OutlinedIconButtonTag)
+        rule
+            .onNodeWithTag(OutlinedIconButtonTag)
             .assertWidthIsEqualTo(40.dp)
             .assertHeightIsEqualTo(40.dp)
     }
@@ -594,20 +579,22 @@ class IconButtonTest {
     fun outlinedIconButton_SmallSize() {
         rule.setContent {
             OutlinedIconButton(
-                modifier = Modifier
-                    .size(OutlinedIconButtonDefaults.SmallButtonSize)
-                    .testTag(OutlinedIconButtonTag),
-                onClick = {}
+                modifier =
+                    Modifier.size(OutlinedIconButtonDefaults.SmallButtonSize)
+                        .testTag(OutlinedIconButtonTag),
+                onClick = {},
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(OutlinedIconButtonIconSize)
-                        .semantics(mergeDescendants = true) {}
+                    modifier =
+                        Modifier.size(OutlinedIconButtonIconSize).semantics(
+                            mergeDescendants = true
+                        ) {}
                 )
             }
         }
 
-        rule.onNodeWithTag(OutlinedIconButtonTag)
+        rule
+            .onNodeWithTag(OutlinedIconButtonTag)
             .assertWidthIsEqualTo(28.dp)
             .assertHeightIsEqualTo(28.dp)
     }
@@ -616,20 +603,22 @@ class IconButtonTest {
     fun outlinedIconButton_MediumSize() {
         rule.setContent {
             OutlinedIconButton(
-                modifier = Modifier
-                    .size(OutlinedIconButtonDefaults.MediumButtonSize)
-                    .testTag(OutlinedIconButtonTag),
-                onClick = {}
+                modifier =
+                    Modifier.size(OutlinedIconButtonDefaults.MediumButtonSize)
+                        .testTag(OutlinedIconButtonTag),
+                onClick = {},
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(OutlinedIconButtonIconSize)
-                        .semantics(mergeDescendants = true) {}
+                    modifier =
+                        Modifier.size(OutlinedIconButtonIconSize).semantics(
+                            mergeDescendants = true
+                        ) {}
                 )
             }
         }
 
-        rule.onNodeWithTag(OutlinedIconButtonTag)
+        rule
+            .onNodeWithTag(OutlinedIconButtonTag)
             .assertWidthIsEqualTo(40.dp)
             .assertHeightIsEqualTo(40.dp)
     }
@@ -638,20 +627,22 @@ class IconButtonTest {
     fun outlinedIconButton_LargeSize() {
         rule.setContent {
             OutlinedIconButton(
-                modifier = Modifier
-                    .size(OutlinedIconButtonDefaults.LargeButtonSize)
-                    .testTag(OutlinedIconButtonTag),
-                onClick = {}
+                modifier =
+                    Modifier.size(OutlinedIconButtonDefaults.LargeButtonSize)
+                        .testTag(OutlinedIconButtonTag),
+                onClick = {},
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(OutlinedIconButtonIconSize)
-                        .semantics(mergeDescendants = true) {}
+                    modifier =
+                        Modifier.size(OutlinedIconButtonIconSize).semantics(
+                            mergeDescendants = true
+                        ) {}
                 )
             }
         }
 
-        rule.onNodeWithTag(OutlinedIconButtonTag)
+        rule
+            .onNodeWithTag(OutlinedIconButtonTag)
             .assertWidthIsEqualTo(56.dp)
             .assertHeightIsEqualTo(56.dp)
     }
@@ -660,20 +651,20 @@ class IconButtonTest {
     fun outlinedIconButton_CustomSize() {
         rule.setContent {
             OutlinedIconButton(
-                modifier = Modifier
-                    .size(64.dp)
-                    .testTag(OutlinedIconButtonTag),
-                onClick = {}
+                modifier = Modifier.size(64.dp).testTag(OutlinedIconButtonTag),
+                onClick = {},
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(OutlinedIconButtonIconSize)
-                        .semantics(mergeDescendants = true) {}
+                    modifier =
+                        Modifier.size(OutlinedIconButtonIconSize).semantics(
+                            mergeDescendants = true
+                        ) {}
                 )
             }
         }
 
-        rule.onNodeWithTag(OutlinedIconButtonTag)
+        rule
+            .onNodeWithTag(OutlinedIconButtonTag)
             .assertWidthIsEqualTo(64.dp)
             .assertHeightIsEqualTo(64.dp)
     }
@@ -684,20 +675,20 @@ class IconButtonTest {
         val height = 24.dp
         rule.setContent {
             OutlinedIconButton(
-                modifier = Modifier
-                    .testTag(OutlinedIconButtonTag)
-                    .size(width, height),
-                onClick = {}
+                modifier = Modifier.testTag(OutlinedIconButtonTag).size(width, height),
+                onClick = {},
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(OutlinedIconButtonIconSize)
-                        .semantics(mergeDescendants = true) {}
+                    modifier =
+                        Modifier.size(OutlinedIconButtonIconSize).semantics(
+                            mergeDescendants = true
+                        ) {}
                 )
             }
         }
 
-        rule.onNodeWithTag(OutlinedIconButtonTag, useUnmergedTree = true)
+        rule
+            .onNodeWithTag(OutlinedIconButtonTag, useUnmergedTree = true)
             .assertWidthIsEqualTo(width)
             .assertHeightIsEqualTo(height)
     }
@@ -708,18 +699,20 @@ class IconButtonTest {
             Box {
                 OutlinedIconButton(
                     modifier = Modifier.testTag(OutlinedIconButtonTag),
-                    onClick = {}
+                    onClick = {},
                 ) {
                     Box(
-                        modifier = Modifier
-                            .size(OutlinedIconButtonDefaults.MediumIconSize)
-                            .semantics(mergeDescendants = true) {}
+                        modifier =
+                            Modifier.size(OutlinedIconButtonDefaults.MediumIconSize).semantics(
+                                mergeDescendants = true
+                            ) {}
                     )
                 }
             }
         }
 
-        rule.onNodeWithTag(OutlinedIconButtonTag)
+        rule
+            .onNodeWithTag(OutlinedIconButtonTag)
             .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
             .assertHasClickAction()
             .assertIsEnabled()
@@ -732,18 +725,20 @@ class IconButtonTest {
                 OutlinedIconButton(
                     modifier = Modifier.testTag(OutlinedIconButtonTag),
                     onClick = {},
-                    onLongClick = {}
+                    onLongClick = {},
                 ) {
                     Box(
-                        modifier = Modifier
-                            .size(OutlinedIconButtonDefaults.MediumIconSize)
-                            .semantics(mergeDescendants = true) {}
+                        modifier =
+                            Modifier.size(OutlinedIconButtonDefaults.MediumIconSize).semantics(
+                                mergeDescendants = true
+                            ) {}
                     )
                 }
             }
         }
 
-        rule.onNodeWithTag(OutlinedIconButtonTag)
+        rule
+            .onNodeWithTag(OutlinedIconButtonTag)
             .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
             .assertHasClickAction()
             .assert(SemanticsMatcher.keyIsDefined(SemanticsActions.OnLongClick))
@@ -757,18 +752,20 @@ class IconButtonTest {
                 OutlinedIconButton(
                     modifier = Modifier.testTag(OutlinedIconButtonTag),
                     onClick = {},
-                    enabled = false
+                    enabled = false,
                 ) {
                     Box(
-                        modifier = Modifier
-                            .size(OutlinedIconButtonDefaults.MediumIconSize)
-                            .semantics(mergeDescendants = true) {}
+                        modifier =
+                            Modifier.size(OutlinedIconButtonDefaults.MediumIconSize).semantics(
+                                mergeDescendants = true
+                            ) {}
                     )
                 }
             }
         }
 
-        rule.onNodeWithTag(OutlinedIconButtonTag)
+        rule
+            .onNodeWithTag(OutlinedIconButtonTag)
             .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
             .assertIsNotEnabled()
     }
@@ -782,22 +779,21 @@ class IconButtonTest {
             Box {
                 OutlinedIconButton(
                     modifier = Modifier.testTag(OutlinedIconButtonTag),
-                    onClick = onClick
+                    onClick = onClick,
                 ) {
                     Box(
-                        modifier = Modifier
-                            .size(OutlinedIconButtonDefaults.MediumIconSize)
-                            .semantics(mergeDescendants = true) {}
+                        modifier =
+                            Modifier.size(OutlinedIconButtonDefaults.MediumIconSize).semantics(
+                                mergeDescendants = true
+                            ) {}
                     )
                 }
             }
         }
-        rule.onNodeWithTag(OutlinedIconButtonTag)
-            .requestFocus()
-            .performKeyInput { pressKey(Key.DirectionCenter) }
-        rule.runOnIdle {
-            Truth.assertThat(counter).isEqualTo(1)
+        rule.onNodeWithTag(OutlinedIconButtonTag).requestFocus().performKeyInput {
+            pressKey(Key.DirectionCenter)
         }
+        rule.runOnIdle { Truth.assertThat(counter).isEqualTo(1) }
     }
 
     @Test
@@ -810,22 +806,22 @@ class IconButtonTest {
                 OutlinedIconButton(
                     modifier = Modifier.testTag(OutlinedIconButtonTag),
                     onClick = {},
-                    onLongClick = onLongClick
+                    onLongClick = onLongClick,
                 ) {
                     Box(
-                        modifier = Modifier
-                            .size(OutlinedIconButtonDefaults.MediumIconSize)
-                            .semantics(mergeDescendants = true) {}
+                        modifier =
+                            Modifier.size(OutlinedIconButtonDefaults.MediumIconSize).semantics(
+                                mergeDescendants = true
+                            ) {}
                     )
                 }
             }
         }
-        rule.onNodeWithTag(OutlinedIconButtonTag)
+        rule
+            .onNodeWithTag(OutlinedIconButtonTag)
             .requestFocus()
             .performLongKeyPress(rule, Key.DirectionCenter)
-        rule.runOnIdle {
-            Truth.assertThat(counter).isEqualTo(1)
-        }
+        rule.runOnIdle { Truth.assertThat(counter).isEqualTo(1) }
     }
 
     @Test
@@ -836,17 +832,19 @@ class IconButtonTest {
                 OutlinedIconButton(
                     modifier = Modifier.testTag(OutlinedIconButtonTag),
                     onClick = { enabled = false },
-                    enabled = enabled
+                    enabled = enabled,
                 ) {
                     Box(
-                        modifier = Modifier
-                            .size(OutlinedIconButtonDefaults.MediumIconSize)
-                            .semantics(mergeDescendants = true) {}
+                        modifier =
+                            Modifier.size(OutlinedIconButtonDefaults.MediumIconSize).semantics(
+                                mergeDescendants = true
+                            ) {}
                     )
                 }
             }
         }
-        rule.onNodeWithTag(OutlinedIconButtonTag)
+        rule
+            .onNodeWithTag(OutlinedIconButtonTag)
             // Confirm the button starts off enabled, with a click action
             .assertHasClickAction()
             .assertIsEnabled()
@@ -871,39 +869,41 @@ class IconButtonTest {
             Column {
                 OutlinedIconButton(
                     modifier = Modifier.testTag(addButtonTag),
-                    onClick = addButtonOnClick
+                    onClick = addButtonOnClick,
                 ) {
                     Box(
-                        modifier = Modifier
-                            .size(OutlinedIconButtonDefaults.MediumIconSize)
-                            .semantics(mergeDescendants = true) {}
+                        modifier =
+                            Modifier.size(OutlinedIconButtonDefaults.MediumIconSize).semantics(
+                                mergeDescendants = true
+                            ) {}
                     )
                 }
                 OutlinedIconButton(
                     modifier = Modifier.testTag(phoneButtonTag),
-                    onClick = phoneButtonOnClick
+                    onClick = phoneButtonOnClick,
                 ) {
                     Box(
-                        modifier = Modifier
-                            .size(OutlinedIconButtonDefaults.MediumIconSize)
-                            .semantics(mergeDescendants = true) {}
+                        modifier =
+                            Modifier.size(OutlinedIconButtonDefaults.MediumIconSize).semantics(
+                                mergeDescendants = true
+                            ) {}
                     )
                 }
             }
         }
 
-        rule.onNodeWithTag(addButtonTag)
-            .requestFocus()
-            .performKeyInput { pressKey(Key.DirectionCenter) }
+        rule.onNodeWithTag(addButtonTag).requestFocus().performKeyInput {
+            pressKey(Key.DirectionCenter)
+        }
 
         rule.runOnIdle {
             Truth.assertThat(addButtonCounter).isEqualTo(1)
             Truth.assertThat(phoneButtonCounter).isEqualTo(0)
         }
 
-        rule.onNodeWithTag(phoneButtonTag)
-            .requestFocus()
-            .performKeyInput { pressKey(Key.DirectionCenter) }
+        rule.onNodeWithTag(phoneButtonTag).requestFocus().performKeyInput {
+            pressKey(Key.DirectionCenter)
+        }
 
         rule.runOnIdle {
             Truth.assertThat(addButtonCounter).isEqualTo(1)
@@ -915,16 +915,16 @@ class IconButtonTest {
     fun outlinedIconButton_PositioningSmallSize() {
         rule.setContent {
             OutlinedIconButton(
-                modifier = Modifier
-                    .size(OutlinedIconButtonDefaults.SmallButtonSize)
-                    .testTag(OutlinedIconButtonTag),
-                onClick = {}
+                modifier =
+                    Modifier.size(OutlinedIconButtonDefaults.SmallButtonSize)
+                        .testTag(OutlinedIconButtonTag),
+                onClick = {},
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(OutlinedIconButtonDefaults.SmallIconSize)
-                        .testTag(OutlinedIconButtonIconTag)
-                        .semantics(mergeDescendants = true) {}
+                    modifier =
+                        Modifier.size(OutlinedIconButtonDefaults.SmallIconSize)
+                            .testTag(OutlinedIconButtonIconTag)
+                            .semantics(mergeDescendants = true) {}
                 )
             }
         }
@@ -934,37 +934,34 @@ class IconButtonTest {
 
         (iconBounds.left - buttonBounds.left).assertIsEqualTo(
             6.dp,
-            "padding between the start of the button and the start of the icon."
+            "padding between the start of the button and the start of the icon.",
         )
 
         (iconBounds.top - buttonBounds.top).assertIsEqualTo(
             6.dp,
-            "padding between the top of the button and the top of the icon."
+            "padding between the top of the button and the top of the icon.",
         )
 
         (buttonBounds.right - iconBounds.right).assertIsEqualTo(
             6.dp,
-            "padding between the end of the icon and the end of the button."
+            "padding between the end of the icon and the end of the button.",
         )
 
         (buttonBounds.bottom - iconBounds.bottom).assertIsEqualTo(
             6.dp,
-            "padding between the bottom of the button and the bottom of the icon."
+            "padding between the bottom of the button and the bottom of the icon.",
         )
     }
 
     @Test
     fun outlinedIconButton_PositioningDefaultOrMediumSize() {
         rule.setContent {
-            OutlinedIconButton(
-                modifier = Modifier.testTag(OutlinedIconButtonTag),
-                onClick = {}
-            ) {
+            OutlinedIconButton(modifier = Modifier.testTag(OutlinedIconButtonTag), onClick = {}) {
                 Box(
-                    modifier = Modifier
-                        .size(OutlinedIconButtonDefaults.MediumIconSize)
-                        .testTag(OutlinedIconButtonIconTag)
-                        .semantics(mergeDescendants = true) {}
+                    modifier =
+                        Modifier.size(OutlinedIconButtonDefaults.MediumIconSize)
+                            .testTag(OutlinedIconButtonIconTag)
+                            .semantics(mergeDescendants = true) {}
                 )
             }
         }
@@ -974,22 +971,22 @@ class IconButtonTest {
 
         (iconBounds.left - buttonBounds.left).assertIsEqualTo(
             10.dp,
-            "padding between the start of the button and the start of the icon."
+            "padding between the start of the button and the start of the icon.",
         )
 
         (iconBounds.top - buttonBounds.top).assertIsEqualTo(
             10.dp,
-            "padding between the top of the button and the top of the icon."
+            "padding between the top of the button and the top of the icon.",
         )
 
         (buttonBounds.right - iconBounds.right).assertIsEqualTo(
             10.dp,
-            "padding between the end of the icon and the end of the button."
+            "padding between the end of the icon and the end of the button.",
         )
 
         (buttonBounds.bottom - iconBounds.bottom).assertIsEqualTo(
             10.dp,
-            "padding between the bottom of the button and the bottom of the icon."
+            "padding between the bottom of the button and the bottom of the icon.",
         )
     }
 
@@ -997,16 +994,16 @@ class IconButtonTest {
     fun outlinedIconButton_PositioningLargeSize() {
         rule.setContent {
             OutlinedIconButton(
-                modifier = Modifier
-                    .size(OutlinedIconButtonDefaults.LargeButtonSize)
-                    .testTag(OutlinedIconButtonTag),
-                onClick = {}
+                modifier =
+                    Modifier.size(OutlinedIconButtonDefaults.LargeButtonSize)
+                        .testTag(OutlinedIconButtonTag),
+                onClick = {},
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(OutlinedIconButtonDefaults.LargeIconSize)
-                        .testTag(OutlinedIconButtonIconTag)
-                        .semantics(mergeDescendants = true) {}
+                    modifier =
+                        Modifier.size(OutlinedIconButtonDefaults.LargeIconSize)
+                            .testTag(OutlinedIconButtonIconTag)
+                            .semantics(mergeDescendants = true) {}
                 )
             }
         }
@@ -1016,22 +1013,22 @@ class IconButtonTest {
 
         (iconBounds.left - buttonBounds.left).assertIsEqualTo(
             14.dp,
-            "padding between the start of the button and the start of the icon."
+            "padding between the start of the button and the start of the icon.",
         )
 
         (iconBounds.top - buttonBounds.top).assertIsEqualTo(
             14.dp,
-            "padding between the top of the button and the top of the icon."
+            "padding between the top of the button and the top of the icon.",
         )
 
         (buttonBounds.right - iconBounds.right).assertIsEqualTo(
             14.dp,
-            "padding between the end of the icon and the end of the button."
+            "padding between the end of the icon and the end of the button.",
         )
 
         (buttonBounds.bottom - iconBounds.bottom).assertIsEqualTo(
             14.dp,
-            "padding between the bottom of the button and the bottom of the icon."
+            "padding between the bottom of the button and the bottom of the icon.",
         )
     }
 
@@ -1041,17 +1038,14 @@ class IconButtonTest {
         rule.setContent {
             Box {
                 OutlinedIconButton(onClick = {}) {
-                    Box(
-                        Modifier
-                            .size(diameter)
-                            .testTag(OutlinedIconButtonIconTag)
-                    )
+                    Box(Modifier.size(diameter).testTag(OutlinedIconButtonIconTag))
                 }
             }
         }
 
         // Icon should be centered inside the OutlinedIconButton
-        rule.onNodeWithTag(OutlinedIconButtonIconTag, useUnmergedTree = true)
+        rule
+            .onNodeWithTag(OutlinedIconButtonIconTag, useUnmergedTree = true)
             .assertLeftPositionInRootIsEqualTo(20.dp / 2)
             .assertTopPositionInRootIsEqualTo(20.dp / 2)
     }
@@ -1062,17 +1056,14 @@ class IconButtonTest {
         rule.setContent {
             Box {
                 OutlinedIconButton(onClick = {}) {
-                    Box(
-                        Modifier
-                            .size(diameter)
-                            .testTag(OutlinedIconButtonIconTag)
-                    )
+                    Box(Modifier.size(diameter).testTag(OutlinedIconButtonIconTag))
                 }
             }
         }
 
         // Icon should be centered inside the OutlinedIconButton
-        rule.onNodeWithTag(OutlinedIconButtonIconTag, useUnmergedTree = true)
+        rule
+            .onNodeWithTag(OutlinedIconButtonIconTag, useUnmergedTree = true)
             .assertLeftPositionInRootIsEqualTo(10.dp)
             .assertTopPositionInRootIsEqualTo(10.dp)
     }

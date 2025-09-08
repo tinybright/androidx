@@ -35,8 +35,7 @@ import org.junit.Test
 
 class SliderBenchmark {
 
-    @get:Rule
-    val benchmarkRule = ComposeBenchmarkRule()
+    @get:Rule val benchmarkRule = ComposeBenchmarkRule()
 
     private val sliderCaseFactory = { InlineSliderTestCase() }
 
@@ -85,14 +84,12 @@ internal class InlineSliderTestCase : LayeredComposeTestCase() {
             valueRange = 1f..4f,
             increaseIcon = { Icon(InlineSliderDefaults.Increase, "Increase") },
             decreaseIcon = { Icon(InlineSliderDefaults.Decrease, "Decrease") },
-            steps = 2
+            steps = 2,
         )
     }
 
     @Composable
     override fun ContentWrappers(content: @Composable () -> Unit) {
-        MaterialTheme {
-            content()
-        }
+        MaterialTheme { content() }
     }
 }

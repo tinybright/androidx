@@ -51,32 +51,23 @@ fun CatalogTopAppBar(
     onIssueClick: () -> Unit = {},
     onTermsClick: () -> Unit = {},
     onPrivacyClick: () -> Unit = {},
-    onLicensesClick: () -> Unit = {}
+    onLicensesClick: () -> Unit = {},
 ) {
     var moreMenuExpanded by remember { mutableStateOf(false) }
     TopAppBar(
         windowInsets = AppBarDefaults.topAppBarWindowInsets,
-        title = {
-            Text(
-                text = title,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        },
+        title = { Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         actions = {
             Box {
                 Row {
                     IconButton(onClick = onThemeClick) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_palette_24dp),
-                            contentDescription = null
+                            contentDescription = null,
                         )
                     }
                     IconButton(onClick = { moreMenuExpanded = true }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = null
-                        )
+                        Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
                     }
                 }
                 MoreMenu(
@@ -109,22 +100,23 @@ fun CatalogTopAppBar(
                     onLicensesClick = {
                         onLicensesClick()
                         moreMenuExpanded = false
-                    }
+                    },
                 )
             }
         },
-        navigationIcon = if (showBackNavigationIcon) {
-            {
-                IconButton(onClick = onBackClick) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null
-                    )
+        navigationIcon =
+            if (showBackNavigationIcon) {
+                {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null,
+                        )
+                    }
                 }
-            }
-        } else {
-            null
-        }
+            } else {
+                null
+            },
     )
 }
 
@@ -140,10 +132,7 @@ private fun MoreMenu(
     onPrivacyClick: () -> Unit,
     onLicensesClick: () -> Unit,
 ) {
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = onDismissRequest
-    ) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
         DropdownMenuItem(onClick = onGuidelinesClick) {
             Text(stringResource(id = R.string.view_design_guidelines))
         }

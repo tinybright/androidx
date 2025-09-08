@@ -37,10 +37,7 @@ fun BlurSample() {
     Box(
         Modifier.size(300.dp)
             // Blur content allowing the result to extend beyond the bounds of the original content
-            .blur(
-                30.dp,
-                edgeTreatment = BlurredEdgeTreatment.Unbounded
-            )
+            .blur(30.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
             .background(Color.Red, CircleShape)
     )
 }
@@ -52,6 +49,6 @@ fun ImageBlurSample() {
         painter = painterResource(R.drawable.circus),
         contentDescription = "sample blurred image",
         // Blur content within the original bounds, clipping the result to a rounded rectangle
-        modifier = Modifier.blur(30.dp, BlurredEdgeTreatment(RoundedCornerShape(5.dp)))
+        modifier = Modifier.blur(30.dp, BlurredEdgeTreatment(RoundedCornerShape(5.dp))),
     )
 }

@@ -48,23 +48,22 @@ import org.junit.runners.Parameterized
 class TextMeasurerBenchmark(
     private val textLength: Int,
     private val textType: TextType,
-    alphabet: Alphabet
+    alphabet: Alphabet,
 ) {
     companion object {
         @JvmStatic
         @Parameterized.Parameters(name = "length={0} type={1} alphabet={2}")
-        fun initParameters(): List<Array<Any?>> = cartesian(
-            arrayOf(8, 32, 128, 512),
-            arrayOf(TextType.PlainText, TextType.StyledText),
-            arrayOf(Alphabet.Latin, Alphabet.Cjk)
-        )
+        fun initParameters(): List<Array<Any?>> =
+            cartesian(
+                arrayOf(8, 32, 128, 512),
+                arrayOf(TextType.PlainText, TextType.StyledText),
+                arrayOf(Alphabet.Latin, Alphabet.Cjk),
+            )
     }
 
-    @get:Rule
-    val benchmarkRule = BenchmarkRule()
+    @get:Rule val benchmarkRule = BenchmarkRule()
 
-    @get:Rule
-    val textBenchmarkRule = TextBenchmarkTestRule(alphabet)
+    @get:Rule val textBenchmarkRule = TextBenchmarkTestRule(alphabet)
 
     private lateinit var instrumentationContext: Context
 
@@ -75,38 +74,42 @@ class TextMeasurerBenchmark(
     @Before
     fun setup() {
         instrumentationContext = InstrumentationRegistry.getInstrumentation().context
-        width = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            textBenchmarkRule.widthDp,
-            instrumentationContext.resources.displayMetrics
-        ).roundToInt()
+        width =
+            TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    textBenchmarkRule.widthDp,
+                    instrumentationContext.resources.displayMetrics,
+                )
+                .roundToInt()
     }
 
     private fun text(textGenerator: RandomTextGenerator): AnnotatedString {
         val text = textGenerator.nextParagraph(textLength)
-        val spanStyles = if (textType == TextType.StyledText) {
-            textGenerator.createStyles(text)
-        } else {
-            listOf()
-        }
+        val spanStyles =
+            if (textType == TextType.StyledText) {
+                textGenerator.createStyles(text)
+            } else {
+                listOf()
+            }
         return AnnotatedString(text = text, spanStyles = spanStyles)
     }
 
     @Test
     fun text_measurer_no_cache() {
         textBenchmarkRule.generator { textGenerator ->
-            val textMeasurer = TextMeasurer(
-                defaultFontFamilyResolver = createFontFamilyResolver(instrumentationContext),
-                defaultDensity = Density(instrumentationContext),
-                defaultLayoutDirection = LayoutDirection.Ltr,
-                cacheSize = 0
-            )
+            val textMeasurer =
+                TextMeasurer(
+                    defaultFontFamilyResolver = createFontFamilyResolver(instrumentationContext),
+                    defaultDensity = Density(instrumentationContext),
+                    defaultLayoutDirection = LayoutDirection.Ltr,
+                    cacheSize = 0,
+                )
             val text = text(textGenerator)
             benchmarkRule.measureRepeated {
                 textMeasurer.measure(
                     text,
                     style = TextStyle(color = Color.Red, fontSize = fontSize),
-                    constraints = Constraints.fixedWidth(width)
+                    constraints = Constraints.fixedWidth(width),
                 )
             }
         }
@@ -115,18 +118,19 @@ class TextMeasurerBenchmark(
     @Test
     fun text_measurer_cached() {
         textBenchmarkRule.generator { textGenerator ->
-            val textMeasurer = TextMeasurer(
-                defaultFontFamilyResolver = createFontFamilyResolver(instrumentationContext),
-                defaultDensity = Density(instrumentationContext),
-                defaultLayoutDirection = LayoutDirection.Ltr,
-                cacheSize = 16
-            )
+            val textMeasurer =
+                TextMeasurer(
+                    defaultFontFamilyResolver = createFontFamilyResolver(instrumentationContext),
+                    defaultDensity = Density(instrumentationContext),
+                    defaultLayoutDirection = LayoutDirection.Ltr,
+                    cacheSize = 16,
+                )
             val text = text(textGenerator)
             benchmarkRule.measureRepeated {
                 textMeasurer.measure(
                     text,
                     style = TextStyle(color = Color.Red, fontSize = fontSize),
-                    constraints = Constraints.fixedWidth(width)
+                    constraints = Constraints.fixedWidth(width),
                 )
             }
         }
@@ -135,27 +139,28 @@ class TextMeasurerBenchmark(
     @Test
     fun drawText_TextLayoutResult_no_change() {
         textBenchmarkRule.generator { textGenerator ->
-            val textMeasurer = TextMeasurer(
-                defaultFontFamilyResolver = createFontFamilyResolver(instrumentationContext),
-                defaultDensity = Density(instrumentationContext),
-                defaultLayoutDirection = LayoutDirection.Ltr,
-                cacheSize = 16
-            )
-            val textLayoutResult = textMeasurer.measure(
-                text(textGenerator),
-                style = TextStyle(color = Color.Red, fontSize = fontSize),
-                constraints = Constraints.fixedWidth(width)
-            )
+            val textMeasurer =
+                TextMeasurer(
+                    defaultFontFamilyResolver = createFontFamilyResolver(instrumentationContext),
+                    defaultDensity = Density(instrumentationContext),
+                    defaultLayoutDirection = LayoutDirection.Ltr,
+                    cacheSize = 16,
+                )
+            val textLayoutResult =
+                textMeasurer.measure(
+                    text(textGenerator),
+                    style = TextStyle(color = Color.Red, fontSize = fontSize),
+                    constraints = Constraints.fixedWidth(width),
+                )
             val drawScope = CanvasDrawScope()
-            val canvas = Canvas(
-                ImageBitmap(textLayoutResult.size.width, textLayoutResult.size.height)
-            )
+            val canvas =
+                Canvas(ImageBitmap(textLayoutResult.size.width, textLayoutResult.size.height))
             benchmarkRule.measureRepeated {
                 drawScope.draw(
                     Density(instrumentationContext),
                     LayoutDirection.Ltr,
                     canvas,
-                    textLayoutResult.size.toSize()
+                    textLayoutResult.size.toSize(),
                 ) {
                     drawText(textLayoutResult)
                 }
@@ -166,27 +171,28 @@ class TextMeasurerBenchmark(
     @Test
     fun drawText_TextLayoutResult_color_override() {
         textBenchmarkRule.generator { textGenerator ->
-            val textMeasurer = TextMeasurer(
-                defaultFontFamilyResolver = createFontFamilyResolver(instrumentationContext),
-                defaultDensity = Density(instrumentationContext),
-                defaultLayoutDirection = LayoutDirection.Ltr,
-                cacheSize = 16
-            )
-            val textLayoutResult = textMeasurer.measure(
-                text(textGenerator),
-                style = TextStyle(color = Color.Red, fontSize = fontSize),
-                constraints = Constraints.fixedWidth(width)
-            )
+            val textMeasurer =
+                TextMeasurer(
+                    defaultFontFamilyResolver = createFontFamilyResolver(instrumentationContext),
+                    defaultDensity = Density(instrumentationContext),
+                    defaultLayoutDirection = LayoutDirection.Ltr,
+                    cacheSize = 16,
+                )
+            val textLayoutResult =
+                textMeasurer.measure(
+                    text(textGenerator),
+                    style = TextStyle(color = Color.Red, fontSize = fontSize),
+                    constraints = Constraints.fixedWidth(width),
+                )
             val drawScope = CanvasDrawScope()
-            val canvas = Canvas(
-                ImageBitmap(textLayoutResult.size.width, textLayoutResult.size.height)
-            )
+            val canvas =
+                Canvas(ImageBitmap(textLayoutResult.size.width, textLayoutResult.size.height))
             benchmarkRule.measureRepeated {
                 drawScope.draw(
                     Density(instrumentationContext),
                     LayoutDirection.Ltr,
                     canvas,
-                    textLayoutResult.size.toSize()
+                    textLayoutResult.size.toSize(),
                 ) {
                     drawText(textLayoutResult, color = Color.Blue)
                 }

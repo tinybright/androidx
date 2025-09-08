@@ -16,14 +16,12 @@
 
 package androidx.hilt.integration.viewmodelapp
 
-import android.os.Build
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
-import androidx.test.filters.SdkSuppress
 import com.google.common.truth.Truth.assertThat
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -36,21 +34,21 @@ import org.junit.runner.RunWith
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 // TODO: Find out why random ClassNotFoundException is thrown in APIs lower than 21.
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.LOLLIPOP)
 class BaseFragmentInjectionTest {
 
-    @get:Rule
-    val rule = HiltAndroidRule(this)
+    @get:Rule val rule = HiltAndroidRule(this)
 
     @Test
     fun verifyInjection() {
         ActivityScenario.launch(TestActivity::class.java).use {
             it.onActivity { activity ->
-                val fragment = activity.supportFragmentManager.fragmentFactory.instantiate(
-                    TestFragment::class.java.classLoader!!,
-                    TestFragment::class.java.name
-                ) as TestFragment
-                activity.supportFragmentManager.beginTransaction()
+                val fragment =
+                    activity.supportFragmentManager.fragmentFactory.instantiate(
+                        TestFragment::class.java.classLoader!!,
+                        TestFragment::class.java.name,
+                    ) as TestFragment
+                activity.supportFragmentManager
+                    .beginTransaction()
                     .add(0, fragment, FragmentInjectionTest.FRAGMENT_TAG)
                     .commitNow()
                 assertThat(fragment.myAndroidViewModel).isNotNull()
@@ -60,11 +58,9 @@ class BaseFragmentInjectionTest {
         }
     }
 
-    @AndroidEntryPoint
-    class TestActivity : FragmentActivity()
+    @AndroidEntryPoint class TestActivity : FragmentActivity()
 
-    @AndroidEntryPoint
-    class TestFragment : BaseFragment()
+    @AndroidEntryPoint class TestFragment : BaseFragment()
 
     abstract class BaseFragment : Fragment() {
         val myAndroidViewModel by viewModels<MyAndroidViewModel>()

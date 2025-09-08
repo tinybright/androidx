@@ -39,17 +39,16 @@ internal fun Modifier.textFieldMinSize(style: TextStyle) = composed {
     val fontFamilyResolver = LocalFontFamilyResolver.current
     val layoutDirection = LocalLayoutDirection.current
 
-    val resolvedStyle = remember(style, layoutDirection) {
-        resolveDefaults(style, layoutDirection)
-    }
-    val typeface by remember(fontFamilyResolver, resolvedStyle) {
-        fontFamilyResolver.resolve(
-            resolvedStyle.fontFamily,
-            resolvedStyle.fontWeight ?: FontWeight.Normal,
-            resolvedStyle.fontStyle ?: FontStyle.Normal,
-            resolvedStyle.fontSynthesis ?: FontSynthesis.All
-        )
-    }
+    val resolvedStyle = remember(style, layoutDirection) { resolveDefaults(style, layoutDirection) }
+    val typeface by
+        remember(fontFamilyResolver, resolvedStyle) {
+            fontFamilyResolver.resolve(
+                resolvedStyle.fontFamily,
+                resolvedStyle.fontWeight ?: FontWeight.Normal,
+                resolvedStyle.fontStyle ?: FontStyle.Normal,
+                resolvedStyle.fontSynthesis ?: FontSynthesis.All,
+            )
+        }
 
     val minSizeState = remember {
         TextFieldSize(layoutDirection, density, fontFamilyResolver, style, typeface)
@@ -60,14 +59,13 @@ internal fun Modifier.textFieldMinSize(style: TextStyle) = composed {
     Modifier.layout { measurable, constraints ->
         val minSize = minSizeState.minSize
 
-        val childConstraints = constraints.copy(
-            minWidth = minSize.width.coerceIn(constraints.minWidth, constraints.maxWidth),
-            minHeight = minSize.height.coerceIn(constraints.minHeight, constraints.maxHeight)
-        )
+        val childConstraints =
+            constraints.copy(
+                minWidth = minSize.width.coerceIn(constraints.minWidth, constraints.maxWidth),
+                minHeight = minSize.height.coerceIn(constraints.minHeight, constraints.maxHeight),
+            )
         val measured = measurable.measure(childConstraints)
-        layout(measured.width, measured.height) {
-            measured.placeRelative(0, 0)
-        }
+        layout(measured.width, measured.height) { measured.placeRelative(0, 0) }
     }
 }
 
@@ -76,7 +74,7 @@ private class TextFieldSize(
     var density: Density,
     var fontFamilyResolver: FontFamily.Resolver,
     var resolvedStyle: TextStyle,
-    var typeface: Any
+    var typeface: Any,
 ) {
     var minSize = computeMinSize()
         private set
@@ -86,13 +84,14 @@ private class TextFieldSize(
         density: Density,
         fontFamilyResolver: FontFamily.Resolver,
         resolvedStyle: TextStyle,
-        typeface: Any
+        typeface: Any,
     ) {
-        if (layoutDirection != this.layoutDirection ||
-            density != this.density ||
-            fontFamilyResolver != this.fontFamilyResolver ||
-            resolvedStyle != this.resolvedStyle ||
-            typeface != this.typeface
+        if (
+            layoutDirection != this.layoutDirection ||
+                density != this.density ||
+                fontFamilyResolver != this.fontFamilyResolver ||
+                resolvedStyle != this.resolvedStyle ||
+                typeface != this.typeface
         ) {
             this.layoutDirection = layoutDirection
             this.density = density
@@ -107,7 +106,7 @@ private class TextFieldSize(
         return computeSizeForDefaultText(
             style = resolvedStyle,
             density = density,
-            fontFamilyResolver = fontFamilyResolver
+            fontFamilyResolver = fontFamilyResolver,
         )
     }
 }

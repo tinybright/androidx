@@ -26,21 +26,22 @@ import java.util.Date
 import java.util.Objects
 
 /**
- * Decorator for [DateTimeFormatter], because [MessageFormat] expects formatters that
- * extend [java.text.Format].
+ * Decorator for [DateTimeFormatter], because [MessageFormat] expects formatters that extend
+ * [java.text.Format].
  */
 internal class DateTimeFormatterAsFormat(private val realFormatter: DateTimeFormatter) : Format() {
     override fun format(
         obj: Any,
         stringBuffer: StringBuffer,
-        fieldPosition: FieldPosition
+        fieldPosition: FieldPosition,
     ): StringBuffer {
-        val result = when (obj) {
-            is Date -> realFormatter.format(obj)
-            is Calendar -> realFormatter.format(obj)
-            is Long -> realFormatter.format(obj)
-            else -> Objects.toString(obj)
-        }
+        val result =
+            when (obj) {
+                is Date -> realFormatter.format(obj)
+                is Calendar -> realFormatter.format(obj)
+                is Long -> realFormatter.format(obj)
+                else -> Objects.toString(obj)
+            }
         return stringBuffer.append(result)
     }
 

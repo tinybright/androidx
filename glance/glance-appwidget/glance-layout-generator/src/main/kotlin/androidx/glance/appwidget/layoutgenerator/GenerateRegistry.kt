@@ -39,8 +39,8 @@ import java.io.File
 /**
  * Generate the registry: a mapping from `LayoutSelector` to `Layout`.
  *
- * For each generated layout, a selector is created describing what the layout can and cannot do.
- * It is mapped to a `Layout`, an object describing the parameters needed to act on the layout.
+ * For each generated layout, a selector is created describing what the layout can and cannot do. It
+ * is mapped to a `Layout`, an object describing the parameters needed to act on the layout.
  */
 internal fun generateRegistry(
     packageName: String,
@@ -52,133 +52,150 @@ internal fun generateRegistry(
     outputSourceDir.mkdirs()
     val file = FileSpec.builder(packageName, "GeneratedLayouts")
 
-    val generatedContainerApi21 = funSpec("registerContainers") {
-        returns(ContainerMap)
-        addModifiers(PRIVATE)
-        addStatement("val result =")
-        addCode(buildInitializer(layouts))
-        addStatement("return result")
-    }
+    val generatedContainerApi21 =
+        funSpec("registerContainers") {
+            returns(ContainerMap)
+            addModifiers(PRIVATE)
+            addStatement("val result =")
+            addCode(buildInitializer(layouts))
+            addStatement("return result")
+        }
 
-    val generatedChildrenApi21 = funSpec("registerChildren") {
-        returns(ContainerChildrenMap)
-        addModifiers(PRIVATE)
-        addStatement("val result =")
-        addCode(buildChildrenInitializer(layouts, StubSizes))
-        addStatement("return result")
-    }
+    val generatedChildrenApi21 =
+        funSpec("registerChildren") {
+            returns(ContainerChildrenMap)
+            addModifiers(PRIVATE)
+            addStatement("val result =")
+            addCode(buildChildrenInitializer(layouts, StubSizes))
+            addStatement("return result")
+        }
 
-    val requireApi31 = AnnotationSpec.builder(RequiresApi).apply {
-        addMember("%M", VersionCodeS)
-    }.build()
-    val generatedContainerApi31 = objectSpec("GeneratedContainersForApi31Impl") {
-        addModifiers(PRIVATE)
-        addAnnotation(requireApi31)
-        addFunction(
-            funSpec("registerContainers") {
-                returns(ContainerMap)
-                addAnnotation(DoNotInline)
-                addStatement("val result =")
-                addCode(buildInitializer(layouts))
-                addStatement("return result")
-            }
-        )
-        addFunction(
-            funSpec("registerChildren") {
-                returns(ContainerChildrenMap)
-                addAnnotation(DoNotInline)
-                addStatement("val result =")
-                addCode(buildChildrenInitializer(layouts, listOf(ValidSize.Wrap)))
-                addStatement("return result")
-            }
-        )
-    }
+    val requireApi31 =
+        AnnotationSpec.builder(RequiresApi).apply { addMember("%M", VersionCodeS) }.build()
+    val generatedContainerApi31 =
+        objectSpec("GeneratedContainersForApi31Impl") {
+            addModifiers(PRIVATE)
+            addAnnotation(requireApi31)
+            addFunction(
+                funSpec("registerContainers") {
+                    returns(ContainerMap)
+                    addAnnotation(DoNotInline)
+                    addStatement("val result =")
+                    addCode(buildInitializer(layouts))
+                    addStatement("return result")
+                }
+            )
+            addFunction(
+                funSpec("registerChildren") {
+                    returns(ContainerChildrenMap)
+                    addAnnotation(DoNotInline)
+                    addStatement("val result =")
+                    addCode(buildChildrenInitializer(layouts, listOf(ValidSize.Wrap)))
+                    addStatement("return result")
+                }
+            )
+        }
 
-    val generatedLayouts = propertySpec(
-        "generatedContainers",
-        ContainerMap,
-        INTERNAL,
-    ) {
-        initializer(buildCodeBlock {
-            addStatement(
-                """
+    val generatedLayouts =
+        propertySpec("generatedContainers", ContainerMap, INTERNAL) {
+            initializer(
+                buildCodeBlock {
+                    addStatement(
+                        """
                 |if(%M >= %M) {
                 |  GeneratedContainersForApi31Impl.registerContainers()
                 |} else {
                 |  registerContainers()
-                |}""".trimMargin(),
-                SdkInt, VersionCodeS
+                |}"""
+                            .trimMargin(),
+                        SdkInt,
+                        VersionCodeS,
+                    )
+                }
             )
-        })
-    }
+        }
     file.addProperty(generatedLayouts)
     file.addFunction(generatedContainerApi21)
 
-    val generatedChildren = propertySpec(
-        "generatedChildren",
-        ContainerChildrenMap,
-        INTERNAL,
-    ) {
-        initializer(buildCodeBlock {
-            addStatement(
-                """
+    val generatedChildren =
+        propertySpec("generatedChildren", ContainerChildrenMap, INTERNAL) {
+            initializer(
+                buildCodeBlock {
+                    addStatement(
+                        """
                 |if(%M >= %M) {
                 |  GeneratedContainersForApi31Impl.registerChildren()
                 |} else {
                 |  registerChildren()
-                |}""".trimMargin(),
-                SdkInt, VersionCodeS
+                |}"""
+                            .trimMargin(),
+                        SdkInt,
+                        VersionCodeS,
+                    )
+                }
             )
-        })
-    }
+        }
     file.addProperty(generatedChildren)
     file.addFunction(generatedChildrenApi21)
     file.addType(generatedContainerApi31)
 
     // TODO: only register the box children on T+, since the layouts are in layout-v32
-    val generatedBoxChildren = propertySpec(
-        "generatedBoxChildren",
-        BoxChildrenMap,
-        INTERNAL,
-    ) {
-        initializer(buildBoxChildInitializer(boxChildLayouts))
-    }
+    val generatedBoxChildren =
+        propertySpec("generatedBoxChildren", BoxChildrenMap, INTERNAL) {
+            initializer(buildBoxChildInitializer(boxChildLayouts))
+        }
     file.addProperty(generatedBoxChildren)
-    val generatedRowColumnChildren = propertySpec(
-        "generatedRowColumnChildren",
-        RowColumnChildrenMap,
-        INTERNAL,
-    ) {
-        initializer(buildRowColumnChildInitializer(rowColumnChildLayouts))
-    }
+    val generatedRowColumnChildren =
+        propertySpec("generatedRowColumnChildren", RowColumnChildrenMap, INTERNAL) {
+            initializer(buildRowColumnChildInitializer(rowColumnChildLayouts))
+        }
     file.addProperty(generatedRowColumnChildren)
 
-    val generatedComplexLayouts = propertySpec("generatedComplexLayouts", LayoutsMap, INTERNAL) {
-        initializer(buildComplexInitializer())
-    }
+    val generatedComplexLayouts =
+        propertySpec("generatedComplexLayouts", LayoutsMap, INTERNAL) {
+            initializer(buildComplexInitializer())
+        }
     file.addProperty(generatedComplexLayouts)
 
-    val generatedRoots = propertySpec("generatedRootLayoutShifts", SizeSelectorToIntMap, INTERNAL) {
-        addKdoc("Shift per root layout before Android S, based on width, height")
-        initializer(buildRootInitializer())
-    }
+    val generatedRoots =
+        propertySpec("generatedRootLayoutShifts", SizeSelectorToIntMap, INTERNAL) {
+            addKdoc("Shift per root layout before Android S, based on width, height")
+            initializer(buildRootInitializer())
+        }
     file.addProperty(generatedRoots)
 
-    val firstRootAlias = propertySpec("FirstRootAlias", INT, INTERNAL) {
-        initializer("R.layout.${makeRootAliasResourceName(0)}")
-    }
-    val lastRootAlias = propertySpec("LastRootAlias", INT, INTERNAL) {
-        initializer(
-            "R.layout.%L",
-            makeRootAliasResourceName(generatedRootSizePairs.size * RootLayoutAliasCount - 1)
-        )
-    }
-    val rootAliasCount = propertySpec("RootAliasCount", INT, INTERNAL) {
-        initializer("%L", generatedRootSizePairs.size * RootLayoutAliasCount)
-    }
+    val firstRootAlias =
+        propertySpec("FirstRootAlias", INT, INTERNAL) {
+            initializer("R.layout.${makeRootAliasResourceName(0)}")
+        }
+    val lastRootAlias =
+        propertySpec("LastRootAlias", INT, INTERNAL) {
+            initializer(
+                "R.layout.%L",
+                makeRootAliasResourceName(generatedRootSizePairs.size * RootLayoutAliasCount - 1),
+            )
+        }
+    val rootAliasCount =
+        propertySpec("RootAliasCount", INT, INTERNAL) {
+            initializer("%L", generatedRootSizePairs.size * RootLayoutAliasCount)
+        }
     file.addProperty(firstRootAlias)
     file.addProperty(lastRootAlias)
     file.addProperty(rootAliasCount)
+
+    val firstViewId =
+        propertySpec("FirstViewId", INT, INTERNAL) {
+            initializer("R.id.${makeViewIdResourceName(0)}")
+        }
+    val lastViewId =
+        propertySpec("LastViewId", INT, INTERNAL) {
+            initializer("R.id.${makeViewIdResourceName(TotalViewCount - 1)}")
+        }
+    val totalViewCount =
+        propertySpec("TotalViewCount", INT, INTERNAL) { initializer("%L", TotalViewCount) }
+    file.addProperty(firstViewId)
+    file.addProperty(lastViewId)
+    file.addProperty(totalViewCount)
 
     file.build().writeTo(outputSourceDir)
 }
@@ -189,9 +206,8 @@ private fun buildInitializer(layouts: Map<File, List<ContainerProperties>>): Cod
             addStatement("mapOf(")
             withIndent {
                 add(
-                    layouts.map {
-                        it.key to createFileInitializer(it.key, it.value)
-                    }
+                    layouts
+                        .map { it.key to createFileInitializer(it.key, it.value) }
                         .sortedBy { it.first.nameWithoutExtension }
                         .map { it.second }
                         .joinToCode("")
@@ -209,9 +225,8 @@ private fun buildChildrenInitializer(
         addStatement("mapOf(")
         withIndent {
             add(
-                layouts.map {
-                    it.key to createChildrenInitializer(it.key, it.value, sizes)
-                }
+                layouts
+                    .map { it.key to createChildrenInitializer(it.key, it.value, sizes) }
                     .sortedBy { it.first.nameWithoutExtension }
                     .map { it.second }
                     .joinToCode("")
@@ -227,9 +242,8 @@ private fun buildBoxChildInitializer(layouts: Map<File, List<BoxChildProperties>
             addStatement("mapOf(")
             withIndent {
                 add(
-                    layouts.map {
-                        it.key to createBoxChildFileInitializer(it.key, it.value)
-                    }
+                    layouts
+                        .map { it.key to createBoxChildFileInitializer(it.key, it.value) }
                         .sortedBy { it.first.nameWithoutExtension }
                         .map { it.second }
                         .joinToCode("")
@@ -241,23 +255,21 @@ private fun buildBoxChildInitializer(layouts: Map<File, List<BoxChildProperties>
 
 private fun buildRowColumnChildInitializer(
     layouts: Map<File, List<RowColumnChildProperties>>
-): CodeBlock =
-    buildCodeBlock {
+): CodeBlock = buildCodeBlock {
+    withIndent {
+        addStatement("mapOf(")
         withIndent {
-            addStatement("mapOf(")
-            withIndent {
-                add(
-                    layouts.map {
-                        it.key to createRowColumnChildFileInitializer(it.key, it.value)
-                    }
-                        .sortedBy { it.first.nameWithoutExtension }
-                        .map { it.second }
-                        .joinToCode("")
-                )
-            }
-            addStatement(")")
+            add(
+                layouts
+                    .map { it.key to createRowColumnChildFileInitializer(it.key, it.value) }
+                    .sortedBy { it.first.nameWithoutExtension }
+                    .map { it.second }
+                    .joinToCode("")
+            )
         }
+        addStatement(")")
     }
+}
 
 private fun buildComplexInitializer(): CodeBlock {
     return buildCodeBlock {
@@ -298,20 +310,18 @@ private fun buildRootInitializer(): CodeBlock {
     }
 }
 
-private fun createFileInitializer(
-    layout: File,
-    generated: List<ContainerProperties>
-): CodeBlock =
+private fun createFileInitializer(layout: File, generated: List<ContainerProperties>): CodeBlock =
     buildCodeBlock {
         val viewType = layout.nameWithoutExtension.toLayoutType()
         generated.forEach { props ->
             addContainer(
-                resourceName = makeContainerResourceName(
-                    layout,
-                    props.numberChildren,
-                    props.horizontalAlignment,
-                    props.verticalAlignment
-                ),
+                resourceName =
+                    makeContainerResourceName(
+                        layout,
+                        props.numberChildren,
+                        props.horizontalAlignment,
+                        props.verticalAlignment,
+                    ),
                 viewType = viewType,
                 horizontalAlignment = props.horizontalAlignment,
                 verticalAlignment = props.verticalAlignment,
@@ -322,57 +332,55 @@ private fun createFileInitializer(
 
 private fun createBoxChildFileInitializer(
     layout: File,
-    generated: List<BoxChildProperties>
-): CodeBlock =
-    buildCodeBlock {
-        val viewType = layout.nameWithoutExtension.toLayoutType()
-        generated.forEach { props ->
-            addBoxChild(
-                resourceName = makeBoxChildResourceName(
+    generated: List<BoxChildProperties>,
+): CodeBlock = buildCodeBlock {
+    val viewType = layout.nameWithoutExtension.toLayoutType()
+    generated.forEach { props ->
+        addBoxChild(
+            resourceName =
+                makeBoxChildResourceName(
                     layout,
                     props.horizontalAlignment,
-                    props.verticalAlignment
+                    props.verticalAlignment,
                 ),
-                viewType = viewType,
-                horizontalAlignment = props.horizontalAlignment,
-                verticalAlignment = props.verticalAlignment,
-            )
-        }
+            viewType = viewType,
+            horizontalAlignment = props.horizontalAlignment,
+            verticalAlignment = props.verticalAlignment,
+        )
     }
+}
 
 private fun createRowColumnChildFileInitializer(
     layout: File,
-    generated: List<RowColumnChildProperties>
-): CodeBlock =
-    buildCodeBlock {
-        val viewType = layout.nameWithoutExtension.toLayoutType()
-        generated.forEach { props ->
-            addRowColumnChild(
-                resourceName = makeRowColumnChildResourceName(layout, props.width, props.height),
-                viewType = viewType,
-                width = props.width,
-                height = props.height,
-            )
-        }
+    generated: List<RowColumnChildProperties>,
+): CodeBlock = buildCodeBlock {
+    val viewType = layout.nameWithoutExtension.toLayoutType()
+    generated.forEach { props ->
+        addRowColumnChild(
+            resourceName = makeRowColumnChildResourceName(layout, props.width, props.height),
+            viewType = viewType,
+            width = props.width,
+            height = props.height,
+        )
     }
+}
 
 private fun createChildrenInitializer(
     layout: File,
     generated: List<ContainerProperties>,
     sizes: List<ValidSize>,
-): CodeBlock =
-    buildCodeBlock {
-        val viewType = layout.nameWithoutExtension.toLayoutType()
-        val orientation = generated.first().containerOrientation
-        val numChildren =
-            generated.map { it.numberChildren }.maxOrNull() ?: error("There must be children")
-        childrenInitializer(viewType, generateChildren(numChildren, orientation, sizes))
-    }
+): CodeBlock = buildCodeBlock {
+    val viewType = layout.nameWithoutExtension.toLayoutType()
+    val orientation = generated.first().containerOrientation
+    val numChildren =
+        generated.map { it.numberChildren }.maxOrNull() ?: error("There must be children")
+    childrenInitializer(viewType, generateChildren(numChildren, orientation, sizes))
+}
 
 private fun generateChildren(
     numChildren: Int,
     containerOrientation: ContainerOrientation,
-    sizes: List<ValidSize>
+    sizes: List<ValidSize>,
 ) =
     (0 until numChildren).associateWith { pos ->
         val widths = sizes + containerOrientation.extraWidths
@@ -392,7 +400,8 @@ private fun CodeBlock.Builder.childrenInitializer(
 ) {
     addStatement("%M to mapOf(", makeViewType(viewType))
     withIndent {
-        children.toList()
+        children
+            .toList()
             .sortedBy { it.first }
             .forEach { (pos, children) ->
                 addStatement("$pos to mapOf(")
@@ -410,7 +419,7 @@ private fun CodeBlock.Builder.childrenInitializer(
                                     makeIdName(
                                         pos,
                                         child.width,
-                                        child.height
+                                        child.height,
                                     )
                                 },"
                             )
@@ -512,95 +521,85 @@ private val BoxChildrenMap = Map::class.asTypeName().parameterizedBy(BoxChildSel
 private val RowColumnChildrenMap =
     Map::class.asTypeName().parameterizedBy(RowColumnChildSelector, LayoutInfo)
 
-private fun makeViewType(name: String) =
-    MemberName("androidx.glance.appwidget.LayoutType", name)
+private fun makeViewType(name: String) = MemberName("androidx.glance.appwidget.LayoutType", name)
 
 private fun String.toLayoutType(): String =
-    snakeRegex.replace(this.removePrefix("glance_")) {
-        it.value.replace("_", "").uppercase()
-    }.replaceFirstChar { it.uppercaseChar() }
+    snakeRegex
+        .replace(this.removePrefix("glance_")) { it.value.replace("_", "").uppercase() }
+        .replaceFirstChar { it.uppercaseChar() }
 
 private val snakeRegex = "_[a-zA-Z0-9]".toRegex()
 
-private fun ValidSize.toValue() = when (this) {
-    ValidSize.Wrap -> WrapValue
-    ValidSize.Fixed -> FixedValue
-    ValidSize.Expand -> ExpandValue
-    ValidSize.Match -> MatchValue
-}
+private fun ValidSize.toValue() =
+    when (this) {
+        ValidSize.Wrap -> WrapValue
+        ValidSize.Fixed -> FixedValue
+        ValidSize.Expand -> ExpandValue
+        ValidSize.Match -> MatchValue
+    }
 
 internal fun makeComplexResourceName(width: ValidSize, height: ValidSize) =
-    listOf(
-        "complex",
-        width.resourceName,
-        height.resourceName,
-    ).joinToString(separator = "_")
+    listOf("complex", width.resourceName, height.resourceName).joinToString(separator = "_")
 
 internal fun makeRootResourceName(width: ValidSize, height: ValidSize) =
-    listOf(
-        "root",
-        width.resourceName,
-        height.resourceName,
-    ).joinToString(separator = "_")
+    listOf("root", width.resourceName, height.resourceName).joinToString(separator = "_")
 
 internal fun makeRootAliasResourceName(index: Int) = "root_alias_%03d".format(index)
+
+internal fun makeViewIdResourceName(index: Int) = "glance_view_id_%03d".format(index)
 
 internal fun makeContainerResourceName(
     file: File,
     numChildren: Int,
     horizontalAlignment: HorizontalAlignment?,
-    verticalAlignment: VerticalAlignment?
+    verticalAlignment: VerticalAlignment?,
 ) =
     listOf(
-        file.nameWithoutExtension,
-        horizontalAlignment?.resourceName,
-        verticalAlignment?.resourceName,
-        "${numChildren}children"
-    ).joinToString(separator = "_")
+            file.nameWithoutExtension,
+            horizontalAlignment?.resourceName,
+            verticalAlignment?.resourceName,
+            "${numChildren}children",
+        )
+        .joinToString(separator = "_")
 
 internal fun makeChildResourceName(
     pos: Int,
     containerOrientation: ContainerOrientation,
     horizontalAlignment: HorizontalAlignment?,
-    verticalAlignment: VerticalAlignment?
+    verticalAlignment: VerticalAlignment?,
 ) =
     listOf(
-        containerOrientation.resourceName,
-        "child",
-        horizontalAlignment?.resourceName,
-        verticalAlignment?.resourceName,
-        "group",
-        pos
-    ).joinToString(separator = "_")
+            containerOrientation.resourceName,
+            "child",
+            horizontalAlignment?.resourceName,
+            verticalAlignment?.resourceName,
+            "group",
+            pos,
+        )
+        .joinToString(separator = "_")
 
 internal fun makeBoxChildResourceName(
     file: File,
     horizontalAlignment: HorizontalAlignment?,
-    verticalAlignment: VerticalAlignment?
+    verticalAlignment: VerticalAlignment?,
 ) =
     listOf(
-        file.nameWithoutExtension,
-        horizontalAlignment?.resourceName,
-        verticalAlignment?.resourceName,
-    ).joinToString(separator = "_")
+            file.nameWithoutExtension,
+            horizontalAlignment?.resourceName,
+            verticalAlignment?.resourceName,
+        )
+        .joinToString(separator = "_")
 
-internal fun makeRowColumnChildResourceName(
-    file: File,
-    width: ValidSize,
-    height: ValidSize,
-) =
+internal fun makeRowColumnChildResourceName(file: File, width: ValidSize, height: ValidSize) =
     listOf(
-        file.nameWithoutExtension,
-        if (width == ValidSize.Expand) "expandwidth" else "wrapwidth",
-        if (height == ValidSize.Expand) "expandheight" else "wrapheight",
-    ).joinToString(separator = "_")
+            file.nameWithoutExtension,
+            if (width == ValidSize.Expand) "expandwidth" else "wrapwidth",
+            if (height == ValidSize.Expand) "expandheight" else "wrapheight",
+        )
+        .joinToString(separator = "_")
 
 internal fun makeIdName(pos: Int, width: ValidSize, height: ValidSize) =
-    listOf(
-        "childStub$pos",
-        width.resourceName,
-        height.resourceName
-    ).joinToString(separator = "_")
+    listOf("childStub$pos", width.resourceName, height.resourceName).joinToString(separator = "_")
 
 internal fun CodeBlock.Builder.withIndent(
     builderAction: CodeBlock.Builder.() -> Unit
@@ -621,7 +620,7 @@ internal fun propertySpec(
     name: String,
     type: TypeName,
     vararg modifiers: KModifier,
-    builder: PropertySpec.Builder.() -> Unit
+    builder: PropertySpec.Builder.() -> Unit,
 ) = PropertySpec.builder(name, type, *modifiers).apply(builder).build()
 
 private val listConfigurations =
@@ -631,8 +630,7 @@ private val generatedRootSizePairs = crossProduct(StubSizes, StubSizes)
 
 internal inline fun mapConfiguration(
     function: (width: ValidSize, height: ValidSize) -> File
-): List<File> =
-    listConfigurations.map { (a, b) -> function(a, b) }
+): List<File> = listConfigurations.map { (a, b) -> function(a, b) }
 
 internal inline fun forEachConfiguration(function: (width: ValidSize, height: ValidSize) -> Unit) {
     listConfigurations.forEach { (a, b) -> function(a, b) }
@@ -641,30 +639,18 @@ internal inline fun forEachConfiguration(function: (width: ValidSize, height: Va
 internal inline fun <A, B, T> mapInCrossProduct(
     first: Iterable<A>,
     second: Iterable<B>,
-    consumer: (A, B) -> T
-): List<T> =
-    first.flatMap { a ->
-        second.map { b ->
-            consumer(a, b)
-        }
-    }
+    consumer: (A, B) -> T,
+): List<T> = first.flatMap { a -> second.map { b -> consumer(a, b) } }
 
 internal inline fun <A, B, T> forEachInCrossProduct(
     first: Iterable<A>,
     second: Iterable<B>,
-    consumer: (A, B) -> T
+    consumer: (A, B) -> T,
 ) {
-    first.forEach { a ->
-        second.forEach { b ->
-            consumer(a, b)
-        }
-    }
+    first.forEach { a -> second.forEach { b -> consumer(a, b) } }
 }
 
-internal fun <A, B> crossProduct(
-    first: Iterable<A>,
-    second: Iterable<B>,
-): List<Pair<A, B>> =
+internal fun <A, B> crossProduct(first: Iterable<A>, second: Iterable<B>): List<Pair<A, B>> =
     mapInCrossProduct(first, second) { a, b -> a to b }
 
 internal fun File.resolveRes(resName: String) = resolve("$resName.xml")

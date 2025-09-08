@@ -174,8 +174,6 @@ public final class ViewPager2 extends ViewGroup {
         initialize(context, attrs);
     }
 
-    @RequiresApi(21)
-    @SuppressLint("ClassVerificationFailure")
     public ViewPager2(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
@@ -210,6 +208,9 @@ public final class ViewPager2 extends ViewGroup {
         // Add mScrollEventAdapter after attaching mPagerSnapHelper to mRecyclerView, because we
         // don't want to respond on the events sent out during the attach process
         mRecyclerView.addOnScrollListener(mScrollEventAdapter);
+
+        // Pass-through ViewPager's overScrollMode settings to its impl
+        mRecyclerView.setOverScrollMode(getOverScrollMode());
 
         mPageChangeEventDispatcher = new CompositeOnPageChangeCallback(3);
         mScrollEventAdapter.setOnPageChangeCallback(mPageChangeEventDispatcher);
@@ -387,7 +388,6 @@ public final class ViewPager2 extends ViewGroup {
         Parcelable mAdapterState;
 
         @RequiresApi(24)
-        @SuppressLint("ClassVerificationFailure")
         SavedState(Parcel source, ClassLoader loader) {
             super(source, loader);
             readValues(source, loader);
@@ -538,6 +538,15 @@ public final class ViewPager2 extends ViewGroup {
         if (mCurrentItemDirty) {
             updateCurrentItem();
         }
+    }
+
+    @Override
+    public void setOverScrollMode(int overScrollMode) {
+        // Skip calling mRecyclerView when it is not initialized
+        if (mRecyclerView != null) {
+            mRecyclerView.setOverScrollMode(overScrollMode);
+        }
+        super.setOverScrollMode(overScrollMode);
     }
 
     /** Updates {@link #mCurrentItem} based on what is currently visible in the viewport. */
@@ -1431,9 +1440,6 @@ public final class ViewPager2 extends ViewGroup {
         @Override
         public void onSetUserInputEnabled() {
             updatePageAccessibilityActions();
-            if (Build.VERSION.SDK_INT < 21) {
-                sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-            }
         }
 
         @Override

@@ -50,7 +50,7 @@ enum class Navigation(val displayName: String, val action: @Composable () -> Uni
     StickyHeader("Sticky Header", { StickyHeaderContent() });
 
     fun toRouteValue(): String {
-        return "/${displayName.lowercase().replace(' ', '-')}";
+        return "/${displayName.lowercase().replace(' ', '-')}"
     }
 }
 
@@ -68,15 +68,15 @@ internal fun TopNavigation(
     PillIndicatorTabRow(
         tabs = tabs,
         selectedTabIndex = selectedTabIndex,
-        updateSelectedTab = { selectedTabIndex = it }
+        updateSelectedTab = { selectedTabIndex = it },
     )
 
     // Underlined indicator
-//    UnderlinedIndicatorTabRow(
-//        tabs = tabs,
-//        selectedTabIndex = selectedTabIndex,
-//        updateSelectedTab = { selectedTabIndex = it }
-//    )
+    //    UnderlinedIndicatorTabRow(
+    //        tabs = tabs,
+    //        selectedTabIndex = selectedTabIndex,
+    //        updateSelectedTab = { selectedTabIndex = it }
+    //    )
 
     LaunchedEffect(selectedTabIndex) {
         // Only update the tab after 250 milliseconds to avoid loading intermediate tabs while
@@ -86,33 +86,28 @@ internal fun TopNavigation(
     }
 }
 
-/**
- * Pill indicator tab row for reference
- */
+/** Pill indicator tab row for reference */
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun PillIndicatorTabRow(
     tabs: List<String>,
     selectedTabIndex: Int,
-    updateSelectedTab: (Int) -> Unit
+    updateSelectedTab: (Int) -> Unit,
 ) {
     val focusRequester = remember { FocusRequester() }
 
-    TabRow(
-        selectedTabIndex = selectedTabIndex,
-        modifier = Modifier.focusRestorer { focusRequester }
-    ) {
+    TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.focusRestorer(focusRequester)) {
         tabs.forEachIndexed { index, tab ->
             key(index) {
                 Tab(
                     selected = index == selectedTabIndex,
                     onFocus = { updateSelectedTab(index) },
-                    modifier = Modifier.ifElse(index == 0, Modifier.focusRequester(focusRequester))
+                    modifier = Modifier.ifElse(index == 0, Modifier.focusRequester(focusRequester)),
                 ) {
                     Text(
                         text = tab,
                         fontSize = 12.sp,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                     )
                 }
             }
@@ -120,15 +115,13 @@ fun PillIndicatorTabRow(
     }
 }
 
-/**
- * Underlined indicator tab row for reference
- */
+/** Underlined indicator tab row for reference */
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun UnderlinedIndicatorTabRow(
     tabs: List<String>,
     selectedTabIndex: Int,
-    updateSelectedTab: (Int) -> Unit
+    updateSelectedTab: (Int) -> Unit,
 ) {
     val focusRequester = remember { FocusRequester() }
 
@@ -141,22 +134,16 @@ fun UnderlinedIndicatorTabRow(
                 doesTabRowHaveFocus = doesTabRowHaveFocus,
             )
         },
-        modifier = Modifier
-            .focusRestorer { focusRequester },
+        modifier = Modifier.focusRestorer(focusRequester),
     ) {
         tabs.forEachIndexed { index, tab ->
             Tab(
                 selected = index == selectedTabIndex,
                 onFocus = { updateSelectedTab(index) },
-                modifier = Modifier
-                    .ifElse(index == 0, Modifier.focusRequester(focusRequester)),
+                modifier = Modifier.ifElse(index == 0, Modifier.focusRequester(focusRequester)),
                 colors = TabDefaults.underlinedIndicatorTabColors(),
             ) {
-                Text(
-                    text = tab,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
+                Text(text = tab, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
             }
         }
     }

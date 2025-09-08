@@ -58,13 +58,9 @@ class DelegatingWorkerFactoryTest : DatabaseTest() {
 
         val request = OneTimeWorkRequest.from(TestWorker::class.java)
         insertWork(request)
-        val params: WorkerParameters =
-            newWorkerParams(factory, progressUpdater, mForegroundUpdater)
-        val worker = factory.createWorkerWithDefaultFallback(
-            context,
-            TestWorker::class.java.name,
-            params
-        )
+        val params: WorkerParameters = newWorkerParams(factory, progressUpdater, mForegroundUpdater)
+        val worker =
+            factory.createWorkerWithDefaultFallback(context, TestWorker::class.java.name, params)
 
         assertThat(worker, notNullValue())
         assertThat(worker, instanceOf(FailureWorker::class.java))
@@ -75,13 +71,9 @@ class DelegatingWorkerFactoryTest : DatabaseTest() {
         factory = DelegatingWorkerFactory()
         val request = OneTimeWorkRequest.from(TestWorker::class.java)
         insertWork(request)
-        val params: WorkerParameters =
-            newWorkerParams(factory, progressUpdater, mForegroundUpdater)
-        val worker = factory.createWorkerWithDefaultFallback(
-            context,
-            TestWorker::class.java.name,
-            params
-        )
+        val params: WorkerParameters = newWorkerParams(factory, progressUpdater, mForegroundUpdater)
+        val worker =
+            factory.createWorkerWithDefaultFallback(context, TestWorker::class.java.name, params)
 
         assertThat(worker, notNullValue())
         assertThat(worker, instanceOf(TestWorker::class.java))
@@ -90,28 +82,29 @@ class DelegatingWorkerFactoryTest : DatabaseTest() {
     private fun newWorkerParams(
         factory: WorkerFactory,
         progressUpdater: ProgressUpdater,
-        foregroundUpdater: ForegroundUpdater
-    ) = WorkerParameters(
-        UUID.randomUUID(),
-        Data.EMPTY,
-        listOf<String>(),
-        WorkerParameters.RuntimeExtras(),
-        1,
-        0,
-        SynchronousExecutor(),
-        Dispatchers.Default,
-        WorkManagerTaskExecutor(SynchronousExecutor()),
-        factory,
-        progressUpdater,
-        foregroundUpdater
-    )
+        foregroundUpdater: ForegroundUpdater,
+    ) =
+        WorkerParameters(
+            UUID.randomUUID(),
+            Data.EMPTY,
+            listOf<String>(),
+            WorkerParameters.RuntimeExtras(),
+            1,
+            0,
+            SynchronousExecutor(),
+            Dispatchers.Default,
+            WorkManagerTaskExecutor(SynchronousExecutor()),
+            factory,
+            progressUpdater,
+            foregroundUpdater,
+        )
 }
 
 class NoOpFactory : WorkerFactory() {
     override fun createWorker(
         appContext: Context,
         workerClassName: String,
-        workerParameters: WorkerParameters
+        workerParameters: WorkerParameters,
     ): ListenableWorker? {
         return null
     }
@@ -121,7 +114,7 @@ class FailedWorkerFactory : WorkerFactory() {
     override fun createWorker(
         appContext: Context,
         workerClassName: String,
-        workerParameters: WorkerParameters
+        workerParameters: WorkerParameters,
     ): ListenableWorker {
         return FailureWorker(appContext, workerParameters)
     }

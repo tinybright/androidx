@@ -27,16 +27,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun Card(
-    modifier: Modifier = Modifier,
-    backgroundColor: Color = Color.Transparent,
-) {
+fun Card(modifier: Modifier = Modifier, backgroundColor: Color = Color.Transparent) {
     Box(
-        modifier = modifier
-            .background(backgroundColor.copy(alpha = 0.3f))
-            .width(200.dp)
-            .height(150.dp)
-            .drawBorderOnFocus()
-            .clickable { }
+        modifier =
+            modifier
+                .background(backgroundColor.copy(alpha = 0.3f))
+                .width(200.dp)
+                .height(150.dp)
+                .drawBorderOnFocus()
+                .clickable {}
     )
 }

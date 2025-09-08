@@ -25,37 +25,37 @@ import androidx.glance.unit.ColorProvider
  * Holds a set of Glance specific [ColorProvider] that can be used to represent a Material 3 color
  * scheme.
  */
-sealed class ColorProviders {
+public sealed class ColorProviders {
 
-    val primary: ColorProvider
-    val onPrimary: ColorProvider
-    val primaryContainer: ColorProvider
-    val onPrimaryContainer: ColorProvider
-    val secondary: ColorProvider
-    val onSecondary: ColorProvider
-    val secondaryContainer: ColorProvider
-    val onSecondaryContainer: ColorProvider
-    val tertiary: ColorProvider
-    val onTertiary: ColorProvider
-    val tertiaryContainer: ColorProvider
-    val onTertiaryContainer: ColorProvider
-    val error: ColorProvider
-    val errorContainer: ColorProvider
-    val onError: ColorProvider
-    val onErrorContainer: ColorProvider
-    val background: ColorProvider
-    val onBackground: ColorProvider
-    val surface: ColorProvider
-    val onSurface: ColorProvider
-    val surfaceVariant: ColorProvider
-    val onSurfaceVariant: ColorProvider
-    val outline: ColorProvider
-    val inverseOnSurface: ColorProvider
-    val inverseSurface: ColorProvider
-    val inversePrimary: ColorProvider
-    val widgetBackground: ColorProvider
+    public val primary: ColorProvider
+    public val onPrimary: ColorProvider
+    public val primaryContainer: ColorProvider
+    public val onPrimaryContainer: ColorProvider
+    public val secondary: ColorProvider
+    public val onSecondary: ColorProvider
+    public val secondaryContainer: ColorProvider
+    public val onSecondaryContainer: ColorProvider
+    public val tertiary: ColorProvider
+    public val onTertiary: ColorProvider
+    public val tertiaryContainer: ColorProvider
+    public val onTertiaryContainer: ColorProvider
+    public val error: ColorProvider
+    public val errorContainer: ColorProvider
+    public val onError: ColorProvider
+    public val onErrorContainer: ColorProvider
+    public val background: ColorProvider
+    public val onBackground: ColorProvider
+    public val surface: ColorProvider
+    public val onSurface: ColorProvider
+    public val surfaceVariant: ColorProvider
+    public val onSurfaceVariant: ColorProvider
+    public val outline: ColorProvider
+    public val inverseOnSurface: ColorProvider
+    public val inverseSurface: ColorProvider
+    public val inversePrimary: ColorProvider
+    public val widgetBackground: ColorProvider
 
-    constructor(
+    protected constructor(
         primary: ColorProvider,
         onPrimary: ColorProvider,
         primaryContainer: ColorProvider,
@@ -114,7 +114,7 @@ sealed class ColorProviders {
     }
 
     @Deprecated("Hidden")
-    constructor(
+    protected constructor(
         primary: ColorProvider,
         onPrimary: ColorProvider,
         primaryContainer: ColorProvider,
@@ -276,35 +276,36 @@ sealed class ColorProviders {
  * devices this falls back to the Material baseline theme.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-object DynamicThemeColorProviders : ColorProviders(
-    primary = ColorProvider(R.color.glance_colorPrimary),
-    onPrimary = ColorProvider(R.color.glance_colorOnPrimary),
-    primaryContainer = ColorProvider(R.color.glance_colorPrimaryContainer),
-    onPrimaryContainer = ColorProvider(R.color.glance_colorOnPrimaryContainer),
-    secondary = ColorProvider(R.color.glance_colorSecondary),
-    onSecondary = ColorProvider(R.color.glance_colorOnSecondary),
-    secondaryContainer = ColorProvider(R.color.glance_colorSecondaryContainer),
-    onSecondaryContainer = ColorProvider(R.color.glance_colorOnSecondaryContainer),
-    tertiary = ColorProvider(R.color.glance_colorTertiary),
-    onTertiary = ColorProvider(R.color.glance_colorOnTertiary),
-    tertiaryContainer = ColorProvider(R.color.glance_colorTertiaryContainer),
-    onTertiaryContainer = ColorProvider(R.color.glance_colorOnTertiaryContainer),
-    error = ColorProvider(R.color.glance_colorError),
-    errorContainer = ColorProvider(R.color.glance_colorErrorContainer),
-    onError = ColorProvider(R.color.glance_colorOnError),
-    onErrorContainer = ColorProvider(R.color.glance_colorOnErrorContainer),
-    background = ColorProvider(R.color.glance_colorBackground),
-    onBackground = ColorProvider(R.color.glance_colorOnBackground),
-    surface = ColorProvider(R.color.glance_colorSurface),
-    onSurface = ColorProvider(R.color.glance_colorOnSurface),
-    surfaceVariant = ColorProvider(R.color.glance_colorSurfaceVariant),
-    onSurfaceVariant = ColorProvider(R.color.glance_colorOnSurfaceVariant),
-    outline = ColorProvider(R.color.glance_colorOutline),
-    inverseOnSurface = ColorProvider(R.color.glance_colorOnSurfaceInverse),
-    inverseSurface = ColorProvider(R.color.glance_colorSurfaceInverse),
-    inversePrimary = ColorProvider(R.color.glance_colorPrimaryInverse),
-    widgetBackground = ColorProvider(R.color.glance_colorWidgetBackground),
-)
+public object DynamicThemeColorProviders :
+    ColorProviders(
+        primary = ColorProvider(R.color.glance_colorPrimary),
+        onPrimary = ColorProvider(R.color.glance_colorOnPrimary),
+        primaryContainer = ColorProvider(R.color.glance_colorPrimaryContainer),
+        onPrimaryContainer = ColorProvider(R.color.glance_colorOnPrimaryContainer),
+        secondary = ColorProvider(R.color.glance_colorSecondary),
+        onSecondary = ColorProvider(R.color.glance_colorOnSecondary),
+        secondaryContainer = ColorProvider(R.color.glance_colorSecondaryContainer),
+        onSecondaryContainer = ColorProvider(R.color.glance_colorOnSecondaryContainer),
+        tertiary = ColorProvider(R.color.glance_colorTertiary),
+        onTertiary = ColorProvider(R.color.glance_colorOnTertiary),
+        tertiaryContainer = ColorProvider(R.color.glance_colorTertiaryContainer),
+        onTertiaryContainer = ColorProvider(R.color.glance_colorOnTertiaryContainer),
+        error = ColorProvider(R.color.glance_colorError),
+        errorContainer = ColorProvider(R.color.glance_colorErrorContainer),
+        onError = ColorProvider(R.color.glance_colorOnError),
+        onErrorContainer = ColorProvider(R.color.glance_colorOnErrorContainer),
+        background = ColorProvider(R.color.glance_colorBackground),
+        onBackground = ColorProvider(R.color.glance_colorOnBackground),
+        surface = ColorProvider(R.color.glance_colorSurface),
+        onSurface = ColorProvider(R.color.glance_colorOnSurface),
+        surfaceVariant = ColorProvider(R.color.glance_colorSurfaceVariant),
+        onSurfaceVariant = ColorProvider(R.color.glance_colorOnSurfaceVariant),
+        outline = ColorProvider(R.color.glance_colorOutline),
+        inverseOnSurface = ColorProvider(R.color.glance_colorOnSurfaceInverse),
+        inverseSurface = ColorProvider(R.color.glance_colorSurfaceInverse),
+        inversePrimary = ColorProvider(R.color.glance_colorPrimaryInverse),
+        widgetBackground = ColorProvider(R.color.glance_colorWidgetBackground),
+    )
 
 internal class CustomColorProviders(
     primary: ColorProvider,
@@ -334,37 +335,38 @@ internal class CustomColorProviders(
     inverseSurface: ColorProvider,
     inversePrimary: ColorProvider,
     widgetBackground: ColorProvider,
-) : ColorProviders(
-    primary = primary,
-    onPrimary = onPrimary,
-    primaryContainer = primaryContainer,
-    onPrimaryContainer = onPrimaryContainer,
-    secondary = secondary,
-    onSecondary = onSecondary,
-    secondaryContainer = secondaryContainer,
-    onSecondaryContainer = onSecondaryContainer,
-    tertiary = tertiary,
-    onTertiary = onTertiary,
-    tertiaryContainer = tertiaryContainer,
-    onTertiaryContainer = onTertiaryContainer,
-    error = error,
-    errorContainer = errorContainer,
-    onError = onError,
-    onErrorContainer = onErrorContainer,
-    background = background,
-    onBackground = onBackground,
-    surface = surface,
-    onSurface = onSurface,
-    surfaceVariant = surfaceVariant,
-    onSurfaceVariant = onSurfaceVariant,
-    outline = outline,
-    inverseOnSurface = inverseOnSurface,
-    inverseSurface = inverseSurface,
-    inversePrimary = inversePrimary,
-    widgetBackground = widgetBackground,
-)
+) :
+    ColorProviders(
+        primary = primary,
+        onPrimary = onPrimary,
+        primaryContainer = primaryContainer,
+        onPrimaryContainer = onPrimaryContainer,
+        secondary = secondary,
+        onSecondary = onSecondary,
+        secondaryContainer = secondaryContainer,
+        onSecondaryContainer = onSecondaryContainer,
+        tertiary = tertiary,
+        onTertiary = onTertiary,
+        tertiaryContainer = tertiaryContainer,
+        onTertiaryContainer = onTertiaryContainer,
+        error = error,
+        errorContainer = errorContainer,
+        onError = onError,
+        onErrorContainer = onErrorContainer,
+        background = background,
+        onBackground = onBackground,
+        surface = surface,
+        onSurface = onSurface,
+        surfaceVariant = surfaceVariant,
+        onSurfaceVariant = onSurfaceVariant,
+        outline = outline,
+        inverseOnSurface = inverseOnSurface,
+        inverseSurface = inverseSurface,
+        inversePrimary = inversePrimary,
+        widgetBackground = widgetBackground,
+    )
 
-fun colorProviders(
+public fun colorProviders(
     primary: ColorProvider,
     onPrimary: ColorProvider,
     primaryContainer: ColorProvider,
@@ -392,37 +394,38 @@ fun colorProviders(
     inverseSurface: ColorProvider,
     inversePrimary: ColorProvider,
     widgetBackground: ColorProvider,
-): ColorProviders = CustomColorProviders(
-    primary = primary,
-    onPrimary = onPrimary,
-    primaryContainer = primaryContainer,
-    onPrimaryContainer = onPrimaryContainer,
-    secondary = secondary,
-    onSecondary = onSecondary,
-    secondaryContainer = secondaryContainer,
-    onSecondaryContainer = onSecondaryContainer,
-    tertiary = tertiary,
-    onTertiary = onTertiary,
-    tertiaryContainer = tertiaryContainer,
-    onTertiaryContainer = onTertiaryContainer,
-    error = error,
-    errorContainer = errorContainer,
-    onError = onError,
-    onErrorContainer = onErrorContainer,
-    background = background,
-    onBackground = onBackground,
-    surface = surface,
-    onSurface = onSurface,
-    surfaceVariant = surfaceVariant,
-    onSurfaceVariant = onSurfaceVariant,
-    outline = outline,
-    inverseOnSurface = inverseOnSurface,
-    inverseSurface = inverseSurface,
-    inversePrimary = inversePrimary,
-    widgetBackground = widgetBackground,
-)
+): ColorProviders =
+    CustomColorProviders(
+        primary = primary,
+        onPrimary = onPrimary,
+        primaryContainer = primaryContainer,
+        onPrimaryContainer = onPrimaryContainer,
+        secondary = secondary,
+        onSecondary = onSecondary,
+        secondaryContainer = secondaryContainer,
+        onSecondaryContainer = onSecondaryContainer,
+        tertiary = tertiary,
+        onTertiary = onTertiary,
+        tertiaryContainer = tertiaryContainer,
+        onTertiaryContainer = onTertiaryContainer,
+        error = error,
+        errorContainer = errorContainer,
+        onError = onError,
+        onErrorContainer = onErrorContainer,
+        background = background,
+        onBackground = onBackground,
+        surface = surface,
+        onSurface = onSurface,
+        surfaceVariant = surfaceVariant,
+        onSurfaceVariant = onSurfaceVariant,
+        outline = outline,
+        inverseOnSurface = inverseOnSurface,
+        inverseSurface = inverseSurface,
+        inversePrimary = inversePrimary,
+        widgetBackground = widgetBackground,
+    )
 
-fun colorProviders(
+public fun colorProviders(
     primary: ColorProvider,
     onPrimary: ColorProvider,
     primaryContainer: ColorProvider,
@@ -449,32 +452,33 @@ fun colorProviders(
     inverseOnSurface: ColorProvider,
     inverseSurface: ColorProvider,
     inversePrimary: ColorProvider,
-): ColorProviders = CustomColorProviders(
-    primary = primary,
-    onPrimary = onPrimary,
-    primaryContainer = primaryContainer,
-    onPrimaryContainer = onPrimaryContainer,
-    secondary = secondary,
-    onSecondary = onSecondary,
-    secondaryContainer = secondaryContainer,
-    onSecondaryContainer = onSecondaryContainer,
-    tertiary = tertiary,
-    onTertiary = onTertiary,
-    tertiaryContainer = tertiaryContainer,
-    onTertiaryContainer = onTertiaryContainer,
-    error = error,
-    errorContainer = errorContainer,
-    onError = onError,
-    onErrorContainer = onErrorContainer,
-    background = background,
-    onBackground = onBackground,
-    surface = surface,
-    onSurface = onSurface,
-    surfaceVariant = surfaceVariant,
-    onSurfaceVariant = onSurfaceVariant,
-    outline = outline,
-    inverseOnSurface = inverseOnSurface,
-    inverseSurface = inverseSurface,
-    inversePrimary = inversePrimary,
-    widgetBackground = ColorProvider(Color.Unspecified),
-)
+): ColorProviders =
+    CustomColorProviders(
+        primary = primary,
+        onPrimary = onPrimary,
+        primaryContainer = primaryContainer,
+        onPrimaryContainer = onPrimaryContainer,
+        secondary = secondary,
+        onSecondary = onSecondary,
+        secondaryContainer = secondaryContainer,
+        onSecondaryContainer = onSecondaryContainer,
+        tertiary = tertiary,
+        onTertiary = onTertiary,
+        tertiaryContainer = tertiaryContainer,
+        onTertiaryContainer = onTertiaryContainer,
+        error = error,
+        errorContainer = errorContainer,
+        onError = onError,
+        onErrorContainer = onErrorContainer,
+        background = background,
+        onBackground = onBackground,
+        surface = surface,
+        onSurface = onSurface,
+        surfaceVariant = surfaceVariant,
+        onSurfaceVariant = onSurfaceVariant,
+        outline = outline,
+        inverseOnSurface = inverseOnSurface,
+        inverseSurface = inverseSurface,
+        inversePrimary = inversePrimary,
+        widgetBackground = ColorProvider(Color.Unspecified),
+    )

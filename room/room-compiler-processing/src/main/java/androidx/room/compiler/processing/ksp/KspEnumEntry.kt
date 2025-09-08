@@ -26,8 +26,9 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 internal class KspEnumEntry(
     env: KspProcessingEnv,
     override val declaration: KSClassDeclaration,
-    override val enclosingElement: XEnumTypeElement
-) : KspElement(env, declaration),
+    override val enclosingElement: XEnumTypeElement,
+) :
+    KspElement(env, declaration),
     XHasModifiers by KspHasModifiers.create(declaration),
     XAnnotated by KspAnnotated.create(env, declaration, KspAnnotated.UseSiteFilter.NO_USE_SITE),
     XEnumEntry {
@@ -46,22 +47,17 @@ internal class KspEnumEntry(
         get() = enclosingElement
 
     companion object {
-        fun create(
-            env: KspProcessingEnv,
-            declaration: KSClassDeclaration,
-        ): KspEnumEntry {
+        fun create(env: KspProcessingEnv, declaration: KSClassDeclaration): KspEnumEntry {
             require(declaration.classKind == ClassKind.ENUM_ENTRY) {
                 "Expected declaration to be an enum entry but was ${declaration.classKind}"
             }
             return KspEnumEntry(
                 env,
                 declaration,
-                KspTypeElement.create(
-                    env,
-                    declaration
-                        .requireEnclosingMemberContainer(env)
-                        .declaration as KSClassDeclaration
-                ) as XEnumTypeElement
+                env.wrapClassDeclaration(
+                    declaration.requireEnclosingMemberContainer(env).declaration
+                        as KSClassDeclaration
+                ) as XEnumTypeElement,
             )
         }
     }

@@ -37,7 +37,7 @@ import androidx.health.platform.client.service.HealthDataServiceConstants.KEY_RE
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 internal class HealthPermissionsRequestAppContract(
-    private val providerPackageName: String = DEFAULT_PROVIDER_PACKAGE_NAME,
+    private val providerPackageName: String = DEFAULT_PROVIDER_PACKAGE_NAME
 ) : ActivityResultContract<Set<String>, Set<String>>() {
 
     override fun createIntent(context: Context, input: Set<String>): Intent {
@@ -66,8 +66,7 @@ internal class HealthPermissionsRequestAppContract(
                 ?.getParcelableArrayListExtra<ParcelablePermission>(KEY_GRANTED_PERMISSIONS_STRING)
                 ?.asSequence()
                 ?.map { it.proto.permission }
-                ?.toSet()
-                ?: emptySet()
+                ?.toSet() ?: emptySet()
         Logger.debug(HEALTH_CONNECT_CLIENT_TAG, "Granted ${grantedPermissions.size} permissions.")
         return grantedPermissions
     }

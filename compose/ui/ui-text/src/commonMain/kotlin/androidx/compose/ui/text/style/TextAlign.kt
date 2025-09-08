@@ -20,7 +20,7 @@ package androidx.compose.ui.text.style
  * appears.
  */
 @kotlin.jvm.JvmInline
-value class TextAlign internal constructor(internal val value: Int) {
+value class TextAlign internal constructor(val value: Int) {
 
     override fun toString(): String {
         return when (this) {
@@ -35,6 +35,14 @@ value class TextAlign internal constructor(internal val value: Int) {
         }
     }
 
+    /**
+     * Returns `true` if this baseline shift is not [TextAlign.Unspecified].
+     *
+     * @see TextAlign.Unspecified
+     */
+    val isSpecified: Boolean
+        get() = value != 0
+
     companion object {
         /** Align the text on the left edge of the container. */
         val Left = TextAlign(1)
@@ -46,8 +54,7 @@ value class TextAlign internal constructor(internal val value: Int) {
         val Center = TextAlign(3)
 
         /**
-         * Stretch lines of text that end with a soft line break to fill the width of
-         * the container.
+         * Stretch lines of text that end with a soft line break to fill the width of the container.
          *
          * Lines that end with hard line breaks are aligned towards the [Start] edge.
          */
@@ -58,7 +65,8 @@ value class TextAlign internal constructor(internal val value: Int) {
          *
          * For Left to Right text ([ResolvedTextDirection.Ltr]), this is the left edge.
          *
-         * For Right to Left text ([ResolvedTextDirection.Rtl]), like Arabic, this is the right edge.
+         * For Right to Left text ([ResolvedTextDirection.Rtl]), like Arabic, this is the right
+         * edge.
          */
         val Start = TextAlign(5)
 
@@ -72,14 +80,23 @@ value class TextAlign internal constructor(internal val value: Int) {
         val End = TextAlign(6)
 
         /**
-         * Return a list containing all possible values of TextAlign.
+         * This represents an unset value, a usual replacement for "null" when a primitive value is
+         * desired.
          */
+        val Unspecified = TextAlign(0)
+
+        /** Return a list containing all possible values of TextAlign. */
         fun values(): List<TextAlign> = listOf(Left, Right, Center, Justify, Start, End)
 
         /**
-         * This represents an unset value, a usual replacement for "null" when a primitive value
-         * is desired.
+         * Creates a TextAlign from the given integer value. This can be useful if you need to
+         * serialize/deserialize TextAlign values.
+         *
+         * @param value The integer representation of the TextAlign.
+         * @see [TextAlign.value]
          */
-        val Unspecified = TextAlign(Int.MIN_VALUE)
+        fun valueOf(value: Int): TextAlign {
+            return TextAlign(value)
+        }
     }
 }

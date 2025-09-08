@@ -18,17 +18,22 @@ package androidx.lifecycle
 
 import androidx.kruth.assertThat
 import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.IgnoreWebTarget
 import kotlin.reflect.KClass
 import kotlin.test.Test
 
+@IgnoreWebTarget
 class ViewModelProviderGetTest {
     @Test
     fun get_withReifiedType() {
-        val factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T =
-                TestViewModel() as T
-        }
+        val factory =
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(
+                    modelClass: KClass<T>,
+                    extras: CreationExtras,
+                ): T = TestViewModel() as T
+            }
         val provider = ViewModelProvider.create(ViewModelStore(), factory)
 
         val viewModel = provider.get<TestViewModel>()

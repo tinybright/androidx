@@ -31,9 +31,7 @@ internal interface KeyMapping {
 // desktop, the value depends on the current OS
 internal expect val platformDefaultKeyMapping: KeyMapping
 
-/**
- * Copied from [Key] as the constants there are experimental
- */
+/** Copied from [Key] as the constants there are experimental */
 internal expect object MappedKeys {
     val A: Key
     val C: Key
@@ -47,12 +45,14 @@ internal expect object MappedKeys {
     val DirectionRight: Key
     val DirectionUp: Key
     val DirectionDown: Key
+    val DirectionCenter: Key
     val PageUp: Key
     val PageDown: Key
     val MoveHome: Key
     val MoveEnd: Key
     val Insert: Key
     val Enter: Key
+    val NumPadEnter: Key
     val Backspace: Key
     val Delete: Key
     val Paste: Key
@@ -62,9 +62,7 @@ internal expect object MappedKeys {
 }
 
 // It's common for all platforms key mapping
-internal fun commonKeyMapping(
-    shortcutModifier: (KeyEvent) -> Boolean
-): KeyMapping {
+internal fun commonKeyMapping(shortcutModifier: (KeyEvent) -> Boolean): KeyMapping {
     return object : KeyMapping {
         override fun map(event: KeyEvent): KeyCommand? {
             return when {
@@ -75,7 +73,8 @@ internal fun commonKeyMapping(
                     }
                 shortcutModifier(event) ->
                     when (event.key) {
-                        MappedKeys.C, MappedKeys.Insert -> KeyCommand.COPY
+                        MappedKeys.C,
+                        MappedKeys.Insert -> KeyCommand.COPY
                         MappedKeys.V -> KeyCommand.PASTE
                         MappedKeys.X -> KeyCommand.CUT
                         MappedKeys.A -> KeyCommand.SELECT_ALL
@@ -103,11 +102,13 @@ internal fun commonKeyMapping(
                         MappedKeys.DirectionRight -> KeyCommand.RIGHT_CHAR
                         MappedKeys.DirectionUp -> KeyCommand.UP
                         MappedKeys.DirectionDown -> KeyCommand.DOWN
+                        MappedKeys.DirectionCenter -> KeyCommand.CENTER
                         MappedKeys.PageUp -> KeyCommand.PAGE_UP
                         MappedKeys.PageDown -> KeyCommand.PAGE_DOWN
                         MappedKeys.MoveHome -> KeyCommand.LINE_START
                         MappedKeys.MoveEnd -> KeyCommand.LINE_END
-                        MappedKeys.Enter -> KeyCommand.NEW_LINE
+                        MappedKeys.Enter,
+                        MappedKeys.NumPadEnter -> KeyCommand.NEW_LINE
                         MappedKeys.Backspace -> KeyCommand.DELETE_PREV_CHAR
                         MappedKeys.Delete -> KeyCommand.DELETE_NEXT_CHAR
                         MappedKeys.Paste -> KeyCommand.PASTE
@@ -149,8 +150,8 @@ internal val defaultKeyMapping: KeyMapping =
                         }
                     event.isShiftPressed ->
                         when (event.key) {
-                            MappedKeys.MoveHome -> KeyCommand.SELECT_LINE_LEFT
-                            MappedKeys.MoveEnd -> KeyCommand.SELECT_LINE_RIGHT
+                            MappedKeys.MoveHome -> KeyCommand.SELECT_LINE_START
+                            MappedKeys.MoveEnd -> KeyCommand.SELECT_LINE_END
                             else -> null
                         }
                     event.isAltPressed ->

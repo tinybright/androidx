@@ -19,13 +19,12 @@ package androidx.room.concurrent
 import androidx.annotation.RestrictTo
 import kotlin.coroutines.CoroutineContext
 
-/**
- * Container of thread-local data.
- */
+/** Container of thread-local data. */
 @RestrictTo(RestrictTo.Scope.LIBRARY) // Public + lib restricted so we can typealias in JVM.
-expect class ThreadLocal<T>() {
-    fun get(): T?
-    fun set(value: T?)
+public expect class ThreadLocal<T>() {
+    public fun get(): T?
+
+    public fun set(value: T?)
 }
 
 /**
@@ -34,7 +33,5 @@ expect class ThreadLocal<T>() {
  */
 internal expect fun <T> ThreadLocal<T>.asContextElement(value: T): CoroutineContext.Element
 
-/**
- * Gets the current thread id.
- */
+/** Gets the current thread id. */
 internal expect fun currentThreadId(): Long

@@ -18,17 +18,15 @@ package androidx.tv.integration.playground
 
 import androidx.compose.ui.Modifier
 
-/**
- * Thanks, Plex 🦄 :)
- */
+/** Thanks, Plex 🦄 :) */
 fun Modifier.ifElse(
     condition: () -> Boolean,
     ifTrueModifier: Modifier,
-    ifFalseModifier: Modifier = Modifier
+    ifFalseModifier: Modifier = Modifier,
 ): Modifier = then(if (condition()) ifTrueModifier else ifFalseModifier)
 
 fun Modifier.ifElse(
     condition: Boolean,
     ifTrueModifier: Modifier,
-    ifFalseModifier: Modifier = Modifier
+    ifFalseModifier: Modifier = Modifier,
 ): Modifier = ifElse({ condition }, ifTrueModifier, ifFalseModifier)

@@ -24,9 +24,8 @@ import androidx.work.WorkerParameters
 
 public open class TestForegroundWorker(
     private val context: Context,
-    private val parameters: WorkerParameters
-) :
-    Worker(context, parameters) {
+    private val parameters: WorkerParameters,
+) : Worker(context, parameters) {
 
     override fun doWork(): Result {
         return Result.success()
@@ -37,11 +36,12 @@ public open class TestForegroundWorker(
     }
 
     private fun getNotification(): ForegroundInfo {
-        val notification = NotificationCompat.Builder(context, ChannelId)
-            .setOngoing(true)
-            .setTicker(Ticker)
-            .setContentText(Content)
-            .build()
+        val notification =
+            NotificationCompat.Builder(context, ChannelId)
+                .setOngoing(true)
+                .setTicker(Ticker)
+                .setContentText(Content)
+                .build()
 
         return ForegroundInfo(NotificationId, notification)
     }

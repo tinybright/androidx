@@ -34,15 +34,17 @@ internal class ServiceBackedHealthServicesClient(context: Context) :
         CLIENT_CONFIGURATION,
         HsConnectionManager.getInstance(context),
         { binder -> IHealthServicesApiService.Stub.asInterface(binder) },
-        { service -> service.apiVersion }
+        { service -> service.apiVersion },
     ) {
 
     private val applicationContext = context.applicationContext
 
     override val exerciseClient: ExerciseClient
         get() = ServiceBackedExerciseClient(applicationContext)
+
     override val passiveMonitoringClient: PassiveMonitoringClient
         get() = ServiceBackedPassiveMonitoringClient(applicationContext)
+
     override val measureClient: MeasureClient
         get() = ServiceBackedMeasureClient(applicationContext)
 

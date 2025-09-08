@@ -30,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -52,8 +51,8 @@ import androidx.compose.ui.unit.Dp
  * @param headlineContent the [Composable] headline content of the list item
  * @param modifier [Modifier] to be applied to the list item
  * @param enabled controls the enabled state of this list item. When `false`, this component will
- * not respond to user input, and it will appear visually disabled and disabled to accessibility
- * services.
+ *   not respond to user input, and it will appear visually disabled and disabled to accessibility
+ *   services.
  * @param onLongClick called when this ListItem is long clicked (long-pressed).
  * @param leadingContent the [Composable] leading content of the list item
  * @param overlineContent the [Composable] content displayed above the headline content
@@ -61,19 +60,19 @@ import androidx.compose.ui.unit.Dp
  * @param trailingContent the [Composable] trailing meta text, icon, switch or checkbox
  * @param tonalElevation the tonal elevation of this list item
  * @param shape [ListItemShape] defines the shape of ListItem's container in different interaction
- * states. See [ListItemDefaults.shape].
+ *   states. See [ListItemDefaults.shape].
  * @param colors [ListItemColors] defines the background and content colors used in the list item
- * for different interaction states. See [ListItemDefaults.colors]
+ *   for different interaction states. See [ListItemDefaults.colors]
  * @param scale [ListItemScale] defines the size of the list item relative to its original size in
- * different interaction states. See [ListItemDefaults.scale]
+ *   different interaction states. See [ListItemDefaults.scale]
  * @param border [ListItemBorder] defines a border around the list item in different interaction
- * states. See [ListItemDefaults.border]
+ *   states. See [ListItemDefaults.border]
  * @param glow [ListItemGlow] defines a shadow to be shown behind the list item for different
- * interaction states. See [ListItemDefaults.glow]
+ *   interaction states. See [ListItemDefaults.glow]
  * @param interactionSource an optional hoisted [MutableInteractionSource] for observing and
- * emitting [Interaction]s for this list item. You can use this to change the list item's appearance
- * or preview the list item in different states. Note that if `null` is provided, interactions will
- * still happen internally.
+ *   emitting [Interaction]s for this list item. You can use this to change the list item's
+ *   appearance or preview the list item in different states. Note that if `null` is provided,
+ *   interactions will still happen internally.
  */
 @Composable
 fun ListItem(
@@ -93,7 +92,7 @@ fun ListItem(
     scale: ListItemScale = ListItemDefaults.scale(),
     border: ListItemBorder = ListItemDefaults.border(),
     glow: ListItemGlow = ListItemDefaults.glow(),
-    interactionSource: MutableInteractionSource? = null
+    interactionSource: MutableInteractionSource? = null,
 ) {
     BaseListItem(
         selected = selected,
@@ -113,15 +112,16 @@ fun ListItem(
         scale = scale,
         border = border,
         glow = glow,
-        minHeight = listItemMinHeight(
-            hasLeadingContent = leadingContent != null,
-            hasSupportingContent = supportingContent != null,
-            hasOverlineContent = overlineContent != null
-        ),
+        minHeight =
+            listItemMinHeight(
+                hasLeadingContent = leadingContent != null,
+                hasSupportingContent = supportingContent != null,
+                hasOverlineContent = overlineContent != null,
+            ),
         minIconSize = ListItemDefaults.IconSize,
         headlineTextStyle = MaterialTheme.typography.titleMedium,
         trailingTextStyle = MaterialTheme.typography.labelLarge,
-        interactionSource = interactionSource
+        interactionSource = interactionSource,
     )
 }
 
@@ -143,8 +143,8 @@ fun ListItem(
  * @param headlineContent the [Composable] headline content of the list item
  * @param modifier [Modifier] to be applied to the list item
  * @param enabled controls the enabled state of this list item. When `false`, this component will
- * not respond to user input, and it will appear visually disabled and disabled to accessibility
- * services.
+ *   not respond to user input, and it will appear visually disabled and disabled to accessibility
+ *   services.
  * @param onLongClick called when this ListItem is long clicked (long-pressed).
  * @param leadingContent the [Composable] leading content of the list item
  * @param overlineContent the [Composable] content displayed above the headline content
@@ -152,19 +152,19 @@ fun ListItem(
  * @param trailingContent the [Composable] trailing meta text, icon, switch or checkbox
  * @param tonalElevation the tonal elevation of this list item
  * @param shape [ListItemShape] defines the shape of ListItem's container in different interaction
- * states. See [ListItemDefaults.shape].
+ *   states. See [ListItemDefaults.shape].
  * @param colors [ListItemColors] defines the background and content colors used in the list item
- * for different interaction states. See [ListItemDefaults.colors]
+ *   for different interaction states. See [ListItemDefaults.colors]
  * @param scale [ListItemScale] defines the size of the list item relative to its original size in
- * different interaction states. See [ListItemDefaults.scale]
+ *   different interaction states. See [ListItemDefaults.scale]
  * @param border [ListItemBorder] defines a border around the list item in different interaction
- * states. See [ListItemDefaults.border]
+ *   states. See [ListItemDefaults.border]
  * @param glow [ListItemGlow] defines a shadow to be shown behind the list item for different
- * interaction states. See [ListItemDefaults.glow]
+ *   interaction states. See [ListItemDefaults.glow]
  * @param interactionSource an optional hoisted [MutableInteractionSource] for observing and
- * emitting [Interaction]s for this list item. You can use this to change the list item's appearance
- * or preview the list item in different states. Note that if `null` is provided, interactions will
- * still happen internally.
+ *   emitting [Interaction]s for this list item. You can use this to change the list item's
+ *   appearance or preview the list item in different states. Note that if `null` is provided,
+ *   interactions will still happen internally.
  */
 @Composable
 fun DenseListItem(
@@ -184,7 +184,7 @@ fun DenseListItem(
     scale: ListItemScale = ListItemDefaults.scale(),
     border: ListItemBorder = ListItemDefaults.border(),
     glow: ListItemGlow = ListItemDefaults.glow(),
-    interactionSource: MutableInteractionSource? = null
+    interactionSource: MutableInteractionSource? = null,
 ) {
     BaseListItem(
         selected = selected,
@@ -204,16 +204,17 @@ fun DenseListItem(
         scale = scale,
         border = border,
         glow = glow,
-        minHeight = listItemMinHeight(
-            hasLeadingContent = leadingContent != null,
-            hasSupportingContent = supportingContent != null,
-            hasOverlineContent = overlineContent != null,
-            dense = true
-        ),
+        minHeight =
+            listItemMinHeight(
+                hasLeadingContent = leadingContent != null,
+                hasSupportingContent = supportingContent != null,
+                hasOverlineContent = overlineContent != null,
+                dense = true,
+            ),
         minIconSize = ListItemDefaults.IconSizeDense,
         headlineTextStyle = MaterialTheme.typography.titleSmall,
         trailingTextStyle = MaterialTheme.typography.labelSmall,
-        interactionSource = interactionSource
+        interactionSource = interactionSource,
     )
 }
 
@@ -226,8 +227,8 @@ fun DenseListItem(
  * @param headlineContent the [Composable] headline content of the list item
  * @param modifier [Modifier] to be applied to the list item
  * @param enabled controls the enabled state of this list item. When `false`, this component will
- * not respond to user input, and it will appear visually disabled and disabled to accessibility
- * services.
+ *   not respond to user input, and it will appear visually disabled and disabled to accessibility
+ *   services.
  * @param onLongClick called when this ListItem is long clicked (long-pressed).
  * @param leadingContent the [Composable] leading content of the list item
  * @param overlineContent the [Composable] content displayed above the headline content
@@ -235,23 +236,23 @@ fun DenseListItem(
  * @param trailingContent the [Composable] trailing meta text, icon, switch or checkbox
  * @param tonalElevation the tonal elevation of this list item
  * @param shape [ListItemShape] defines the shape of ListItem's container in different interaction
- * states.
+ *   states.
  * @param colors [ListItemColors] defines the background and content colors used in the list item
- * for different interaction states.
+ *   for different interaction states.
  * @param scale [ListItemScale] defines the size of the list item relative to its original size in
- * different interaction states.
+ *   different interaction states.
  * @param border [ListItemBorder] defines a border around the list item in different interaction
- * states.
+ *   states.
  * @param glow [ListItemGlow] defines a shadow to be shown behind the list item for different
- * interaction states.
+ *   interaction states.
  * @param minHeight defines the minimum height [Dp] for the ListItem.
  * @param minIconSize defines the minimum icon size [Dp] to be used in leading content.
  * @param headlineTextStyle defines the [TextStyle] for the headline content.
  * @param trailingTextStyle defines the [TextStyle] for the trailing content.
  * @param interactionSource an optional hoisted [MutableInteractionSource] for observing and
- * emitting [Interaction]s for this list item. You can use this to change the list item's appearance
- * or preview the list item in different states. Note that if `null` is provided, interactions will
- * still happen internally.
+ *   emitting [Interaction]s for this list item. You can use this to change the list item's
+ *   appearance or preview the list item in different states. Note that if `null` is provided,
+ *   interactions will still happen internally.
  */
 @Composable
 private fun BaseListItem(
@@ -276,13 +277,10 @@ private fun BaseListItem(
     minIconSize: Dp,
     headlineTextStyle: TextStyle,
     trailingTextStyle: TextStyle,
-    interactionSource: MutableInteractionSource?
+    interactionSource: MutableInteractionSource?,
 ) {
-    val semanticModifier = Modifier
-        .semantics(mergeDescendants = true) {
-            this.selected = selected
-        }
-        .then(modifier)
+    val semanticModifier =
+        Modifier.semantics(mergeDescendants = true) { this.selected = selected }.then(modifier)
 
     Surface(
         selected = selected,
@@ -296,65 +294,57 @@ private fun BaseListItem(
         scale = scale.toSelectableSurfaceScale(),
         border = border.toSelectableSurfaceBorder(),
         glow = glow.toSelectableSurfaceGlow(),
-        interactionSource = interactionSource
+        interactionSource = interactionSource,
     ) {
         Row(
-            modifier = Modifier
-                .defaultMinSize(minHeight = minHeight)
-                .padding(contentPadding),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.defaultMinSize(minHeight = minHeight).padding(contentPadding),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             leadingContent?.let {
-                Box(
-                    modifier = Modifier
-                        .defaultMinSize(
-                            minWidth = minIconSize,
-                            minHeight = minIconSize
-                        )
-                        .graphicsLayer {
-                            alpha = ListItemDefaults.LeadingContentOpacity
-                        },
-                    contentAlignment = Alignment.Center,
-                    content = it
-                )
-                Spacer(
-                    modifier = Modifier.padding(end = ListItemDefaults.LeadingContentEndPadding)
-                )
+                CompositionLocalProvider(
+                    LocalContentColor provides ListItemDefaults.LeadingContentColor
+                ) {
+                    Box(
+                        modifier =
+                            Modifier.defaultMinSize(
+                                minWidth = minIconSize,
+                                minHeight = minIconSize,
+                            ),
+                        contentAlignment = Alignment.Center,
+                        content = it,
+                    )
+                }
+                Spacer(modifier = Modifier.padding(end = ListItemDefaults.LeadingContentEndPadding))
             }
 
-            Box(
-                Modifier
-                    .weight(1f)
-                    .align(Alignment.CenterVertically)
-            ) {
+            Box(Modifier.weight(1f).align(Alignment.CenterVertically)) {
                 Column {
                     overlineContent?.let {
                         CompositionLocalProvider(
-                            LocalContentColor provides LocalContentColor.current.copy(
-                                alpha = ListItemDefaults.OverlineContentOpacity
-                            )
+                            LocalContentColor provides
+                                LocalContentColor.current.copy(
+                                    alpha = ListItemDefaults.OverlineContentOpacity
+                                )
                         ) {
                             ProvideTextStyle(
                                 value = MaterialTheme.typography.labelSmall,
-                                content = it
+                                content = it,
                             )
                         }
                     }
 
-                    ProvideTextStyle(
-                        value = headlineTextStyle,
-                        content = headlineContent
-                    )
+                    ProvideTextStyle(value = headlineTextStyle, content = headlineContent)
 
                     supportingContent?.let {
                         CompositionLocalProvider(
-                            LocalContentColor provides LocalContentColor.current.copy(
-                                alpha = ListItemDefaults.SupportingContentOpacity
-                            )
+                            LocalContentColor provides
+                                LocalContentColor.current.copy(
+                                    alpha = ListItemDefaults.SupportingContentOpacity
+                                )
                         ) {
                             ProvideTextStyle(
                                 value = MaterialTheme.typography.bodySmall,
-                                content = it
+                                content = it,
                             )
                         }
                     }
@@ -363,16 +353,11 @@ private fun BaseListItem(
 
             trailingContent?.let {
                 Box(
-                    modifier = Modifier
-                        .padding(start = ListItemDefaults.TrailingContentStartPadding)
+                    modifier =
+                        Modifier.padding(start = ListItemDefaults.TrailingContentStartPadding)
                 ) {
-                    CompositionLocalProvider(
-                        LocalContentColor provides LocalContentColor.current
-                    ) {
-                        ProvideTextStyle(
-                            value = trailingTextStyle,
-                            content = it
-                        )
+                    CompositionLocalProvider(LocalContentColor provides LocalContentColor.current) {
+                        ProvideTextStyle(value = trailingTextStyle, content = it)
                     }
                 }
             }
@@ -381,39 +366,35 @@ private fun BaseListItem(
 }
 
 /**
- * Calculates the minimum container height for [ListItem] based on whether the list items
- * are One-Line, Two-Line or Three-Line list items.
+ * Calculates the minimum container height for [ListItem] based on whether the list items are
+ * One-Line, Two-Line or Three-Line list items.
  *
  * @param hasLeadingContent if the leading supporting visual of the list item exists.
  * @param hasSupportingContent if the supporting text composable of the list item exists.
  * @param hasOverlineContent if the text composable displayed above the headline text exists.
  * @param dense whether the current list item is dense or not.
- *
  * @return The minimum container height for the given list item (to be used with
- * [Modifier.defaultMinSize]).
+ *   [Modifier.defaultMinSize]).
  */
 private fun listItemMinHeight(
     hasLeadingContent: Boolean,
     hasSupportingContent: Boolean,
     hasOverlineContent: Boolean,
-    dense: Boolean = false
+    dense: Boolean = false,
 ): Dp {
     return when {
         hasSupportingContent && hasOverlineContent -> {
             if (dense) ListItemDefaults.MinDenseContainerHeightThreeLine
             else ListItemDefaults.MinContainerHeightThreeLine
         }
-
         hasSupportingContent || hasOverlineContent -> {
             if (dense) ListItemDefaults.MinDenseContainerHeightTwoLine
             else ListItemDefaults.MinContainerHeightTwoLine
         }
-
         hasLeadingContent -> {
             if (dense) ListItemDefaults.MinDenseContainerHeightLeadingContent
             else ListItemDefaults.MinContainerHeightLeadingContent
         }
-
         else -> {
             if (dense) ListItemDefaults.MinDenseContainerHeight
             else ListItemDefaults.MinContainerHeight
@@ -432,7 +413,7 @@ internal fun ListItemShape.toSelectableSurfaceShape() =
         focusedDisabledShape = focusedDisabledShape,
         pressedSelectedShape = pressedSelectedShape,
         selectedDisabledShape = disabledShape,
-        focusedSelectedDisabledShape = focusedDisabledShape
+        focusedSelectedDisabledShape = focusedDisabledShape,
     )
 
 internal fun ListItemColors.toSelectableSurfaceColors() =
@@ -450,7 +431,7 @@ internal fun ListItemColors.toSelectableSurfaceColors() =
         focusedSelectedContainerColor = focusedSelectedContainerColor,
         focusedSelectedContentColor = focusedSelectedContentColor,
         pressedSelectedContainerColor = pressedSelectedContainerColor,
-        pressedSelectedContentColor = pressedSelectedContentColor
+        pressedSelectedContentColor = pressedSelectedContentColor,
     )
 
 internal fun ListItemScale.toSelectableSurfaceScale() =
@@ -464,7 +445,7 @@ internal fun ListItemScale.toSelectableSurfaceScale() =
         focusedDisabledScale = focusedDisabledScale,
         pressedSelectedScale = pressedSelectedScale,
         selectedDisabledScale = disabledScale,
-        focusedSelectedDisabledScale = focusedDisabledScale
+        focusedSelectedDisabledScale = focusedDisabledScale,
     )
 
 internal fun ListItemBorder.toSelectableSurfaceBorder() =
@@ -478,7 +459,7 @@ internal fun ListItemBorder.toSelectableSurfaceBorder() =
         focusedDisabledBorder = focusedDisabledBorder,
         pressedSelectedBorder = pressedSelectedBorder,
         selectedDisabledBorder = disabledBorder,
-        focusedSelectedDisabledBorder = focusedDisabledBorder
+        focusedSelectedDisabledBorder = focusedDisabledBorder,
     )
 
 internal fun ListItemGlow.toSelectableSurfaceGlow() =
@@ -488,5 +469,5 @@ internal fun ListItemGlow.toSelectableSurfaceGlow() =
         pressedGlow = pressedGlow,
         selectedGlow = selectedGlow,
         focusedSelectedGlow = focusedSelectedGlow,
-        pressedSelectedGlow = pressedSelectedGlow
+        pressedSelectedGlow = pressedSelectedGlow,
     )

@@ -53,24 +53,22 @@ private val DefaultColor = Color.Black
 private val DefaultColorForegroundStyle = TextForegroundStyle.from(DefaultColor)
 
 /**
- * Styling configuration for a text span. This configuration only allows character level styling,
- * in order to set paragraph level styling such as line height, or text alignment please see
+ * Styling configuration for a text span. This configuration only allows character level styling, in
+ * order to set paragraph level styling such as line height, or text alignment please see
  * [ParagraphStyle].
  *
  * @sample androidx.compose.ui.text.samples.SpanStyleSample
- *
  * @sample androidx.compose.ui.text.samples.AnnotatedStringBuilderSample
- *
- * @param fontSize The size of glyphs (in logical pixels) to use when painting the text. This
- * may be [TextUnit.Unspecified] for inheriting from another [SpanStyle].
+ * @param fontSize The size of glyphs (in logical pixels) to use when painting the text. This may be
+ *   [TextUnit.Unspecified] for inheriting from another [SpanStyle].
  * @param fontWeight The typeface thickness to use when painting the text (e.g., bold).
  * @param fontStyle The typeface variant to use when drawing the letters (e.g., italic).
  * @param fontSynthesis Whether to synthesize font weight and/or style when the requested weight or
- *  style cannot be found in the provided font family.
+ *   style cannot be found in the provided font family.
  * @param fontFamily The font family to be used when rendering the text.
  * @param fontFeatureSettings The advanced typography settings provided by font. The format is the
- *  same as the CSS font-feature-settings attribute:
- *  https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop
+ *   same as the CSS font-feature-settings attribute:
+ *   https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop
  * @param letterSpacing The amount of space (in em) to add between each letter.
  * @param baselineShift The amount by which the text is shifted up from the current baseline.
  * @param textGeometricTransform The geometric transformation applied the text.
@@ -80,14 +78,14 @@ private val DefaultColorForegroundStyle = TextForegroundStyle.from(DefaultColor)
  * @param shadow The shadow effect applied on the text.
  * @param platformStyle Platform specific [SpanStyle] parameters.
  * @param drawStyle Drawing style of text, whether fill in the text while drawing or stroke around
- * the edges.
- *
+ *   the edges.
  * @see AnnotatedString
  * @see TextStyle
  * @see ParagraphStyle
  */
 @Immutable
-class SpanStyle internal constructor(
+class SpanStyle
+internal constructor(
     // The fill to draw text, a unified representation of Color and Brush.
     internal val textForegroundStyle: TextForegroundStyle,
     val fontSize: TextUnit = TextUnit.Unspecified,
@@ -104,29 +102,27 @@ class SpanStyle internal constructor(
     val textDecoration: TextDecoration? = null,
     val shadow: Shadow? = null,
     val platformStyle: PlatformSpanStyle? = null,
-    val drawStyle: DrawStyle? = null
-) {
+    val drawStyle: DrawStyle? = null,
+) : AnnotatedString.Annotation {
 
     /**
-     * Styling configuration for a text span. This configuration only allows character level styling,
-     * in order to set paragraph level styling such as line height, or text alignment please see
-     * [ParagraphStyle].
+     * Styling configuration for a text span. This configuration only allows character level
+     * styling, in order to set paragraph level styling such as line height, or text alignment
+     * please see [ParagraphStyle].
      *
      * @sample androidx.compose.ui.text.samples.SpanStyleSample
-     *
      * @sample androidx.compose.ui.text.samples.AnnotatedStringBuilderSample
-     *
      * @param color The text color.
      * @param fontSize The size of glyphs (in logical pixels) to use when painting the text. This
-     * may be [TextUnit.Unspecified] for inheriting from another [SpanStyle].
+     *   may be [TextUnit.Unspecified] for inheriting from another [SpanStyle].
      * @param fontWeight The typeface thickness to use when painting the text (e.g., bold).
      * @param fontStyle The typeface variant to use when drawing the letters (e.g., italic).
      * @param fontSynthesis Whether to synthesize font weight and/or style when the requested weight
-     * or style cannot be found in the provided font family.
+     *   or style cannot be found in the provided font family.
      * @param fontFamily The font family to be used when rendering the text.
      * @param fontFeatureSettings The advanced typography settings provided by font. The format is
-     * the same as the CSS font-feature-settings attribute:
-     *  https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop
+     *   the same as the CSS font-feature-settings attribute:
+     *   https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop
      * @param letterSpacing The amount of space (in em) to add between each letter.
      * @param baselineShift The amount by which the text is shifted up from the current baseline.
      * @param textGeometricTransform The geometric transformation applied the text.
@@ -134,7 +130,6 @@ class SpanStyle internal constructor(
      * @param background The background color for the text.
      * @param textDecoration The decorations to paint on the text (e.g., an underline).
      * @param shadow The shadow effect applied on the text.
-     *
      * @see AnnotatedString
      * @see TextStyle
      * @see ParagraphStyle
@@ -143,79 +138,7 @@ class SpanStyle internal constructor(
         "SpanStyle constructors that do not take new stable parameters " +
             "like PlatformStyle, DrawStyle are deprecated. Please use the new stable " +
             "constructor.",
-        level = DeprecationLevel.HIDDEN
-    )
-    constructor(
-        color: Color = Color.Unspecified,
-        fontSize: TextUnit = TextUnit.Unspecified,
-        fontWeight: FontWeight? = null,
-        fontStyle: FontStyle? = null,
-        fontSynthesis: FontSynthesis? = null,
-        fontFamily: FontFamily? = null,
-        fontFeatureSettings: String? = null,
-        letterSpacing: TextUnit = TextUnit.Unspecified,
-        baselineShift: BaselineShift? = null,
-        textGeometricTransform: TextGeometricTransform? = null,
-        localeList: LocaleList? = null,
-        background: Color = Color.Unspecified,
-        textDecoration: TextDecoration? = null,
-        shadow: Shadow? = null
-    ) : this(
-        textForegroundStyle = TextForegroundStyle.from(color),
-        fontSize = fontSize,
-        fontWeight = fontWeight,
-        fontStyle = fontStyle,
-        fontSynthesis = fontSynthesis,
-        fontFamily = fontFamily,
-        fontFeatureSettings = fontFeatureSettings,
-        letterSpacing = letterSpacing,
-        baselineShift = baselineShift,
-        textGeometricTransform = textGeometricTransform,
-        localeList = localeList,
-        background = background,
-        textDecoration = textDecoration,
-        shadow = shadow,
-        platformStyle = null
-    )
-
-    /**
-     * Styling configuration for a text span. This configuration only allows character level styling,
-     * in order to set paragraph level styling such as line height, or text alignment please see
-     * [ParagraphStyle].
-     *
-     * @sample androidx.compose.ui.text.samples.SpanStyleSample
-     *
-     * @sample androidx.compose.ui.text.samples.AnnotatedStringBuilderSample
-     *
-     * @param color The color to draw the text.
-     * @param fontSize The size of glyphs (in logical pixels) to use when painting the text. This
-     * may be [TextUnit.Unspecified] for inheriting from another [SpanStyle].
-     * @param fontWeight The typeface thickness to use when painting the text (e.g., bold).
-     * @param fontStyle The typeface variant to use when drawing the letters (e.g., italic).
-     * @param fontSynthesis Whether to synthesize font weight and/or style when the requested weight
-     * or style cannot be found in the provided font family.
-     * @param fontFamily The font family to be used when rendering the text.
-     * @param fontFeatureSettings The advanced typography settings provided by font. The format is
-     * the same as the CSS font-feature-settings attribute:
-     *  https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop
-     * @param letterSpacing The amount of space (in em) to add between each letter.
-     * @param baselineShift The amount by which the text is shifted up from the current baseline.
-     * @param textGeometricTransform The geometric transformation applied the text.
-     * @param localeList The locale list used to select region-specific glyphs.
-     * @param background The background color for the text.
-     * @param textDecoration The decorations to paint on the text (e.g., an underline).
-     * @param shadow The shadow effect applied on the text.
-     * @param platformStyle Platform specific [SpanStyle] parameters.
-     *
-     * @see AnnotatedString
-     * @see TextStyle
-     * @see ParagraphStyle
-     */
-    @Deprecated(
-        "SpanStyle constructors that do not take new stable parameters " +
-            "like PlatformStyle, DrawStyle are deprecated. Please use the new stable " +
-            "constructor.",
-        level = DeprecationLevel.HIDDEN
+        level = DeprecationLevel.HIDDEN,
     )
     constructor(
         color: Color = Color.Unspecified,
@@ -232,7 +155,6 @@ class SpanStyle internal constructor(
         background: Color = Color.Unspecified,
         textDecoration: TextDecoration? = null,
         shadow: Shadow? = null,
-        platformStyle: PlatformSpanStyle? = null
     ) : this(
         textForegroundStyle = TextForegroundStyle.from(color),
         fontSize = fontSize,
@@ -248,29 +170,97 @@ class SpanStyle internal constructor(
         background = background,
         textDecoration = textDecoration,
         shadow = shadow,
-        platformStyle = platformStyle
+        platformStyle = null,
     )
 
     /**
-     * Styling configuration for a text span. This configuration only allows character level styling,
-     * in order to set paragraph level styling such as line height, or text alignment please see
-     * [ParagraphStyle].
+     * Styling configuration for a text span. This configuration only allows character level
+     * styling, in order to set paragraph level styling such as line height, or text alignment
+     * please see [ParagraphStyle].
      *
      * @sample androidx.compose.ui.text.samples.SpanStyleSample
-     *
      * @sample androidx.compose.ui.text.samples.AnnotatedStringBuilderSample
-     *
      * @param color The color to draw the text.
      * @param fontSize The size of glyphs (in logical pixels) to use when painting the text. This
-     * may be [TextUnit.Unspecified] for inheriting from another [SpanStyle].
+     *   may be [TextUnit.Unspecified] for inheriting from another [SpanStyle].
      * @param fontWeight The typeface thickness to use when painting the text (e.g., bold).
      * @param fontStyle The typeface variant to use when drawing the letters (e.g., italic).
      * @param fontSynthesis Whether to synthesize font weight and/or style when the requested weight
-     * or style cannot be found in the provided font family.
+     *   or style cannot be found in the provided font family.
      * @param fontFamily The font family to be used when rendering the text.
      * @param fontFeatureSettings The advanced typography settings provided by font. The format is
-     * the same as the CSS font-feature-settings attribute:
-     *  https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop
+     *   the same as the CSS font-feature-settings attribute:
+     *   https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop
+     * @param letterSpacing The amount of space (in em) to add between each letter.
+     * @param baselineShift The amount by which the text is shifted up from the current baseline.
+     * @param textGeometricTransform The geometric transformation applied the text.
+     * @param localeList The locale list used to select region-specific glyphs.
+     * @param background The background color for the text.
+     * @param textDecoration The decorations to paint on the text (e.g., an underline).
+     * @param shadow The shadow effect applied on the text.
+     * @param platformStyle Platform specific [SpanStyle] parameters.
+     * @see AnnotatedString
+     * @see TextStyle
+     * @see ParagraphStyle
+     */
+    @Deprecated(
+        "SpanStyle constructors that do not take new stable parameters " +
+            "like PlatformStyle, DrawStyle are deprecated. Please use the new stable " +
+            "constructor.",
+        level = DeprecationLevel.HIDDEN,
+    )
+    constructor(
+        color: Color = Color.Unspecified,
+        fontSize: TextUnit = TextUnit.Unspecified,
+        fontWeight: FontWeight? = null,
+        fontStyle: FontStyle? = null,
+        fontSynthesis: FontSynthesis? = null,
+        fontFamily: FontFamily? = null,
+        fontFeatureSettings: String? = null,
+        letterSpacing: TextUnit = TextUnit.Unspecified,
+        baselineShift: BaselineShift? = null,
+        textGeometricTransform: TextGeometricTransform? = null,
+        localeList: LocaleList? = null,
+        background: Color = Color.Unspecified,
+        textDecoration: TextDecoration? = null,
+        shadow: Shadow? = null,
+        platformStyle: PlatformSpanStyle? = null,
+    ) : this(
+        textForegroundStyle = TextForegroundStyle.from(color),
+        fontSize = fontSize,
+        fontWeight = fontWeight,
+        fontStyle = fontStyle,
+        fontSynthesis = fontSynthesis,
+        fontFamily = fontFamily,
+        fontFeatureSettings = fontFeatureSettings,
+        letterSpacing = letterSpacing,
+        baselineShift = baselineShift,
+        textGeometricTransform = textGeometricTransform,
+        localeList = localeList,
+        background = background,
+        textDecoration = textDecoration,
+        shadow = shadow,
+        platformStyle = platformStyle,
+    )
+
+    /**
+     * Styling configuration for a text span. This configuration only allows character level
+     * styling, in order to set paragraph level styling such as line height, or text alignment
+     * please see [ParagraphStyle].
+     *
+     * @sample androidx.compose.ui.text.samples.SpanStyleSample
+     * @sample androidx.compose.ui.text.samples.AnnotatedStringBuilderSample
+     * @param color The color to draw the text.
+     * @param fontSize The size of glyphs (in logical pixels) to use when painting the text. This
+     *   may be [TextUnit.Unspecified] for inheriting from another [SpanStyle].
+     * @param fontWeight The typeface thickness to use when painting the text (e.g., bold).
+     * @param fontStyle The typeface variant to use when drawing the letters (e.g., italic).
+     * @param fontSynthesis Whether to synthesize font weight and/or style when the requested weight
+     *   or style cannot be found in the provided font family.
+     * @param fontFamily The font family to be used when rendering the text.
+     * @param fontFeatureSettings The advanced typography settings provided by font. The format is
+     *   the same as the CSS font-feature-settings attribute:
+     *   https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop
      * @param letterSpacing The amount of space (in em) to add between each letter.
      * @param baselineShift The amount by which the text is shifted up from the current baseline.
      * @param textGeometricTransform The geometric transformation applied the text.
@@ -280,8 +270,7 @@ class SpanStyle internal constructor(
      * @param shadow The shadow effect applied on the text.
      * @param platformStyle Platform specific [SpanStyle] parameters.
      * @param drawStyle Drawing style of text, whether fill in the text while drawing or stroke
-     * around the edges.
-     *
+     *   around the edges.
      * @see AnnotatedString
      * @see TextStyle
      * @see ParagraphStyle
@@ -302,7 +291,7 @@ class SpanStyle internal constructor(
         textDecoration: TextDecoration? = null,
         shadow: Shadow? = null,
         platformStyle: PlatformSpanStyle? = null,
-        drawStyle: DrawStyle? = null
+        drawStyle: DrawStyle? = null,
     ) : this(
         textForegroundStyle = TextForegroundStyle.from(color),
         fontSize = fontSize,
@@ -319,33 +308,31 @@ class SpanStyle internal constructor(
         textDecoration = textDecoration,
         shadow = shadow,
         platformStyle = platformStyle,
-        drawStyle = drawStyle
+        drawStyle = drawStyle,
     )
 
     /**
-     * Styling configuration for a text span. This configuration only allows character level styling,
-     * in order to set paragraph level styling such as line height, or text alignment please see
-     * [ParagraphStyle].
+     * Styling configuration for a text span. This configuration only allows character level
+     * styling, in order to set paragraph level styling such as line height, or text alignment
+     * please see [ParagraphStyle].
      *
      * @sample androidx.compose.ui.text.samples.SpanStyleBrushSample
-     *
      * @sample androidx.compose.ui.text.samples.AnnotatedStringBuilderSample
-     *
      * @param brush The brush to use when painting the text. If brush is given as null, it will be
-     * treated as unspecified. It is equivalent to calling the alternative color constructor with
-     * [Color.Unspecified]
+     *   treated as unspecified. It is equivalent to calling the alternative color constructor with
+     *   [Color.Unspecified]
      * @param alpha Opacity to be applied to [brush] from 0.0f to 1.0f representing fully
-     * transparent to fully opaque respectively.
+     *   transparent to fully opaque respectively.
      * @param fontSize The size of glyphs (in logical pixels) to use when painting the text. This
-     * may be [TextUnit.Unspecified] for inheriting from another [SpanStyle].
+     *   may be [TextUnit.Unspecified] for inheriting from another [SpanStyle].
      * @param fontWeight The typeface thickness to use when painting the text (e.g., bold).
      * @param fontStyle The typeface variant to use when drawing the letters (e.g., italic).
      * @param fontSynthesis Whether to synthesize font weight and/or style when the requested weight
-     * or style cannot be found in the provided font family.
+     *   or style cannot be found in the provided font family.
      * @param fontFamily The font family to be used when rendering the text.
      * @param fontFeatureSettings The advanced typography settings provided by font. The format is
-     * the same as the CSS font-feature-settings attribute:
-     *  https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop
+     *   the same as the CSS font-feature-settings attribute:
+     *   https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop
      * @param letterSpacing The amount of space (in em) to add between each letter.
      * @param baselineShift The amount by which the text is shifted up from the current baseline.
      * @param textGeometricTransform The geometric transformation applied the text.
@@ -355,8 +342,7 @@ class SpanStyle internal constructor(
      * @param shadow The shadow effect applied on the text.
      * @param platformStyle Platform specific [SpanStyle] parameters.
      * @param drawStyle Drawing style of text, whether fill in the text while drawing or stroke
-     * around the edges.
-     *
+     *   around the edges.
      * @see AnnotatedString
      * @see TextStyle
      * @see ParagraphStyle
@@ -378,7 +364,7 @@ class SpanStyle internal constructor(
         textDecoration: TextDecoration? = null,
         shadow: Shadow? = null,
         platformStyle: PlatformSpanStyle? = null,
-        drawStyle: DrawStyle? = null
+        drawStyle: DrawStyle? = null,
     ) : this(
         textForegroundStyle = TextForegroundStyle.from(brush, alpha),
         fontSize = fontSize,
@@ -395,24 +381,23 @@ class SpanStyle internal constructor(
         textDecoration = textDecoration,
         shadow = shadow,
         platformStyle = platformStyle,
-        drawStyle = drawStyle
+        drawStyle = drawStyle,
     )
 
-    /**
-     * Color to draw text.
-     */
-    val color: Color get() = this.textForegroundStyle.color
+    /** Color to draw text. */
+    val color: Color
+        get() = this.textForegroundStyle.color
 
-    /**
-     * Brush to draw text. If not null, overrides [color].
-     */
-    val brush: Brush? get() = this.textForegroundStyle.brush
+    /** Brush to draw text. If not null, overrides [color]. */
+    val brush: Brush?
+        get() = this.textForegroundStyle.brush
 
     /**
      * Opacity of text. This value is either provided along side Brush, or via alpha channel in
      * color.
      */
-    val alpha: Float get() = this.textForegroundStyle.alpha
+    val alpha: Float
+        get() = this.textForegroundStyle.alpha
 
     /**
      * Returns a new span style that is a combination of this style and the given [other] style.
@@ -444,67 +429,18 @@ class SpanStyle internal constructor(
             textDecoration = other.textDecoration,
             shadow = other.shadow,
             platformStyle = other.platformStyle,
-            drawStyle = other.drawStyle
+            drawStyle = other.drawStyle,
         )
     }
 
-    /**
-     * Plus operator overload that applies a [merge].
-     */
-    @Stable
-    operator fun plus(other: SpanStyle): SpanStyle = this.merge(other)
+    /** Plus operator overload that applies a [merge]. */
+    @Stable operator fun plus(other: SpanStyle): SpanStyle = this.merge(other)
 
     @Deprecated(
         "SpanStyle copy constructors that do not take new stable parameters " +
             "like PlatformStyle, DrawStyle are deprecated. Please use the new stable " +
             "copy constructor.",
-        level = DeprecationLevel.HIDDEN
-    )
-    fun copy(
-        color: Color = this.color,
-        fontSize: TextUnit = this.fontSize,
-        fontWeight: FontWeight? = this.fontWeight,
-        fontStyle: FontStyle? = this.fontStyle,
-        fontSynthesis: FontSynthesis? = this.fontSynthesis,
-        fontFamily: FontFamily? = this.fontFamily,
-        fontFeatureSettings: String? = this.fontFeatureSettings,
-        letterSpacing: TextUnit = this.letterSpacing,
-        baselineShift: BaselineShift? = this.baselineShift,
-        textGeometricTransform: TextGeometricTransform? = this.textGeometricTransform,
-        localeList: LocaleList? = this.localeList,
-        background: Color = this.background,
-        textDecoration: TextDecoration? = this.textDecoration,
-        shadow: Shadow? = this.shadow
-    ): SpanStyle {
-        return SpanStyle(
-            textForegroundStyle = if (color == this.color) {
-                textForegroundStyle
-            } else {
-                TextForegroundStyle.from(color)
-            },
-            fontSize = fontSize,
-            fontWeight = fontWeight,
-            fontStyle = fontStyle,
-            fontSynthesis = fontSynthesis,
-            fontFamily = fontFamily,
-            fontFeatureSettings = fontFeatureSettings,
-            letterSpacing = letterSpacing,
-            baselineShift = baselineShift,
-            textGeometricTransform = textGeometricTransform,
-            localeList = localeList,
-            background = background,
-            textDecoration = textDecoration,
-            shadow = shadow,
-            platformStyle = this.platformStyle,
-            drawStyle = this.drawStyle
-        )
-    }
-
-    @Deprecated(
-        "SpanStyle copy constructors that do not take new stable parameters " +
-            "like PlatformStyle, DrawStyle are deprecated. Please use the new stable " +
-            "copy constructor.",
-        level = DeprecationLevel.HIDDEN
+        level = DeprecationLevel.HIDDEN,
     )
     fun copy(
         color: Color = this.color,
@@ -521,14 +457,14 @@ class SpanStyle internal constructor(
         background: Color = this.background,
         textDecoration: TextDecoration? = this.textDecoration,
         shadow: Shadow? = this.shadow,
-        platformStyle: PlatformSpanStyle? = this.platformStyle
     ): SpanStyle {
         return SpanStyle(
-            textForegroundStyle = if (color == this.color) {
-                textForegroundStyle
-            } else {
-                TextForegroundStyle.from(color)
-            },
+            textForegroundStyle =
+                if (color == this.color) {
+                    textForegroundStyle
+                } else {
+                    TextForegroundStyle.from(color)
+                },
             fontSize = fontSize,
             fontWeight = fontWeight,
             fontStyle = fontStyle,
@@ -542,7 +478,55 @@ class SpanStyle internal constructor(
             background = background,
             textDecoration = textDecoration,
             shadow = shadow,
-            platformStyle = platformStyle
+            platformStyle = this.platformStyle,
+            drawStyle = this.drawStyle,
+        )
+    }
+
+    @Deprecated(
+        "SpanStyle copy constructors that do not take new stable parameters " +
+            "like PlatformStyle, DrawStyle are deprecated. Please use the new stable " +
+            "copy constructor.",
+        level = DeprecationLevel.HIDDEN,
+    )
+    fun copy(
+        color: Color = this.color,
+        fontSize: TextUnit = this.fontSize,
+        fontWeight: FontWeight? = this.fontWeight,
+        fontStyle: FontStyle? = this.fontStyle,
+        fontSynthesis: FontSynthesis? = this.fontSynthesis,
+        fontFamily: FontFamily? = this.fontFamily,
+        fontFeatureSettings: String? = this.fontFeatureSettings,
+        letterSpacing: TextUnit = this.letterSpacing,
+        baselineShift: BaselineShift? = this.baselineShift,
+        textGeometricTransform: TextGeometricTransform? = this.textGeometricTransform,
+        localeList: LocaleList? = this.localeList,
+        background: Color = this.background,
+        textDecoration: TextDecoration? = this.textDecoration,
+        shadow: Shadow? = this.shadow,
+        platformStyle: PlatformSpanStyle? = this.platformStyle,
+    ): SpanStyle {
+        return SpanStyle(
+            textForegroundStyle =
+                if (color == this.color) {
+                    textForegroundStyle
+                } else {
+                    TextForegroundStyle.from(color)
+                },
+            fontSize = fontSize,
+            fontWeight = fontWeight,
+            fontStyle = fontStyle,
+            fontSynthesis = fontSynthesis,
+            fontFamily = fontFamily,
+            fontFeatureSettings = fontFeatureSettings,
+            letterSpacing = letterSpacing,
+            baselineShift = baselineShift,
+            textGeometricTransform = textGeometricTransform,
+            localeList = localeList,
+            background = background,
+            textDecoration = textDecoration,
+            shadow = shadow,
+            platformStyle = platformStyle,
         )
     }
 
@@ -562,14 +546,15 @@ class SpanStyle internal constructor(
         textDecoration: TextDecoration? = this.textDecoration,
         shadow: Shadow? = this.shadow,
         platformStyle: PlatformSpanStyle? = this.platformStyle,
-        drawStyle: DrawStyle? = this.drawStyle
+        drawStyle: DrawStyle? = this.drawStyle,
     ): SpanStyle {
         return SpanStyle(
-            textForegroundStyle = if (color == this.color) {
-                textForegroundStyle
-            } else {
-                TextForegroundStyle.from(color)
-            },
+            textForegroundStyle =
+                if (color == this.color) {
+                    textForegroundStyle
+                } else {
+                    TextForegroundStyle.from(color)
+                },
             fontSize = fontSize,
             fontWeight = fontWeight,
             fontStyle = fontStyle,
@@ -584,7 +569,7 @@ class SpanStyle internal constructor(
             textDecoration = textDecoration,
             shadow = shadow,
             platformStyle = platformStyle,
-            drawStyle = drawStyle
+            drawStyle = drawStyle,
         )
     }
 
@@ -605,7 +590,7 @@ class SpanStyle internal constructor(
         textDecoration: TextDecoration? = this.textDecoration,
         shadow: Shadow? = this.shadow,
         platformStyle: PlatformSpanStyle? = this.platformStyle,
-        drawStyle: DrawStyle? = this.drawStyle
+        drawStyle: DrawStyle? = this.drawStyle,
     ): SpanStyle {
         return SpanStyle(
             textForegroundStyle = TextForegroundStyle.from(brush, alpha),
@@ -623,15 +608,14 @@ class SpanStyle internal constructor(
             textDecoration = textDecoration,
             shadow = shadow,
             platformStyle = platformStyle,
-            drawStyle = drawStyle
+            drawStyle = drawStyle,
         )
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is SpanStyle) return false
-        return hasSameLayoutAffectingAttributes(other) &&
-            hasSameNonLayoutAttributes(other)
+        return hasSameLayoutAffectingAttributes(other) && hasSameNonLayoutAttributes(other)
     }
 
     internal fun hasSameLayoutAffectingAttributes(other: SpanStyle): Boolean {
@@ -741,87 +725,54 @@ internal fun <T> lerpDiscrete(a: T, b: T, fraction: Float): T = if (fraction < 0
  *
  * This will not work well if the styles don't set the same fields.
  *
- * The [fraction] argument represents position on the timeline, with 0.0 meaning
- * that the interpolation has not started, returning [start] (or something
- * equivalent to [start]), 1.0 meaning that the interpolation has finished,
- * returning [stop] (or something equivalent to [stop]), and values in between
- * meaning that the interpolation is at the relevant point on the timeline
- * between [start] and [stop]. The interpolation can be extrapolated beyond 0.0 and
- * 1.0, so negative values and values greater than 1.0 are valid.
+ * The [fraction] argument represents position on the timeline, with 0.0 meaning that the
+ * interpolation has not started, returning [start] (or something equivalent to [start]), 1.0
+ * meaning that the interpolation has finished, returning [stop] (or something equivalent to
+ * [stop]), and values in between meaning that the interpolation is at the relevant point on the
+ * timeline between [start] and [stop]. The interpolation can be extrapolated beyond 0.0 and 1.0, so
+ * negative values and values greater than 1.0 are valid.
  */
 fun lerp(start: SpanStyle, stop: SpanStyle, fraction: Float): SpanStyle {
     return SpanStyle(
         textForegroundStyle = lerp(start.textForegroundStyle, stop.textForegroundStyle, fraction),
-        fontFamily = lerpDiscrete(
-            start.fontFamily,
-            stop.fontFamily,
-            fraction
-        ),
+        fontFamily = lerpDiscrete(start.fontFamily, stop.fontFamily, fraction),
         fontSize = lerpTextUnitInheritable(start.fontSize, stop.fontSize, fraction),
-        fontWeight = lerp(
-            start.fontWeight ?: FontWeight.Normal,
-            stop.fontWeight ?: FontWeight.Normal,
-            fraction
-        ),
-        fontStyle = lerpDiscrete(
-            start.fontStyle,
-            stop.fontStyle,
-            fraction
-        ),
-        fontSynthesis = lerpDiscrete(
-            start.fontSynthesis,
-            stop.fontSynthesis,
-            fraction
-        ),
-        fontFeatureSettings = lerpDiscrete(
-            start.fontFeatureSettings,
-            stop.fontFeatureSettings,
-            fraction
-        ),
-        letterSpacing = lerpTextUnitInheritable(
-            start.letterSpacing,
-            stop.letterSpacing,
-            fraction
-        ),
-        baselineShift = lerp(
-            start.baselineShift ?: BaselineShift(0f),
-            stop.baselineShift ?: BaselineShift(0f),
-            fraction
-        ),
-        textGeometricTransform = lerp(
-            start.textGeometricTransform ?: TextGeometricTransform.None,
-            stop.textGeometricTransform ?: TextGeometricTransform.None,
-            fraction
-        ),
+        fontWeight =
+            lerp(
+                start.fontWeight ?: FontWeight.Normal,
+                stop.fontWeight ?: FontWeight.Normal,
+                fraction,
+            ),
+        fontStyle = lerpDiscrete(start.fontStyle, stop.fontStyle, fraction),
+        fontSynthesis = lerpDiscrete(start.fontSynthesis, stop.fontSynthesis, fraction),
+        fontFeatureSettings =
+            lerpDiscrete(start.fontFeatureSettings, stop.fontFeatureSettings, fraction),
+        letterSpacing = lerpTextUnitInheritable(start.letterSpacing, stop.letterSpacing, fraction),
+        baselineShift =
+            lerp(
+                start.baselineShift ?: BaselineShift(0f),
+                stop.baselineShift ?: BaselineShift(0f),
+                fraction,
+            ),
+        textGeometricTransform =
+            lerp(
+                start.textGeometricTransform ?: TextGeometricTransform.None,
+                stop.textGeometricTransform ?: TextGeometricTransform.None,
+                fraction,
+            ),
         localeList = lerpDiscrete(start.localeList, stop.localeList, fraction),
-        background = lerp(
-            start.background,
-            stop.background,
-            fraction
-        ),
-        textDecoration = lerpDiscrete(
-            start.textDecoration,
-            stop.textDecoration,
-            fraction
-        ),
-        shadow = lerp(
-            start.shadow ?: Shadow(),
-            stop.shadow ?: Shadow(),
-            fraction
-        ),
+        background = lerp(start.background, stop.background, fraction),
+        textDecoration = lerpDiscrete(start.textDecoration, stop.textDecoration, fraction),
+        shadow = lerp(start.shadow ?: Shadow(), stop.shadow ?: Shadow(), fraction),
         platformStyle = lerpPlatformStyle(start.platformStyle, stop.platformStyle, fraction),
-        drawStyle = lerpDiscrete(
-            start.drawStyle,
-            stop.drawStyle,
-            fraction
-        )
+        drawStyle = lerpDiscrete(start.drawStyle, stop.drawStyle, fraction),
     )
 }
 
 private fun lerpPlatformStyle(
     start: PlatformSpanStyle?,
     stop: PlatformSpanStyle?,
-    fraction: Float
+    fraction: Float,
 ): PlatformSpanStyle? {
     if (start == null && stop == null) return null
     val startNonNull = start ?: PlatformSpanStyle.Default
@@ -829,28 +780,31 @@ private fun lerpPlatformStyle(
     return lerp(startNonNull, stopNonNull, fraction)
 }
 
-internal fun resolveSpanStyleDefaults(style: SpanStyle) = SpanStyle(
-    textForegroundStyle = style.textForegroundStyle.takeOrElse { DefaultColorForegroundStyle },
-    fontSize = if (style.fontSize.isUnspecified) DefaultFontSize else style.fontSize,
-    fontWeight = style.fontWeight ?: FontWeight.Normal,
-    fontStyle = style.fontStyle ?: FontStyle.Normal,
-    fontSynthesis = style.fontSynthesis ?: FontSynthesis.All,
-    fontFamily = style.fontFamily ?: FontFamily.Default,
-    fontFeatureSettings = style.fontFeatureSettings ?: "",
-    letterSpacing = if (style.letterSpacing.isUnspecified) {
-        DefaultLetterSpacing
-    } else {
-        style.letterSpacing
-    },
-    baselineShift = style.baselineShift ?: BaselineShift.None,
-    textGeometricTransform = style.textGeometricTransform ?: TextGeometricTransform.None,
-    localeList = style.localeList ?: LocaleList.current,
-    background = style.background.takeOrElse { DefaultBackgroundColor },
-    textDecoration = style.textDecoration ?: TextDecoration.None,
-    shadow = style.shadow ?: Shadow.None,
-    platformStyle = style.platformStyle,
-    drawStyle = style.drawStyle ?: Fill
-)
+internal fun resolveSpanStyleDefaults(style: SpanStyle) =
+    SpanStyle(
+        textForegroundStyle = style.textForegroundStyle.takeOrElse { DefaultColorForegroundStyle },
+        fontSize = if (style.fontSize.isUnspecified) DefaultFontSize else style.fontSize,
+        fontWeight = style.fontWeight ?: FontWeight.Normal,
+        fontStyle = style.fontStyle ?: FontStyle.Normal,
+        fontSynthesis = style.fontSynthesis ?: FontSynthesis.All,
+        fontFamily = style.fontFamily ?: FontFamily.Default,
+        fontFeatureSettings = style.fontFeatureSettings ?: "",
+        letterSpacing =
+            if (style.letterSpacing.isUnspecified) {
+                DefaultLetterSpacing
+            } else {
+                style.letterSpacing
+            },
+        baselineShift =
+            (style.baselineShift ?: BaselineShift.None).takeOrElse { BaselineShift.None },
+        textGeometricTransform = style.textGeometricTransform ?: TextGeometricTransform.None,
+        localeList = style.localeList ?: LocaleList.current,
+        background = style.background.takeOrElse { DefaultBackgroundColor },
+        textDecoration = style.textDecoration ?: TextDecoration.None,
+        shadow = style.shadow ?: Shadow.None,
+        platformStyle = style.platformStyle,
+        drawStyle = style.drawStyle ?: Fill,
+    )
 
 internal fun SpanStyle.fastMerge(
     color: Color,
@@ -870,53 +824,50 @@ internal fun SpanStyle.fastMerge(
     textDecoration: TextDecoration?,
     shadow: Shadow?,
     platformStyle: PlatformSpanStyle?,
-    drawStyle: DrawStyle?
+    drawStyle: DrawStyle?,
 ): SpanStyle {
     // prioritize the parameters to Text in diffs here
     /**
-     *  color: Color
-     *  fontSize: TextUnit
-     *  fontStyle: FontStyle?
-     *  fontWeight: FontWeight?
-     *  fontFamily: FontFamily?
-     *  letterSpacing: TextUnit
-     *  textDecoration: TextDecoration?
-     *  textAlign: TextAlign?
-     *  lineHeight: TextUnit
+     * color: Color fontSize: TextUnit fontStyle: FontStyle? fontWeight: FontWeight? fontFamily:
+     * FontFamily? letterSpacing: TextUnit textDecoration: TextDecoration? textAlign: TextAlign?
+     * lineHeight: TextUnit
      */
 
     // any new vals should do a pre-merge check here
-    val requiresAlloc = fontSize.isSpecified && fontSize != this.fontSize ||
-        brush == null && color.isSpecified && color != textForegroundStyle.color ||
-        fontStyle != null && fontStyle != this.fontStyle ||
-        fontWeight != null && fontWeight != this.fontWeight ||
-        // ref check for font-family, since we don't want to compare lists in fast path
-        fontFamily != null && fontFamily !== this.fontFamily ||
-        letterSpacing.isSpecified && letterSpacing != this.letterSpacing ||
-        textDecoration != null && textDecoration != this.textDecoration ||
-        // then compare the remaining params, for potential non-Text merges
-        brush != textForegroundStyle.brush ||
-        brush != null && alpha != this.textForegroundStyle.alpha ||
-        fontSynthesis != null && fontSynthesis != this.fontSynthesis ||
-        fontFeatureSettings != null && fontFeatureSettings != this.fontFeatureSettings ||
-        baselineShift != null && baselineShift != this.baselineShift ||
-        textGeometricTransform != null && textGeometricTransform != this.textGeometricTransform ||
-        localeList != null && localeList != this.localeList ||
-        background.isSpecified && background != this.background ||
-        shadow != null && shadow != this.shadow ||
-        platformStyle != null && platformStyle != this.platformStyle ||
-        drawStyle != null && drawStyle != this.drawStyle
+    val requiresAlloc =
+        fontSize.isSpecified && fontSize != this.fontSize ||
+            brush == null && color.isSpecified && color != textForegroundStyle.color ||
+            fontStyle != null && fontStyle != this.fontStyle ||
+            fontWeight != null && fontWeight != this.fontWeight ||
+            // ref check for font-family, since we don't want to compare lists in fast path
+            fontFamily != null && fontFamily !== this.fontFamily ||
+            letterSpacing.isSpecified && letterSpacing != this.letterSpacing ||
+            textDecoration != null && textDecoration != this.textDecoration ||
+            // then compare the remaining params, for potential non-Text merges
+            brush != textForegroundStyle.brush ||
+            brush != null && alpha != this.textForegroundStyle.alpha ||
+            fontSynthesis != null && fontSynthesis != this.fontSynthesis ||
+            fontFeatureSettings != null && fontFeatureSettings != this.fontFeatureSettings ||
+            baselineShift != null && baselineShift != this.baselineShift ||
+            textGeometricTransform != null &&
+                textGeometricTransform != this.textGeometricTransform ||
+            localeList != null && localeList != this.localeList ||
+            background.isSpecified && background != this.background ||
+            shadow != null && shadow != this.shadow ||
+            platformStyle != null && platformStyle != this.platformStyle ||
+            drawStyle != null && drawStyle != this.drawStyle
 
     if (!requiresAlloc) {
         // we're done
         return this
     }
 
-    val otherTextForegroundStyle = if (brush != null) {
-        TextForegroundStyle.from(brush, alpha)
-    } else {
-        TextForegroundStyle.from(color)
-    }
+    val otherTextForegroundStyle =
+        if (brush != null) {
+            TextForegroundStyle.from(brush, alpha)
+        } else {
+            TextForegroundStyle.from(color)
+        }
 
     return SpanStyle(
         textForegroundStyle = textForegroundStyle.merge(otherTextForegroundStyle),
@@ -926,11 +877,12 @@ internal fun SpanStyle.fastMerge(
         fontStyle = fontStyle ?: this.fontStyle,
         fontSynthesis = fontSynthesis ?: this.fontSynthesis,
         fontFeatureSettings = fontFeatureSettings ?: this.fontFeatureSettings,
-        letterSpacing = if (!letterSpacing.isUnspecified) {
-            letterSpacing
-        } else {
-            this.letterSpacing
-        },
+        letterSpacing =
+            if (!letterSpacing.isUnspecified) {
+                letterSpacing
+            } else {
+                this.letterSpacing
+            },
         baselineShift = baselineShift ?: this.baselineShift,
         textGeometricTransform = textGeometricTransform ?: this.textGeometricTransform,
         localeList = localeList ?: this.localeList,
@@ -938,7 +890,7 @@ internal fun SpanStyle.fastMerge(
         textDecoration = textDecoration ?: this.textDecoration,
         shadow = shadow ?: this.shadow,
         platformStyle = mergePlatformStyle(platformStyle),
-        drawStyle = drawStyle ?: this.drawStyle
+        drawStyle = drawStyle ?: this.drawStyle,
     )
 }
 

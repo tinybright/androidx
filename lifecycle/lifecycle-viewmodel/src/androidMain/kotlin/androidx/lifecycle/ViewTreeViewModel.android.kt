@@ -20,16 +20,17 @@ package androidx.lifecycle
 import android.view.View
 
 /**
- * Locates the [ViewModelStoreOwner] associated with this [View], if present.
- * This may be used to retain state associated with this view across configuration changes.
+ * Locates the [ViewModelStoreOwner] associated with this [View], if present. This may be used to
+ * retain state associated with this view across configuration changes.
  */
 @Deprecated(
     message = "Replaced by View.findViewTreeViewModelStoreOwner in ViewTreeViewModelStoreOwner",
-    replaceWith = ReplaceWith(
-        "View.findViewTreeViewModelStoreOwner",
-        "androidx.lifecycle.ViewTreeViewModelStoreOwner"
-    ),
-    level = DeprecationLevel.HIDDEN
+    replaceWith =
+        ReplaceWith(
+            "View.findViewTreeViewModelStoreOwner",
+            "androidx.lifecycle.ViewTreeViewModelStoreOwner",
+        ),
+    level = DeprecationLevel.HIDDEN,
 )
 public fun findViewTreeViewModelStoreOwner(view: View): ViewModelStoreOwner? =
     view.findViewTreeViewModelStoreOwner()

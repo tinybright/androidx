@@ -37,12 +37,13 @@ internal fun <T> ResultSet.collect(f: (ResultSet) -> T): List<T> {
 }
 
 private fun <T> PreparedStatement.map(f: (Int, ResultSetMetaData) -> T): List<T> {
-    val columnCount = try {
-        metaData.columnCount
-    } catch (ex: SQLException) {
-        // ignore, no-result query
-        0
-    }
+    val columnCount =
+        try {
+            metaData.columnCount
+        } catch (ex: SQLException) {
+            // ignore, no-result query
+            0
+        }
     // return is separate than data creation because we want to know who throws the exception
     return (1.rangeTo(columnCount)).map { f(it, metaData) }
 }
@@ -65,7 +66,7 @@ internal fun PreparedStatement.columnInfo(): List<ColumnInfo> {
         ColumnInfo(
             name = data.getColumnName(index),
             type = tryGetAffinity(index),
-            originTable = data.getTableName(index)?.ifEmpty { null }
+            originTable = data.getTableName(index)?.ifEmpty { null },
         )
     }
 }

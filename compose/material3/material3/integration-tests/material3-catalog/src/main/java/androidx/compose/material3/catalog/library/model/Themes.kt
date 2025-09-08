@@ -16,28 +16,44 @@
 
 package androidx.compose.material3.catalog.library.model
 
+import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.MaterialTheme
+
 data class Theme(
-    val themeMode: ThemeMode = ThemeMode.System,
+    val themeColorMode: ThemeColorMode = ThemeColorMode.System,
     val colorMode: ColorMode = ColorMode.Baseline,
+    val expressiveThemeMode: ExpressiveThemeMode = ExpressiveThemeMode.NonExpressive,
     val fontScale: Float = 1.0f,
     val fontScaleMode: FontScaleMode = FontScaleMode.System,
     val textDirection: TextDirection = TextDirection.System,
+    val showOnlyExpressiveComponents: Boolean = false,
+    val markExpressiveComponents: Boolean = true,
 ) {
-    constructor(map: Map<String, Float>) : this(
-        themeMode = ThemeMode.values()[map.getValue(ThemeModeKey).toInt()],
+    constructor(
+        map: Map<String, Float>
+    ) : this(
+        themeColorMode = ThemeColorMode.values()[map.getValue(ThemeModeKey).toInt()],
         colorMode = ColorMode.values()[map.getValue(ColorModeKey).toInt()],
+        expressiveThemeMode =
+            ExpressiveThemeMode.values()[map.getValue(ExpressiveThemeModeKey).toInt()],
         fontScale = map.getValue(FontScaleKey).toFloat(),
         fontScaleMode = FontScaleMode.values()[map.getValue(FontScaleModeKey).toInt()],
         textDirection = TextDirection.values()[map.getValue(TextDirectionKey).toInt()],
+        showOnlyExpressiveComponents = map.getValue(ShowOnlyExpressiveComponents).toInt() != 0,
+        markExpressiveComponents = map.getValue(MarkExpressiveComponents).toInt() != 0,
     )
 
-    fun toMap() = mapOf(
-        ThemeModeKey to themeMode.ordinal.toFloat(),
-        ColorModeKey to colorMode.ordinal.toFloat(),
-        FontScaleKey to fontScale,
-        FontScaleModeKey to fontScaleMode.ordinal.toFloat(),
-        TextDirectionKey to textDirection.ordinal.toFloat(),
-    )
+    fun toMap() =
+        mapOf(
+            ThemeModeKey to themeColorMode.ordinal.toFloat(),
+            ColorModeKey to colorMode.ordinal.toFloat(),
+            ExpressiveThemeModeKey to expressiveThemeMode.ordinal.toFloat(),
+            FontScaleKey to fontScale,
+            FontScaleModeKey to fontScaleMode.ordinal.toFloat(),
+            TextDirectionKey to textDirection.ordinal.toFloat(),
+            ShowOnlyExpressiveComponents to if (showOnlyExpressiveComponents) 1 else 0,
+            MarkExpressiveComponents to if (markExpressiveComponents) 1 else 0,
+        )
 }
 
 /**
@@ -68,8 +84,8 @@ enum class ColorMode(val label: String) {
      */
     Baseline("Baseline"),
     /**
-     * Build a color scheme from a pre-selected color palette that behaves the same as a dynamic color
-     * palette.
+     * Build a color scheme from a pre-selected color palette that behaves the same as a dynamic
+     * color palette.
      *
      * Useful for testing dynamic color schemes on devices that don't support dynamic colors.
      */
@@ -77,7 +93,8 @@ enum class ColorMode(val label: String) {
     /**
      * Build a color scheme from the dynamic colors taken from the Android System.
      *
-     * If the dynamic colors are not available, the baseline color scheme will be used as a fallback.
+     * If the dynamic colors are not available, the baseline color scheme will be used as a
+     * fallback.
      */
     Dynamic("Dynamic (Android 12+)");
 
@@ -91,10 +108,24 @@ enum class FontScaleMode(val label: String) {
     override fun toString(): String = label
 }
 
-enum class ThemeMode {
+/**
+ * Determines whether the current [ColorMode] should be in light theme, dark theme, or determined by
+ * the system.
+ */
+enum class ThemeColorMode {
     System,
     Light,
     Dark,
+}
+
+/**
+ * A class for identifying legacy and expressive Material3 themes.
+ *
+ * See [MaterialTheme] and [MaterialExpressiveTheme] for more information.
+ */
+enum class ExpressiveThemeMode {
+    Expressive,
+    NonExpressive,
 }
 
 const val MinFontScale = 0.4f
@@ -102,6 +133,9 @@ const val MaxFontScale = 2f
 
 private const val ThemeModeKey = "themeMode"
 private const val ColorModeKey = "colorMode"
+private const val ExpressiveThemeModeKey = "expressiveThemeMode"
 private const val FontScaleKey = "fontScale"
 private const val FontScaleModeKey = "fontScaleMode"
 private const val TextDirectionKey = "textDirection"
+private const val MarkExpressiveComponents = "markExpressiveComponents"
+private const val ShowOnlyExpressiveComponents = "showOnlyExpressiveComponents"

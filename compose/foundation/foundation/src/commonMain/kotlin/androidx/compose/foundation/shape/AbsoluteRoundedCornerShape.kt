@@ -22,6 +22,7 @@ import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.toRect
 import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -41,13 +42,14 @@ class AbsoluteRoundedCornerShape(
     topLeft: CornerSize,
     topRight: CornerSize,
     bottomRight: CornerSize,
-    bottomLeft: CornerSize
-) : CornerBasedShape(
-    topStart = topLeft,
-    topEnd = topRight,
-    bottomEnd = bottomRight,
-    bottomStart = bottomLeft
-) {
+    bottomLeft: CornerSize,
+) :
+    CornerBasedShape(
+        topStart = topLeft,
+        topEnd = topRight,
+        bottomEnd = bottomRight,
+        bottomStart = bottomLeft,
+    ) {
 
     override fun createOutline(
         size: Size,
@@ -55,32 +57,34 @@ class AbsoluteRoundedCornerShape(
         topEnd: Float,
         bottomEnd: Float,
         bottomStart: Float,
-        layoutDirection: LayoutDirection
-    ) = if (topStart + topEnd + bottomEnd + bottomStart == 0.0f) {
-        Outline.Rectangle(size.toRect())
-    } else {
-        Outline.Rounded(
-            RoundRect(
-                rect = size.toRect(),
-                topLeft = CornerRadius(topStart),
-                topRight = CornerRadius(topEnd),
-                bottomRight = CornerRadius(bottomEnd),
-                bottomLeft = CornerRadius(bottomStart)
+        layoutDirection: LayoutDirection,
+    ) =
+        if (topStart + topEnd + bottomEnd + bottomStart == 0.0f) {
+            Outline.Rectangle(size.toRect())
+        } else {
+            Outline.Rounded(
+                RoundRect(
+                    rect = size.toRect(),
+                    topLeft = CornerRadius(topStart),
+                    topRight = CornerRadius(topEnd),
+                    bottomRight = CornerRadius(bottomEnd),
+                    bottomLeft = CornerRadius(bottomStart),
+                )
             )
-        )
-    }
+        }
 
     override fun copy(
         topStart: CornerSize,
         topEnd: CornerSize,
         bottomEnd: CornerSize,
-        bottomStart: CornerSize
-    ) = AbsoluteRoundedCornerShape(
-        topLeft = topStart,
-        topRight = topEnd,
-        bottomRight = bottomEnd,
-        bottomLeft = bottomStart
-    )
+        bottomStart: CornerSize,
+    ) =
+        AbsoluteRoundedCornerShape(
+            topLeft = topStart,
+            topRight = topEnd,
+            bottomRight = bottomEnd,
+            bottomLeft = bottomStart,
+        )
 
     override fun toString(): String {
         return "AbsoluteRoundedCornerShape(topLeft = $topStart, topRight = $topEnd, " +
@@ -108,10 +112,35 @@ class AbsoluteRoundedCornerShape(
     }
 
     private fun Float.toRadius() = CornerRadius(this)
+
+    override fun lerp(other: Any?, t: Float): Any? {
+        var other: Any? = other
+        if (other == RectangleShape || other == null) {
+            other = AbsoluteRoundedCornerShape(0f)
+        }
+        if (other is AbsoluteRoundedCornerShape) {
+            return lerp(this, other, t)
+        }
+        return null
+    }
+}
+
+internal fun lerp(
+    a: AbsoluteRoundedCornerShape,
+    b: AbsoluteRoundedCornerShape,
+    t: Float,
+): AbsoluteRoundedCornerShape {
+    return AbsoluteRoundedCornerShape(
+        lerp(a.topStart, b.topStart, t),
+        lerp(a.topEnd, b.topEnd, t),
+        lerp(a.bottomEnd, b.bottomEnd, t),
+        lerp(a.bottomStart, b.bottomStart, t),
+    )
 }
 
 /**
  * Creates [AbsoluteRoundedCornerShape] with the same size applied for all four corners.
+ *
  * @param corner [CornerSize] to apply.
  */
 fun AbsoluteRoundedCornerShape(corner: CornerSize) =
@@ -119,77 +148,74 @@ fun AbsoluteRoundedCornerShape(corner: CornerSize) =
 
 /**
  * Creates [AbsoluteRoundedCornerShape] with the same size applied for all four corners.
+ *
  * @param size Size in [Dp] to apply.
  */
 fun AbsoluteRoundedCornerShape(size: Dp) = AbsoluteRoundedCornerShape(CornerSize(size))
 
 /**
  * Creates [AbsoluteRoundedCornerShape] with the same size applied for all four corners.
+ *
  * @param size Size in pixels to apply.
  */
 fun AbsoluteRoundedCornerShape(size: Float) = AbsoluteRoundedCornerShape(CornerSize(size))
 
 /**
  * Creates [AbsoluteRoundedCornerShape] with the same size applied for all four corners.
+ *
  * @param percent Size in percents to apply.
  */
-fun AbsoluteRoundedCornerShape(percent: Int) =
-    AbsoluteRoundedCornerShape(CornerSize(percent))
+fun AbsoluteRoundedCornerShape(percent: Int) = AbsoluteRoundedCornerShape(CornerSize(percent))
 
-/**
- * Creates [AbsoluteRoundedCornerShape] with sizes defined in [Dp].
- */
+/** Creates [AbsoluteRoundedCornerShape] with sizes defined in [Dp]. */
 fun AbsoluteRoundedCornerShape(
     topLeft: Dp = 0.dp,
     topRight: Dp = 0.dp,
     bottomRight: Dp = 0.dp,
-    bottomLeft: Dp = 0.dp
-) = AbsoluteRoundedCornerShape(
-    topLeft = CornerSize(topLeft),
-    topRight = CornerSize(topRight),
-    bottomRight = CornerSize(bottomRight),
-    bottomLeft = CornerSize(bottomLeft)
-)
+    bottomLeft: Dp = 0.dp,
+) =
+    AbsoluteRoundedCornerShape(
+        topLeft = CornerSize(topLeft),
+        topRight = CornerSize(topRight),
+        bottomRight = CornerSize(bottomRight),
+        bottomLeft = CornerSize(bottomLeft),
+    )
 
-/**
- * Creates [AbsoluteRoundedCornerShape] with sizes defined in pixels.
- */
+/** Creates [AbsoluteRoundedCornerShape] with sizes defined in pixels. */
 fun AbsoluteRoundedCornerShape(
     topLeft: Float = 0.0f,
     topRight: Float = 0.0f,
     bottomRight: Float = 0.0f,
-    bottomLeft: Float = 0.0f
-) = AbsoluteRoundedCornerShape(
-    topLeft = CornerSize(topLeft),
-    topRight = CornerSize(topRight),
-    bottomRight = CornerSize(bottomRight),
-    bottomLeft = CornerSize(bottomLeft)
-)
+    bottomLeft: Float = 0.0f,
+) =
+    AbsoluteRoundedCornerShape(
+        topLeft = CornerSize(topLeft),
+        topRight = CornerSize(topRight),
+        bottomRight = CornerSize(bottomRight),
+        bottomLeft = CornerSize(bottomLeft),
+    )
 
 /**
  * Creates [AbsoluteRoundedCornerShape] with sizes defined in percents of the shape's smaller side.
  *
  * @param topLeftPercent The top left corner radius as a percentage of the smaller side, with a
- * range of 0 - 100.
+ *   range of 0 - 100.
  * @param topRightPercent The top right corner radius as a percentage of the smaller side, with a
- * range of 0 - 100.
+ *   range of 0 - 100.
  * @param bottomRightPercent The bottom right corner radius as a percentage of the smaller side,
- * with a range of 0 - 100.
- * @param bottomLeftPercent The bottom left corner radius as a percentage of the smaller side,
- * with a range of 0 - 100.
+ *   with a range of 0 - 100.
+ * @param bottomLeftPercent The bottom left corner radius as a percentage of the smaller side, with
+ *   a range of 0 - 100.
  */
 fun AbsoluteRoundedCornerShape(
-    @IntRange(from = 0, to = 100)
-    topLeftPercent: Int = 0,
-    @IntRange(from = 0, to = 100)
-    topRightPercent: Int = 0,
-    @IntRange(from = 0, to = 100)
-    bottomRightPercent: Int = 0,
-    @IntRange(from = 0, to = 100)
-    bottomLeftPercent: Int = 0
-) = AbsoluteRoundedCornerShape(
-    topLeft = CornerSize(topLeftPercent),
-    topRight = CornerSize(topRightPercent),
-    bottomRight = CornerSize(bottomRightPercent),
-    bottomLeft = CornerSize(bottomLeftPercent)
-)
+    @IntRange(from = 0, to = 100) topLeftPercent: Int = 0,
+    @IntRange(from = 0, to = 100) topRightPercent: Int = 0,
+    @IntRange(from = 0, to = 100) bottomRightPercent: Int = 0,
+    @IntRange(from = 0, to = 100) bottomLeftPercent: Int = 0,
+) =
+    AbsoluteRoundedCornerShape(
+        topLeft = CornerSize(topLeftPercent),
+        topRight = CornerSize(topRightPercent),
+        bottomRight = CornerSize(bottomRightPercent),
+        bottomLeft = CornerSize(bottomLeftPercent),
+    )

@@ -27,33 +27,31 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 class TrackingRemoteWorkerFactory : WorkerFactory() {
-    private val factory = object : WorkerFactory() {
-        override fun createWorker(
-            appContext: Context,
-            workerClassName: String,
-            workerParameters: WorkerParameters
-        ): ListenableWorker? = null
-    }
+    private val factory =
+        object : WorkerFactory() {
+            override fun createWorker(
+                appContext: Context,
+                workerClassName: String,
+                workerParameters: WorkerParameters,
+            ): ListenableWorker? = null
+        }
     val createdWorkers = MutableStateFlow<Map<UUID, Workers>>(emptyMap())
 
     override fun createWorker(
         appContext: Context,
         workerClassName: String,
-        workerParameters: WorkerParameters
+        workerParameters: WorkerParameters,
     ): ListenableWorker {
-        return factory.createWorkerWithDefaultFallback(
-            appContext,
-            workerClassName,
-            workerParameters
-        ).also {
-            val oldWorkers = createdWorkers.value[it.id]
-            val workers = if (oldWorkers == null)
-                Workers(localProxy = it)
-            else
-                Workers(oldWorkers.localProxy, it)
+        return factory
+            .createWorkerWithDefaultFallback(appContext, workerClassName, workerParameters)
+            .also {
+                val oldWorkers = createdWorkers.value[it.id]
+                val workers =
+                    if (oldWorkers == null) Workers(localProxy = it)
+                    else Workers(oldWorkers.localProxy, it)
 
-            createdWorkers.value = createdWorkers.value + (it.id to workers)
-        }
+                createdWorkers.value = createdWorkers.value + (it.id to workers)
+            }
     }
 
     suspend fun awaitRemote(id: UUID): ListenableWorker =

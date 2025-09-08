@@ -44,9 +44,7 @@ fun AlertDialogSample() {
                 // onCloseRequest.
                 openDialog.value = false
             },
-            title = {
-                Text(text = "Title")
-            },
+            title = { Text(text = "Title") },
             text = {
                 Text(
                     "This area typically contains the supportive text " +
@@ -54,23 +52,11 @@ fun AlertDialogSample() {
                 )
             },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        openDialog.value = false
-                    }
-                ) {
-                    Text("Confirm")
-                }
+                TextButton(onClick = { openDialog.value = false }) { Text("Confirm") }
             },
             dismissButton = {
-                TextButton(
-                    onClick = {
-                        openDialog.value = false
-                    }
-                ) {
-                    Text("Dismiss")
-                }
-            }
+                TextButton(onClick = { openDialog.value = false }) { Text("Dismiss") }
+            },
         )
     }
 }
@@ -82,12 +68,8 @@ fun CustomAlertDialogSample() {
 
     if (openDialog.value) {
         AlertDialog(
-            onDismissRequest = {
-                openDialog.value = false
-            },
-            title = {
-                Text(text = "Title")
-            },
+            onDismissRequest = { openDialog.value = false },
+            title = { Text(text = "Title") },
             text = {
                 Text(
                     "This area typically contains the supportive text " +
@@ -97,16 +79,16 @@ fun CustomAlertDialogSample() {
             buttons = {
                 Row(
                     modifier = Modifier.padding(all = 8.dp),
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.Center,
                 ) {
                     Button(
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { openDialog.value = false }
+                        onClick = { openDialog.value = false },
                     ) {
                         Text("Dismiss")
                     }
                 }
-            }
+            },
         )
     }
 }

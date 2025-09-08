@@ -19,6 +19,7 @@ package androidx.work.multiprocess
 import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import androidx.work.Constraints
 import androidx.work.Data
 import androidx.work.WorkInfo
 import androidx.work.multiprocess.parcelable.ParcelConverters
@@ -42,15 +43,16 @@ public class ParcelableWorkInfoTest {
             return
         }
 
-        val workInfo = WorkInfo(
-            UUID.randomUUID(),
-            WorkInfo.State.ENQUEUED,
-            setOf("tag1", "tag2"),
-            Data.EMPTY,
-            Data.EMPTY,
-            1,
-            1,
-        )
+        val workInfo =
+            WorkInfo(
+                UUID.randomUUID(),
+                WorkInfo.State.ENQUEUED,
+                setOf("tag1", "tag2"),
+                Data.EMPTY,
+                Data.EMPTY,
+                1,
+                1,
+            )
         assertOn(workInfo)
     }
 
@@ -62,20 +64,46 @@ public class ParcelableWorkInfoTest {
             return
         }
 
-        val data = Data.Builder()
-            .put("test", "testString")
-            .put("int", 10)
-            .build()
+        val data = Data.Builder().put("test", "testString").put("int", 10).build()
 
-        val workInfo = WorkInfo(
-            UUID.randomUUID(),
-            WorkInfo.State.ENQUEUED,
-            setOf("tag1", "tag2"),
-            data,
-            Data.EMPTY,
-            1,
-            3,
-        )
+        val workInfo =
+            WorkInfo(
+                UUID.randomUUID(),
+                WorkInfo.State.ENQUEUED,
+                setOf("tag1", "tag2"),
+                data,
+                Data.EMPTY,
+                1,
+                3,
+            )
+        assertOn(workInfo)
+    }
+
+    @Test
+    @SmallTest
+    public fun converterTest3() {
+        if (Build.VERSION.SDK_INT <= 27) {
+            // Exclude <= API 27, from tests because it causes a SIGSEGV.
+            return
+        }
+
+        val data = Data.Builder().put("test", "testString").put("int", 10).build()
+
+        val workInfo =
+            WorkInfo(
+                UUID.randomUUID(),
+                WorkInfo.State.ENQUEUED,
+                setOf("tag1", "tag2"),
+                data,
+                Data.EMPTY,
+                1,
+                3,
+                Constraints.Builder().setRequiresCharging(true).build(),
+                10_000L,
+                WorkInfo.PeriodicityInfo(1_000L, 5_000L),
+                50_000L,
+                WorkInfo.STOP_REASON_CANCELLED_BY_APP,
+            )
         assertOn(workInfo)
     }
 
@@ -87,22 +115,36 @@ public class ParcelableWorkInfoTest {
             return
         }
 
-        val data = Data.Builder()
-            .put("test", "testString")
-            .put("int", 10)
-            .build()
+        val data = Data.Builder().put("test", "testString").put("int", 10).build()
 
-        val workInfo = WorkInfo(
-            UUID.randomUUID(),
-            WorkInfo.State.ENQUEUED,
-            setOf("tag1", "tag2"),
-            data,
-            Data.EMPTY,
-            1,
-            0,
-        )
+        val workInfoOne =
+            WorkInfo(
+                UUID.randomUUID(),
+                WorkInfo.State.ENQUEUED,
+                setOf("tag1", "tag2"),
+                data,
+                Data.EMPTY,
+                1,
+                0,
+            )
 
-        assertOn(listOf(workInfo, workInfo))
+        val workInfoTwo =
+            WorkInfo(
+                UUID.randomUUID(),
+                WorkInfo.State.ENQUEUED,
+                setOf("tag1", "tag2"),
+                data,
+                Data.EMPTY,
+                1,
+                3,
+                Constraints.Builder().setRequiresCharging(true).build(),
+                10_000L,
+                WorkInfo.PeriodicityInfo(1_000L, 5_000L),
+                50_000L,
+                WorkInfo.STOP_REASON_CANCELLED_BY_APP,
+            )
+
+        assertOn(listOf(workInfoOne, workInfoTwo))
     }
 
     private fun assertOn(workInfos: List<WorkInfo>) {
@@ -110,7 +152,7 @@ public class ParcelableWorkInfoTest {
         val parcelled: ParcelableWorkInfos =
             ParcelConverters.unmarshall(
                 ParcelConverters.marshall(parcelable),
-                ParcelableWorkInfos.CREATOR
+                ParcelableWorkInfos.CREATOR,
             )
         equal(workInfos, parcelled.workInfos)
     }
@@ -120,15 +162,13 @@ public class ParcelableWorkInfoTest {
         val parcelled: ParcelableWorkInfo =
             ParcelConverters.unmarshall(
                 ParcelConverters.marshall(parcelable),
-                ParcelableWorkInfo.CREATOR
+                ParcelableWorkInfo.CREATOR,
             )
         equal(workInfo, parcelled.workInfo)
     }
 
     private fun equal(first: List<WorkInfo>, second: List<WorkInfo>) {
-        first.forEachIndexed { index, workInfo ->
-            equal(workInfo, second[index])
-        }
+        first.forEachIndexed { index, workInfo -> equal(workInfo, second[index]) }
     }
 
     private fun equal(first: WorkInfo, second: WorkInfo) {

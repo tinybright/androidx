@@ -26,11 +26,12 @@ import androidx.graphics.surface.JniBindings
 import androidx.graphics.surface.SurfaceControlCompat
 
 /**
- * Helper class to determine the corresponding transformation hint based on various Android
- * API levels
+ * Helper class to determine the corresponding transformation hint based on various Android API
+ * levels
  */
 internal class BufferTransformHintResolver {
 
+    /** Equivalent to [android.view.AttachedSurfaceControl.getBufferTransformHint]. */
     fun getBufferTransformHint(view: View): Int {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S_V2) {
             return TransformHintHelper.resolveBufferTransformHint(view)
@@ -40,10 +41,8 @@ internal class BufferTransformHintResolver {
                 orientation = JniBindings.nGetDisplayOrientation()
                 val rotation = view.display?.rotation
                 if (rotation != null) {
-                    val transform = getBufferTransformHintFromInstallOrientation(
-                        orientation,
-                        rotation
-                    )
+                    val transform =
+                        getBufferTransformHintFromInstallOrientation(orientation, rotation)
                     Log.v(TAG, "Obtained transform: $transform for orientation: $orientation")
                     transform
                 } else {
@@ -59,7 +58,7 @@ internal class BufferTransformHintResolver {
 
     internal fun getBufferTransformHintFromInstallOrientation(
         orientation: String,
-        rotation: Int
+        rotation: Int,
     ): Int =
         when (orientation) {
             ORIENTATION_90 -> {
@@ -120,8 +119,9 @@ internal class BufferTransformHintResolver {
             matrix: Matrix,
             width: Float,
             height: Float,
-            @SurfaceControlCompat.Companion.BufferTransform transform: Int
-        ): Matrix = matrix.apply {
+            @SurfaceControlCompat.Companion.BufferTransform transform: Int,
+        ): Matrix =
+            matrix.apply {
                 when (transform) {
                     SurfaceControlCompat.BUFFER_TRANSFORM_ROTATE_90 -> {
                         reset()
@@ -146,15 +146,12 @@ internal class BufferTransformHintResolver {
     }
 }
 
-/**
- * Helper class to avoid class verification errors
- */
+/** Helper class to avoid class verification errors */
 @RequiresApi(Build.VERSION_CODES.S_V2)
 internal class TransformHintHelper private constructor() {
 
     companion object {
         @RequiresApi(Build.VERSION_CODES.S_V2)
-        @androidx.annotation.DoNotInline
         fun resolveBufferTransformHint(view: View): Int =
             view.rootSurfaceControl?.bufferTransformHint ?: 0
     }

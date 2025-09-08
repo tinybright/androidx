@@ -24,19 +24,15 @@ import javax.lang.model.element.ExecutableElement
 
 internal abstract class JavacExecutableElement(
     env: JavacProcessingEnv,
-    override val element: ExecutableElement
+    override val element: ExecutableElement,
 ) : JavacElement(env, element), XExecutableElement {
     abstract override val kotlinMetadata: KmFunctionContainer?
 
-    override val jvmDescriptor by lazy {
-        element.descriptor(env.delegate)
-    }
+    override val jvmDescriptor by lazy { element.descriptor(env.delegate) }
 
     abstract override val parameters: List<JavacMethodParameter>
 
-    override val enclosingElement: JavacTypeElement by lazy {
-        element.requireEnclosingType(env)
-    }
+    override val enclosingElement: JavacTypeElement by lazy { element.requireEnclosingType(env) }
 
     override val closestMemberContainer: JavacTypeElement
         get() = enclosingElement
@@ -50,7 +46,7 @@ internal abstract class JavacExecutableElement(
             env.wrap<JavacType>(
                 typeMirror = it,
                 kotlinType = null,
-                elementNullability = XNullability.UNKNOWN
+                elementNullability = XNullability.UNKNOWN,
             )
         }
     }

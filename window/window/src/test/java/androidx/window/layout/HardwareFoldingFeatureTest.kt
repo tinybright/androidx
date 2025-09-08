@@ -25,9 +25,7 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Tests for [HardwareFoldingFeature] that run on the JVM to verify the logic.
- */
+/** Tests for [HardwareFoldingFeature] that run on the JVM to verify the logic. */
 class HardwareFoldingFeatureTest {
 
     @Test(expected = IllegalArgumentException::class)
@@ -35,7 +33,7 @@ class HardwareFoldingFeatureTest {
         HardwareFoldingFeature(
             Bounds(0, 0, 0, 0),
             HardwareFoldingFeature.Type.HINGE,
-            FoldingFeature.State.HALF_OPENED
+            FoldingFeature.State.HALF_OPENED,
         )
     }
 
@@ -44,7 +42,7 @@ class HardwareFoldingFeatureTest {
         HardwareFoldingFeature(
             Bounds(1, 10, 20, 10),
             HardwareFoldingFeature.Type.HINGE,
-            FoldingFeature.State.HALF_OPENED
+            FoldingFeature.State.HALF_OPENED,
         )
     }
 
@@ -53,7 +51,7 @@ class HardwareFoldingFeatureTest {
         HardwareFoldingFeature(
             Bounds(10, 1, 19, 29),
             HardwareFoldingFeature.Type.HINGE,
-            FoldingFeature.State.HALF_OPENED
+            FoldingFeature.State.HALF_OPENED,
         )
     }
 
@@ -62,7 +60,7 @@ class HardwareFoldingFeatureTest {
         HardwareFoldingFeature(
             Bounds(1, 10, 20, 10),
             HardwareFoldingFeature.Type.FOLD,
-            FoldingFeature.State.HALF_OPENED
+            FoldingFeature.State.HALF_OPENED,
         )
     }
 
@@ -71,7 +69,7 @@ class HardwareFoldingFeatureTest {
         HardwareFoldingFeature(
             Bounds(10, 1, 10, 20),
             HardwareFoldingFeature.Type.FOLD,
-            FoldingFeature.State.HALF_OPENED
+            FoldingFeature.State.HALF_OPENED,
         )
     }
 
@@ -141,10 +139,12 @@ class HardwareFoldingFeatureTest {
     @Test
     fun testIsSeparating_falseForFlatFold() {
         val bounds = Bounds(1, 0, 1, 10)
-        val feature = HardwareFoldingFeature(bounds,
-            HardwareFoldingFeature.Type.FOLD,
-            FoldingFeature.State.FLAT
-        )
+        val feature =
+            HardwareFoldingFeature(
+                bounds,
+                HardwareFoldingFeature.Type.FOLD,
+                FoldingFeature.State.FLAT,
+            )
         assertFalse(feature.isSeparating)
     }
 

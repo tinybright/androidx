@@ -57,8 +57,7 @@ import org.junit.Test
 @MediumTest
 class PositionsTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     @Test
     fun testCornersEdgesAndCenter() {
@@ -132,7 +131,7 @@ class PositionsTest {
                             .testTag("viewport")
                             .verticalScroll(
                                 rememberScrollState(),
-                                reverseScrolling = reverseScrollDirection
+                                reverseScrolling = reverseScrollDirection,
                             )
                     ) {
                         ClickableTestBox(width = 200f, height = 200f)
@@ -144,7 +143,7 @@ class PositionsTest {
                             .testTag("viewport")
                             .horizontalScroll(
                                 rememberScrollState(),
-                                reverseScrolling = reverseScrollDirection
+                                reverseScrolling = reverseScrollDirection,
                             )
                     ) {
                         ClickableTestBox(width = 200f, height = 200f)

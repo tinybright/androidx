@@ -18,19 +18,16 @@ package androidx.compose.ui.contentcapture
 
 import androidx.compose.ui.ExperimentalComposeUiApi
 
+@Suppress("NullAnnotationGroup")
 @ExperimentalComposeUiApi
 sealed interface ContentCaptureManager {
     companion object {
         /**
          * A flag to force disable the content capture feature.
          *
-         * If you find any issues with the new feature, flip this flag to true to confirm they are newly
-         * introduced then file a bug.
+         * If you find any issues with the new feature, flip this flag to true to confirm they are
+         * newly introduced then file a bug.
          */
-        @Suppress("OPT_IN_MARKER_ON_WRONG_TARGET", "NullAnnotationGroup")
-        @get:ExperimentalComposeUiApi
-        @set:ExperimentalComposeUiApi
-        @ExperimentalComposeUiApi
-        var isEnabled: Boolean = true
+        @Suppress("NullAnnotationGroup") @ExperimentalComposeUiApi var isEnabled: Boolean = true
     }
 }

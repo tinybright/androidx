@@ -23,8 +23,6 @@ import androidx.room.DatabaseConfiguration
 import androidx.room.InvalidationTracker
 import androidx.room.RoomDatabase
 import androidx.room.RoomOpenDelegate
-import androidx.room.driver.SupportSQLiteConnection
-import androidx.room.driver.SupportSQLiteDriver
 import androidx.room.migration.AutoMigrationSpec
 import androidx.room.migration.Migration
 import androidx.room.migration.bundle.SchemaBundle
@@ -34,6 +32,8 @@ import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
+import androidx.sqlite.driver.SupportSQLiteConnection
+import androidx.sqlite.driver.SupportSQLiteDriver
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -47,13 +47,14 @@ import org.junit.runner.Description
  * A class that can help test and verify database creation and migration at different versions with
  * different schemas in Instrumentation tests.
  *
- * The helper relies on exported schemas so [androidx.room.Database.exportSchema] should
- * be enabled. Schema location should be configured via Room's Gradle Plugin (id 'androidx.room'):
+ * The helper relies on exported schemas so [androidx.room.Database.exportSchema] should be enabled.
+ * Schema location should be configured via Room's Gradle Plugin (id 'androidx.room'):
  * ```
  * room {
  *   schemaDirectory("$projectDir/schemas")
  * }
  * ```
+ *
  * The schema files must also be copied into the test assets in order for the helper to open them
  * during the instrumentation test:
  * ```
@@ -63,11 +64,13 @@ import org.junit.runner.Description
  *     }
  * }
  * ```
+ *
  * See the various constructors documentation for possible configurations.
  *
- * See also [Room's Test Migrations Documentation](https://developer.android.com/training/data-storage/room/migrating-db-versions#test)
+ * See also
+ * [Room's Test Migrations Documentation](https://developer.android.com/training/data-storage/room/migrating-db-versions#test)
  */
-actual open class MigrationTestHelper : TestWatcher {
+public actual open class MigrationTestHelper : TestWatcher {
     private val delegate: AndroidMigrationTestHelper
 
     private val managedSupportDatabases = mutableListOf<WeakReference<SupportSQLiteDatabase>>()
@@ -80,11 +83,11 @@ actual open class MigrationTestHelper : TestWatcher {
      * (falls back to the app resources) and the target context to create the database.
      *
      * When the [MigrationTestHelper] is created with this constructor configuration then only
-     * [createDatabase] and [runMigrationsAndValidate] that return [SupportSQLiteDatabase] can
-     * be used.
+     * [createDatabase] and [runMigrationsAndValidate] that return [SupportSQLiteDatabase] can be
+     * used.
      *
      * @param instrumentation The instrumentation instance.
-     * @param assetsFolder    The asset folder in the assets directory.
+     * @param assetsFolder The asset folder in the assets directory.
      * @param openFactory factory for creating an [SupportSQLiteOpenHelper]
      */
     @Deprecated(
@@ -95,18 +98,19 @@ actual open class MigrationTestHelper : TestWatcher {
         """
     )
     @JvmOverloads
-    constructor(
+    public constructor(
         instrumentation: Instrumentation,
         assetsFolder: String,
-        openFactory: SupportSQLiteOpenHelper.Factory = FrameworkSQLiteOpenHelperFactory()
+        openFactory: SupportSQLiteOpenHelper.Factory = FrameworkSQLiteOpenHelperFactory(),
     ) {
-        this.delegate = SupportSQLiteMigrationTestHelper(
-            instrumentation = instrumentation,
-            assetsFolder = assetsFolder,
-            databaseClass = null,
-            openFactory = openFactory,
-            autoMigrationSpecs = emptyList()
-        )
+        this.delegate =
+            SupportSQLiteMigrationTestHelper(
+                instrumentation = instrumentation,
+                assetsFolder = assetsFolder,
+                databaseClass = null,
+                openFactory = openFactory,
+                autoMigrationSpecs = emptyList(),
+            )
     }
 
     /**
@@ -114,61 +118,63 @@ actual open class MigrationTestHelper : TestWatcher {
      * (falls back to the app resources) and the target context to create the database.
      *
      * When the [MigrationTestHelper] is created with this constructor configuration then only
-     * [createDatabase] and [runMigrationsAndValidate] that return [SupportSQLiteDatabase] can
-     * be used.
+     * [createDatabase] and [runMigrationsAndValidate] that return [SupportSQLiteDatabase] can be
+     * used.
      *
      * @param instrumentation The instrumentation instance.
-     * @param databaseClass   The Database class to be tested.
+     * @param databaseClass The Database class to be tested.
      */
-    constructor(
+    public constructor(
         instrumentation: Instrumentation,
-        databaseClass: Class<out RoomDatabase>
+        databaseClass: Class<out RoomDatabase>,
     ) : this(
         instrumentation = instrumentation,
         databaseClass = databaseClass,
         specs = emptyList(),
-        openFactory = FrameworkSQLiteOpenHelperFactory()
+        openFactory = FrameworkSQLiteOpenHelperFactory(),
     )
 
     /**
      * Creates a new migration helper. It uses the [instrumentation] context to load the schema
      * (falls back to the app resources) and the target context to create the database.
      *
-     * Instances of classes annotated with [androidx.room.ProvidedAutoMigrationSpec] have
-     * provided using this constructor. [MigrationTestHelper] will map auto migration
-     * spec classes to their provided instances before running and validating the migrations.
+     * Instances of classes annotated with [androidx.room.ProvidedAutoMigrationSpec] have provided
+     * using this constructor. [MigrationTestHelper] will map auto migration spec classes to their
+     * provided instances before running and validating the migrations.
      *
      * When the [MigrationTestHelper] is created with this constructor configuration then only
-     * [createDatabase] and [runMigrationsAndValidate] that return [SupportSQLiteDatabase] can
-     * be used.
+     * [createDatabase] and [runMigrationsAndValidate] that return [SupportSQLiteDatabase] can be
+     * used.
      *
      * @param instrumentation The instrumentation instance.
-     * @param databaseClass   The Database class to be tested.
-     * @param specs           The list of available auto migration specs that will be provided to
-     *                        the RoomDatabase at runtime.
+     * @param databaseClass The Database class to be tested.
+     * @param specs The list of available auto migration specs that will be provided to the
+     *   RoomDatabase at runtime.
      * @param openFactory factory for creating an [SupportSQLiteOpenHelper]
      */
     @JvmOverloads
-    constructor(
+    public constructor(
         instrumentation: Instrumentation,
         databaseClass: Class<out RoomDatabase>,
         specs: List<AutoMigrationSpec>,
-        openFactory: SupportSQLiteOpenHelper.Factory = FrameworkSQLiteOpenHelperFactory()
+        openFactory: SupportSQLiteOpenHelper.Factory = FrameworkSQLiteOpenHelperFactory(),
     ) {
-        val assetsFolder = checkNotNull(databaseClass.canonicalName).let {
-            if (it.endsWith("/")) {
-                it.substring(0, it.length - 1)
-            } else {
-                it
+        val assetsFolder =
+            checkNotNull(databaseClass.canonicalName).let {
+                if (it.endsWith("/")) {
+                    it.substring(0, it.length - 1)
+                } else {
+                    it
+                }
             }
-        }
-        this.delegate = SupportSQLiteMigrationTestHelper(
-            instrumentation = instrumentation,
-            assetsFolder = assetsFolder,
-            databaseClass = databaseClass,
-            openFactory = openFactory,
-            autoMigrationSpecs = specs
-        )
+        this.delegate =
+            SupportSQLiteMigrationTestHelper(
+                instrumentation = instrumentation,
+                assetsFolder = assetsFolder,
+                databaseClass = databaseClass,
+                openFactory = openFactory,
+                autoMigrationSpecs = specs,
+            )
     }
 
     /**
@@ -176,22 +182,21 @@ actual open class MigrationTestHelper : TestWatcher {
      * (falls back to the app resources) and the target context to create the database.
      *
      * When the [MigrationTestHelper] is created with this constructor configuration then only
-     * [createDatabase] and [runMigrationsAndValidate] that return [SQLiteConnection] can
-     * be used.
+     * [createDatabase] and [runMigrationsAndValidate] that return [SQLiteConnection] can be used.
      *
      * @param instrumentation The instrumentation instance.
      * @param file The database file.
-     * @param driver A driver that opens connection to a file database. A driver that opens connections
-     * to an in-memory database would be meaningless.
+     * @param driver A driver that opens connection to a file database. A driver that opens
+     *   connections to an in-memory database would be meaningless.
      * @param databaseClass The [androidx.room.Database] annotated class.
      * @param databaseFactory An optional factory function to create an instance of the
-     * [databaseClass]. Should be the same factory used when building the database via
-     * [androidx.room.Room.databaseBuilder].
-     * @param autoMigrationSpecs The list of [androidx.room.ProvidedAutoMigrationSpec] instances
-     * for [androidx.room.AutoMigration]s that require them.
+     *   [databaseClass]. Should be the same factory used when building the database via
+     *   [androidx.room.Room.databaseBuilder].
+     * @param autoMigrationSpecs The list of [androidx.room.ProvidedAutoMigrationSpec] instances for
+     *   [androidx.room.AutoMigration]s that require them.
      */
     @Suppress("StreamFiles")
-    constructor(
+    public constructor(
         instrumentation: Instrumentation,
         file: File,
         driver: SQLiteDriver,
@@ -199,24 +204,26 @@ actual open class MigrationTestHelper : TestWatcher {
         databaseFactory: () -> RoomDatabase = {
             findAndInstantiateDatabaseImpl(databaseClass.java)
         },
-        autoMigrationSpecs: List<AutoMigrationSpec> = emptyList()
+        autoMigrationSpecs: List<AutoMigrationSpec> = emptyList(),
     ) {
-        val assetsFolder = checkNotNull(databaseClass.qualifiedName).let {
-            if (it.endsWith("/")) {
-                it.substring(0, it.length - 1)
-            } else {
-                it
+        val assetsFolder =
+            checkNotNull(databaseClass.qualifiedName).let {
+                if (it.endsWith("/")) {
+                    it.substring(0, it.length - 1)
+                } else {
+                    it
+                }
             }
-        }
-        this.delegate = SQLiteDriverMigrationTestHelper(
-            instrumentation = instrumentation,
-            assetsFolder = assetsFolder,
-            file = file,
-            driver = driver,
-            databaseClass = databaseClass,
-            databaseFactory = databaseFactory,
-            autoMigrationSpecs = autoMigrationSpecs
-        )
+        this.delegate =
+            SQLiteDriverMigrationTestHelper(
+                instrumentation = instrumentation,
+                assetsFolder = assetsFolder,
+                file = file,
+                driver = driver,
+                databaseClass = databaseClass,
+                databaseFactory = databaseFactory,
+                autoMigrationSpecs = autoMigrationSpecs,
+            )
     }
 
     override fun starting(description: Description?) {
@@ -227,15 +234,15 @@ actual open class MigrationTestHelper : TestWatcher {
     /**
      * Creates the database in the given version.
      *
-     * If the database file already exists, it tries to delete it first. If delete fails, throws
-     * an exception.
+     * If the database file already exists, it tries to delete it first. If delete fails, throws an
+     * exception.
      *
-     * @param name    The name of the database.
+     * @param name The name of the database.
      * @param version The version in which the database should be created.
      * @return A database connection which has the schema in the requested version.
      */
     @Throws(IOException::class)
-    open fun createDatabase(name: String, version: Int): SupportSQLiteDatabase {
+    public open fun createDatabase(name: String, version: Int): SupportSQLiteDatabase {
         check(delegate is SupportSQLiteMigrationTestHelper) {
             "MigrationTestHelper functionality returning a SupportSQLiteDatabase is not possible " +
                 "because a SQLiteDriver was provided during configuration."
@@ -250,33 +257,30 @@ actual open class MigrationTestHelper : TestWatcher {
      * that are provided to this method must be sufficient to bring the database from current
      * version to the desired version.
      *
-     * After the migration, the method validates the database schema to ensure that migration
-     * result matches the expected schema. Handling of dropped tables depends on the
-     * `validateDroppedTables` argument. If set to true, the verification will fail if it
-     * finds a table that is not registered in the Database. If set to false, extra tables in the
-     * database will be ignored (this is the runtime library behavior).
+     * After the migration, the method validates the database schema to ensure that migration result
+     * matches the expected schema. Handling of dropped tables depends on the
+     * `validateDroppedTables` argument. If set to true, the verification will fail if it finds a
+     * table that is not registered in the Database. If set to false, extra tables in the database
+     * will be ignored (this is the runtime library behavior).
      *
-     * @param name                  The database name. You must first create this database via
-     * [createDatabase].
-     * @param version               The final version after applying the migrations.
-     * @param validateDroppedTables If set to true, validation will fail if the database has
-     * unknown tables.
-     * @param migrations            The list of available migrations.
+     * @param name The database name. You must first create this database via [createDatabase].
+     * @param version The final version after applying the migrations.
+     * @param validateDroppedTables If set to true, validation will fail if the database has unknown
+     *   tables.
+     * @param migrations The list of available migrations.
      * @throws IllegalStateException If the schema validation fails.
      */
-    open fun runMigrationsAndValidate(
+    public open fun runMigrationsAndValidate(
         name: String,
         version: Int,
         validateDroppedTables: Boolean,
-        vararg migrations: Migration
+        vararg migrations: Migration,
     ): SupportSQLiteDatabase {
         check(delegate is SupportSQLiteMigrationTestHelper) {
             "MigrationTestHelper functionality returning a SupportSQLiteDatabase is not possible " +
                 "because a SQLiteDriver was provided during configuration."
         }
-        return delegate.runMigrationsAndValidate(
-            name, version, validateDroppedTables, migrations
-        )
+        return delegate.runMigrationsAndValidate(name, version, validateDroppedTables, migrations)
     }
 
     /**
@@ -288,7 +292,7 @@ actual open class MigrationTestHelper : TestWatcher {
      * @return A database connection of the newly created database.
      * @throws IllegalStateException If a new database was not created.
      */
-    actual fun createDatabase(version: Int): SQLiteConnection {
+    public actual fun createDatabase(version: Int): SQLiteConnection {
         check(delegate is SQLiteDriverMigrationTestHelper) {
             "MigrationTestHelper functionality returning a SQLiteConnection is not possible " +
                 "because a SupportSQLiteOpenHelper was provided during configuration (i.e. no " +
@@ -301,11 +305,10 @@ actual open class MigrationTestHelper : TestWatcher {
      * Runs the given set of migrations on the existing database once created via [createDatabase].
      *
      * This function uses the same algorithm that Room performs to choose migrations such that the
-     * [migrations] instances provided must be sufficient to bring the database from current
-     * version to the desired version. If the database contains
-     * [androidx.room.AutoMigration]s, then those are already included in the list of migrations
-     * to execute if necessary. Note that provided manual migrations take precedence over
-     * auto migrations if they overlap in migration paths.
+     * [migrations] instances provided must be sufficient to bring the database from current version
+     * to the desired version. If the database contains [androidx.room.AutoMigration]s, then those
+     * are already included in the list of migrations to execute if necessary. Note that provided
+     * manual migrations take precedence over auto migrations if they overlap in migration paths.
      *
      * Once migrations are done, this functions validates the database schema to ensure the
      * migration performed resulted in the expected schema.
@@ -315,7 +318,7 @@ actual open class MigrationTestHelper : TestWatcher {
      * @return A database connection of the migrated database.
      * @throws IllegalStateException If the schema validation fails.
      */
-    actual fun runMigrationsAndValidate(
+    public actual fun runMigrationsAndValidate(
         version: Int,
         migrations: List<Migration>,
     ): SQLiteConnection {
@@ -337,12 +340,12 @@ actual open class MigrationTestHelper : TestWatcher {
     /**
      * Registers a database connection to be automatically closed when the test finishes.
      *
-     * This only works if [MigrationTestHelper] is registered as a Junit test rule via
-     * the [org.junit.Rule] annotation.
+     * This only works if [MigrationTestHelper] is registered as a Junit test rule via the
+     * [org.junit.Rule] annotation.
      *
      * @param db The database connection that should be closed after the test finishes.
      */
-    open fun closeWhenFinished(db: SupportSQLiteDatabase) {
+    public open fun closeWhenFinished(db: SupportSQLiteDatabase) {
         check(testStarted) {
             "You cannot register a database to be closed before" +
                 " the test starts. Maybe you forgot to annotate MigrationTestHelper as a" +
@@ -354,12 +357,12 @@ actual open class MigrationTestHelper : TestWatcher {
     /**
      * Registers a database connection to be automatically closed when the test finishes.
      *
-     * This only works if [MigrationTestHelper] is registered as a Junit test rule via
-     * the [org.junit.Rule] annotation.
+     * This only works if [MigrationTestHelper] is registered as a Junit test rule via the
+     * [org.junit.Rule] annotation.
      *
      * @param db The RoomDatabase instance which holds the database.
      */
-    open fun closeWhenFinished(db: RoomDatabase) {
+    public open fun closeWhenFinished(db: RoomDatabase) {
         check(testStarted) {
             "You cannot register a database to be closed before" +
                 " the test starts. Maybe you forgot to annotate MigrationTestHelper as a" +
@@ -369,12 +372,10 @@ actual open class MigrationTestHelper : TestWatcher {
     }
 }
 
-/**
- * Base implementation of Android's [MigrationTestHelper]
- */
+/** Base implementation of Android's [MigrationTestHelper] */
 private sealed class AndroidMigrationTestHelper(
     private val instrumentation: Instrumentation,
-    private val assetsFolder: String
+    private val assetsFolder: String,
 ) {
     protected val managedConnections = mutableListOf<WeakReference<SQLiteConnection>>()
 
@@ -411,31 +412,32 @@ private sealed class AndroidMigrationTestHelper(
         container: RoomDatabase.MigrationContainer,
         openFactory: SupportSQLiteOpenHelper.Factory?,
         sqliteDriver: SQLiteDriver?,
-        databaseFileName: String?
-    ) = DatabaseConfiguration(
-        context = instrumentation.targetContext,
-        name = databaseFileName,
-        sqliteOpenHelperFactory = openFactory,
-        migrationContainer = container,
-        callbacks = null,
-        allowMainThreadQueries = true,
-        journalMode = RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING,
-        queryExecutor = ArchTaskExecutor.getIOThreadExecutor(),
-        transactionExecutor = ArchTaskExecutor.getIOThreadExecutor(),
-        multiInstanceInvalidationServiceIntent = null,
-        requireMigration = true,
-        allowDestructiveMigrationOnDowngrade = false,
-        migrationNotRequiredFrom = emptySet(),
-        copyFromAssetPath = null,
-        copyFromFile = null,
-        copyFromInputStream = null,
-        prepackagedDatabaseCallback = null,
-        typeConverters = emptyList(),
-        autoMigrationSpecs = emptyList(),
-        allowDestructiveMigrationForAllTables = false,
-        sqliteDriver = sqliteDriver,
-        queryCoroutineContext = null
-    )
+        databaseFileName: String?,
+    ) =
+        DatabaseConfiguration(
+            context = instrumentation.targetContext,
+            name = databaseFileName,
+            sqliteOpenHelperFactory = openFactory,
+            migrationContainer = container,
+            callbacks = null,
+            allowMainThreadQueries = true,
+            journalMode = RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING,
+            queryExecutor = ArchTaskExecutor.getIOThreadExecutor(),
+            transactionExecutor = ArchTaskExecutor.getIOThreadExecutor(),
+            multiInstanceInvalidationServiceIntent = null,
+            requireMigration = true,
+            allowDestructiveMigrationOnDowngrade = false,
+            migrationNotRequiredFrom = emptySet(),
+            copyFromAssetPath = null,
+            copyFromFile = null,
+            copyFromInputStream = null,
+            prepackagedDatabaseCallback = null,
+            typeConverters = emptyList(),
+            autoMigrationSpecs = emptyList(),
+            allowDestructiveMigrationForAllTables = false,
+            sqliteDriver = sqliteDriver,
+            queryCoroutineContext = null,
+        )
 }
 
 /**
@@ -451,39 +453,41 @@ private class SupportSQLiteMigrationTestHelper(
 ) : AndroidMigrationTestHelper(instrumentation, assetsFolder) {
 
     private val context = instrumentation.targetContext
-    private val databaseInstance: RoomDatabase = if (databaseClass == null) {
-        object : RoomDatabase() {
-            override fun createInvalidationTracker(): InvalidationTracker {
-                return InvalidationTracker(this, emptyMap(), emptyMap())
+    private val databaseInstance: RoomDatabase =
+        if (databaseClass == null) {
+            object : RoomDatabase() {
+                override fun createInvalidationTracker(): InvalidationTracker {
+                    return InvalidationTracker(this, emptyMap(), emptyMap())
+                }
+
+                override fun clearAllTables() {
+                    error("Function should never be called during tests.")
+                }
+
+                override fun createAutoMigrations(
+                    autoMigrationSpecs: Map<KClass<out AutoMigrationSpec>, AutoMigrationSpec>
+                ): List<Migration> {
+                    return emptyList()
+                }
             }
-            override fun clearAllTables() {
-                error("Function should never be called during tests.")
-            }
-            override fun createAutoMigrations(
-                autoMigrationSpecs: Map<KClass<out AutoMigrationSpec>, AutoMigrationSpec>
-            ): List<Migration> {
-                return emptyList()
-            }
+        } else {
+            findAndInstantiateDatabaseImpl(databaseClass)
         }
-    } else {
-        findAndInstantiateDatabaseImpl(databaseClass)
-    }
 
     fun createDatabase(name: String, version: Int): SupportSQLiteDatabase {
         val dbPath = context.getDatabasePath(name)
         if (dbPath.exists()) {
-            check(dbPath.delete()) {
-                "There is a database file and I could not delete it."
-            }
+            check(dbPath.delete()) { "There is a database file and I could not delete it." }
         }
         val schemaBundle = loadSchema(version)
-        val connection = createDatabaseCommon(
-            schema = schemaBundle.database,
-            configurationFactory = ::createConfiguration,
-            connectionManagerFactory = { config, openDelegate ->
-                SupportTestConnectionManager(config.copy(name = name), openDelegate)
-            }
-        )
+        val connection =
+            createDatabaseCommon(
+                schema = schemaBundle.database,
+                configurationFactory = ::createConfiguration,
+                connectionManagerFactory = { config, openDelegate ->
+                    SupportTestConnectionManager(config.copy(name = name), openDelegate)
+                },
+            )
         managedConnections.add(WeakReference(connection))
         check(connection is SupportSQLiteConnection) {
             "Expected connection to be a SupportSQLiteConnection but was ${connection::class}"
@@ -495,7 +499,7 @@ private class SupportSQLiteMigrationTestHelper(
         name: String,
         version: Int,
         validateDroppedTables: Boolean,
-        migrations: Array<out Migration>
+        migrations: Array<out Migration>,
     ): SupportSQLiteDatabase {
         val dbPath = context.getDatabasePath(name)
         check(dbPath.exists()) {
@@ -504,17 +508,18 @@ private class SupportSQLiteMigrationTestHelper(
                 "createDatabase()."
         }
         val schemaBundle = loadSchema(version)
-        val connection = runMigrationsAndValidateCommon(
-            databaseInstance = databaseInstance,
-            schema = schemaBundle.database,
-            migrations = migrations.toList(),
-            autoMigrationSpecs = autoMigrationSpecs,
-            validateUnknownTables = validateDroppedTables,
-            configurationFactory = ::createConfiguration,
-            connectionManagerFactory = { config, openDelegate ->
-                SupportTestConnectionManager(config.copy(name = name), openDelegate)
-            }
-        )
+        val connection =
+            runMigrationsAndValidateCommon(
+                databaseInstance = databaseInstance,
+                schema = schemaBundle.database,
+                migrations = migrations.toList(),
+                autoMigrationSpecs = autoMigrationSpecs,
+                validateUnknownTables = validateDroppedTables,
+                configurationFactory = ::createConfiguration,
+                connectionManagerFactory = { config, openDelegate ->
+                    SupportTestConnectionManager(config.copy(name = name), openDelegate)
+                },
+            )
         managedConnections.add(WeakReference(connection))
         check(connection is SupportSQLiteConnection) {
             "Expected connection to be a SupportSQLiteConnection but was ${connection::class}"
@@ -527,7 +532,7 @@ private class SupportSQLiteMigrationTestHelper(
 
     private class SupportTestConnectionManager(
         override val configuration: DatabaseConfiguration,
-        override val openDelegate: RoomOpenDelegate
+        override val openDelegate: RoomOpenDelegate,
     ) : TestConnectionManager() {
 
         private val driverWrapper: SQLiteDriver
@@ -545,26 +550,26 @@ private class SupportSQLiteMigrationTestHelper(
 
         override fun openConnection(): SQLiteConnection {
             val name = configuration.name
-            val filename = if (configuration.name != null) {
-                configuration.context.getDatabasePath(name).absolutePath
-            } else {
-                ":memory:"
-            }
+            val filename =
+                if (configuration.name != null) {
+                    configuration.context.getDatabasePath(name).absolutePath
+                } else {
+                    ":memory:"
+                }
             return driverWrapper.open(filename)
         }
 
-        inner class SupportOpenHelperCallback(
-            version: Int
-        ) : SupportSQLiteOpenHelper.Callback(version) {
+        inner class SupportOpenHelperCallback(version: Int) :
+            SupportSQLiteOpenHelper.Callback(version) {
             override fun onCreate(db: SupportSQLiteDatabase) {
-                this@SupportTestConnectionManager.onCreate(
-                    SupportSQLiteConnection(db)
-                )
+                this@SupportTestConnectionManager.onCreate(SupportSQLiteConnection(db))
             }
 
             override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
                 this@SupportTestConnectionManager.onMigrate(
-                    SupportSQLiteConnection(db), oldVersion, newVersion
+                    SupportSQLiteConnection(db),
+                    oldVersion,
+                    newVersion,
                 )
             }
 
@@ -579,9 +584,7 @@ private class SupportSQLiteMigrationTestHelper(
     }
 }
 
-/**
- * Implementation of the [MigrationTestHelper] for [SQLiteDriver] and [SQLiteConnection].
- */
+/** Implementation of the [MigrationTestHelper] for [SQLiteDriver] and [SQLiteConnection]. */
 private class SQLiteDriverMigrationTestHelper(
     instrumentation: Instrumentation,
     assetsFolder: String,
@@ -589,34 +592,33 @@ private class SQLiteDriverMigrationTestHelper(
     databaseClass: KClass<out RoomDatabase>,
     databaseFactory: () -> RoomDatabase,
     private val file: File,
-    private val autoMigrationSpecs: List<AutoMigrationSpec>
+    private val autoMigrationSpecs: List<AutoMigrationSpec>,
 ) : AndroidMigrationTestHelper(instrumentation, assetsFolder) {
 
     private val databaseInstance = databaseClass.cast(databaseFactory.invoke())
 
     fun createDatabase(version: Int): SQLiteConnection {
         val schemaBundle = loadSchema(version)
-        val connection = createDatabaseCommon(
-            schema = schemaBundle.database,
-            configurationFactory = ::createConfiguration
-        )
+        val connection =
+            createDatabaseCommon(
+                schema = schemaBundle.database,
+                configurationFactory = ::createConfiguration,
+            )
         managedConnections.add(WeakReference(connection))
         return connection
     }
 
-    fun runMigrationsAndValidate(
-        version: Int,
-        migrations: List<Migration>,
-    ): SQLiteConnection {
+    fun runMigrationsAndValidate(version: Int, migrations: List<Migration>): SQLiteConnection {
         val schemaBundle = loadSchema(version)
-        val connection = runMigrationsAndValidateCommon(
-            databaseInstance = databaseInstance,
-            schema = schemaBundle.database,
-            migrations = migrations,
-            autoMigrationSpecs = autoMigrationSpecs,
-            validateUnknownTables = false,
-            configurationFactory = ::createConfiguration
-        )
+        val connection =
+            runMigrationsAndValidateCommon(
+                databaseInstance = databaseInstance,
+                schema = schemaBundle.database,
+                migrations = migrations,
+                autoMigrationSpecs = autoMigrationSpecs,
+                validateUnknownTables = false,
+                configurationFactory = ::createConfiguration,
+            )
         managedConnections.add(WeakReference(connection))
         return connection
     }

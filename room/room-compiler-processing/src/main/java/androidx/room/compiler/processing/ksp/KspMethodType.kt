@@ -25,21 +25,20 @@ import com.squareup.javapoet.TypeVariableName
 internal sealed class KspMethodType(
     env: KspProcessingEnv,
     override val origin: KspMethodElement,
-    containing: KspType?
+    containing: KspType?,
 ) : KspExecutableType(env, origin, containing), XMethodType {
 
     override val typeVariables: List<XTypeVariableType> by lazy {
-        origin.declaration.typeParameters.map {
-            KspMethodTypeVariableType(env, it)
-        }
+        origin.declaration.typeParameters.map { KspMethodTypeVariableType(env, it) }
     }
 
     @Deprecated(
         "Use typeVariables property and convert to JavaPoet names.",
-        replaceWith = ReplaceWith(
-            "typeVariables.map { it.asTypeName().toJavaPoet() }",
-            "androidx.room.compiler.codegen.toJavaPoet"
-        )
+        replaceWith =
+            ReplaceWith(
+                "typeVariables.map { it.asTypeName().toJavaPoet() }",
+                "androidx.room.compiler.codegen.toJavaPoet",
+            ),
     )
     override val typeVariableNames: List<TypeVariableName> by lazy {
         typeVariables.map { it.asTypeName().java as TypeVariableName }
@@ -48,25 +47,24 @@ internal sealed class KspMethodType(
     private class KspNormalMethodType(
         env: KspProcessingEnv,
         origin: KspMethodElement,
-        containing: KspType?
+        containing: KspType?,
     ) : KspMethodType(env, origin, containing) {
         override val returnType: XType by lazy {
-            origin.declaration.returnKspType(
-                env = env,
-                containing = containing
-            ).copyWithScope(
-                KSTypeVarianceResolverScope.MethodReturnType(
-                    method = origin,
-                    asMemberOf = containing
+            origin.declaration
+                .returnKspType(env = env, containing = containing)
+                .copyWithScope(
+                    KSTypeVarianceResolverScope.MethodReturnType(
+                        method = origin,
+                        asMemberOf = containing,
+                    )
                 )
-            )
         }
     }
 
     private class KspSuspendMethodType(
         env: KspProcessingEnv,
         origin: KspMethodElement,
-        containing: KspType?
+        containing: KspType?,
     ) : KspMethodType(env, origin, containing), XSuspendMethodType {
         override val returnType: XType
             // suspend functions always return Any?, no need to call asMemberOf
@@ -75,23 +73,18 @@ internal sealed class KspMethodType(
         override fun getSuspendFunctionReturnType(): XType {
             // suspend functions work w/ continuation so it is always boxed
             return env.wrap(
-                ksType = origin.declaration.returnTypeAsMemberOf(
-                    ksType = containing?.ksType
-                ),
-                allowPrimitives = false
+                ksType = origin.declaration.returnTypeAsMemberOf(ksType = containing?.ksType),
+                allowPrimitives = false,
             )
         }
     }
 
     companion object {
-        fun create(
-            env: KspProcessingEnv,
-            origin: KspMethodElement,
-            containing: KspType?
-        ) = if (origin.isSuspendFunction()) {
-            KspSuspendMethodType(env, origin, containing)
-        } else {
-            KspNormalMethodType(env, origin, containing)
-        }
+        fun create(env: KspProcessingEnv, origin: KspMethodElement, containing: KspType?) =
+            if (origin.isSuspendFunction()) {
+                KspSuspendMethodType(env, origin, containing)
+            } else {
+                KspNormalMethodType(env, origin, containing)
+            }
     }
 }

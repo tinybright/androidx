@@ -20,8 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.database.sqlite.SQLiteConstraintException;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.room.EntityDeletionOrUpdateAdapter;
 import androidx.room.EntityInsertionAdapter;
 import androidx.room.EntityUpsertionAdapter;
@@ -36,6 +34,8 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.MediumTest;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -81,18 +81,16 @@ public class EntityUpsertionAdapterTest{
                         statement.bindString(4, entity.getAdoptionDate().toString());
                     }
 
-                    @NonNull
                     @Override
-                    protected String createQuery() {
+                    protected @NonNull String createQuery() {
                         return "INSERT INTO `Pet` (`mPetId`, `mUserId`, `mPetName`,`mAdoptionDate`)"
                                 + " VALUES (?,?,?,?)";
                     }
                 };
         mUpdateAdapter =
                 new EntityDeletionOrUpdateAdapter<Pet>(mTestDatabase) {
-                    @NonNull
                     @Override
-                    protected String createQuery() {
+                    protected @NonNull String createQuery() {
                         return "UPDATE `Pet` SET `mPetName` = ?, `mAdoptionDate` = ? WHERE `mPetId`"
                                 + " = ?";
                     }
@@ -114,26 +112,25 @@ public class EntityUpsertionAdapterTest{
                 statement.bindLong(3, entity.getPetId());
             }
 
-            @NonNull
             @Override
-            protected String createQuery() {
+            protected @NonNull String createQuery() {
                 return "INSERT INTO `TOY` (`mId`, `mName`, `mPetId`)"
                         + " VALUES (?,?,?)";
             }
         };
 
         mUpdateAdapterToy = new EntityDeletionOrUpdateAdapter<Toy>(mTestDatabase) {
-            @NonNull
             @Override
-            protected String createQuery() {
-                return "UPDATE `Toy` SET `mName` = ?, `mPetId` = ? WHERE `mPetId`"
+            protected @NonNull String createQuery() {
+                return "UPDATE `Toy` SET `mName` = ?, `mPetId` = ? WHERE `mId`"
                         + " = ?";
             }
 
             @Override
             protected void bind(@NonNull SupportSQLiteStatement statement, Toy entity) {
                 statement.bindString(1, entity.getName());
-                statement.bindLong(3, entity.getPetId());
+                statement.bindLong(2, entity.getPetId());
+                statement.bindLong(3, entity.getId());
             }
         };
 
@@ -228,7 +225,7 @@ public class EntityUpsertionAdapterTest{
         try {
             mUpsertionAdapterToy.upsertAndReturnId(testToy);
         } catch (SQLiteConstraintException ex) {
-            assertThat(ex.toString().contains("foreign key"));
+            assertThat(ex.toString()).contains("FOREIGN KEY");
         }
     }
 
@@ -255,7 +252,7 @@ public class EntityUpsertionAdapterTest{
         try {
             mUpsertionAdapterToy.upsertAndReturnId(testToy2);
         } catch (SQLiteConstraintException ex) {
-            assertThat(ex.toString().contains("2067"));
+            assertThat(ex.toString()).contains("2067");
         }
     }
 
@@ -274,9 +271,8 @@ public class EntityUpsertionAdapterTest{
                 statement.bindString(4, entity.getAdoptionDate().toString());
             }
 
-            @NonNull
             @Override
-            protected String createQuery() {
+            protected @NonNull String createQuery() {
                 return "INSERT OR IGNORE INTO `Pet` (`mPetId`, `mUserId`, `mPetName`,"
                         + "`mAdoptionDate`)"
                         + " VALUES (?,?,?,?)";
@@ -308,9 +304,8 @@ public class EntityUpsertionAdapterTest{
                         statement.bindString(4, entity.getAdoptionDate().toString());
                     }
 
-                    @NonNull
                     @Override
-                    protected String createQuery() {
+                    protected @NonNull String createQuery() {
                         return "INSERT OR IGNORE INTO `Pet` (`mPetId`, `mUserId`, `mPetName`,"
                                 + "`mAdoptionDate`)"
                                 + " VALUES (?,?,?,?)";

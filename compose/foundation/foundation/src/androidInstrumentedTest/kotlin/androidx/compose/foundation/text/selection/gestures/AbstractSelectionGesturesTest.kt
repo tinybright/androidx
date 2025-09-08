@@ -16,6 +16,8 @@
 
 package androidx.compose.foundation.text.selection.gestures
 
+import androidx.compose.foundation.ComposeFoundationFlags
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -23,6 +25,8 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.FocusedWindowTest
 import androidx.compose.foundation.text.Handle
 import androidx.compose.foundation.text.TEST_FONT_FAMILY
+import androidx.compose.foundation.text.contextmenu.internal.ProvidePlatformTextContextMenuToolbar
+import androidx.compose.foundation.text.contextmenu.test.SpyTextActionModeCallback
 import androidx.compose.foundation.text.selection.HandlePressedScope
 import androidx.compose.foundation.text.selection.gestures.util.FakeHapticFeedback
 import androidx.compose.foundation.text.selection.gestures.util.mouseDragNodeBy
@@ -41,7 +45,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalTextToolbar
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.TextToolbar
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.MouseInjectionScope
 import androidx.compose.ui.test.TouchInjectionScope
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -60,11 +63,8 @@ import org.junit.Rule
 
 const val RtlChar = "\u05D1"
 
-@OptIn(ExperimentalTestApi::class)
 internal abstract class AbstractSelectionGesturesTest : FocusedWindowTest {
-
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     protected abstract val pointerAreaTag: String
 
@@ -79,95 +79,134 @@ internal abstract class AbstractSelectionGesturesTest : FocusedWindowTest {
     protected val density = Density(1f)
 
     protected lateinit var textToolbar: TextToolbar
+    protected var spyTextActionModeCallback: SpyTextActionModeCallback? = null
 
-    @Composable
-    abstract fun Content()
+    @Composable abstract fun Content()
 
+    @OptIn(ExperimentalFoundationApi::class)
     @Before
     fun setup() {
         rule.setTextFieldTestContent {
-            textToolbar = LocalTextToolbar.current
-            CompositionLocalProvider(
-                LocalDensity provides density,
-                LocalViewConfiguration provides TestViewConfiguration(
-                    minimumTouchTargetSize = DpSize.Zero,
-                    touchSlop = 0.1f, // less than 1, not too close to 0
-                ),
-                LocalHapticFeedback provides hapticFeedback,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .padding(32.dp)
-                        .fillMaxSize()
-                        .wrapContentSize()
+            if (ComposeFoundationFlags.isNewContextMenuEnabled) {
+                val spyTextActionModeCallback =
+                    SpyTextActionModeCallback().also { spyTextActionModeCallback = it }
+
+                ProvidePlatformTextContextMenuToolbar(
+                    callbackInjector = { spyTextActionModeCallback.apply { delegate = it } }
                 ) {
-                    Content()
+                    InnerContent()
                 }
+            } else {
+                InnerContent()
             }
         }
     }
 
-    private val bounds
+    @Composable
+    private fun InnerContent() {
+        textToolbar = LocalTextToolbar.current
+        CompositionLocalProvider(
+            LocalDensity provides density,
+            LocalViewConfiguration provides
+                TestViewConfiguration(
+                    minimumTouchTargetSize = DpSize.Zero,
+                    touchSlop = 0.1f, // less than 1, not too close to 0
+                ),
+            LocalHapticFeedback provides hapticFeedback,
+        ) {
+            Box(modifier = Modifier.padding(32.dp).fillMaxSize().wrapContentSize()) { Content() }
+        }
+    }
+
+    protected val bounds
         get() = rule.onNodeWithTag(pointerAreaTag).fetchSemanticsNode().size.toSize().toRect()
 
-    private val left get() = bounds.left + 1f
-    private val top get() = bounds.top + 1f
-    private val right get() = bounds.right - 1f
-    private val bottom get() = bounds.bottom - 1f
+    private val left
+        get() = bounds.left + 1f
 
-    private val start get() = textDirection.take(ltr = left, rtl = right)
-    private val end get() = textDirection.take(ltr = right, rtl = left)
+    private val top
+        get() = bounds.top + 1f
 
-    protected val topStart get() = Offset(start, top)
-    protected val centerStart get() = Offset(start, center.y)
-    protected val bottomStart get() = Offset(start, bottom)
+    private val right
+        get() = bounds.right - 1f
 
-    protected val center get() = bounds.center
+    private val bottom
+        get() = bounds.bottom - 1f
 
-    protected val topEnd get() = Offset(end, top)
-    protected val centerEnd get() = Offset(end, center.y)
-    protected val bottomEnd get() = Offset(end, bottom)
+    private val start
+        get() = textDirection.take(ltr = left, rtl = right)
 
-    protected enum class VerticalDirection { UP, DOWN, CENTER }
-    protected enum class HorizontalDirection { START, END, CENTER }
+    private val end
+        get() = textDirection.take(ltr = right, rtl = left)
+
+    protected val topStart
+        get() = Offset(start, top)
+
+    protected val centerStart
+        get() = Offset(start, center.y)
+
+    protected val bottomStart
+        get() = Offset(start, bottom)
+
+    protected val center
+        get() = bounds.center
+
+    protected val topEnd
+        get() = Offset(end, top)
+
+    protected val centerEnd
+        get() = Offset(end, center.y)
+
+    protected val bottomEnd
+        get() = Offset(end, bottom)
+
+    protected enum class VerticalDirection {
+        UP,
+        DOWN,
+        CENTER,
+    }
+
+    protected enum class HorizontalDirection {
+        START,
+        END,
+        CENTER,
+    }
 
     // nudge 2f since we start 1f inwards from the edges and want to ensure we move over them if
     // we nudge outwards again
     protected fun Offset.nudge(
         xDirection: HorizontalDirection = HorizontalDirection.CENTER,
         yDirection: VerticalDirection = VerticalDirection.CENTER,
-    ): Offset = Offset(
-        x = x.adjustHorizontal(xDirection, 2f),
-        y = y.adjustVertical(yDirection, 2f),
-    )
+    ): Offset = Offset(x = x.adjustHorizontal(xDirection, 2f), y = y.adjustVertical(yDirection, 2f))
 
     private fun Float.adjustVertical(direction: VerticalDirection, diff: Float): Float =
-        this + diff * when (direction) {
-            VerticalDirection.UP -> -1f
-            VerticalDirection.CENTER -> 0f
-            VerticalDirection.DOWN -> 1f
-        }
+        this +
+            diff *
+                when (direction) {
+                    VerticalDirection.UP -> -1f
+                    VerticalDirection.CENTER -> 0f
+                    VerticalDirection.DOWN -> 1f
+                }
 
     private fun Float.adjustHorizontal(direction: HorizontalDirection, diff: Float): Float =
-        this + diff * when (direction) {
-            HorizontalDirection.START -> textDirection.take(ltr = -1f, rtl = 1f)
-            HorizontalDirection.CENTER -> 0f
-            HorizontalDirection.END -> textDirection.take(ltr = 1f, rtl = -1f)
-        }
+        this +
+            diff *
+                when (direction) {
+                    HorizontalDirection.START -> textDirection.take(ltr = -1f, rtl = 1f)
+                    HorizontalDirection.CENTER -> 0f
+                    HorizontalDirection.END -> textDirection.take(ltr = 1f, rtl = -1f)
+                }
 
-    private fun <T> ResolvedTextDirection.take(ltr: T, rtl: T): T = when (this) {
-        ResolvedTextDirection.Ltr -> ltr
-        ResolvedTextDirection.Rtl -> rtl
-        else -> throw AssertionError("Unrecognized text direction $textDirection")
-    }
+    private fun <T> ResolvedTextDirection.take(ltr: T, rtl: T): T =
+        when (this) {
+            ResolvedTextDirection.Ltr -> ltr
+            ResolvedTextDirection.Rtl -> rtl
+        }
 
     // TODO(b/281584353) When touch mode can be changed globally,
     //  this should change to a single tap outside of the bounds.
     internal fun TouchInjectionScope.enterTouchMode() {
-        swipe(
-            start = bounds.center,
-            end = bounds.bottomCenter + Offset(0f, 10f)
-        )
+        swipe(start = bounds.center, end = bounds.bottomCenter + Offset(0f, 10f))
     }
 
     // TODO(b/281584353) When touch mode can be changed globally,
@@ -187,42 +226,27 @@ internal abstract class AbstractSelectionGesturesTest : FocusedWindowTest {
         rule.onNodeWithTag(pointerAreaTag).performMouseInput(block)
     }
 
-    protected fun withHandlePressed(
-        handle: Handle,
-        block: HandlePressedScope.() -> Unit
-    ) {
+    protected fun withHandlePressed(handle: Handle, block: HandlePressedScope.() -> Unit) {
         rule.withHandlePressed(handle, block)
         rule.waitForIdle()
     }
 
-    protected fun touchDragTo(
-        position: Offset,
-        durationMillis: Long = 200L,
-    ) {
+    protected fun touchDragTo(position: Offset, durationMillis: Long = 200L) {
         rule.onNodeWithTag(pointerAreaTag).touchDragNodeTo(position, durationMillis)
         rule.waitForIdle()
     }
 
-    protected fun touchDragBy(
-        delta: Offset,
-        durationMillis: Long = 100L
-    ) {
+    protected fun touchDragBy(delta: Offset, durationMillis: Long = 100L) {
         rule.onNodeWithTag(pointerAreaTag).touchDragNodeBy(delta, durationMillis)
         rule.waitForIdle()
     }
 
-    protected fun mouseDragTo(
-        position: Offset,
-        durationMillis: Long = 200L,
-    ) {
+    protected fun mouseDragTo(position: Offset, durationMillis: Long = 200L) {
         rule.onNodeWithTag(pointerAreaTag).mouseDragNodeTo(position, durationMillis)
         rule.waitForIdle()
     }
 
-    protected fun mouseDragBy(
-        delta: Offset,
-        durationMillis: Long = 100L
-    ) {
+    protected fun mouseDragBy(delta: Offset, durationMillis: Long = 100L) {
         rule.onNodeWithTag(pointerAreaTag).mouseDragNodeBy(delta, durationMillis)
         rule.waitForIdle()
     }

@@ -26,35 +26,33 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 
-/* ktlint-disable max-line-length */
 @RunWith(JUnit4::class)
 
-/**
- * Test for [MaterialImportDetector].
- */
+/** Test for [MaterialImportDetector]. */
 class MaterialImportDetectorTest : LintDetectorTest() {
     override fun getDetector(): Detector = MaterialImportDetector()
 
     override fun getIssues(): MutableList<Issue> =
         mutableListOf(MaterialImportDetector.UsingMaterialAndMaterial3Libraries)
 
-    private val MaterialButtonStub = bytecodeStub(
-        filename = "Button.kt",
-        filepath = "androidx/compose/material",
-        checksum = 0x3ab9ae7,
-        """
+    private val MaterialButtonStub =
+        bytecodeStub(
+            filename = "Button.kt",
+            filepath = "androidx/compose/material",
+            checksum = 0x3ab9ae7,
+            """
             package androidx.compose.material
 
             fun Button() {}
         """,
-"""
+            """
         META-INF/main.kotlin_module:
         H4sIAAAAAAAA/2NgYGBmYGBgBGJOBijgUuWSTMxLKcrPTKnQS87PLcgvTtXL
         TSxJLcpMzBHicCotKcnP8y7hMuNSxalMr6A0J6coNa0otThDiDcAyAmCcID6
         dLgUcOsryiwoyEkV4ggC00DValxSOFUbI7mGl4s5LT9fiC0ktbjEu0SJQYsB
         AAY211PcAAAA
         """,
-        """
+            """
         androidx/compose/material/ButtonKt.class:
         H4sIAAAAAAAA/yVOu07DQBCcPScOMY84hJdTUkGDE0RHBUhIFgEkQGlSXeIT
         usS+Q/Y5SplfoqVAqfkoxB3eYnZ2Zla7P79f3wCuEBFOuUoLLdNVPNP5hy5F
@@ -63,14 +61,15 @@ class MaterialImportDetectorTest : LintDetectorTest() {
         WZfkttr1sYuFITTudCoInZFU4qnKp6J449PMKsGrroqZuJduiF4qZWQuxrKU
         1r1RShtupFYlhmBooH4nQhO+7Yd2ilAXff5bRxadBRtmOHZf4wAntg+t2rKL
         WxN4CdoJggTb2Emwi70EHYQTUIku9idgJZolen+absHWdwEAAA==
-        """
-    )
+        """,
+        )
 
-    private val ExperimentalMaterialApiStub = bytecodeStub(
-        filename = "ExperimentalMaterialApi.kt",
-        filepath = "androidx/compose/material",
-        checksum = 0x4808c29,
-        """
+    private val ExperimentalMaterialApiStub =
+        bytecodeStub(
+            filename = "ExperimentalMaterialApi.kt",
+            filepath = "androidx/compose/material",
+            checksum = 0x4808c29,
+            """
             package androidx.compose.material
 
             @RequiresOptIn(
@@ -80,14 +79,14 @@ class MaterialImportDetectorTest : LintDetectorTest() {
             @Retention(AnnotationRetention.BINARY)
             annotation class ExperimentalMaterialApi
         """,
-"""
+            """
         META-INF/main.kotlin_module:
         H4sIAAAAAAAA/2NgYGBmYGBgBGJOBijgUuWSTMxLKcrPTKnQS87PLcgvTtXL
         TSxJLcpMzBHicCotKcnP8y7hMuNSxalMr6A0J6coNa0otThDiDcAyAmCcID6
         dLgUcOsryiwoyEkV4ggC00DValxSOFUbI7mGl4s5LT9fiC0ktbjEu0SJQYsB
         AAY211PcAAAA
         """,
-        """
+            """
         androidx/compose/material/ExperimentalMaterialApi.class:
         H4sIAAAAAAAA/5VSTW8TMRB93pAmTflIC5SkodRwaG/dtnDjtEWAVkpplSCk
         KicnGRo3u+uw9kbpLTf+EwcUceRHIWZFQyJRhLiM38x79ryx/f3Hl68AXuCZ
@@ -100,26 +99,27 @@ class MaterialImportDetectorTest : LintDetectorTest() {
         oNI2WdqjNzriW6y3Mp4rpg/a6m5Eiwu0Ao1rLkzGf7C7bBG3uNVKPh4K2OHo
         4Qkkr285rzC3RriNO7j7C95DFesoYqODQoj7IR6EeIhNhngUooZ6B8JiC40O
         PIvHFtt4yoet8W7+0ihbrP4EIBEHSxkDAAA=
-        """
-    )
+        """,
+        )
 
-    private val Material3ButtonStub = bytecodeStub(
-        filename = "Button.kt",
-        filepath = "androidx/compose/material3",
-        checksum = 0x314468f6,
-        """
+    private val Material3ButtonStub =
+        bytecodeStub(
+            filename = "Button.kt",
+            filepath = "androidx/compose/material3",
+            checksum = 0x314468f6,
+            """
             package androidx.compose.material3
 
             fun Button() {}
         """,
-"""
+            """
         META-INF/main.kotlin_module:
         H4sIAAAAAAAA/2NgYGBmYGBgBGJOBijgUuWSTMxLKcrPTKnQS87PLcgvTtXL
         TSxJLcpMzBHicCotKcnP8y7hMuNSxalMr6A0J6coNa0otThDiDcAyAmCcID6
         dLgUcOsryiwoyEkV4ggC00DValxSOFUbI7mGl4s5LT9fiC0ktbjEu0SJQYsB
         AAY211PcAAAA
         """,
-        """
+            """
         androidx/compose/material3/ButtonKt.class:
         H4sIAAAAAAAA/yVOu07DQBCcPScOMY84hJfT0kCDE6CjAiQkiwASoDSpLvEJ
         HbHvkH2OUuaXaClQaj4KcYe3mJ2dmdXuz+/XN4BLRIRjrtJCy3QZz3T+oUsR
@@ -128,26 +128,27 @@ class MaterialImportDetectorTest : LintDetectorTest() {
         yFnn5Lba9bGzuSE0bnUqCJ2RVOKxyqeieOXTzCrBi66KmbiTboieK2VkLsay
         lNa9VkobbqRWJYZgaKB+J0ITvu37dopQF33+WwcWnQUbZjh0X2MPR7YPrdqy
         ixsTeAnaCYIEm9hKsI2dBB2EE1CJLnYnYCWaJXp/zsaw43gBAAA=
-        """
-    )
+        """,
+        )
 
-    private val RippleStub = bytecodeStub(
-        filename = "Ripple.kt",
-        filepath = "androidx/compose/material/ripple",
-        checksum = 0x691c7742,
-        """
+    private val RippleStub =
+        bytecodeStub(
+            filename = "Ripple.kt",
+            filepath = "androidx/compose/material/ripple",
+            checksum = 0x691c7742,
+            """
             package androidx.compose.material.ripple
 
             fun rememberRipple() {}
         """,
-"""
+            """
         META-INF/main.kotlin_module:
         H4sIAAAAAAAA/2NgYGBmYGBgBGJOBijgUuWSTMxLKcrPTKnQS87PLcgvTtXL
         TSxJLcpMzBHicCotKcnP8y7hMuNSxalMr6A0J6coNa0otThDiDcAyAmCcID6
         dLgUcOsryiwoyEkV4ggC00DValxSOFUbI7mGl4s5LT9fiC0ktbjEu0SJQYsB
         AAY211PcAAAA
         """,
-        """
+            """
         androidx/compose/material/ripple/RippleKt.class:
         H4sIAAAAAAAA/yVOTU/CQBB9s+VDqkIRv8ovkIsF4s2TMTFpRE3QcOG00I1Z
         aHdJuxCO/CWvHgxnf5Rxl87hvZl5M3nv9+/7B8AdQkKPqyTXMtlGc52tdCGi
@@ -156,26 +157,27 @@ class MaterialImportDetectorTest : LintDetectorTest() {
         BaxbC/a7LuuTk4bkvhql2e3SECqPOrG2rZFU4nXtknzwmQviv+t1PhdP0g3h
         eK2MzMREFtKqD0ppw43UqsAADBWUcUJUUbN8YacQZdHXQbq06CTYY4Yrlxrn
         uLY8sNu6fTyawovRiOHHOMZJjFM0Y7QQTEEF2jibghWoFuj8AynVobWGAQAA
-        """
+        """,
         )
 
-    private val IconsStub = bytecodeStub(
-        filename = "Icons.kt",
-        filepath = "androidx/compose/material/icons",
-        checksum = 0xe246828f,
-        """
+    private val IconsStub =
+        bytecodeStub(
+            filename = "Icons.kt",
+            filepath = "androidx/compose/material/icons",
+            checksum = 0xe246828f,
+            """
             package androidx.compose.material.icons
 
             object Icons
         """,
-"""
+            """
         META-INF/main.kotlin_module:
         H4sIAAAAAAAA/2NgYGBmYGBgBGJOBijgUuWSTMxLKcrPTKnQS87PLcgvTtXL
         TSxJLcpMzBHicCotKcnP8y7hMuNSxalMr6A0J6coNa0otThDiDcAyAmCcID6
         dLgUcOsryiwoyEkV4ggC00DValxSOFUbI7mGl4s5LT9fiC0ktbjEu0SJQYsB
         AAY211PcAAAA
         """,
-        """
+            """
         androidx/compose/material/icons/Icons.class:
         H4sIAAAAAAAA/42Sz27TQBDGv90kjuMGmhZoEwq00CL+HHBbcaNCKhVIloyR
         aBWp6mljr9pNbC+yN1GPOfEgvEHFoRKVUAQ3HgoxayI4cGEtzcw3O/vbnZF/
@@ -188,26 +190,27 @@ class MaterialImportDetectorTest : LintDetectorTest() {
         9aqVnh0S+XukHPId8py+RqXWSfm2YfKNp5dwL6rtjXkxCHKfbPt3AVqEAlws
         /Dm8StV2LVyBH1+i/RmLF1WC40Fl72Kz+qdo+ARYPkEtwI0ANwPcwgqFWA3Q
         Re8ErMRtrNF+Ca/EnRLOL4cbczOQAgAA
-        """
+        """,
         )
 
-    private val PullRefreshStub = bytecodeStub(
-        filename = "PullRefresh.kt",
-        filepath = "androidx/compose/material/pullrefresh",
-        checksum = 0xfa59248b,
-        """
+    private val PullRefreshStub =
+        bytecodeStub(
+            filename = "PullRefresh.kt",
+            filepath = "androidx/compose/material/pullrefresh",
+            checksum = 0xfa59248b,
+            """
             package androidx.compose.material.pullrefresh
 
             fun pullRefresh() {}
         """,
-"""
+            """
         META-INF/main.kotlin_module:
         H4sIAAAAAAAA/2NgYGBmYGBgBGJOBijgUuWSTMxLKcrPTKnQS87PLcgvTtXL
         TSxJLcpMzBHicCotKcnP8y7hMuNSxalMr6A0J6coNa0otThDiDcAyAmCcID6
         dLgUcOsryiwoyEkV4ggC00DValxSOFUbI7mGl4s5LT9fiC0ktbjEu0SJQYsB
         AAY211PcAAAA
         """,
-        """
+            """
         androidx/compose/material/pullrefresh/PullRefreshKt.class:
         H4sIAAAAAAAA/01OTU/CQBSct+VDikIRv8ov0IsF9ebJmJg04kfQcOG00FUX
         2i5pt4Qjf8mrB8PZH2XclYO+w7x5M/OS+fr++ARwAZ9wztMoUzJaBhOVzFUu
@@ -217,14 +220,15 @@ class MaterialImportDetectorTest : LintDetectorTest() {
         xI20hz8oUi0TMZS5NO5VmirNtVRpjh4YSth08lFGxex9c/nYDL3/WgcGrQUT
         Zji01bGHI7N7Rq2ax60RnBC1EG6IOrZD7KARoglvBMrRwu4ILEc5R/sHIVOo
         LJIBAAA=
-        """
+        """,
         )
 
     @Test
     fun material_imports() {
-        lint().files(
-            kotlin(
-                """
+        lint()
+            .files(
+                kotlin(
+                    """
                 package foo
 
                 import androidx.compose.material.Button
@@ -236,14 +240,14 @@ class MaterialImportDetectorTest : LintDetectorTest() {
 
                 fun test() {}
             """
-            ),
-            MaterialButtonStub,
-            ExperimentalMaterialApiStub,
-            Material3ButtonStub,
-            RippleStub,
-            IconsStub,
-            PullRefreshStub
-        )
+                ),
+                MaterialButtonStub,
+                ExperimentalMaterialApiStub,
+                Material3ButtonStub,
+                RippleStub,
+                IconsStub,
+                PullRefreshStub,
+            )
             .run()
             .expect(
                 """
@@ -257,9 +261,10 @@ src/foo/test.kt:4: Warning: Using a material import while also using the materia
 
     @Test
     fun material_wildcardImports() {
-        lint().files(
-            kotlin(
-                """
+        lint()
+            .files(
+                kotlin(
+                    """
                 package foo
 
                 import androidx.compose.material.*
@@ -270,14 +275,14 @@ src/foo/test.kt:4: Warning: Using a material import while also using the materia
 
                 fun test() {}
             """
-            ),
-            MaterialButtonStub,
-            ExperimentalMaterialApiStub,
-            Material3ButtonStub,
-            RippleStub,
-            IconsStub,
-            PullRefreshStub
-        )
+                ),
+                MaterialButtonStub,
+                ExperimentalMaterialApiStub,
+                Material3ButtonStub,
+                RippleStub,
+                IconsStub,
+                PullRefreshStub,
+            )
             .run()
             .expect(
                 """
@@ -289,4 +294,3 @@ src/foo/test.kt:4: Warning: Using a material import while also using the materia
             )
     }
 }
-/* ktlint-enable max-line-length */

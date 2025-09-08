@@ -26,12 +26,13 @@ import androidx.compose.ui.unit.DpSize
  * Default values for [TestViewConfiguration]. This object exists so we can leverage the default
  * implementation of members from [ViewConfiguration].
  */
-private val Default = object : ViewConfiguration {
-    override val longPressTimeoutMillis: Long = 500L
-    override val doubleTapTimeoutMillis: Long = 300L
-    override val doubleTapMinTimeMillis: Long = 40L
-    override val touchSlop: Float = 18f
-}
+private val Default =
+    object : ViewConfiguration {
+        override val longPressTimeoutMillis: Long = 500L
+        override val doubleTapTimeoutMillis: Long = 300L
+        override val doubleTapMinTimeMillis: Long = 40L
+        override val touchSlop: Float = 18f
+    }
 
 /**
  * A [ViewConfiguration] that can be used for testing. The default values are representative for
@@ -49,14 +50,14 @@ class TestViewConfiguration(
     override val doubleTapTimeoutMillis: Long = Default.doubleTapTimeoutMillis,
     override val doubleTapMinTimeMillis: Long = Default.doubleTapMinTimeMillis,
     override val touchSlop: Float = Default.touchSlop,
-    override val minimumTouchTargetSize: DpSize = Default.minimumTouchTargetSize
+    override val minimumTouchTargetSize: DpSize = Default.minimumTouchTargetSize,
 ) : ViewConfiguration
 
 @Composable
 fun WithLongPressTimeoutMillis(longPressTimeoutMillis: Long, content: @Composable () -> Unit) {
     WithViewConfiguration(
         TestViewConfiguration(longPressTimeoutMillis = longPressTimeoutMillis),
-        content = content
+        content = content,
     )
 }
 
@@ -64,7 +65,7 @@ fun WithLongPressTimeoutMillis(longPressTimeoutMillis: Long, content: @Composabl
 fun WithDoubleTapTimeoutMillis(doubleTapTimeoutMillis: Long, content: @Composable () -> Unit) {
     WithViewConfiguration(
         TestViewConfiguration(doubleTapTimeoutMillis = doubleTapTimeoutMillis),
-        content = content
+        content = content,
     )
 }
 
@@ -72,33 +73,30 @@ fun WithDoubleTapTimeoutMillis(doubleTapTimeoutMillis: Long, content: @Composabl
 fun WithDoubleTapMinTimeMillis(doubleTapMinTimeMillis: Long, content: @Composable () -> Unit) {
     WithViewConfiguration(
         TestViewConfiguration(doubleTapMinTimeMillis = doubleTapMinTimeMillis),
-        content = content
+        content = content,
     )
 }
 
 @Composable
 fun WithTouchSlop(touchSlop: Float, content: @Composable () -> Unit) {
-    WithViewConfiguration(
-        TestViewConfiguration(touchSlop = touchSlop),
-        content = content
-    )
+    WithViewConfiguration(TestViewConfiguration(touchSlop = touchSlop), content = content)
 }
 
 @Composable
 fun WithMinimumTouchTargetSize(minimumTouchTargetSize: DpSize, content: @Composable () -> Unit) {
     WithViewConfiguration(
         TestViewConfiguration(minimumTouchTargetSize = minimumTouchTargetSize),
-        content = content
+        content = content,
     )
 }
 
 @Composable
 fun WithViewConfiguration(
     testViewConfiguration: TestViewConfiguration,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(
         LocalViewConfiguration provides testViewConfiguration,
-        content = content
+        content = content,
     )
 }

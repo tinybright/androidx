@@ -25,9 +25,8 @@ class InvalidationTest : BaseInvalidationTest() {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
 
     override fun getRoomDatabase(): SampleDatabase {
-        return Room.inMemoryDatabaseBuilder<SampleDatabase>(
-            context = instrumentation.targetContext,
-        ).setDriver(BundledSQLiteDriver())
+        return Room.inMemoryDatabaseBuilder<SampleDatabase>(context = instrumentation.targetContext)
+            .setDriver(BundledSQLiteDriver())
             .build()
     }
 }

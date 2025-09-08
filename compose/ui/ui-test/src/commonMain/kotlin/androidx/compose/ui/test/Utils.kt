@@ -20,14 +20,14 @@ import androidx.compose.ui.semantics.SemanticsNode
 
 /**
  * Executes [selector] on every parent of this [SemanticsNode] and returns the closest
- * [SemanticsNode] to return `true` from [selector] or null if [selector] returns false
- * for all ancestors.
+ * [SemanticsNode] to return `true` from [selector] or null if [selector] returns false for all
+ * ancestors.
  *
  * @param includeSelf Whether it should include self into the search.
  */
 internal fun SemanticsNode.findClosestParentNode(
     includeSelf: Boolean = false,
-    selector: (SemanticsNode) -> Boolean
+    selector: (SemanticsNode) -> Boolean,
 ): SemanticsNode? {
     var currentParent = if (includeSelf) this else parent
     while (currentParent != null) {

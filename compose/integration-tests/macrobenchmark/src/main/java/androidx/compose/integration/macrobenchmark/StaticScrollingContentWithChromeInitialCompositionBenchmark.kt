@@ -31,30 +31,33 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 class StaticScrollingContentWithChromeInitialCompositionBenchmark(
     private val startupMode: StartupMode,
-    private val compilationMode: CompilationMode
+    private val compilationMode: CompilationMode,
 ) {
-    @get:Rule
-    val benchmarkRule = MacrobenchmarkRule()
+    @get:Rule val benchmarkRule = MacrobenchmarkRule()
 
     @Test
-    fun initialComposition() = benchmarkRule.measureStartup(
-        compilationMode = compilationMode,
-        startupMode = startupMode,
-        packageName = "androidx.compose.integration.macrobenchmark.target"
-    ) {
-        action = "androidx.compose.integration.macrobenchmark.target" +
-            ".STATIC_SCROLLING_CONTENT_WITH_CHROME_INITIAL_COMPOSITION_ACTIVITY"
-    }
+    fun initialComposition() =
+        benchmarkRule.measureStartup(
+            compilationMode = compilationMode,
+            startupMode = startupMode,
+            packageName = "androidx.compose.integration.macrobenchmark.target",
+        ) {
+            action =
+                "androidx.compose.integration.macrobenchmark.target" +
+                    ".STATIC_SCROLLING_CONTENT_WITH_CHROME_INITIAL_COMPOSITION_ACTIVITY"
+        }
 
     @Test
-    fun firstFrame() = benchmarkRule.measureStartup(
-        compilationMode = compilationMode,
-        startupMode = startupMode,
-        packageName = "androidx.compose.integration.macrobenchmark.target"
-    ) {
-        action = "androidx.compose.integration.macrobenchmark.target" +
-            ".STATIC_SCROLLING_CONTENT_WITH_CHROME_FIRST_FRAME_ACTIVITY"
-    }
+    fun firstFrame() =
+        benchmarkRule.measureStartup(
+            compilationMode = compilationMode,
+            startupMode = startupMode,
+            packageName = "androidx.compose.integration.macrobenchmark.target",
+        ) {
+            action =
+                "androidx.compose.integration.macrobenchmark.target" +
+                    ".STATIC_SCROLLING_CONTENT_WITH_CHROME_FIRST_FRAME_ACTIVITY"
+        }
 
     companion object {
         @Parameterized.Parameters(name = "startup={0},compilation={1}")

@@ -32,19 +32,21 @@ import org.jetbrains.uast.getParameterForArgument
 import org.jetbrains.uast.skipParenthesizedExprDown
 
 class LocaleInvalidLanguageTagDetector : Detector(), SourceCodeScanner {
-    override fun getApplicableConstructorTypes() = listOf(
-        "androidx.compose.ui.text.intl.LocaleList",
-        "androidx.compose.ui.text.intl.Locale"
-    )
+    override fun getApplicableConstructorTypes() =
+        listOf("androidx.compose.ui.text.intl.LocaleList", "androidx.compose.ui.text.intl.Locale")
+
     override fun visitConstructor(
         context: JavaContext,
         node: UCallExpression,
-        constructor: PsiMethod
+        constructor: PsiMethod,
     ) {
-        val languageTag = node.valueArguments.find {
-            val name = node.getParameterForArgument(it)?.name
-            name == "languageTag" || name == "languageTags"
-        }?.skipParenthesizedExprDown()
+        val languageTag =
+            node.valueArguments
+                .find {
+                    val name = node.getParameterForArgument(it)?.name
+                    name == "languageTag" || name == "languageTags"
+                }
+                ?.skipParenthesizedExprDown()
 
         val localeValue = languageTag?.evaluate() as? String ?: return
         val localeInvalid = localeValue.contains('_')
@@ -61,24 +63,27 @@ class LocaleInvalidLanguageTagDetector : Detector(), SourceCodeScanner {
                     .text(localeValue)
                     .with(fixedLocaleValue)
                     .autoFix()
-                    .build()
+                    .build(),
             )
         }
     }
 
     companion object {
-        val InvalidLanguageTagDelimiter = Issue.create(
-            id = "InvalidLanguageTagDelimiter",
-            briefDescription = "Undercore (_) is an unsupported delimiter for subtags",
-            explanation = "A language tag must be compliant with IETF BCP47, specifically a " +
-                "sequence of subtags must be separated by hyphens (-) instead of underscores (_)",
-            category = Category.CORRECTNESS,
-            priority = 3,
-            severity = Severity.ERROR,
-            implementation = Implementation(
-                LocaleInvalidLanguageTagDetector::class.java,
-                EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES)
+        val InvalidLanguageTagDelimiter =
+            Issue.create(
+                id = "InvalidLanguageTagDelimiter",
+                briefDescription = "Undercore (_) is an unsupported delimiter for subtags",
+                explanation =
+                    "A language tag must be compliant with IETF BCP47, specifically a " +
+                        "sequence of subtags must be separated by hyphens (-) instead of underscores (_)",
+                category = Category.CORRECTNESS,
+                priority = 3,
+                severity = Severity.ERROR,
+                implementation =
+                    Implementation(
+                        LocaleInvalidLanguageTagDetector::class.java,
+                        EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES),
+                    ),
             )
-        )
     }
 }

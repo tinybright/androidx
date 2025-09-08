@@ -19,7 +19,7 @@ package androidx.core.haptics.samples
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
-import android.animation.ValueAnimator.INFINITE
+import android.animation.ValueAnimator.RESTART
 import android.content.Context
 import androidx.annotation.Sampled
 import androidx.core.haptics.HapticAttributes
@@ -37,34 +37,23 @@ import androidx.core.haptics.signal.PredefinedEffectSignal.Companion.predefinedC
 import androidx.core.haptics.signal.PredefinedEffectSignal.Companion.predefinedDoubleClick
 import kotlin.time.Duration.Companion.seconds
 
-/**
- * Sample showing how to play a standard click haptic effect on the system vibrator.
- */
+/** Sample showing how to play a standard click haptic effect on the system vibrator. */
 @Sampled
 fun PlaySystemStandardClick(context: Context) {
     val hapticManager = HapticManager.create(context)
     hapticManager?.play(predefinedClick(), HapticAttributes(HapticAttributes.USAGE_TOUCH))
 }
 
-/**
- * Sample showing how to play a haptic signal on a vibrator.
- */
+/** Sample showing how to play a haptic signal on a vibrator. */
 @Sampled
 fun PlayHapticSignal(hapticManager: HapticManager) {
     hapticManager.play(
-        compositionOf(
-            slowRise(),
-            quickFall(),
-            off(durationMillis = 50),
-            thud(),
-        ),
+        compositionOf(slowRise(), quickFall(), off(durationMillis = 50), thud()),
         HapticAttributes(HapticAttributes.USAGE_TOUCH),
     )
 }
 
-/**
- * Sample showing how to play a resolvable haptic signal on a vibrator.
- */
+/** Sample showing how to play a resolvable haptic signal on a vibrator. */
 @Sampled
 fun PlayResolvableHapticSignal(hapticManager: HapticManager) {
     hapticManager.play(
@@ -80,24 +69,22 @@ fun PlayResolvableHapticSignal(hapticManager: HapticManager) {
     )
 }
 
-/**
- * Sample showing how to play a haptic signal and then cancel.
- */
+/** Sample showing how to play a haptic signal and then cancel. */
 @Sampled
-fun PlayThenCancel(
-    hapticManager: HapticManager,
-    repeatingHapticSignal: InfiniteSignal,
-) {
+fun PlayThenCancel(hapticManager: HapticManager, repeatingHapticSignal: InfiniteSignal) {
     ValueAnimator.ofFloat(0f, 1f).apply {
         duration = 3.seconds.inWholeMilliseconds
-        repeatMode = INFINITE
-        addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationStart(animation: Animator) {
-                hapticManager.play(repeatingHapticSignal, HapticAttributes(USAGE_MEDIA))
+        repeatMode = RESTART
+        addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationStart(animation: Animator) {
+                    hapticManager.play(repeatingHapticSignal, HapticAttributes(USAGE_MEDIA))
+                }
+
+                override fun onAnimationCancel(animation: Animator) {
+                    hapticManager.cancel()
+                }
             }
-            override fun onAnimationCancel(animation: Animator) {
-                hapticManager.cancel()
-            }
-        })
+        )
     }
 }

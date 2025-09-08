@@ -16,7 +16,6 @@
 package androidx.wear.compose.material
 
 import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -48,13 +47,13 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.test.filters.SdkSuppress
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 
 class SelectableChipTest {
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     @Test
     fun supports_testtag() {
@@ -64,7 +63,7 @@ class SelectableChipTest {
                 onClick = {},
                 label = { Text("Label") },
                 selectionControl = { TestImage() },
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
@@ -80,12 +79,13 @@ class SelectableChipTest {
                 label = { Text("Label") },
                 selectionControl = { TestImage() },
                 onContainerClick = {},
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
         rule.onNodeWithTag(TEST_TAG).assertExists()
     }
+
     @Test
     fun has_clickaction_when_enabled() {
         rule.setContentWithTheme {
@@ -95,7 +95,7 @@ class SelectableChipTest {
                 enabled = true,
                 label = { Text("Label") },
                 selectionControl = { TestImage() },
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
@@ -112,7 +112,7 @@ class SelectableChipTest {
                 label = { Text("Label") },
                 selectionControl = { TestImage() },
                 onContainerClick = {},
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
@@ -128,7 +128,7 @@ class SelectableChipTest {
                 enabled = false,
                 label = { Text("Label") },
                 selectionControl = { TestImage() },
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
@@ -144,17 +144,13 @@ class SelectableChipTest {
                 enabled = false,
                 label = { Text("Label") },
                 selectionControl = { TestImage() },
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
-        rule.onNodeWithTag(TEST_TAG)
-            .assert(
-                SemanticsMatcher.expectValue(
-                    SemanticsProperties.Role,
-                    Role.RadioButton
-                )
-            )
+        rule
+            .onNodeWithTag(TEST_TAG)
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.RadioButton))
     }
 
     @Test
@@ -167,7 +163,7 @@ class SelectableChipTest {
                 label = { Text("Label") },
                 selectionControl = { TestImage() },
                 onContainerClick = {},
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
@@ -214,7 +210,7 @@ class SelectableChipTest {
                 label = { Text("Label") },
                 selectionControl = { TestImage() },
                 onContainerClick = {},
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
         rule.onNodeWithTag(TEST_TAG).onChildAt(0).assertHasClickAction()
@@ -229,7 +225,7 @@ class SelectableChipTest {
                 label = { Text("Label") },
                 selectionControl = { TestImage() },
                 enabled = true,
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
@@ -246,7 +242,7 @@ class SelectableChipTest {
                 selectionControl = { TestImage() },
                 enabled = true,
                 onContainerClick = {},
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
@@ -262,7 +258,7 @@ class SelectableChipTest {
                 label = { Text("Label") },
                 selectionControl = { TestImage() },
                 enabled = false,
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
@@ -279,7 +275,7 @@ class SelectableChipTest {
                 selectionControl = { TestImage() },
                 enabled = false,
                 onContainerClick = {},
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
@@ -362,11 +358,7 @@ class SelectableChipTest {
             )
         }
 
-        rule
-            .onNodeWithTag(TEST_TAG)
-            .assertIsNotSelected()
-            .performClick()
-            .assertIsSelected()
+        rule.onNodeWithTag(TEST_TAG).assertIsNotSelected().performClick().assertIsSelected()
     }
 
     @Test
@@ -380,7 +372,7 @@ class SelectableChipTest {
                 selectionControl = { TestImage() },
                 enabled = true,
                 onContainerClick = {},
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
@@ -402,15 +394,11 @@ class SelectableChipTest {
                 label = { Text("Label") },
                 selectionControl = { TestImage() },
                 enabled = false,
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
-        rule
-            .onNodeWithTag(TEST_TAG)
-            .assertIsNotSelected()
-            .performClick()
-            .assertIsNotSelected()
+        rule.onNodeWithTag(TEST_TAG).assertIsNotSelected().performClick().assertIsNotSelected()
     }
 
     @Test
@@ -424,7 +412,7 @@ class SelectableChipTest {
                 selectionControl = { TestImage() },
                 enabled = false,
                 onContainerClick = {},
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
@@ -445,17 +433,14 @@ class SelectableChipTest {
                 label = { Text("Label") },
                 selectionControl = { TestImage() },
                 onContainerClick = {},
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
-        rule.onNodeWithTag(TEST_TAG).onChildAt(0)
-            .assert(
-                SemanticsMatcher.expectValue(
-                    SemanticsProperties.Role,
-                    Role.Button
-                )
-            )
+        rule
+            .onNodeWithTag(TEST_TAG)
+            .onChildAt(0)
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
     }
 
     @Test
@@ -491,29 +476,28 @@ class SelectableChipTest {
         rule.onNodeWithText(textContent).assertExists()
     }
 
-    @Test
-    fun gives_chip_correct_height() =
-        verifyChipHeight(ChipDefaults.Height)
+    @Test fun gives_chip_correct_height() = verifyChipHeight(ChipDefaults.Height)
 
     @Test
     fun gives_chip_adjustable_height() {
         val expectedMinHeight = SelectableChipDefaults.Height + 1.dp
-        rule.setContentWithThemeForSizeAssertions {
-            SelectableChip(
-                selected = true,
-                onClick = {},
-                label = {
-                    Text(
-                        text = "SelectableChip text spanning over multiple lines of text " +
-                            "to test height is adjustable. This should exceed the minimum height" +
-                            " for the SelectableChip."
-                    )
-                },
-                selectionControl = {
-                    RadioButton(selected = true)
-                }
-            )
-        }.assertHeightIsAtLeast(expectedMinHeight)
+        rule
+            .setContentWithThemeForSizeAssertions {
+                SelectableChip(
+                    selected = true,
+                    onClick = {},
+                    label = {
+                        Text(
+                            text =
+                                "SelectableChip text spanning over multiple lines of text " +
+                                    "to test height is adjustable. This should exceed the minimum height" +
+                                    " for the SelectableChip."
+                        )
+                    },
+                    selectionControl = { RadioButton(selected = true) },
+                )
+            }
+            .assertHeightIsAtLeast(expectedMinHeight)
     }
 
     private fun verifyChipHeight(expectedHeight: Dp) {
@@ -527,30 +511,29 @@ class SelectableChipTest {
         }
     }
 
-    @Test
-    fun gives_split_chip_correct_height() =
-        verifySplitChipHeight(ChipDefaults.Height)
+    @Test fun gives_split_chip_correct_height() = verifySplitChipHeight(ChipDefaults.Height)
 
     @Test
     fun gives_split_chip_adjustable_height() {
         val expectedMinHeight = SelectableChipDefaults.Height + 1.dp
-        rule.setContentWithThemeForSizeAssertions {
-            SplitSelectableChip(
-                selected = true,
-                onSelectionClick = {},
-                onContainerClick = {},
-                label = {
-                    Text(
-                        text = "SplitSelectableChip text spanning over multiple lines of text " +
-                            "to test height is adjustable. This should exceed the minimum height " +
-                            "for the SplitSelectableChip."
-                    )
-                },
-                selectionControl = {
-                    RadioButton(selected = true)
-                }
-            )
-        }.assertHeightIsAtLeast(expectedMinHeight)
+        rule
+            .setContentWithThemeForSizeAssertions {
+                SplitSelectableChip(
+                    selected = true,
+                    onSelectionClick = {},
+                    onContainerClick = {},
+                    label = {
+                        Text(
+                            text =
+                                "SplitSelectableChip text spanning over multiple lines of text " +
+                                    "to test height is adjustable. This should exceed the minimum height " +
+                                    "for the SplitSelectableChip."
+                        )
+                    },
+                    selectionControl = { RadioButton(selected = true) },
+                )
+            }
+            .assertHeightIsAtLeast(expectedMinHeight)
     }
 
     private fun verifySplitChipHeight(expectedHeight: Dp) {
@@ -571,7 +554,7 @@ class SelectableChipTest {
             ChipStatus.Enabled,
             selected = true,
             { MaterialTheme.colors.onSurface },
-            { MaterialTheme.colors.secondary }
+            { MaterialTheme.colors.secondary },
         )
 
     @Test
@@ -590,7 +573,7 @@ class SelectableChipTest {
             ChipStatus.Enabled,
             selected = false,
             { MaterialTheme.colors.onSurface },
-            { MaterialTheme.colors.onSurface }
+            { MaterialTheme.colors.onSurface },
         )
 
     @Test
@@ -609,7 +592,7 @@ class SelectableChipTest {
             ChipStatus.Disabled,
             selected = true,
             { MaterialTheme.colors.onSurface },
-            { MaterialTheme.colors.secondary }
+            { MaterialTheme.colors.secondary },
         )
 
     @Test
@@ -619,7 +602,7 @@ class SelectableChipTest {
             selected = true,
             { MaterialTheme.colors.onSurface },
             { MaterialTheme.colors.secondary },
-            splitSelectableChip = true
+            splitSelectableChip = true,
         )
 
     @Test
@@ -628,7 +611,7 @@ class SelectableChipTest {
             ChipStatus.Disabled,
             selected = false,
             { MaterialTheme.colors.onSurface },
-            { MaterialTheme.colors.onSurface }
+            { MaterialTheme.colors.onSurface },
         )
 
     @Test
@@ -652,12 +635,13 @@ class SelectableChipTest {
                     selected = true,
                     onClick = {},
                     enabled = true,
-                    colors = SelectableChipDefaults.selectableChipColors(
-                        selectedContentColor = override
-                    ),
+                    colors =
+                        SelectableChipDefaults.selectableChipColors(
+                            selectedContentColor = override
+                        ),
                     label = { actualContentColor = LocalContentColor.current },
                     selectionControl = {},
-                    modifier = Modifier.testTag(TEST_TAG)
+                    modifier = Modifier.testTag(TEST_TAG),
                 )
             }
         }
@@ -676,13 +660,12 @@ class SelectableChipTest {
                     selected = true,
                     onSelectionClick = {},
                     enabled = true,
-                    colors = SelectableChipDefaults.splitSelectableChipColors(
-                        contentColor = override
-                    ),
+                    colors =
+                        SelectableChipDefaults.splitSelectableChipColors(contentColor = override),
                     label = { actualContentColor = LocalContentColor.current },
                     selectionControl = {},
                     onContainerClick = {},
-                    modifier = Modifier.testTag(TEST_TAG)
+                    modifier = Modifier.testTag(TEST_TAG),
                 )
             }
         }
@@ -690,7 +673,7 @@ class SelectableChipTest {
         Assert.assertEquals(override, actualContentColor)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
     @Test
     fun split_chip_background_color_correct() {
         var actualBackgrondColor = Color.Transparent
@@ -705,18 +688,19 @@ class SelectableChipTest {
                     label = {},
                     selectionControl = {},
                     onContainerClick = {},
-                    modifier = Modifier.testTag(TEST_TAG).fillMaxWidth()
+                    modifier = Modifier.testTag(TEST_TAG).fillMaxWidth(),
                 )
             }
             actualBackgrondColor = MaterialTheme.colors.surface
         }
 
-        rule.onNodeWithTag(TEST_TAG)
+        rule
+            .onNodeWithTag(TEST_TAG)
             .captureToImage()
             .assertContainsColor(actualBackgrondColor, 50.0f)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
     @Test
     fun split_chip_overridden_background_color_correct() {
         val override = Color.Green
@@ -727,20 +711,19 @@ class SelectableChipTest {
                     selected = true,
                     onSelectionClick = {},
                     enabled = true,
-                    colors = SelectableChipDefaults.splitSelectableChipColors(
-                        backgroundColor = override
-                    ),
+                    colors =
+                        SelectableChipDefaults.splitSelectableChipColors(
+                            backgroundColor = override
+                        ),
                     label = {},
                     selectionControl = {},
                     onContainerClick = {},
-                    modifier = Modifier.testTag(TEST_TAG).fillMaxWidth()
+                    modifier = Modifier.testTag(TEST_TAG).fillMaxWidth(),
                 )
             }
         }
 
-        rule.onNodeWithTag(TEST_TAG)
-            .captureToImage()
-            .assertContainsColor(override, 50.0f)
+        rule.onNodeWithTag(TEST_TAG).captureToImage().assertContainsColor(override, 50.0f)
     }
 
     private fun verifyColors(
@@ -760,11 +743,7 @@ class SelectableChipTest {
         rule.setContentWithTheme {
             expectedLabel = labelColor()
             expectedIcon = selectionControlColor()
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Transparent)
-            ) {
+            Box(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
                 if (splitSelectableChip) {
                     SplitSelectableChip(
                         selected = selected,
@@ -779,7 +758,7 @@ class SelectableChipTest {
                             actualLabelDisabledAlpha = ContentAlpha.disabled
                         },
                         onContainerClick = {},
-                        modifier = Modifier.testTag(TEST_TAG)
+                        modifier = Modifier.testTag(TEST_TAG),
                     )
                 } else {
                     SelectableChip(
@@ -794,7 +773,7 @@ class SelectableChipTest {
                             actualLabel = LocalContentColor.current
                             actualLabelDisabledAlpha = ContentAlpha.disabled
                         },
-                        modifier = Modifier.testTag(TEST_TAG)
+                        modifier = Modifier.testTag(TEST_TAG),
                     )
                 }
             }
@@ -811,8 +790,5 @@ class SelectableChipTest {
 }
 
 private fun ComposeContentTestRule.verifyHeight(expected: Dp, content: @Composable () -> Unit) {
-    setContentWithThemeForSizeAssertions {
-        content()
-    }
-        .assertHeightIsEqualTo(expected)
+    setContentWithThemeForSizeAssertions { content() }.assertHeightIsEqualTo(expected)
 }

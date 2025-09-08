@@ -18,6 +18,7 @@ package androidx.compose.ui.benchmark.accessibility
 
 import android.view.View
 import android.view.accessibility.AccessibilityNodeProvider
+import android.view.accessibility.AccessibilityNodeProvider.HOST_VIEW_ID
 import androidx.benchmark.ExperimentalBenchmarkConfigApi
 import androidx.benchmark.MicrobenchmarkConfig
 import androidx.benchmark.junit4.BenchmarkRule
@@ -29,7 +30,6 @@ import androidx.compose.material.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.testutils.ComposeTestCase
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.node.RootForTest
 import androidx.compose.ui.platform.LocalView
@@ -48,12 +48,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @LargeTest
-@OptIn(ExperimentalComposeUiApi::class)
 @RunWith(AndroidJUnit4::class)
 class AccessibilityBenchmark {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+    @get:Rule val composeTestRule = createComposeRule()
 
     @OptIn(ExperimentalBenchmarkConfigApi::class)
     @get:Rule
@@ -62,8 +60,6 @@ class AccessibilityBenchmark {
     private lateinit var composeView: View
     private lateinit var provider: AccessibilityNodeProvider
     private lateinit var semanticsList: List<SemanticsNode>
-
-    private val tag = "TestTag"
 
     /**
      * Measure the creation of AccessibilityNodeInfos, as well as the accessibility traversal
@@ -77,24 +73,28 @@ class AccessibilityBenchmark {
             AccessibilityTestCase().Content()
         }
 
-        // TODO(b/272068594): Add api to fetch the semantics id from SemanticsNodeInteraction
-        //  Collection directly. If we were only fetching one node with `onNodeWithTag`, we could
-        // have a `SemanticsNodeInteraction.semanticsId`, but we want to create ANIs for multiple
-        // nodes.
-        semanticsList = composeTestRule
-            .onAllNodesWithTag(tag, useUnmergedTree = true)
-            .fetchSemanticsNodes(atLeastOneRootRequired = false)
+        // Parent AccessibilityNodeInfo must always be requested before their children
+        provider.createAccessibilityNodeInfo(HOST_VIEW_ID)
+        nodesWithTag(container1Tag).forEach { provider.createAccessibilityNodeInfo(it.id) }
+        nodesWithTag(container2Tag).forEach { provider.createAccessibilityNodeInfo(it.id) }
+
+        semanticsList = nodesWithTag(childTag)
 
         benchmarkRule.measureRepeated {
-            semanticsList.forEach {
-                provider.createAccessibilityNodeInfo(it.id)
-            }
+            semanticsList.forEach { provider.createAccessibilityNodeInfo(it.id) }
         }
     }
 
-    class AccessibilityTestCase : ComposeTestCase {
+    // TODO(b/272068594): Add api to fetch the semantics id from SemanticsNodeInteraction
+    //  Collection directly. If we were only fetching one node with `onNodeWithTag`, we could
+    // have a `SemanticsNodeInteraction.semanticsId`, but we want to create ANIs for multiple
+    // nodes.
+    private fun nodesWithTag(tag: String): List<SemanticsNode> =
+        composeTestRule
+            .onAllNodesWithTag(tag, useUnmergedTree = true)
+            .fetchSemanticsNodes(atLeastOneRootRequired = false)
 
-        private val tag = "TestTag"
+    class AccessibilityTestCase : ComposeTestCase {
 
         @Composable
         override fun Content() {
@@ -103,38 +103,48 @@ class AccessibilityBenchmark {
             // Set traversal groups and indices to force traversal sorting and ordering
             // to take place.
             repeat(25) {
-                Column(Modifier.semantics { isTraversalGroup = true }) {
-                    Row(Modifier.semantics { isTraversalGroup = true }) {
+                Column(
+                    Modifier.semantics {
+                        isTraversalGroup = true
+                        testTag = container1Tag
+                    }
+                ) {
+                    Row(
+                        Modifier.semantics {
+                            isTraversalGroup = true
+                            testTag = container2Tag
+                        }
+                    ) {
                         Button(
                             onClick = {},
-                            modifier = Modifier
-                                .semantics {
+                            modifier =
+                                Modifier.semantics {
                                     contentDescription = "ContentDescription 1"
                                     traversalIndex = 2f
-                                    testTag = tag
-                                }
+                                    testTag = childTag
+                                },
                         ) {
                             BasicText("BasicText 1")
                         }
                         Button(
                             onClick = {},
-                            modifier = Modifier
-                                .semantics {
+                            modifier =
+                                Modifier.semantics {
                                     contentDescription = "ContentDescription 2"
                                     traversalIndex = 1f
-                                    testTag = tag
-                                }
+                                    testTag = childTag
+                                },
                         ) {
                             BasicText("BasicText 2")
                         }
                         Button(
                             onClick = {},
-                            modifier = Modifier
-                                .semantics {
+                            modifier =
+                                Modifier.semantics {
                                     contentDescription = "ContentDescription 3"
                                     traversalIndex = 3f
-                                    testTag = tag
-                                }
+                                    testTag = childTag
+                                },
                         ) {
                             BasicText("BasicText 3")
                         }
@@ -149,5 +159,11 @@ class AccessibilityBenchmark {
                 (composeView as RootForTest).forceAccessibilityForTesting(true)
             }
         }
+    }
+
+    companion object {
+        val container1Tag = "Container1TestTag"
+        val container2Tag = "Container2TestTag"
+        val childTag = "TestTag"
     }
 }

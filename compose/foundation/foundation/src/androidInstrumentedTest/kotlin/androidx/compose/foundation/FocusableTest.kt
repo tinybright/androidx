@@ -16,16 +16,20 @@
 
 package androidx.compose.foundation
 
+import android.os.Build.VERSION.SDK_INT
+import android.view.View
+import android.widget.FrameLayout
 import androidx.compose.foundation.interaction.FocusInteraction
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.relocation.BringIntoViewResponder
 import androidx.compose.foundation.relocation.bringIntoViewResponder
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.CompositionLocalProvider
@@ -37,10 +41,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.testutils.assertModifierIsPure
 import androidx.compose.testutils.first
+import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.FocusState
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.onFocusEvent
@@ -53,23 +59,32 @@ import androidx.compose.ui.layout.LocalPinnableContainer
 import androidx.compose.ui.layout.PinnableContainer
 import androidx.compose.ui.layout.PinnableContainer.PinnedHandle
 import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.platform.AbstractComposeView
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.InspectableValue
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInputModeManager
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.isDebugInspectorInfoEnabled
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotFocused
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.isFocusable
 import androidx.compose.ui.test.isNotFocusable
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.requestFocus
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
+import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -79,13 +94,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalFoundationApi::class)
 @MediumTest
 @RunWith(AndroidJUnit4::class)
 class FocusableTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     private val focusTag = "myFocusable"
 
@@ -99,22 +112,20 @@ class FocusableTest {
         isDebugInspectorInfoEnabled = false
     }
 
+    // TODO(b/267253920): Add a compose test API to set/reset InputMode.
+    @After
+    fun resetTouchMode() =
+        with(InstrumentationRegistry.getInstrumentation()) {
+            if (SDK_INT < 33) setInTouchMode(true) else resetInTouchMode()
+        }
+
     @Test
     fun focusable_defaultSemantics() {
         rule.setFocusableContent {
-            Box {
-                BasicText(
-                    "focusableText",
-                    modifier = Modifier
-                        .testTag(focusTag)
-                        .focusable()
-                )
-            }
+            Box { BasicText("focusableText", modifier = Modifier.testTag(focusTag).focusable()) }
         }
 
-        rule.onNodeWithTag(focusTag)
-            .assertIsEnabled()
-            .assert(isFocusable())
+        rule.onNodeWithTag(focusTag).assertIsEnabled().assert(isFocusable())
     }
 
     @Test
@@ -123,15 +134,12 @@ class FocusableTest {
             Box {
                 BasicText(
                     "focusableText",
-                    modifier = Modifier
-                        .testTag(focusTag)
-                        .focusable(enabled = false)
+                    modifier = Modifier.testTag(focusTag).focusable(enabled = false),
                 )
             }
         }
 
-        rule.onNodeWithTag(focusTag)
-            .assert(isNotFocusable())
+        rule.onNodeWithTag(focusTag).assert(isNotFocusable())
     }
 
     @Test
@@ -141,18 +149,9 @@ class FocusableTest {
         lateinit var inputModeManager: InputModeManager
         rule.setContent {
             inputModeManager = LocalInputModeManager.current
-            Box(
-                Modifier
-                    .testTag(focusTag)
-                    .size(10.dp)
-                    .focusRequester(focusRequester)
-                    .focusable()
-            )
+            Box(Modifier.testTag(focusTag).size(10.dp).focusRequester(focusRequester).focusable())
         }
-        rule.runOnIdle {
-            @OptIn(ExperimentalComposeUiApi::class)
-            inputModeManager.requestInputMode(InputMode.Touch)
-        }
+        rule.runOnIdle { inputModeManager.requestInputMode(InputMode.Touch) }
 
         // Act.
         rule.runOnIdle { focusRequester.requestFocus() }
@@ -168,18 +167,9 @@ class FocusableTest {
         lateinit var inputModeManager: InputModeManager
         rule.setContent {
             inputModeManager = LocalInputModeManager.current
-            Box(
-                Modifier
-                    .testTag(focusTag)
-                    .size(10.dp)
-                    .focusRequester(focusRequester)
-                    .focusable()
-            )
+            Box(Modifier.testTag(focusTag).size(10.dp).focusRequester(focusRequester).focusable())
         }
-        rule.runOnIdle {
-            @OptIn(ExperimentalComposeUiApi::class)
-            inputModeManager.requestInputMode(InputMode.Keyboard)
-        }
+        rule.runOnIdle { inputModeManager.requestInputMode(InputMode.Keyboard) }
 
         // Act.
         rule.runOnIdle { focusRequester.requestFocus() }
@@ -194,17 +184,9 @@ class FocusableTest {
         lateinit var inputModeManager: InputModeManager
         rule.setContent {
             inputModeManager = LocalInputModeManager.current
-            Box(
-                Modifier
-                    .testTag(focusTag)
-                    .size(10.dp)
-                    .focusable()
-            )
+            Box(Modifier.testTag(focusTag).size(10.dp).focusable())
         }
-        rule.runOnIdle {
-            @OptIn(ExperimentalComposeUiApi::class)
-            inputModeManager.requestInputMode(InputMode.Touch)
-        }
+        rule.runOnIdle { inputModeManager.requestInputMode(InputMode.Touch) }
 
         // Act.
         rule.onNodeWithTag(focusTag).requestFocus()
@@ -220,18 +202,9 @@ class FocusableTest {
         val focusRequester = FocusRequester()
         rule.setFocusableContent {
             inputModeManager = LocalInputModeManager.current
-            Box(
-                Modifier
-                    .focusRequester(focusRequester)
-                    .testTag(focusTag)
-                    .size(10.dp)
-                    .focusable()
-            )
+            Box(Modifier.focusRequester(focusRequester).testTag(focusTag).size(10.dp).focusable())
         }
-        rule.runOnIdle {
-            @OptIn(ExperimentalComposeUiApi::class)
-            inputModeManager.requestInputMode(InputMode.Keyboard)
-        }
+        rule.runOnIdle { inputModeManager.requestInputMode(InputMode.Keyboard) }
 
         // Act.
         rule.onNodeWithTag(focusTag).requestFocus()
@@ -247,36 +220,24 @@ class FocusableTest {
             Box {
                 BasicText(
                     "focusableText",
-                    modifier = Modifier
-                        .testTag(focusTag)
-                        .focusRequester(focusRequester)
-                        .focusable()
+                    modifier = Modifier.testTag(focusTag).focusRequester(focusRequester).focusable(),
                 )
                 BasicText(
                     "otherFocusableText",
-                    modifier = Modifier
-                        .focusRequester(otherFocusRequester)
-                        .focusable()
+                    modifier = Modifier.focusRequester(otherFocusRequester).focusable(),
                 )
             }
         }
 
-        rule.onNodeWithTag(focusTag)
-            .assertIsNotFocused()
+        rule.onNodeWithTag(focusTag).assertIsNotFocused()
 
-        rule.runOnIdle {
-            focusRequester.requestFocus()
-        }
+        rule.runOnIdle { focusRequester.requestFocus() }
 
-        rule.onNodeWithTag(focusTag)
-            .assertIsFocused()
+        rule.onNodeWithTag(focusTag).assertIsFocused()
 
-        rule.runOnIdle {
-            otherFocusRequester.requestFocus()
-        }
+        rule.runOnIdle { otherFocusRequester.requestFocus() }
 
-        rule.onNodeWithTag(focusTag)
-            .assertIsNotFocused()
+        rule.onNodeWithTag(focusTag).assertIsNotFocused()
     }
 
     @Test
@@ -291,48 +252,37 @@ class FocusableTest {
             Box {
                 BasicText(
                     "focusableText",
-                    modifier = Modifier
-                        .testTag(focusTag)
-                        .focusRequester(focusRequester)
-                        .focusable(interactionSource = interactionSource)
+                    modifier =
+                        Modifier.testTag(focusTag)
+                            .focusRequester(focusRequester)
+                            .focusable(interactionSource = interactionSource),
                 )
                 BasicText(
                     "otherFocusableText",
-                    modifier = Modifier
-                        .focusRequester(otherFocusRequester)
-                        .focusable()
+                    modifier = Modifier.focusRequester(otherFocusRequester).focusable(),
                 )
             }
         }
 
         val interactions = mutableListOf<Interaction>()
 
-        scope.launch {
-            interactionSource.interactions.collect { interactions.add(it) }
-        }
+        scope.launch { interactionSource.interactions.collect { interactions.add(it) } }
 
-        rule.runOnIdle {
-            assertThat(interactions).isEmpty()
-        }
+        rule.runOnIdle { assertThat(interactions).isEmpty() }
 
-        rule.runOnIdle {
-            focusRequester.requestFocus()
-        }
+        rule.runOnIdle { focusRequester.requestFocus() }
 
         rule.runOnIdle {
             assertThat(interactions).hasSize(1)
             assertThat(interactions.first()).isInstanceOf(FocusInteraction.Focus::class.java)
         }
 
-        rule.runOnIdle {
-            otherFocusRequester.requestFocus()
-        }
+        rule.runOnIdle { otherFocusRequester.requestFocus() }
 
         rule.runOnIdle {
             assertThat(interactions).hasSize(2)
             assertThat(interactions.first()).isInstanceOf(FocusInteraction.Focus::class.java)
-            assertThat(interactions[1])
-                .isInstanceOf(FocusInteraction.Unfocus::class.java)
+            assertThat(interactions[1]).isInstanceOf(FocusInteraction.Unfocus::class.java)
             assertThat((interactions[1] as FocusInteraction.Unfocus).focus)
                 .isEqualTo(interactions[0])
         }
@@ -351,27 +301,21 @@ class FocusableTest {
             Box {
                 BasicText(
                     "focusableText",
-                    modifier = Modifier
-                        .testTag(focusTag)
-                        .focusRequester(focusRequester)
-                        .focusable(enabled = enabled, interactionSource)
+                    modifier =
+                        Modifier.testTag(focusTag)
+                            .focusRequester(focusRequester)
+                            .focusable(enabled = enabled, interactionSource),
                 )
             }
         }
 
         val interactions = mutableListOf<Interaction>()
 
-        scope.launch {
-            interactionSource.interactions.collect { interactions.add(it) }
-        }
+        scope.launch { interactionSource.interactions.collect { interactions.add(it) } }
 
-        rule.runOnIdle {
-            assertThat(interactions).isEmpty()
-        }
+        rule.runOnIdle { assertThat(interactions).isEmpty() }
 
-        rule.runOnIdle {
-            focusRequester.requestFocus()
-        }
+        rule.runOnIdle { focusRequester.requestFocus() }
 
         rule.runOnIdle {
             assertThat(interactions).hasSize(1)
@@ -379,9 +323,7 @@ class FocusableTest {
         }
 
         // Make focusable disabled, Interaction should be gone
-        rule.runOnIdle {
-            enabled = false
-        }
+        rule.runOnIdle { enabled = false }
 
         rule.runOnIdle {
             assertThat(interactions).hasSize(2)
@@ -393,7 +335,59 @@ class FocusableTest {
     }
 
     @Test
-    fun focusable_interactionSource_resetWhenDisposed() {
+    fun focusable_interactionSource_resetWhenModifierDetached() {
+        val interactionSource = MutableInteractionSource()
+        val focusRequester = FocusRequester()
+        var emitFocusableNode by mutableStateOf(true)
+
+        lateinit var scope: CoroutineScope
+
+        rule.setFocusableContent {
+            scope = rememberCoroutineScope()
+            Box {
+                BasicText(
+                    "focusableText",
+                    modifier =
+                        Modifier.testTag(focusTag)
+                            .focusRequester(focusRequester)
+                            .then(
+                                if (emitFocusableNode) {
+                                    Modifier.focusable(interactionSource = interactionSource)
+                                } else {
+                                    Modifier
+                                }
+                            ),
+                )
+            }
+        }
+
+        val interactions = mutableListOf<Interaction>()
+
+        scope.launch { interactionSource.interactions.collect { interactions.add(it) } }
+
+        rule.runOnIdle { assertThat(interactions).isEmpty() }
+
+        rule.runOnIdle { focusRequester.requestFocus() }
+
+        rule.runOnIdle {
+            assertThat(interactions).hasSize(1)
+            assertThat(interactions.first()).isInstanceOf(FocusInteraction.Focus::class.java)
+        }
+
+        // Dispose focusable, Interaction should be gone
+        rule.runOnIdle { emitFocusableNode = false }
+
+        rule.runOnIdle {
+            assertThat(interactions).hasSize(2)
+            assertThat(interactions.first()).isInstanceOf(FocusInteraction.Focus::class.java)
+            assertThat(interactions[1]).isInstanceOf(FocusInteraction.Unfocus::class.java)
+            assertThat((interactions[1] as FocusInteraction.Unfocus).focus)
+                .isEqualTo(interactions[0])
+        }
+    }
+
+    @Test
+    fun focusable_interactionSource_resetWhenLayoutDetached() {
         val interactionSource = MutableInteractionSource()
         val focusRequester = FocusRequester()
         var emitFocusableText by mutableStateOf(true)
@@ -406,10 +400,10 @@ class FocusableTest {
                 if (emitFocusableText) {
                     BasicText(
                         "focusableText",
-                        modifier = Modifier
-                            .testTag(focusTag)
-                            .focusRequester(focusRequester)
-                            .focusable(interactionSource = interactionSource)
+                        modifier =
+                            Modifier.testTag(focusTag)
+                                .focusRequester(focusRequester)
+                                .focusable(interactionSource = interactionSource),
                     )
                 }
             }
@@ -417,27 +411,19 @@ class FocusableTest {
 
         val interactions = mutableListOf<Interaction>()
 
-        scope.launch {
-            interactionSource.interactions.collect { interactions.add(it) }
-        }
+        scope.launch { interactionSource.interactions.collect { interactions.add(it) } }
 
-        rule.runOnIdle {
-            assertThat(interactions).isEmpty()
-        }
+        rule.runOnIdle { assertThat(interactions).isEmpty() }
 
-        rule.runOnIdle {
-            focusRequester.requestFocus()
-        }
+        rule.runOnIdle { focusRequester.requestFocus() }
 
         rule.runOnIdle {
             assertThat(interactions).hasSize(1)
             assertThat(interactions.first()).isInstanceOf(FocusInteraction.Focus::class.java)
         }
 
-        // Dispose focusable, Interaction should be gone
-        rule.runOnIdle {
-            emitFocusableText = false
-        }
+        // Dispose the layout node, Interaction should be gone
+        rule.runOnIdle { emitFocusableText = false }
 
         rule.runOnIdle {
             assertThat(interactions).hasSize(2)
@@ -453,32 +439,24 @@ class FocusableTest {
         // Arrange.
         val focusRequester = FocusRequester()
         var onPinInvoked = false
-        val pinnableContainer = object : PinnableContainer {
-            override fun pin(): PinnedHandle {
-                onPinInvoked = true
-                return PinnedHandle {}
+        val pinnableContainer =
+            object : PinnableContainer {
+                override fun pin(): PinnedHandle {
+                    onPinInvoked = true
+                    return PinnedHandle {}
+                }
             }
-        }
         rule.setFocusableContent {
             CompositionLocalProvider(LocalPinnableContainer provides pinnableContainer) {
-                Box(
-                    Modifier
-                        .size(100.dp)
-                        .focusRequester(focusRequester)
-                        .focusable()
-                )
+                Box(Modifier.size(100.dp).focusRequester(focusRequester).focusable())
             }
         }
 
         // Act.
-        rule.runOnUiThread {
-            focusRequester.requestFocus()
-        }
+        rule.runOnUiThread { focusRequester.requestFocus() }
 
         // Assert.
-        rule.runOnIdle {
-            assertThat(onPinInvoked).isTrue()
-        }
+        rule.runOnIdle { assertThat(onPinInvoked).isTrue() }
     }
 
     @Test
@@ -487,41 +465,28 @@ class FocusableTest {
         val focusRequester = FocusRequester()
         val focusRequester2 = FocusRequester()
         var onUnpinInvoked = false
-        val pinnableContainer = object : PinnableContainer {
-            override fun pin(): PinnedHandle {
-                return PinnedHandle { onUnpinInvoked = true }
+        val pinnableContainer =
+            object : PinnableContainer {
+                override fun pin(): PinnedHandle {
+                    return PinnedHandle { onUnpinInvoked = true }
+                }
             }
-        }
         rule.setFocusableContent {
             CompositionLocalProvider(LocalPinnableContainer provides pinnableContainer) {
-                Box(
-                    Modifier
-                        .size(100.dp)
-                        .focusRequester(focusRequester)
-                        .focusable()
-                )
+                Box(Modifier.size(100.dp).focusRequester(focusRequester).focusable())
             }
-            Box(
-                Modifier
-                    .size(100.dp)
-                    .focusRequester(focusRequester2)
-                    .focusable()
-            )
+            Box(Modifier.size(100.dp).focusRequester(focusRequester2).focusable())
         }
 
         // Act.
-        rule.runOnUiThread {
-            focusRequester.requestFocus()
-        }
+        rule.runOnUiThread { focusRequester.requestFocus() }
         rule.runOnIdle {
             assertThat(onUnpinInvoked).isFalse()
             focusRequester2.requestFocus()
         }
 
         // Assert.
-        rule.runOnIdle {
-            assertThat(onUnpinInvoked).isTrue()
-        }
+        rule.runOnIdle { assertThat(onUnpinInvoked).isTrue() }
     }
 
     @Test
@@ -530,40 +495,36 @@ class FocusableTest {
         assertThat(modifier.nameFallback).isEqualTo("focusable")
         assertThat(modifier.valueOverride).isNull()
         assertThat(modifier.inspectableElements.map { it.name }.asIterable())
-            .containsExactly(
-                "enabled",
-                "interactionSource"
-            )
+            .containsExactly("enabled", "interactionSource")
     }
 
     @Test
     fun focusable_equality() {
         val interactionSource = MutableInteractionSource()
         assertModifierIsPure { toggleInput ->
-            Modifier.focusable(
-                enabled = toggleInput,
-                interactionSource = interactionSource,
-            )
+            Modifier.focusable(enabled = toggleInput, interactionSource = interactionSource)
         }
     }
 
+    @Suppress("DEPRECATION") // b/376080744
     @Test
     fun focusable_requestsBringIntoView_whenFocused() {
         // Arrange.
         val requestedRects = mutableListOf<Rect?>()
-        val bringIntoViewResponder = object : BringIntoViewResponder {
-            override fun calculateRectForParent(localRect: Rect): Rect = localRect
-            override suspend fun bringChildIntoView(localRect: () -> Rect?) {
-                requestedRects += localRect()
+        val bringIntoViewResponder =
+            object : androidx.compose.foundation.relocation.BringIntoViewResponder {
+                override fun calculateRectForParent(localRect: Rect): Rect = localRect
+
+                override suspend fun bringChildIntoView(localRect: () -> Rect?) {
+                    requestedRects += localRect()
+                }
             }
-        }
         val focusRequester = FocusRequester()
 
         rule.setFocusableContent {
             with(rule.density) {
                 Box(
-                    Modifier
-                        .bringIntoViewResponder(bringIntoViewResponder)
+                    Modifier.bringIntoViewResponder(bringIntoViewResponder)
                         .focusRequester(focusRequester)
                         .focusable()
                         // Needs a non-zero size.
@@ -572,20 +533,17 @@ class FocusableTest {
             }
         }
 
-        rule.runOnIdle {
-            assertThat(requestedRects).isEmpty()
-        }
+        rule.runOnIdle { assertThat(requestedRects).isEmpty() }
 
         // Act.
-        rule.runOnIdle {
-            focusRequester.requestFocus()
-        }
+        rule.runOnIdle { focusRequester.requestFocus() }
 
         // Assert.
         rule.runOnIdle {
             assertThat(requestedRects).containsExactly(Rect(Offset.Zero, Size(1f, 1f)))
         }
     }
+
     // This test also verifies that the internal API autoInvalidateRemovedNode()
     // is called when a modifier node is disposed.
     @Test
@@ -599,18 +557,11 @@ class FocusableTest {
             state = rememberLazyListState()
             coroutineScope = rememberCoroutineScope()
             LazyRow(
-                modifier = Modifier
-                    .requiredSize(100.dp)
-                    .onFocusChanged { lazyRowHasFocus = it.hasFocus },
-                state = state
+                modifier =
+                    Modifier.requiredSize(100.dp).onFocusChanged { lazyRowHasFocus = it.hasFocus },
+                state = state,
             ) {
-                items(items.size) {
-                    Box(
-                        Modifier
-                            .requiredSize(10.dp)
-                            .testTag("$it")
-                            .focusable())
-                }
+                items(items.size) { Box(Modifier.requiredSize(10.dp).testTag("$it").focusable()) }
             }
         }
         rule.runOnIdle { coroutineScope.launch { state.scrollToItem(19) } }
@@ -620,9 +571,7 @@ class FocusableTest {
         rule.runOnIdle { items = (1..11).toList() }
 
         // Assert.
-        rule.runOnIdle {
-            assertThat(lazyRowHasFocus).isFalse()
-        }
+        rule.runOnIdle { assertThat(lazyRowHasFocus).isFalse() }
     }
 
     @Test
@@ -632,20 +581,15 @@ class FocusableTest {
         var itemVisible by mutableStateOf(true)
         rule.setFocusableContent {
             SubcomposeLayout(
-                modifier = Modifier
-                    .requiredSize(100.dp)
-                    .onFocusChanged { hasFocus = it.hasFocus },
+                modifier = Modifier.requiredSize(100.dp).onFocusChanged { hasFocus = it.hasFocus }
             ) { constraints ->
-                val measurable = if (itemVisible) {
-                    subcompose(Unit) {
-                        Box(
-                            Modifier
-                                .requiredSize(10.dp)
-                                .testTag("0")
-                                .focusable()
-                        )
-                    }.single()
-                } else null
+                val measurable =
+                    if (itemVisible) {
+                        subcompose(Unit) {
+                                Box(Modifier.requiredSize(10.dp).testTag("0").focusable())
+                            }
+                            .single()
+                    } else null
                 val placeable = measurable?.measure(constraints)
                 layout(constraints.minWidth, constraints.minHeight) {
                     placeable?.place(IntOffset.Zero)
@@ -658,9 +602,7 @@ class FocusableTest {
         rule.runOnIdle { itemVisible = false }
 
         // Assert.
-        rule.runOnIdle {
-            assertThat(hasFocus).isFalse()
-        }
+        rule.runOnIdle { assertThat(hasFocus).isFalse() }
     }
 
     @Test
@@ -668,35 +610,30 @@ class FocusableTest {
         // Arrange.
         val focusRequester = FocusRequester()
         var container1Pinned = false
-        val pinnableContainer1 = object : PinnableContainer {
-            override fun pin(): PinnedHandle {
-                container1Pinned = true
-                return PinnedHandle { container1Pinned = false }
+        val pinnableContainer1 =
+            object : PinnableContainer {
+                override fun pin(): PinnedHandle {
+                    container1Pinned = true
+                    return PinnedHandle { container1Pinned = false }
+                }
             }
-        }
         var container2Pinned = false
-        val pinnableContainer2 = object : PinnableContainer {
-            override fun pin(): PinnedHandle {
-                container2Pinned = true
-                return PinnedHandle { container2Pinned = false }
+        val pinnableContainer2 =
+            object : PinnableContainer {
+                override fun pin(): PinnedHandle {
+                    container2Pinned = true
+                    return PinnedHandle { container2Pinned = false }
+                }
             }
-        }
         var pinnableContainer by mutableStateOf<PinnableContainer>(pinnableContainer1)
         rule.setFocusableContent {
             CompositionLocalProvider(LocalPinnableContainer provides pinnableContainer) {
-                Box(
-                    Modifier
-                        .size(100.dp)
-                        .focusRequester(focusRequester)
-                        .focusable()
-                )
+                Box(Modifier.size(100.dp).focusRequester(focusRequester).focusable())
             }
         }
 
         // Act.
-        rule.runOnUiThread {
-            focusRequester.requestFocus()
-        }
+        rule.runOnUiThread { focusRequester.requestFocus() }
         rule.runOnIdle {
             assertThat(container1Pinned).isTrue()
             assertThat(container2Pinned).isFalse()
@@ -720,11 +657,11 @@ class FocusableTest {
             ReusableContent(key) {
                 BasicText(
                     "focusableText",
-                    modifier = Modifier
-                        .testTag(focusTag)
-                        .focusRequester(focusRequester)
-                        .onFocusEvent { state = it }
-                        .focusable()
+                    modifier =
+                        Modifier.testTag(focusTag)
+                            .focusRequester(focusRequester)
+                            .onFocusEvent { state = it }
+                            .focusable(),
                 )
             }
         }
@@ -732,20 +669,14 @@ class FocusableTest {
             focusRequester.requestFocus()
             assertThat(state.isFocused).isTrue()
         }
-        rule.onNodeWithTag(focusTag)
-            .assertIsFocused()
+        rule.onNodeWithTag(focusTag).assertIsFocused()
 
         // Act.
-        rule.runOnIdle {
-            key = 1
-        }
+        rule.runOnIdle { key = 1 }
 
         // Assert.
-        rule.runOnIdle {
-            assertThat(state.isFocused).isFalse()
-        }
-        rule.onNodeWithTag(focusTag)
-            .assertIsNotFocused()
+        rule.runOnIdle { assertThat(state.isFocused).isFalse() }
+        rule.onNodeWithTag(focusTag).assertIsNotFocused()
     }
 
     @Test
@@ -757,8 +688,7 @@ class FocusableTest {
         lateinit var scope: CoroutineScope
         val content = movableContentOf {
             Box(
-                Modifier
-                    .testTag(focusTag)
+                Modifier.testTag(focusTag)
                     .size(5.dp)
                     .focusRequester(focusRequester)
                     .onFocusEvent { state = it }
@@ -769,25 +699,17 @@ class FocusableTest {
         rule.setFocusableContent {
             scope = rememberCoroutineScope()
             if (moveContent) {
-                Box(Modifier.size(5.dp)) {
-                    content()
-                }
+                Box(Modifier.size(5.dp)) { content() }
             } else {
-                Box(Modifier.size(10.dp)) {
-                    content()
-                }
+                Box(Modifier.size(10.dp)) { content() }
             }
         }
 
         val interactions = mutableListOf<Interaction>()
 
-        scope.launch {
-            interactionSource.interactions.collect { interactions.add(it) }
-        }
+        scope.launch { interactionSource.interactions.collect { interactions.add(it) } }
 
-        rule.runOnIdle {
-            assertThat(interactions).isEmpty()
-        }
+        rule.runOnIdle { assertThat(interactions).isEmpty() }
 
         rule.runOnIdle {
             focusRequester.requestFocus() // request focus
@@ -799,19 +721,15 @@ class FocusableTest {
             assertThat(interactions.first()).isInstanceOf(FocusInteraction.Focus::class.java)
         }
 
-        rule.onNodeWithTag(focusTag)
-            .assertIsFocused()
+        rule.onNodeWithTag(focusTag).assertIsFocused()
 
         rule.runOnIdle {
             moveContent = true // moving content
         }
 
         // Assert that focus is reset
-        rule.runOnIdle {
-            assertThat(state.isFocused).isFalse()
-        }
-        rule.onNodeWithTag(focusTag)
-            .assertIsNotFocused()
+        rule.runOnIdle { assertThat(state.isFocused).isFalse() }
+        rule.onNodeWithTag(focusTag).assertIsNotFocused()
 
         rule.runOnIdle {
             assertThat(interactions.first()).isInstanceOf(FocusInteraction.Focus::class.java)
@@ -827,6 +745,191 @@ class FocusableTest {
             assertThat(interactions.first()).isInstanceOf(FocusInteraction.Focus::class.java)
             assertThat(interactions[1]).isInstanceOf(FocusInteraction.Unfocus::class.java)
             assertThat(interactions[2]).isInstanceOf(FocusInteraction.Focus::class.java)
+        }
+    }
+
+    @Test
+    fun clickingOutside_clearsFocus() =
+        withFlags(isClearFocusOnPointerDownEnabled = true) {
+            rule.setFocusableContent {
+                Column {
+                    Spacer(Modifier.size(32.dp).testTag("emptySpace"))
+                    Spacer(Modifier.size(32.dp).testTag(focusTag).focusable())
+                }
+            }
+
+            rule.onNodeWithTag(focusTag).requestFocus()
+
+            rule.onNodeWithTag(focusTag).assertIsFocused()
+
+            rule.onNodeWithTag("emptySpace").performMouseInput { click() }
+
+            rule.onNodeWithTag(focusTag).assertIsNotFocused()
+        }
+
+    @Test
+    fun clickingOutside_doesNotClearFocusWithViewTagDisabled() =
+        withFlags(isClearFocusOnPointerDownEnabled = true) {
+            lateinit var view: View
+
+            rule.setFocusableContent {
+                view = LocalView.current
+                Column {
+                    Spacer(Modifier.size(32.dp).testTag("emptySpace"))
+                    Spacer(Modifier.size(32.dp).testTag(focusTag).focusable())
+                }
+            }
+
+            (view.parent as AbstractComposeView).isClearFocusOnPointerDownEnabled = false
+
+            rule.onNodeWithTag(focusTag).requestFocus()
+
+            rule.onNodeWithTag(focusTag).assertIsFocused()
+
+            rule.onNodeWithTag("emptySpace").performMouseInput { click() }
+
+            rule.onNodeWithTag(focusTag).assertIsFocused()
+        }
+
+    @Test
+    fun clickingOnClickable_clearsFocus() =
+        withFlags(isClearFocusOnPointerDownEnabled = true) {
+            var wasClickableSpaceClicked = false
+
+            rule.setFocusableContent {
+                Column {
+                    Spacer(
+                        Modifier.size(32.dp).testTag("clickableSpace").clickable {
+                            wasClickableSpaceClicked = true
+                        }
+                    )
+                    Spacer(Modifier.size(32.dp).testTag(focusTag).focusable())
+                }
+            }
+
+            rule.onNodeWithTag(focusTag).requestFocus()
+
+            rule.onNodeWithTag(focusTag).assertIsFocused()
+
+            rule.onNodeWithTag("clickableSpace").performMouseInput { click() }
+
+            rule.onNodeWithTag(focusTag).assertIsNotFocused()
+            assertThat(wasClickableSpaceClicked).isTrue()
+        }
+
+    @Test
+    fun clickingOnClickableFocusable_reassignsFocus() {
+        val focusRequesterClickableSpace = FocusRequester()
+        var wasClickableSpaceClicked = false
+
+        rule.setFocusableContent {
+            Column {
+                Spacer(
+                    Modifier.size(32.dp)
+                        .testTag("clickableSpace")
+                        .focusRequester(focusRequesterClickableSpace)
+                        .focusProperties { canFocus = true }
+                        .clickable {
+                            wasClickableSpaceClicked = true
+                            focusRequesterClickableSpace.requestFocus()
+                        }
+                )
+                Spacer(Modifier.size(32.dp).testTag(focusTag).focusable())
+            }
+        }
+
+        rule.onNodeWithTag(focusTag).requestFocus()
+
+        rule.onNodeWithTag(focusTag).assertIsFocused()
+
+        rule.onNodeWithTag("clickableSpace").performMouseInput { click() }
+
+        rule.onNodeWithTag(focusTag).assertIsNotFocused()
+        assertThat(wasClickableSpaceClicked).isTrue()
+        rule.onNodeWithTag("clickableSpace").assertIsFocused()
+    }
+
+    @Test
+    fun clickingOnAndroidViewThroughCompose_clearsFocus() =
+        withFlags(isClearFocusOnPointerDownEnabled = true) {
+            val focusRequester = FocusRequester()
+            var wasClickableSpaceClicked = false
+            lateinit var density: Density
+
+            rule.setFocusableContent {
+                density = LocalDensity.current
+                Box(Modifier.testTag("box")) {
+                    AndroidView(
+                        factory = { context ->
+                            FrameLayout(context).apply {
+                                addView(
+                                    ComposeView(context).apply {
+                                        setContent {
+                                            Column {
+                                                Spacer(
+                                                    Modifier.size(64.dp)
+                                                        .testTag("clickableSpace")
+                                                        .clickable {
+                                                            wasClickableSpaceClicked = true
+                                                        }
+                                                )
+                                                Spacer(Modifier.size(64.dp))
+                                            }
+                                        }
+                                    },
+                                    FrameLayout.LayoutParams(
+                                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                                    ),
+                                )
+                                addView(
+                                    ComposeView(context).apply {
+                                        setContent {
+                                            Column {
+                                                Spacer(Modifier.size(64.dp))
+                                                Spacer(
+                                                    Modifier.size(64.dp)
+                                                        .testTag(focusTag)
+                                                        .focusRequester(focusRequester)
+                                                        .focusable()
+                                                )
+                                            }
+                                        }
+                                    },
+                                    FrameLayout.LayoutParams(
+                                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                                    ),
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+
+            rule.onNodeWithTag(focusTag).requestFocus()
+
+            rule.onNodeWithTag(focusTag).assertIsFocused()
+
+            rule.onNodeWithTag("box").performMouseInput {
+                click(with(density) { Offset(32.dp.toPx(), 32.dp.toPx()) })
+            }
+
+            rule.onNodeWithTag(focusTag).assertIsNotFocused()
+            assertThat(wasClickableSpaceClicked).isTrue()
+        }
+
+    @OptIn(ExperimentalComposeUiApi::class)
+    private inline fun withFlags(
+        isClearFocusOnPointerDownEnabled: Boolean = ComposeUiFlags.isClearFocusOnPointerDownEnabled,
+        block: () -> Unit,
+    ) {
+        val defaultValue = ComposeUiFlags.isClearFocusOnPointerDownEnabled
+        try {
+            ComposeUiFlags.isClearFocusOnPointerDownEnabled = isClearFocusOnPointerDownEnabled
+            block()
+        } finally {
+            ComposeUiFlags.isClearFocusOnPointerDownEnabled = defaultValue
         }
     }
 }

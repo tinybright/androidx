@@ -17,6 +17,7 @@
 package androidx.room
 
 import androidx.room.coroutines.ConnectionPool
+import androidx.room.coroutines.PassthroughConnectionPool
 import androidx.room.coroutines.newConnectionPool
 import androidx.room.coroutines.newSingleConnectionPool
 import androidx.sqlite.SQLiteDriver
@@ -29,25 +30,26 @@ internal actual class RoomConnectionManager(
 ) : BaseRoomConnectionManager() {
 
     private val connectionPool: ConnectionPool =
-        if (configuration.name == null) {
-            // An in-memory database must use a single connection pool.
-            newSingleConnectionPool(
-                driver = DriverWrapper(sqliteDriver),
-                fileName = ":memory:"
+        if (sqliteDriver.hasConnectionPool) {
+            // If the driver already has a connection pool then use a pass-through pool.
+            PassthroughConnectionPool(
+                driver = sqliteDriver,
+                fileName = configuration.name ?: ":memory:",
             )
+        } else if (configuration.name == null) {
+            // An in-memory database must use a single connection pool.
+            newSingleConnectionPool(driver = DriverWrapper(sqliteDriver), fileName = ":memory:")
         } else {
             newConnectionPool(
                 driver = DriverWrapper(sqliteDriver),
                 fileName = configuration.name,
                 maxNumOfReaders = configuration.journalMode.getMaxNumberOfReaders(),
-                maxNumOfWriters = configuration.journalMode.getMaxNumberOfWriters()
+                maxNumOfWriters = configuration.journalMode.getMaxNumberOfWriters(),
             )
         }
 
-    override suspend fun <R> useConnection(
-        isReadOnly: Boolean,
-        block: suspend (Transactor) -> R
-    ) = connectionPool.useConnection(isReadOnly, block)
+    override suspend fun <R> useConnection(isReadOnly: Boolean, block: suspend (Transactor) -> R) =
+        connectionPool.useConnection(isReadOnly, block)
 
     fun close() {
         connectionPool.close()

@@ -29,9 +29,7 @@ import kotlin.reflect.cast
  * API signatures after library desugaring. See b/203472665
  */
 @SuppressLint("BanUncheckedReflection")
-internal class PredicateAdapter(
-    private val loader: ClassLoader
-) {
+internal class PredicateAdapter(private val loader: ClassLoader) {
     internal fun predicateClassOrNull(): Class<*>? {
         return try {
             predicateClassOrThrow()
@@ -45,23 +43,16 @@ internal class PredicateAdapter(
     }
 
     fun <T : Any> buildPredicate(clazz: KClass<T>, predicate: (T) -> Boolean): Any {
-        val predicateHandler = PredicateStubHandler(
-            clazz,
-            predicate
-        )
+        val predicateHandler = PredicateStubHandler(clazz, predicate)
         return Proxy.newProxyInstance(loader, arrayOf(predicateClassOrThrow()), predicateHandler)
     }
 
     fun <T : Any, U : Any> buildPairPredicate(
         firstClazz: KClass<T>,
         secondClazz: KClass<U>,
-        predicate: (T, U) -> Boolean
+        predicate: (T, U) -> Boolean,
     ): Any {
-        val predicateHandler = PairPredicateStubHandler(
-            firstClazz,
-            secondClazz,
-            predicate
-        )
+        val predicateHandler = PairPredicateStubHandler(firstClazz, secondClazz, predicate)
 
         return Proxy.newProxyInstance(loader, arrayOf(predicateClassOrThrow()), predicateHandler)
     }
@@ -111,7 +102,7 @@ internal class PredicateAdapter(
 
     private class PredicateStubHandler<T : Any>(
         clazzT: KClass<T>,
-        private val predicate: (T) -> Boolean
+        private val predicate: (T) -> Boolean,
     ) : BaseHandler<T>(clazzT) {
         override fun invokeTest(obj: Any, parameter: T): Boolean {
             return predicate(parameter)
@@ -129,7 +120,7 @@ internal class PredicateAdapter(
     private class PairPredicateStubHandler<T : Any, U : Any>(
         private val clazzT: KClass<T>,
         private val clazzU: KClass<U>,
-        private val predicate: (T, U) -> Boolean
+        private val predicate: (T, U) -> Boolean,
     ) : BaseHandler<Pair<*, *>>(Pair::class) {
         override fun invokeTest(obj: Any, parameter: Pair<*, *>): Boolean {
             val t = clazzT.cast(parameter.first)

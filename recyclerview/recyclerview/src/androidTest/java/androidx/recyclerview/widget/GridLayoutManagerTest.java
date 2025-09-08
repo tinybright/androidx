@@ -46,7 +46,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.test.annotation.UiThreadTest;
@@ -55,6 +54,7 @@ import androidx.test.filters.LargeTest;
 import androidx.test.filters.SdkSuppress;
 
 import org.hamcrest.CoreMatchers;
+import org.jspecify.annotations.NonNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -976,7 +976,6 @@ public class GridLayoutManagerTest extends BaseGridLayoutManagerTest {
     }
 
     @Test
-    @SdkSuppress(minSdkVersion = Build.VERSION_CODES.M)
     public void onInitializeAccessibilityNodeInfo_addActionScrollToPosition_addedWithNonEmptyList()
             throws Throwable {
         final RecyclerView recyclerView = setupBasic(new Config(3, 1));
@@ -1727,11 +1726,10 @@ public class GridLayoutManagerTest extends BaseGridLayoutManagerTest {
     }
 
     @SuppressWarnings("ConstantConditions")
-    @NonNull
     /**
      * Returns a map of adapter position -> span index from GLM children
      */
-    private Map<Integer, Integer> getPositionToSpanIndexMapping() {
+    private @NonNull Map<Integer, Integer> getPositionToSpanIndexMapping() {
         Map<Integer, Integer> result = new HashMap<>();
         for (int i = 0; i < mGlm.getChildCount(); i++) {
             TestViewHolder viewHolder = (TestViewHolder) mRecyclerView.getChildViewHolder(

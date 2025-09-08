@@ -55,12 +55,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun DecorationBoxDemos() {
-    Column(
-        Modifier
-            .imePadding()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-    ) {
+    Column(Modifier.imePadding().verticalScroll(rememberScrollState()).padding(16.dp)) {
         TagLine(tag = "Simple Decoration w/ Label")
         SimpleDecorationWithLabel()
 
@@ -85,16 +80,14 @@ fun SimpleDecorationWithLabel() {
                 Spacer(modifier = Modifier.height(4.dp))
                 it()
             }
-        }
+        },
     )
 }
 
 @Composable
 fun OutlinedBasicTextField() {
     val state = remember { TextFieldState() }
-    val cursorColor by TextFieldDefaults
-        .outlinedTextFieldColors()
-        .cursorColor(isError = false)
+    val cursorColor by TextFieldDefaults.outlinedTextFieldColors().cursorColor(isError = false)
     BasicTextField(
         state = state,
         modifier = Modifier.fillMaxWidth(),
@@ -114,9 +107,9 @@ fun OutlinedBasicTextField() {
                 enabled = true,
                 isError = false,
                 interactionSource = remember { MutableInteractionSource() },
-                colors = TextFieldDefaults.outlinedTextFieldColors()
+                colors = TextFieldDefaults.outlinedTextFieldColors(),
             )
-        }
+        },
     )
 }
 
@@ -129,12 +122,12 @@ fun NoInnerTextField(modifier: Modifier = Modifier) {
         textStyle = TextStyle(fontSize = 24.sp),
         decorator = {
             Box(
-                Modifier
-                    .fillMaxWidth()
+                Modifier.fillMaxWidth()
                     .border(1.dp, Color.Blue, RoundedCornerShape(8.dp))
-                    .padding(8.dp)) {
+                    .padding(8.dp)
+            ) {
                 Text("${state.text}", Modifier.align(Alignment.Center))
             }
-        }
+        },
     )
 }

@@ -32,17 +32,13 @@ import androidx.tv.material3.Text
 @Sampled
 @Composable
 fun ButtonSample() {
-    Button(onClick = { }) {
-        Text("Button")
-    }
+    Button(onClick = {}) { Text("Button") }
 }
 
 @Sampled
 @Composable
 fun OutlinedButtonSample() {
-    OutlinedButton(onClick = {}) {
-        Text("Outlined Button")
-    }
+    OutlinedButton(onClick = {}) { Text("Outlined Button") }
 }
 
 @Sampled
@@ -50,12 +46,12 @@ fun OutlinedButtonSample() {
 fun LikeButtonSample() {
     Button(
         onClick = { /* Do something! */ },
-        contentPadding = ButtonDefaults.ButtonWithIconContentPadding
+        contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
     ) {
         Icon(
             Icons.Filled.Favorite,
             contentDescription = "Localized description",
-            modifier = Modifier.size(ButtonDefaults.IconSize)
+            modifier = Modifier.size(ButtonDefaults.IconSize),
         )
         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
         Text("Like")

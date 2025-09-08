@@ -54,10 +54,11 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterialApi::class)
 fun ModalBottomSheetSample() {
     var skipHalfExpanded by remember { mutableStateOf(false) }
-    val state = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = skipHalfExpanded
-    )
+    val state =
+        rememberModalBottomSheetState(
+            initialValue = ModalBottomSheetValue.Hidden,
+            skipHalfExpanded = skipHalfExpanded,
+        )
     val scope = rememberCoroutineScope()
     ModalBottomSheetLayout(
         sheetState = state,
@@ -69,23 +70,23 @@ fun ModalBottomSheetSample() {
                         icon = {
                             Icon(
                                 Icons.Default.Favorite,
-                                contentDescription = "Localized description"
+                                contentDescription = "Localized description",
                             )
-                        }
+                        },
                     )
                 }
             }
-        }
+        },
     ) {
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(
                 Modifier.toggleable(
                     value = skipHalfExpanded,
                     role = Role.Checkbox,
-                    onValueChange = { checked -> skipHalfExpanded = checked }
+                    onValueChange = { checked -> skipHalfExpanded = checked },
                 )
             ) {
                 Checkbox(checked = skipHalfExpanded, onCheckedChange = null)
@@ -93,9 +94,7 @@ fun ModalBottomSheetSample() {
                 Text("Skip Half Expanded State")
             }
             Spacer(Modifier.height(20.dp))
-            Button(onClick = { scope.launch { state.show() } }) {
-                Text("Click to show sheet")
-            }
+            Button(onClick = { scope.launch { state.show() } }) { Text("Click to show sheet") }
         }
     }
 }

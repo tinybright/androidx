@@ -32,33 +32,40 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.filters.SdkSuppress
 import androidx.test.filters.SmallTest
 import com.google.common.truth.Truth
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 
 @SmallTest
 class DragAndDropRequestPermissionTest {
 
-    @Suppress("DEPRECATION")
-    @get:Rule
-    val rule = createAndroidComposeRule<TestActivity>()
+    @get:Rule val rule = createAndroidComposeRule<TestActivity>()
 
-    private lateinit var testNode: TestNode
+    private var testNode: TestNode? = null
+
+    private fun requireTestNode() = requireNotNull(testNode) { "testNode was not initialized" }
+
+    @After
+    fun reset() {
+        testNode = null
+    }
 
     @SdkSuppress(minSdkVersion = 24)
     @Test
     fun asksPermission_ifAllRequirementsAreMet() {
         // setup
-        rule.setContent {
-            Box(Modifier.then(TestElement { testNode = it }))
-        }
-        val event = DragAndDropEvent(
-            DragAndDropTestUtils.makeImageDragEvent(
-            DragEvent.ACTION_DROP,
-            Uri.parse("content://com.example/content.png")
-        ))
+        rule.setContent { Box(Modifier.then(TestElement { testNode = it })) }
+
+        val event =
+            DragAndDropEvent(
+                DragAndDropTestUtils.makeImageDragEvent(
+                    DragEvent.ACTION_DROP,
+                    Uri.parse("content://com.example/content.png"),
+                )
+            )
 
         // act
-        testNode.dragAndDropRequestPermission(event)
+        requireTestNode().dragAndDropRequestPermission(event)
 
         // assert
         Truth.assertThat(rule.activity.requestedDragAndDropPermissions).isNotEmpty()
@@ -68,17 +75,17 @@ class DragAndDropRequestPermissionTest {
     @Test
     fun doesNotAskPermission_ifNoContentUri() {
         // setup
-        rule.setContent {
-            Box(Modifier.then(TestElement { testNode = it }))
-        }
-        val event = DragAndDropEvent(
-            DragAndDropTestUtils.makeImageDragEvent(
-            DragEvent.ACTION_DROP,
-            Uri.parse("file://com.example/content.png")
-        ))
+        rule.setContent { Box(Modifier.then(TestElement { testNode = it })) }
+        val event =
+            DragAndDropEvent(
+                DragAndDropTestUtils.makeImageDragEvent(
+                    DragEvent.ACTION_DROP,
+                    Uri.parse("file://com.example/content.png"),
+                )
+            )
 
         // act
-        testNode.dragAndDropRequestPermission(event)
+        requireTestNode().dragAndDropRequestPermission(event)
 
         // assert
         Truth.assertThat(rule.activity.requestedDragAndDropPermissions).isEmpty()
@@ -94,33 +101,34 @@ class DragAndDropRequestPermissionTest {
                 Box(Modifier.then(TestElement { testNode = it }))
             }
         }
-        val event = DragAndDropEvent(
-            DragAndDropTestUtils.makeImageDragEvent(
-            DragEvent.ACTION_DROP,
-            Uri.parse("file://com.example/content.png")
-        ))
+        val event =
+            DragAndDropEvent(
+                DragAndDropTestUtils.makeImageDragEvent(
+                    DragEvent.ACTION_DROP,
+                    Uri.parse("file://com.example/content.png"),
+                )
+            )
 
         toggle = false
 
         // act
-        testNode.dragAndDropRequestPermission(event)
+        requireTestNode().dragAndDropRequestPermission(event)
 
         // assert
         Truth.assertThat(rule.activity.requestedDragAndDropPermissions).isEmpty()
     }
 
-    private data class TestElement(
-        val onNode: (TestNode) -> Unit
-    ) : ModifierNodeElement<TestNode>() {
+    private data class TestElement(val onNode: (TestNode) -> Unit) :
+        ModifierNodeElement<TestNode>() {
         override fun create(): TestNode = TestNode(onNode)
+
         override fun update(node: TestNode) {
             node.onNode = onNode
         }
     }
 
-    private class TestNode(
-        var onNode: (TestNode) -> Unit
-    ) : Modifier.Node(), CompositionLocalConsumerModifierNode {
+    private class TestNode(var onNode: (TestNode) -> Unit) :
+        Modifier.Node(), CompositionLocalConsumerModifierNode {
 
         override fun onAttach() {
             onNode(this)

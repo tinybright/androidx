@@ -35,7 +35,7 @@ fun ToggleableSample() {
     // content that you want to make toggleable
     Text(
         modifier = Modifier.toggleable(value = checked, onValueChange = { checked = it }),
-        text = checked.toString()
+        text = checked.toString(),
     )
 }
 
@@ -45,13 +45,15 @@ fun TriStateToggleableSample() {
     var checked by remember { mutableStateOf(ToggleableState.Indeterminate) }
     // content that you want to make toggleable
     Text(
-        modifier = Modifier.triStateToggleable(
-            state = checked,
-            onClick = {
-                checked =
-                    if (checked == ToggleableState.On) ToggleableState.Off else ToggleableState.On
-            }
-        ),
-        text = checked.toString()
+        modifier =
+            Modifier.triStateToggleable(
+                state = checked,
+                onClick = {
+                    checked =
+                        if (checked == ToggleableState.On) ToggleableState.Off
+                        else ToggleableState.On
+                },
+            ),
+        text = checked.toString(),
     )
 }

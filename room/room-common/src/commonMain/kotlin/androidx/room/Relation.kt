@@ -46,12 +46,11 @@ import kotlin.reflect.KClass
  * }
  * ```
  *
- * For a one-to-many or many-to-many relationship, the type of the field annotated with
- * `Relation` must be a [java.util.List] or [java.util.Set].
+ * For a one-to-many or many-to-many relationship, the type of the field annotated with `Relation`
+ * must be a [java.util.List] or [java.util.Set].
  *
- * By default, the [Entity] type is inferred from the return type.
- * If you would like to return a different object, you can specify the [entity] property
- * in the annotation.
+ * By default, the [Entity] type is inferred from the return type. If you would like to return a
+ * different object, you can specify the [entity] property in the annotation.
  *
  * ```
  * data class Album (
@@ -78,13 +77,12 @@ import kotlin.reflect.KClass
  * }
  * ```
  *
- * In the example above, `SongNameAndId` is a regular POJO but all of fields are fetched
- * from the `entity` defined in the `@Relation` annotation _Song_.
- * `SongNameAndId` could also define its own relations all of which would also be fetched
- * automatically.
+ * In the example above, `SongNameAndId` is a regular POJO but all of fields are fetched from the
+ * `entity` defined in the `@Relation` annotation _Song_. `SongNameAndId` could also define its own
+ * relations all of which would also be fetched automatically.
  *
- * If you would like to specify which columns are fetched from the child [Entity], you can
- * use [projection] property in the `Relation` annotation.
+ * If you would like to specify which columns are fetched from the child [Entity], you can use
+ * [projection] property in the `Relation` annotation.
  *
  * ```
  * data class AlbumAndAllSongs (
@@ -102,12 +100,12 @@ import kotlin.reflect.KClass
  * If the relationship is defined by an associative table (also know as junction table) then you can
  * use [associateBy] to specify it. This is useful for fetching many-to-many relations.
  *
- * Note that `@Relation` annotation can be used only in POJO classes, an [Entity] class
- * cannot have relations. This is a design decision to avoid common pitfalls in [Entity]
- * setups. You can read more about it in the main
+ * Note that `@Relation` annotation can be used only in POJO classes, an [Entity] class cannot have
+ * relations. This is a design decision to avoid common pitfalls in [Entity] setups. You can read
+ * more about it in the main
  * [Room documentation](https://developer.android.com/training/data-storage/room/referencing-data#understand-no-object-references).
- * When loading data, you can simply work around this limitation by creating
- * POJO classes that extend the [Entity].
+ * When loading data, you can simply work around this limitation by creating POJO classes that
+ * extend the [Entity].
  *
  * @see [Junction]
  */
@@ -120,14 +118,14 @@ public annotation class Relation(
      *
      * @return The entity or view to fetch from. By default, inherited from the return type.
      */
-    val entity: KClass<*> = Any::class,
+    @Suppress("KotlinDefaultParameterOrder") val entity: KClass<*> = Any::class,
 
     /**
      * Reference column in the parent POJO.
      *
      * In a one-to-one or one-to-many relation, this value will be matched against the column
-     * defined in [entityColumn]. In a many-to-many using [associateBy] then
-     * this value will be matched against the [Junction.parentColumn]
+     * defined in [entityColumn]. In a many-to-many using [associateBy] then this value will be
+     * matched against the [Junction.parentColumn]
      *
      * @return The column reference in the parent object.
      */
@@ -137,8 +135,8 @@ public annotation class Relation(
      * The column to match in the [entity].
      *
      * In a one-to-one or one-to-many relation, this value will be matched against the column
-     * defined in [parentColumn]. In a many-to-many using [associateBy] then
-     * this value will be matched against the [Junction.entityColumn].
+     * defined in [parentColumn]. In a many-to-many using [associateBy] then this value will be
+     * matched against the [Junction.entityColumn].
      */
     val entityColumn: String,
 
@@ -147,8 +145,7 @@ public annotation class Relation(
      * fetching the relating entities.
      *
      * @return The junction describing the associative table. By default, no junction is specified
-     * and none will be used.
-     *
+     *   and none will be used.
      * @see Junction
      */
     val associateBy: Junction = Junction(Any::class),
@@ -160,5 +157,5 @@ public annotation class Relation(
      *
      * @return The list of columns to be selected from the [entity].
      */
-    val projection: Array<String> = []
+    val projection: Array<String> = [],
 )

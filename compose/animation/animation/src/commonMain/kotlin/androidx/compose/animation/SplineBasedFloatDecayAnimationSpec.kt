@@ -25,15 +25,13 @@ import kotlin.math.sign
  *
  * @param density density of the display
  */
-class SplineBasedFloatDecayAnimationSpec(density: Density) :
-    FloatDecayAnimationSpec {
+public class SplineBasedFloatDecayAnimationSpec(density: Density) : FloatDecayAnimationSpec {
 
-    private val flingCalculator = FlingCalculator(
-        friction = platformFlingScrollFriction,
-        density = density
-    )
+    private val flingCalculator =
+        FlingCalculator(friction = platformFlingScrollFriction, density = density)
 
-    override val absVelocityThreshold: Float get() = 0f
+    override val absVelocityThreshold: Float
+        get() = 0f
 
     private fun flingDistance(startVelocity: Float): Float =
         flingCalculator.flingDistance(startVelocity) * sign(startVelocity)
@@ -45,7 +43,7 @@ class SplineBasedFloatDecayAnimationSpec(density: Density) :
     override fun getValueFromNanos(
         playTimeNanos: Long,
         initialValue: Float,
-        initialVelocity: Float
+        initialVelocity: Float,
     ): Float {
         val playTimeMillis = playTimeNanos / 1_000_000L
         return initialValue + flingCalculator.flingInfo(initialVelocity).position(playTimeMillis)
@@ -59,7 +57,7 @@ class SplineBasedFloatDecayAnimationSpec(density: Density) :
     override fun getVelocityFromNanos(
         playTimeNanos: Long,
         initialValue: Float,
-        initialVelocity: Float
+        initialVelocity: Float,
     ): Float {
         val playTimeMillis = playTimeNanos / 1_000_000L
         return flingCalculator.flingInfo(initialVelocity).velocity(playTimeMillis)

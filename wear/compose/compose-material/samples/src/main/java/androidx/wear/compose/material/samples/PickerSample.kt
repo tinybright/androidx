@@ -52,13 +52,10 @@ fun SimplePicker() {
     val items = listOf("One", "Two", "Three", "Four", "Five")
     val state = rememberPickerState(items.size)
     val contentDescription by remember { derivedStateOf { "${state.selectedOption + 1}" } }
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
             modifier = Modifier.align(Alignment.TopCenter).padding(top = 10.dp),
-            text = "Selected: ${items[state.selectedOption]}"
+            text = "Selected: ${items[state.selectedOption]}",
         )
         Picker(
             modifier = Modifier.size(100.dp, 100.dp),
@@ -76,18 +73,10 @@ fun OptionChangePicker() {
     val coroutineScope = rememberCoroutineScope()
     val state = rememberPickerState(initialNumberOfOptions = 10)
     val contentDescription by remember { derivedStateOf { "${state.selectedOption + 1}" } }
-    Picker(
-        state = state,
-        separation = 4.dp,
-        contentDescription = contentDescription,
-    ) {
+    Picker(state = state, separation = 4.dp, contentDescription = contentDescription) {
         Chip(
-            onClick = {
-                coroutineScope.launch { state.scrollToOption(it) }
-            },
-            label = {
-                Text("$it")
-            }
+            onClick = { coroutineScope.launch { state.scrollToOption(it) } },
+            label = { Text("$it") },
         )
     }
 }
@@ -99,22 +88,11 @@ fun AnimateOptionChangePicker() {
     val state = rememberPickerState(initialNumberOfOptions = 10)
     val contentDescription by remember { derivedStateOf { "${state.selectedOption + 1}" } }
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Picker(
-            state = state,
-            separation = 4.dp,
-            contentDescription = contentDescription,
-        ) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Picker(state = state, separation = 4.dp, contentDescription = contentDescription) {
             Chip(
-                onClick = {
-                    coroutineScope.launch { state.animateScrollToOption(it) }
-                },
-                label = {
-                    Text("$it")
-                }
+                onClick = { coroutineScope.launch { state.animateScrollToOption(it) } },
+                label = { Text("$it") },
             )
         }
     }
@@ -128,29 +106,29 @@ fun DualPicker() {
     val textStyle = MaterialTheme.typography.display1
 
     @Composable
-    fun Option(column: Int, text: String) = Box(modifier = Modifier.fillMaxSize()) {
-        Text(
-            text = text, style = textStyle,
-            color = if (selectedColumn == column) MaterialTheme.colors.secondary
-            else MaterialTheme.colors.onBackground,
-            modifier = Modifier
-                .align(Alignment.Center).wrapContentSize()
-                .pointerInteropFilter {
-                    if (it.action == MotionEvent.ACTION_DOWN) selectedColumn = column
-                    true
-                }
-        )
-    }
+    fun Option(column: Int, text: String) =
+        Box(modifier = Modifier.fillMaxSize()) {
+            Text(
+                text = text,
+                style = textStyle,
+                color =
+                    if (selectedColumn == column) MaterialTheme.colors.secondary
+                    else MaterialTheme.colors.onBackground,
+                modifier =
+                    Modifier.align(Alignment.Center).wrapContentSize().pointerInteropFilter {
+                        if (it.action == MotionEvent.ACTION_DOWN) selectedColumn = column
+                        true
+                    },
+            )
+        }
 
     Row(
         modifier = Modifier.fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
     ) {
-        val hourState = rememberPickerState(
-            initialNumberOfOptions = 12,
-            initiallySelectedOption = 5
-        )
+        val hourState =
+            rememberPickerState(initialNumberOfOptions = 12, initiallySelectedOption = 5)
         val hourContentDescription by remember {
             derivedStateOf { "${hourState.selectedOption + 1 } hours" }
         }
@@ -159,7 +137,7 @@ fun DualPicker() {
             state = hourState,
             modifier = Modifier.size(64.dp, 100.dp),
             contentDescription = hourContentDescription,
-            option = { hour: Int -> Option(0, "%2d".format(hour + 1)) }
+            option = { hour: Int -> Option(0, "%2d".format(hour + 1)) },
         )
         Spacer(Modifier.width(8.dp))
         Text(text = ":", style = textStyle, color = MaterialTheme.colors.onBackground)
@@ -174,7 +152,7 @@ fun DualPicker() {
             state = minuteState,
             modifier = Modifier.size(64.dp, 100.dp),
             contentDescription = minuteContentDescription,
-            option = { minute: Int -> Option(1, "%02d".format(minute)) }
+            option = { minute: Int -> Option(1, "%02d".format(minute)) },
         )
     }
 }

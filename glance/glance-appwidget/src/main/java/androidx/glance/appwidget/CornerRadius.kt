@@ -21,9 +21,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.glance.GlanceModifier
 import androidx.glance.unit.Dimension
 
-/**
- * Modifier to add Rounded Corners on Android S+.
- */
+/** Modifier to add Rounded Corners on Android S+. */
 internal data class CornerRadiusModifier(val radius: Dimension) : GlanceModifier.Element
 
 /**
@@ -31,7 +29,7 @@ internal data class CornerRadiusModifier(val radius: Dimension) : GlanceModifier
  *
  * Note: Only works on Android S+.
  */
-fun GlanceModifier.cornerRadius(radius: Dp): GlanceModifier =
+public fun GlanceModifier.cornerRadius(radius: Dp): GlanceModifier =
     this.then(CornerRadiusModifier(Dimension.Dp(radius)))
 
 /**
@@ -39,5 +37,5 @@ fun GlanceModifier.cornerRadius(radius: Dp): GlanceModifier =
  *
  * Note: Only works on Android S+.
  */
-fun GlanceModifier.cornerRadius(@DimenRes radius: Int): GlanceModifier =
+public fun GlanceModifier.cornerRadius(@DimenRes radius: Int): GlanceModifier =
     this.then(CornerRadiusModifier(Dimension.Resource(radius)))

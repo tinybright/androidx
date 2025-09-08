@@ -31,10 +31,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 
 /**
- * This provides APIs for App and Ad-Sdks to get the user interest topics in a privacy
- * preserving way. This class can be used by Java clients.
+ * This provides APIs for App and Ad-Sdks to get the user interest topics in a privacy preserving
+ * way. This class can be used by Java clients.
  */
-abstract class TopicsManagerFutures internal constructor() {
+public abstract class TopicsManagerFutures internal constructor() {
     /**
      * Returns the topics.
      *
@@ -42,31 +42,32 @@ abstract class TopicsManagerFutures internal constructor() {
      * @return ListenableFuture to get the Topics response.
      */
     @RequiresPermission(AdServicesPermissions.ACCESS_ADSERVICES_TOPICS)
-    abstract fun getTopicsAsync(request: GetTopicsRequest): ListenableFuture<GetTopicsResponse>
+    public abstract fun getTopicsAsync(
+        request: GetTopicsRequest
+    ): ListenableFuture<GetTopicsResponse>
 
-    private class CommonApiJavaImpl(
-        private val mTopicsManager: TopicsManager
-    ) : TopicsManagerFutures() {
+    private class CommonApiJavaImpl(private val mTopicsManager: TopicsManager) :
+        TopicsManagerFutures() {
         @DoNotInline
         @RequiresPermission(AdServicesPermissions.ACCESS_ADSERVICES_TOPICS)
         override fun getTopicsAsync(
             request: GetTopicsRequest
         ): ListenableFuture<GetTopicsResponse> {
-            return CoroutineScope(Dispatchers.Main).async {
-                mTopicsManager.getTopics(request)
-            }.asListenableFuture()
+            return CoroutineScope(Dispatchers.Main)
+                .async { mTopicsManager.getTopics(request) }
+                .asListenableFuture()
         }
     }
 
-    companion object {
+    public companion object {
         /**
-         *  Creates [TopicsManagerFutures].
+         * Creates [TopicsManagerFutures].
          *
-         *  @return TopicsManagerFutures object. If the device is running an incompatible
-         *  build, the value returned is null.
+         * @return TopicsManagerFutures object. If the device is running an incompatible build, the
+         *   value returned is null.
          */
         @JvmStatic
-        fun from(context: Context): TopicsManagerFutures? {
+        public fun from(context: Context): TopicsManagerFutures? {
             return obtain(context)?.let { CommonApiJavaImpl(it) }
         }
     }

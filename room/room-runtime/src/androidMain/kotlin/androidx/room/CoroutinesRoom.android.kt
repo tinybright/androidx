@@ -28,11 +28,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 
-/**
- * A helper class for supporting Kotlin Coroutines in Room.
- *
- */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+/** A helper class for supporting Kotlin Coroutines in Room. */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX) // used in generated code
 public class CoroutinesRoom private constructor() {
 
     public companion object {
@@ -42,16 +39,14 @@ public class CoroutinesRoom private constructor() {
         public suspend fun <R> execute(
             db: RoomDatabase,
             inTransaction: Boolean,
-            callable: Callable<R>
+            callable: Callable<R>,
         ): R {
             if (db.isOpenInternal && db.inTransaction()) {
                 return callable.call()
             }
 
             val context = db.getCoroutineContext(inTransaction)
-            return withContext(context) {
-                callable.call()
-            }
+            return withContext(context) { callable.call() }
         }
 
         @JvmStatic
@@ -60,7 +55,7 @@ public class CoroutinesRoom private constructor() {
             db: RoomDatabase,
             inTransaction: Boolean,
             cancellationSignal: CancellationSignal?,
-            callable: Callable<R>
+            callable: Callable<R>,
         ): R {
             if (db.isOpenInternal && db.inTransaction()) {
                 return callable.call()
@@ -68,14 +63,15 @@ public class CoroutinesRoom private constructor() {
 
             val context = db.getCoroutineContext(inTransaction)
             return suspendCancellableCoroutine<R> { continuation ->
-                val job = db.getCoroutineScope().launch(context) {
-                    try {
-                        val result = callable.call()
-                        continuation.resume(result)
-                    } catch (exception: Throwable) {
-                        continuation.resumeWithException(exception)
+                val job =
+                    db.getCoroutineScope().launch(context) {
+                        try {
+                            val result = callable.call()
+                            continuation.resume(result)
+                        } catch (exception: Throwable) {
+                            continuation.resumeWithException(exception)
+                        }
                     }
-                }
                 continuation.invokeOnCancellation {
                     cancellationSignal?.cancel()
                     job.cancel()
@@ -89,7 +85,7 @@ public class CoroutinesRoom private constructor() {
             db: RoomDatabase,
             inTransaction: Boolean,
             tableNames: Array<String>,
-            callable: Callable<R>
+            callable: Callable<R>,
         ): Flow<@JvmSuppressWildcards R> =
             createFlowCommon(db, inTransaction, tableNames) { callable.call() }
     }

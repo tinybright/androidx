@@ -22,9 +22,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontSynthesis
 import androidx.compose.ui.text.font.FontWeight
 
-/**
- * [AndroidTypeface] that wraps Android [Typeface].
- */
+/** [AndroidTypeface] that wraps Android [Typeface]. */
 internal class AndroidTypefaceWrapper(val typeface: Typeface) : AndroidTypeface {
 
     override val fontFamily: FontFamily? = null
@@ -32,7 +30,7 @@ internal class AndroidTypefaceWrapper(val typeface: Typeface) : AndroidTypeface 
     override fun getNativeTypeface(
         fontWeight: FontWeight,
         fontStyle: FontStyle,
-        synthesis: FontSynthesis
+        synthesis: FontSynthesis,
     ): Typeface {
         return typeface
     }

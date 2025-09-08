@@ -23,21 +23,22 @@ import androidx.annotation.RestrictTo
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @SuppressLint("BanParcelableUsage")
-data class ParcelableInterruptRequest(val id: String, val stopReason: Int) : Parcelable {
+public data class ParcelableInterruptRequest(val id: String, val stopReason: Int) : Parcelable {
 
     internal constructor(parcel: Parcel) : this(parcel.readString()!!, parcel.readInt())
 
-    companion object {
+    public companion object {
         @JvmField
-        val CREATOR = object : Parcelable.Creator<ParcelableInterruptRequest> {
-            override fun createFromParcel(parcel: Parcel): ParcelableInterruptRequest {
-                return ParcelableInterruptRequest(parcel)
-            }
+        public val CREATOR: Parcelable.Creator<ParcelableInterruptRequest> =
+            object : Parcelable.Creator<ParcelableInterruptRequest> {
+                override fun createFromParcel(parcel: Parcel): ParcelableInterruptRequest {
+                    return ParcelableInterruptRequest(parcel)
+                }
 
-            override fun newArray(size: Int): Array<ParcelableInterruptRequest?> {
-                return arrayOfNulls(size)
+                override fun newArray(size: Int): Array<ParcelableInterruptRequest?> {
+                    return arrayOfNulls(size)
+                }
             }
-        }
     }
 
     override fun describeContents(): Int = 0

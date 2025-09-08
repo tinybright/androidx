@@ -62,10 +62,10 @@ if [ "$FLAGS_sourceDir" == "" ]; then
 
   if (( FLAGS_useToT )); then
     printf "Downloading docs-tip-of-tree zip files \n"
-    androidxDackkaZip="docs-tip-of-tree-${FLAGS_buildId}.zip"
+    androidxDackkaZip="docs-tip-of-tree.zip"
   else
     printf "Downloading docs-public zip files \n"
-    androidxDackkaZip="docs-public-${FLAGS_buildId}.zip"
+    androidxDackkaZip="docs-public.zip"
   fi
 
   if (( "${FLAGS_buildId::1}" == "P" )); then
@@ -108,18 +108,11 @@ if (( FLAGS_buildNativeDocs )); then
   ../generateDoxygenDocs.sh
 fi
 
-printf "\n"
-printf "=================================================================== \n"
-printf "== Generate the language switcher \n"
-printf "=================================================================== \n"
-
 cd $newDir/reference
-python3 ./../../../switcher.py --work androidx
-python3 ./../../../switcher.py --work support
 
 if (( FLAGS_buildNativeDocs )); then
   cd $outDir
-  # Copy over doxygen generated refdocs after switcher is added
+  # Copy over doxygen generated refdocs
   rsync -avh --ignore-existing $doxygenNewDir/reference/ $newDir/reference/
 
   # Include doxygen toc files in main toc

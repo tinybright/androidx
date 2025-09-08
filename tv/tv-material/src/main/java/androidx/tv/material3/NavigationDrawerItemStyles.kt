@@ -25,20 +25,19 @@ import androidx.compose.ui.graphics.Shape
 /**
  * Defines [Shape] for all TV [Indication] states of a [NavigationDrawerItem]
  *
- * @constructor create an instance with arbitrary shape. See [NavigationDrawerItemDefaults.shape]
- * for the default shape used in a [NavigationDrawerItem]
- *
  * @param shape the default shape used when the [NavigationDrawerItem] is enabled
  * @param focusedShape the shape used when the [NavigationDrawerItem] is enabled and focused
  * @param pressedShape the shape used when the [NavigationDrawerItem] is enabled and pressed
  * @param selectedShape the shape used when the [NavigationDrawerItem] is enabled and selected
  * @param disabledShape the shape used when the [NavigationDrawerItem] is not enabled
- * @param focusedSelectedShape the shape used when the [NavigationDrawerItem] is enabled,
- * focused and selected
- * @param focusedDisabledShape the shape used when the [NavigationDrawerItem] is not enabled
- * and focused
- * @param pressedSelectedShape the shape used when the [NavigationDrawerItem] is enabled,
- * pressed and selected
+ * @param focusedSelectedShape the shape used when the [NavigationDrawerItem] is enabled, focused
+ *   and selected
+ * @param focusedDisabledShape the shape used when the [NavigationDrawerItem] is not enabled and
+ *   focused
+ * @param pressedSelectedShape the shape used when the [NavigationDrawerItem] is enabled, pressed
+ *   and selected
+ * @constructor create an instance with arbitrary shape. See [NavigationDrawerItemDefaults.shape]
+ *   for the default shape used in a [NavigationDrawerItem]
  */
 @Immutable
 class NavigationDrawerItemShape(
@@ -49,7 +48,7 @@ class NavigationDrawerItemShape(
     val disabledShape: Shape,
     val focusedSelectedShape: Shape,
     val focusedDisabledShape: Shape,
-    val pressedSelectedShape: Shape
+    val pressedSelectedShape: Shape,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -96,40 +95,36 @@ class NavigationDrawerItemShape(
  * Defines container & content color [Color] for all TV [Indication] states of a
  * [NavigationDrawerItem]
  *
- * @constructor create an instance with arbitrary colors. See [NavigationDrawerItemDefaults.colors]
- * for the default colors used in a [NavigationDrawerItem]
- *
- * @param containerColor the default container color used when the [NavigationDrawerItem] is
- * enabled
+ * @param containerColor the default container color used when the [NavigationDrawerItem] is enabled
  * @param contentColor the default content color used when the [NavigationDrawerItem] is enabled
- * @param inactiveContentColor the content color used when none of the navigation items have
- * focus
- * @param focusedContainerColor the container color used when the [NavigationDrawerItem] is
- * enabled and focused
- * @param focusedContentColor the content color used when the [NavigationDrawerItem] is enabled
- * and focused
- * @param pressedContainerColor the container color used when the [NavigationDrawerItem] is
- * enabled and pressed
- * @param pressedContentColor the content color used when the [NavigationDrawerItem] is enabled
- * and pressed
- * @param selectedContainerColor the container color used when the [NavigationDrawerItem] is
- * enabled and selected
- * @param selectedContentColor the content color used when the [NavigationDrawerItem] is
- * enabled and selected
- * @param disabledContainerColor the container color used when the [NavigationDrawerItem] is
- * not enabled
- * @param disabledContentColor the content color used when the [NavigationDrawerItem] is not
- * enabled
- * @param disabledInactiveContentColor the content color used when none of the navigation items
- * have focus and this item is disabled
- * @param focusedSelectedContainerColor the container color used when the
- * [NavigationDrawerItem] is enabled, focused and selected
- * @param focusedSelectedContentColor the content color used when the [NavigationDrawerItem]
- * is enabled, focused and selected
- * @param pressedSelectedContainerColor the container color used when the
- * [NavigationDrawerItem] is enabled, pressed and selected
+ * @param inactiveContentColor the content color used when none of the navigation items have focus
+ * @param focusedContainerColor the container color used when the [NavigationDrawerItem] is enabled
+ *   and focused
+ * @param focusedContentColor the content color used when the [NavigationDrawerItem] is enabled and
+ *   focused
+ * @param pressedContainerColor the container color used when the [NavigationDrawerItem] is enabled
+ *   and pressed
+ * @param pressedContentColor the content color used when the [NavigationDrawerItem] is enabled and
+ *   pressed
+ * @param selectedContainerColor the container color used when the [NavigationDrawerItem] is enabled
+ *   and selected
+ * @param selectedContentColor the content color used when the [NavigationDrawerItem] is enabled and
+ *   selected
+ * @param disabledContainerColor the container color used when the [NavigationDrawerItem] is not
+ *   enabled
+ * @param disabledContentColor the content color used when the [NavigationDrawerItem] is not enabled
+ * @param disabledInactiveContentColor the content color used when none of the navigation items have
+ *   focus and this item is disabled
+ * @param focusedSelectedContainerColor the container color used when the [NavigationDrawerItem] is
+ *   enabled, focused and selected
+ * @param focusedSelectedContentColor the content color used when the [NavigationDrawerItem] is
+ *   enabled, focused and selected
+ * @param pressedSelectedContainerColor the container color used when the [NavigationDrawerItem] is
+ *   enabled, pressed and selected
  * @param pressedSelectedContentColor the content color used when the [NavigationDrawerItem] is
- * enabled, pressed and selected
+ *   enabled, pressed and selected
+ * @constructor create an instance with arbitrary colors. See [NavigationDrawerItemDefaults.colors]
+ *   for the default colors used in a [NavigationDrawerItem]
  */
 @Immutable
 class NavigationDrawerItemColors(
@@ -148,7 +143,7 @@ class NavigationDrawerItemColors(
     val focusedSelectedContainerColor: Color,
     val focusedSelectedContentColor: Color,
     val pressedSelectedContainerColor: Color,
-    val pressedSelectedContentColor: Color
+    val pressedSelectedContentColor: Color,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -215,20 +210,19 @@ class NavigationDrawerItemColors(
 /**
  * Defines the scale for all TV [Indication] states of a [NavigationDrawerItem]
  *
- * @constructor create an instance with arbitrary scale. See [NavigationDrawerItemDefaults.scale]
- * for the default scale used in a [NavigationDrawerItem]
- *
  * @param scale the scale used when the [NavigationDrawerItem] is enabled
  * @param focusedScale the scale used when the [NavigationDrawerItem] is enabled and focused
  * @param pressedScale the scale used when the [NavigationDrawerItem] is enabled and pressed
  * @param selectedScale the scale used when the [NavigationDrawerItem] is enabled and selected
  * @param disabledScale the scale used when the [NavigationDrawerItem] is not enabled
- * @param focusedSelectedScale the scale used when the [NavigationDrawerItem] is enabled,
- * focused and selected
+ * @param focusedSelectedScale the scale used when the [NavigationDrawerItem] is enabled, focused
+ *   and selected
  * @param focusedDisabledScale the scale used when the [NavigationDrawerItem] is not enabled and
- * focused
- * @param pressedSelectedScale the scale used when the [NavigationDrawerItem] is enabled,
- * pressed and selected
+ *   focused
+ * @param pressedSelectedScale the scale used when the [NavigationDrawerItem] is enabled, pressed
+ *   and selected
+ * @constructor create an instance with arbitrary scale. See [NavigationDrawerItemDefaults.scale]
+ *   for the default scale used in a [NavigationDrawerItem]
  */
 @Immutable
 class NavigationDrawerItemScale(
@@ -239,7 +233,7 @@ class NavigationDrawerItemScale(
     @FloatRange(from = 0.0) val disabledScale: Float,
     @FloatRange(from = 0.0) val focusedSelectedScale: Float,
     @FloatRange(from = 0.0) val focusedDisabledScale: Float,
-    @FloatRange(from = 0.0) val pressedSelectedScale: Float
+    @FloatRange(from = 0.0) val pressedSelectedScale: Float,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -282,40 +276,37 @@ class NavigationDrawerItemScale(
     }
 
     companion object {
-        /**
-         * Signifies the absence of a [ScaleIndication] in [NavigationDrawerItem]
-         */
-        val None = NavigationDrawerItemScale(
-            scale = 1f,
-            focusedScale = 1f,
-            pressedScale = 1f,
-            selectedScale = 1f,
-            disabledScale = 1f,
-            focusedSelectedScale = 1f,
-            focusedDisabledScale = 1f,
-            pressedSelectedScale = 1f
-        )
+        /** Signifies the absence of a [ScaleIndication] in [NavigationDrawerItem] */
+        val None =
+            NavigationDrawerItemScale(
+                scale = 1f,
+                focusedScale = 1f,
+                pressedScale = 1f,
+                selectedScale = 1f,
+                disabledScale = 1f,
+                focusedSelectedScale = 1f,
+                focusedDisabledScale = 1f,
+                pressedSelectedScale = 1f,
+            )
     }
 }
 
 /**
  * Defines [Border] for all TV [Indication] states of a [NavigationDrawerItem]
  *
- * @constructor create an instance with arbitrary border. See [NavigationDrawerItemDefaults.border]
- * for the default border used in a [NavigationDrawerItem]
- *
  * @param border the default [Border] used when the [NavigationDrawerItem] is enabled
  * @param focusedBorder the [Border] used when the [NavigationDrawerItem] is enabled and focused
  * @param pressedBorder the [Border] used when the [NavigationDrawerItem] is enabled and pressed
- * @param selectedBorder the [Border] used when the [NavigationDrawerItem] is enabled and
- * selected
+ * @param selectedBorder the [Border] used when the [NavigationDrawerItem] is enabled and selected
  * @param disabledBorder the [Border] used when the [NavigationDrawerItem] is not enabled
  * @param focusedSelectedBorder the [Border] used when the [NavigationDrawerItem] is enabled,
- * focused and selected
- * @param focusedDisabledBorder the [Border] used when the [NavigationDrawerItem] is not
- * enabled and focused
+ *   focused and selected
+ * @param focusedDisabledBorder the [Border] used when the [NavigationDrawerItem] is not enabled and
+ *   focused
  * @param pressedSelectedBorder the [Border] used when the [NavigationDrawerItem] is enabled,
- * pressed and selected
+ *   pressed and selected
+ * @constructor create an instance with arbitrary border. See [NavigationDrawerItemDefaults.border]
+ *   for the default border used in a [NavigationDrawerItem]
  */
 @Immutable
 class NavigationDrawerItemBorder(
@@ -326,7 +317,7 @@ class NavigationDrawerItemBorder(
     val disabledBorder: Border,
     val focusedSelectedBorder: Border,
     val focusedDisabledBorder: Border,
-    val pressedSelectedBorder: Border
+    val pressedSelectedBorder: Border,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -372,17 +363,16 @@ class NavigationDrawerItemBorder(
 /**
  * Defines [Glow] for all TV [Indication] states of a [NavigationDrawerItem]
  *
- * @constructor create an instance with arbitrary glow. See [NavigationDrawerItemDefaults.glow]
- * for the default glow used in a [NavigationDrawerItem]
- *
  * @param glow the [Glow] used when the [NavigationDrawerItem] is enabled
  * @param focusedGlow the [Glow] used when the [NavigationDrawerItem] is enabled and focused
  * @param pressedGlow the [Glow] used when the [NavigationDrawerItem] is enabled and pressed
  * @param selectedGlow the [Glow] used when the [NavigationDrawerItem] is enabled and selected
- * @param focusedSelectedGlow the [Glow] used when the [NavigationDrawerItem] is enabled,
- * focused and selected
- * @param pressedSelectedGlow the [Glow] used when the [NavigationDrawerItem] is enabled,
- * pressed and selected
+ * @param focusedSelectedGlow the [Glow] used when the [NavigationDrawerItem] is enabled, focused
+ *   and selected
+ * @param pressedSelectedGlow the [Glow] used when the [NavigationDrawerItem] is enabled, pressed
+ *   and selected
+ * @constructor create an instance with arbitrary glow. See [NavigationDrawerItemDefaults.glow] for
+ *   the default glow used in a [NavigationDrawerItem]
  */
 @Immutable
 class NavigationDrawerItemGlow(
@@ -391,7 +381,7 @@ class NavigationDrawerItemGlow(
     val pressedGlow: Glow,
     val selectedGlow: Glow,
     val focusedSelectedGlow: Glow,
-    val pressedSelectedGlow: Glow
+    val pressedSelectedGlow: Glow,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

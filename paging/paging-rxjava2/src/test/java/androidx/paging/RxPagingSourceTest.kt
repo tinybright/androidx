@@ -33,27 +33,27 @@ class RxPagingSourceTest {
         return Page(
             List(params.loadSize) { it + key },
             prevKey = key - params.loadSize,
-            nextKey = key + params.loadSize
+            nextKey = key + params.loadSize,
         )
     }
 
-    private val pagingSource = object : PagingSource<Int, Int>() {
-        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Int> {
-            return loadInternal(params)
-        }
-
-        override fun getRefreshKey(state: PagingState<Int, Int>): Int? = null
-    }
-
-    private val rxPagingSource = object : RxPagingSource<Int, Int>() {
-        override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, Int>> {
-            return Single.create { emitter ->
-                emitter.onSuccess(loadInternal(params))
+    private val pagingSource =
+        object : PagingSource<Int, Int>() {
+            override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Int> {
+                return loadInternal(params)
             }
+
+            override fun getRefreshKey(state: PagingState<Int, Int>): Int? = null
         }
 
-        override fun getRefreshKey(state: PagingState<Int, Int>): Int? = null
-    }
+    private val rxPagingSource =
+        object : RxPagingSource<Int, Int>() {
+            override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, Int>> {
+                return Single.create { emitter -> emitter.onSuccess(loadInternal(params)) }
+            }
+
+            override fun getRefreshKey(state: PagingState<Int, Int>): Int? = null
+        }
 
     @Test
     fun basic() = runBlocking {

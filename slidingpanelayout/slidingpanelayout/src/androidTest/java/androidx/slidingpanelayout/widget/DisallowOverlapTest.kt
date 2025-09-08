@@ -32,20 +32,18 @@ class DisallowOverlapTest {
     @Test
     fun twoPaneModeTest() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        val spl = SlidingPaneLayout(context).apply {
-            isOverlappingEnabled = false
-        }
+        val spl = SlidingPaneLayout(context).apply { isOverlappingEnabled = false }
 
-        val firstPane = View(context).also {
-            spl.addView(it, SlidingPaneLayout.LayoutParams(30, MATCH_PARENT))
-        }
-        val secondPane = View(context).also {
-            spl.addView(it, SlidingPaneLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
-        }
+        val firstPane =
+            View(context).also { spl.addView(it, SlidingPaneLayout.LayoutParams(30, MATCH_PARENT)) }
+        val secondPane =
+            View(context).also {
+                spl.addView(it, SlidingPaneLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+            }
 
         spl.measure(
             MeasureSpec.makeMeasureSpec(100, MeasureSpec.EXACTLY),
-            MeasureSpec.makeMeasureSpec(100, MeasureSpec.EXACTLY)
+            MeasureSpec.makeMeasureSpec(100, MeasureSpec.EXACTLY),
         )
 
         assertThat(spl.measuredWidth).isEqualTo(100)

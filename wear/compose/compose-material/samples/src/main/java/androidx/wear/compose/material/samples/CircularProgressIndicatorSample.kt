@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.CircularProgressIndicator
 import androidx.wear.compose.material.CompactChip
@@ -47,22 +48,19 @@ public fun IndeterminateCircularProgressIndicator() {
 @Composable
 public fun CircularProgressIndicatorWithAnimation() {
     var progress by remember { mutableStateOf(0.1f) }
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress,
-        animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec
-    )
+    val animatedProgress by
+        animateFloatAsState(
+            targetValue = progress,
+            animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
+        )
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        CircularProgressIndicator(
-            progress = animatedProgress,
-        )
+        CircularProgressIndicator(progress = animatedProgress)
         Spacer(Modifier.requiredHeight(10.dp))
         CompactChip(
             modifier = Modifier.width(90.dp),
-            onClick = {
-                if (progress < 1f) progress += 0.1f
-            },
-            label = { Text("Increase") }
+            onClick = { if (progress < 1f) progress += 0.1f },
+            label = { Text("Increase") },
         )
     }
 }
@@ -71,10 +69,10 @@ public fun CircularProgressIndicatorWithAnimation() {
 @Composable
 public fun CircularProgressIndicatorFullscreenWithGap() {
     CircularProgressIndicator(
-        modifier = Modifier.fillMaxSize().padding(all = 1.dp),
+        modifier = Modifier.fillMaxSize().padding(all = 1.dp).clearAndSetSemantics {},
         startAngle = 295.5f,
         endAngle = 245.5f,
         progress = 0.3f,
-        strokeWidth = ProgressIndicatorDefaults.FullScreenStrokeWidth
+        strokeWidth = ProgressIndicatorDefaults.FullScreenStrokeWidth,
     )
 }

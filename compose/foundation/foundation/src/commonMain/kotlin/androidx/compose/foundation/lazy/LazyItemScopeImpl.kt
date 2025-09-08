@@ -41,44 +41,43 @@ internal class LazyItemScopeImpl : LazyItemScope {
         maxHeightState.intValue = height
     }
 
-    override fun Modifier.fillParentMaxSize(fraction: Float) = then(
-        ParentSizeElement(
-            widthState = maxWidthState,
-            heightState = maxHeightState,
-            fraction = fraction,
-            inspectorName = "fillParentMaxSize"
+    override fun Modifier.fillParentMaxSize(fraction: Float) =
+        then(
+            ParentSizeElement(
+                widthState = maxWidthState,
+                heightState = maxHeightState,
+                fraction = fraction,
+                inspectorName = "fillParentMaxSize",
+            )
         )
-    )
 
-    override fun Modifier.fillParentMaxWidth(fraction: Float) = then(
-        ParentSizeElement(
-            widthState = maxWidthState,
-            fraction = fraction,
-            inspectorName = "fillParentMaxWidth"
+    override fun Modifier.fillParentMaxWidth(fraction: Float) =
+        then(
+            ParentSizeElement(
+                widthState = maxWidthState,
+                fraction = fraction,
+                inspectorName = "fillParentMaxWidth",
+            )
         )
-    )
 
-    override fun Modifier.fillParentMaxHeight(fraction: Float) = then(
-        ParentSizeElement(
-            heightState = maxHeightState,
-            fraction = fraction,
-            inspectorName = "fillParentMaxHeight"
+    override fun Modifier.fillParentMaxHeight(fraction: Float) =
+        then(
+            ParentSizeElement(
+                heightState = maxHeightState,
+                fraction = fraction,
+                inspectorName = "fillParentMaxHeight",
+            )
         )
-    )
 
     override fun Modifier.animateItem(
         fadeInSpec: FiniteAnimationSpec<Float>?,
         placementSpec: FiniteAnimationSpec<IntOffset>?,
-        fadeOutSpec: FiniteAnimationSpec<Float>?
+        fadeOutSpec: FiniteAnimationSpec<Float>?,
     ): Modifier =
         if (fadeInSpec == null && placementSpec == null && fadeOutSpec == null) {
             this
         } else {
-            this then LazyLayoutAnimateItemElement(
-                fadeInSpec,
-                placementSpec,
-                fadeOutSpec
-            )
+            this then LazyLayoutAnimateItemElement(fadeInSpec, placementSpec, fadeOutSpec)
         }
 }
 
@@ -86,13 +85,13 @@ private class ParentSizeElement(
     val fraction: Float,
     val widthState: State<Int>? = null,
     val heightState: State<Int>? = null,
-    val inspectorName: String
+    val inspectorName: String,
 ) : ModifierNodeElement<ParentSizeNode>() {
     override fun create(): ParentSizeNode {
         return ParentSizeNode(
             fraction = fraction,
             widthState = widthState,
-            heightState = heightState
+            heightState = heightState,
         )
     }
 
@@ -131,32 +130,33 @@ private class ParentSizeNode(
 
     override fun MeasureScope.measure(
         measurable: Measurable,
-        constraints: Constraints
+        constraints: Constraints,
     ): MeasureResult {
-        val width = widthState?.let {
-            if (it.value != Constraints.Infinity) {
-                (it.value * fraction).fastRoundToInt()
-            } else {
-                Constraints.Infinity
-            }
-        } ?: Constraints.Infinity
+        val width =
+            widthState?.let {
+                if (it.value != Constraints.Infinity) {
+                    (it.value * fraction).fastRoundToInt()
+                } else {
+                    Constraints.Infinity
+                }
+            } ?: Constraints.Infinity
 
-        val height = heightState?.let {
-            if (it.value != Constraints.Infinity) {
-                (it.value * fraction).fastRoundToInt()
-            } else {
-                Constraints.Infinity
-            }
-        } ?: Constraints.Infinity
-        val childConstraints = Constraints(
-            minWidth = if (width != Constraints.Infinity) width else constraints.minWidth,
-            minHeight = if (height != Constraints.Infinity) height else constraints.minHeight,
-            maxWidth = if (width != Constraints.Infinity) width else constraints.maxWidth,
-            maxHeight = if (height != Constraints.Infinity) height else constraints.maxHeight,
-        )
+        val height =
+            heightState?.let {
+                if (it.value != Constraints.Infinity) {
+                    (it.value * fraction).fastRoundToInt()
+                } else {
+                    Constraints.Infinity
+                }
+            } ?: Constraints.Infinity
+        val childConstraints =
+            Constraints(
+                minWidth = if (width != Constraints.Infinity) width else constraints.minWidth,
+                minHeight = if (height != Constraints.Infinity) height else constraints.minHeight,
+                maxWidth = if (width != Constraints.Infinity) width else constraints.maxWidth,
+                maxHeight = if (height != Constraints.Infinity) height else constraints.maxHeight,
+            )
         val placeable = measurable.measure(childConstraints)
-        return layout(placeable.width, placeable.height) {
-            placeable.place(0, 0)
-        }
+        return layout(placeable.width, placeable.height) { placeable.place(0, 0) }
     }
 }

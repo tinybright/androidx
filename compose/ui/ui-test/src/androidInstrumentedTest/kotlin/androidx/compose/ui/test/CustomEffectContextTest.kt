@@ -21,13 +21,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.MotionDurationScale
+import androidx.compose.ui.test.util.TestCounter
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -45,14 +50,12 @@ class CustomEffectContextTest {
         val testElement = TestCoroutineContextElement()
         runComposeUiTest(effectContext = testElement) {
             lateinit var compositionScope: CoroutineScope
-            setContent {
-                compositionScope = rememberCoroutineScope()
-            }
+            setContent { compositionScope = rememberCoroutineScope() }
 
             runOnIdle {
                 val elementFromComposition =
                     compositionScope.coroutineContext[TestCoroutineContextElement]
-                Truth.assertThat(elementFromComposition).isSameInstanceAs(testElement)
+                assertThat(elementFromComposition).isSameInstanceAs(testElement)
             }
         }
     }
@@ -65,16 +68,16 @@ class CustomEffectContextTest {
             lastRecordedMotionDurationScale = context[MotionDurationScale]?.scaleFactor
         }
 
-        runOnIdle {
-            Truth.assertThat(lastRecordedMotionDurationScale).isNull()
-        }
+        runOnIdle { assertThat(lastRecordedMotionDurationScale).isNull() }
     }
 
     @Test
     fun motionDurationScale_propagatedToCoroutines() {
-        val motionDurationScale = object : MotionDurationScale {
-            override val scaleFactor: Float get() = 0f
-        }
+        val motionDurationScale =
+            object : MotionDurationScale {
+                override val scaleFactor: Float
+                    get() = 0f
+            }
         runComposeUiTest(effectContext = motionDurationScale) {
             var lastRecordedMotionDurationScale: Float? = null
             setContent {
@@ -82,113 +85,106 @@ class CustomEffectContextTest {
                 lastRecordedMotionDurationScale = context[MotionDurationScale]?.scaleFactor
             }
 
-            runOnIdle {
-                Truth.assertThat(lastRecordedMotionDurationScale).isEqualTo(0f)
-            }
+            runOnIdle { assertThat(lastRecordedMotionDurationScale).isEqualTo(0f) }
         }
     }
 
     @Test
     fun customDispatcher_ignoredWhenNotSubclassOfTestDispatcher() {
-        class CustomNonTestDispatcher : CoroutineDispatcher() {
-            private var queuedTasks = mutableListOf<Runnable>()
-            override fun dispatch(context: CoroutineContext, block: Runnable) {
-                queuedTasks.add(block)
-            }
+        val notATestDispatcher =
+            object : CoroutineDispatcher() {
+                override fun isDispatchNeeded(context: CoroutineContext): Boolean {
+                    throw AssertionError("This dispatcher should be unused")
+                }
 
-            fun runQueuedTasks() {
-                val tasksToRun = queuedTasks
-                queuedTasks = mutableListOf()
-                tasksToRun.forEach {
-                    it.run()
+                override fun dispatch(context: CoroutineContext, block: Runnable) {
+                    throw AssertionError("This dispatcher should be unused")
+                }
+
+                @OptIn(ExperimentalCoroutinesApi::class)
+                override fun limitedParallelism(parallelism: Int): CoroutineDispatcher {
+                    throw AssertionError("This dispatcher should be unused")
                 }
             }
-        }
 
-        val customDispatcher = CustomNonTestDispatcher()
-
-        var expectCounter = 0
-        fun expect(value: Int) {
-            Truth.assertWithMessage("Expected sequence")
-                .that(expectCounter)
-                .isEqualTo(value)
-            expectCounter++
-        }
-
-        runComposeUiTest(effectContext = customDispatcher) {
+        // The custom dispatcher is not a TestDispatcher, so should be completely discarded.
+        // The custom dispatcher throws when it is used, so running the below is enough
+        runComposeUiTest(effectContext = notATestDispatcher) {
             setContent {
                 LaunchedEffect(Unit) {
-                    expect(2)
-                    withFrameNanos {
-                        expect(4)
-                    }
-                    expect(6)
+                    withFrameNanos {}
+                    launch {}
                 }
             }
-            expect(0)
-
-            // None of these will actually start the effect, because we control tasks.
-            waitForIdle()
-            mainClock.advanceTimeByFrame()
-            waitForIdle()
-            expect(1)
-
-            // This will actually start the effect.
-            customDispatcher.runQueuedTasks()
-            expect(3)
-
-            // This runs the first withFrameNanos.
-            mainClock.advanceTimeByFrame()
-            expect(5)
-
-            // And this resumes the effect coroutine after withFrameNanos.
-            customDispatcher.runQueuedTasks()
-            expect(7)
         }
     }
 
     @Test
-    fun customDispatcher_usedWhenSubclassesTestDispatcher() {
-        var expectCounter = 0
-        fun expect(value: Int) {
-            Truth.assertWithMessage("Expected sequence")
-                .that(expectCounter)
-                .isEqualTo(value)
-            expectCounter++
-        }
+    fun customDispatcher_StandardTestDispatcher() {
+        val counter = TestCounter()
 
-        val customDispatcher = StandardTestDispatcher()
-
-        // TestDispatcher has an internal constructor so we can't make our own subclass.
-        // StandardTestDispatcher was the only other subclass of TestDispatcher at the time this
-        // test was initially written.
-        runAndroidComposeUiTest<ComponentActivity>(effectContext = customDispatcher) {
+        runAndroidComposeUiTest<ComponentActivity>(effectContext = StandardTestDispatcher()) {
             // b/328299124: sometimes the timing of window focus can change the order or execution
             waitForWindowFocus()
+
+            // With a StandardTestDispatcher, both launched effects and the launched coroutine are
+            // dispatched, meaning they are added to the queue of tasks after all pending tasks.
+            // Thus, the launched effects run first, and the launched coroutine comes last.
+
             setContent {
                 LaunchedEffect(Unit) {
-                    expect(2)
-                    withFrameNanos {
-                        expect(3)
-                    }
-                    expect(4)
+                    counter.expect(1)
+                    launch { counter.expect(3) }
                 }
+                LaunchedEffect(Unit) { counter.expect(2) }
             }
-            expect(0)
-
-            // This won't wait for the effect to launch…
-            waitForIdle()
-            expect(1)
-
-            // …but this will, because Compose detected the custom TestDispatcher and wired the
-            // clock to it.
-            mainClock.advanceTimeByFrame()
-            expect(5)
+            runOnIdle { counter.expect(4) }
         }
     }
 
+    @Test
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun customDispatcher_UnconfinedTestDispatcher() {
+        val counter = TestCounter()
+
+        runAndroidComposeUiTest<ComponentActivity>(effectContext = UnconfinedTestDispatcher()) {
+            // b/328299124: sometimes the timing of window focus can change the order or execution
+            waitForWindowFocus()
+
+            // With a UnconfinedTestDispatcher, both launched effects and the launched coroutine are
+            // running unconfined, meaning they are executed immediately, regardless if there are
+            // pending tasks.
+            // Thus, the launched coroutine comes before the second launched effect.
+
+            setContent {
+                LaunchedEffect(Unit) {
+                    counter.expect(1)
+                    launch { counter.expect(2) }
+                }
+                LaunchedEffect(Unit) { counter.expect(3) }
+            }
+            runOnIdle { counter.expect(4) }
+        }
+    }
+
+    @Test
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun scheduler_usedWhenPresent() {
+        val scheduler = TestCoroutineScheduler()
+        val startTime = scheduler.currentTime
+
+        // We don't need any content, we only need to trigger the scheduler
+        runComposeUiTest(scheduler) {
+            setContent { rememberCoroutineScope().launch { withFrameNanos {} } }
+        }
+
+        // Only if it is used will the scheduler's time be changed
+        assertThat(scheduler.currentTime).isNotEqualTo(startTime)
+    }
+
     private class TestCoroutineContextElement : CoroutineContext.Element {
-        override val key: CoroutineContext.Key<*> get() = Key
+        override val key: CoroutineContext.Key<*>
+            get() = Key
 
         companion object Key : CoroutineContext.Key<TestCoroutineContextElement>
     }

@@ -30,11 +30,12 @@ import java.time.Instant
 // away by proguard.
 internal object DataPoints {
     private const val TAG = "DataPoints"
+
     /**
      * Creates a new [IntervalDataPoint] of type [DataType.STEPS] with the given [steps].
      *
      * @param steps number of steps taken between [startDurationFromBoot] and [endDurationFromBoot],
-     * Range from 0 to 1000000.
+     *   Range from 0 to 1000000.
      * @param startDurationFromBoot the point in time this data point begins
      * @param endDurationFromBoot the point in time this data point ends
      */
@@ -65,7 +66,7 @@ internal object DataPoints {
     @JvmStatic
     public fun stepsPerMinute(
         @IntRange(from = 0, to = 1000000) stepsPerMinute: Long,
-        timeDurationFromBoot: Duration
+        timeDurationFromBoot: Duration,
     ): SampleDataPoint<Long> {
         if (stepsPerMinute !in 0..1000000) {
             Log.w(TAG, "stepsPerMinute value $stepsPerMinute is out of range")
@@ -73,15 +74,15 @@ internal object DataPoints {
         return SampleDataPoint(
             dataType = DataType.STEPS_PER_MINUTE,
             value = stepsPerMinute,
-            timeDurationFromBoot = timeDurationFromBoot
+            timeDurationFromBoot = timeDurationFromBoot,
         )
     }
 
     /**
      * Creates a new [IntervalDataPoint] of type [DataType.DISTANCE] with the given [meters].
      *
-     * @param meters distance traveled between [startDurationFromBoot] and [endDurationFromBoot]
-     * , Range from 0.0 to 1000000.0
+     * @param meters distance traveled between [startDurationFromBoot] and [endDurationFromBoot] ,
+     *   Range from 0.0 to 1000000.0
      * @param startDurationFromBoot the point in time this data point begins
      * @param endDurationFromBoot the point in time this data point ends
      */
@@ -105,8 +106,8 @@ internal object DataPoints {
     /**
      * Creates a new [CumulativeDataPoint] for [DataType.DISTANCE_TOTAL] with the given [meters].
      *
-     * @param meters distance accumulated between [startTime] and [endTime], Range from
-     * 0.0 to 1000000.0
+     * @param meters distance accumulated between [startTime] and [endTime], Range from 0.0 to
+     *   1000000.0
      * @param startTime the point in time this data point begins
      * @param endTime the point in time this data point ends
      */
@@ -114,7 +115,7 @@ internal object DataPoints {
     public fun distanceTotal(
         @FloatRange(from = 0.0, to = 1000000.0) meters: Double,
         startTime: Instant,
-        endTime: Instant
+        endTime: Instant,
     ): CumulativeDataPoint<Double> {
         if (meters !in 0.0..1000000.0) {
             Log.w(TAG, "distanceTotal value $meters is out of range")
@@ -123,15 +124,15 @@ internal object DataPoints {
             dataType = DataType.DISTANCE_TOTAL,
             total = meters,
             start = startTime,
-            end = endTime
+            end = endTime,
         )
     }
 
     /**
      * Creates a new [IntervalDataPoint] of type [DataType.ELEVATION_GAIN] with the given [meters].
      *
-     * @param meters meters gained between [startDurationFromBoot] and [endDurationFromBoot],
-     * Range from 0.0 to 1000000.0
+     * @param meters meters gained between [startDurationFromBoot] and [endDurationFromBoot], Range
+     *   from 0.0 to 1000000.0
      * @param startDurationFromBoot the point in time this data point begins
      * @param endDurationFromBoot the point in time this data point ends
      */
@@ -155,8 +156,8 @@ internal object DataPoints {
     /**
      * Create a new [IntervalDataPoint] of type [DataType.ELEVATION_LOSS] with the given [meters].
      *
-     * @param meters meters lost between [startDurationFromBoot] and [endDurationFromBoot],
-     * Range from 0.0 to 1000000.0
+     * @param meters meters lost between [startDurationFromBoot] and [endDurationFromBoot], Range
+     *   from 0.0 to 1000000.0
      * @param startDurationFromBoot the point in time this data point begins
      * @param endDurationFromBoot the point in time this data point ends
      */
@@ -181,8 +182,8 @@ internal object DataPoints {
      * Creates a new [SampleDataPoint] of type [DataType.ABSOLUTE_ELEVATION] with the given
      * [meters].
      *
-     * @param meters absolute elevation in meters at [timeDurationFromBoot], Range
-     * from -1000000.0 to 1000000.0
+     * @param meters absolute elevation in meters at [timeDurationFromBoot], Range from -1000000.0
+     *   to 1000000.0
      * @param timeDurationFromBoot the point in time [stepsPerMinute] is accurate
      */
     @JvmStatic
@@ -204,12 +205,12 @@ internal object DataPoints {
      * Creates a new [StatisticalDataPoint] of type [DataType.ABSOLUTE_ELEVATION_STATS] with the
      * given elevations (in meters).
      *
-     * @param minAbsoluteElevationMeters lowest observed elevation in this interval,
-     * Range from -1000000.0 to 1000000.0
-     * @param maxAbsoluteElevationMeters highest observed elevation in this interval,
-     * Range from -1000000.0 to 1000000.0
-     * @param averageAbsoluteElevationMeters average observed elevation in this interval,
-     * Range from -1000000.0 to 1000000.0
+     * @param minAbsoluteElevationMeters lowest observed elevation in this interval, Range from
+     *   -1000000.0 to 1000000.0
+     * @param maxAbsoluteElevationMeters highest observed elevation in this interval, Range from
+     *   -1000000.0 to 1000000.0
+     * @param averageAbsoluteElevationMeters average observed elevation in this interval, Range from
+     *   -1000000.0 to 1000000.0
      * @param startTime the point in time this data point begins
      * @param endTime the point in time this data point ends
      */
@@ -219,20 +220,29 @@ internal object DataPoints {
         @FloatRange(from = -1000000.0, to = 1000000.0) maxAbsoluteElevationMeters: Double,
         @FloatRange(from = -1000000.0, to = 1000000.0) averageAbsoluteElevationMeters: Double,
         startTime: Instant,
-        endTime: Instant
+        endTime: Instant,
     ): StatisticalDataPoint<Double> {
 
         if (minAbsoluteElevationMeters !in -1000000.0..1000000.0) {
-            Log.w(TAG, "absoluteElevationStats: minAbsoluteElevationMeters value " +
-                "$minAbsoluteElevationMeters is out of range")
+            Log.w(
+                TAG,
+                "absoluteElevationStats: minAbsoluteElevationMeters value " +
+                    "$minAbsoluteElevationMeters is out of range",
+            )
         }
         if (maxAbsoluteElevationMeters !in -1000000.0..1000000.0) {
-            Log.w(TAG, "absoluteElevationStats: maxAbsoluteElevationMeters value " +
-                "$maxAbsoluteElevationMeters is out of range")
+            Log.w(
+                TAG,
+                "absoluteElevationStats: maxAbsoluteElevationMeters value " +
+                    "$maxAbsoluteElevationMeters is out of range",
+            )
         }
         if (averageAbsoluteElevationMeters !in -1000000.0..1000000.0) {
-            Log.w(TAG, "absoluteElevationStats: averageAbsoluteElevationMeters value " +
-                "$averageAbsoluteElevationMeters is out of range")
+            Log.w(
+                TAG,
+                "absoluteElevationStats: averageAbsoluteElevationMeters value " +
+                    "$averageAbsoluteElevationMeters is out of range",
+            )
         }
         return StatisticalDataPoint(
             dataType = DataType.ABSOLUTE_ELEVATION_STATS,
@@ -248,7 +258,7 @@ internal object DataPoints {
      * Creates a new [IntervalDataPoint] of type [DataType.FLOORS] with the given [floors].
      *
      * @param floors floors ascended between [startDurationFromBoot] and [endDurationFromBoot],
-     * Range from 0.0 to 1000000.0
+     *   Range from 0.0 to 1000000.0
      * @param startDurationFromBoot the point in time this data point begins
      * @param endDurationFromBoot the point in time this data point ends
      */
@@ -273,7 +283,7 @@ internal object DataPoints {
      * Creates a new [IntervalDataPoint] of type [DataType.CALORIES] with the given [kilocalories].
      *
      * @param kilocalories total calories burned (BMR + Active) between [startDurationFromBoot] and
-     * [endDurationFromBoot], Range from 0.0 to 1000000.0
+     *   [endDurationFromBoot], Range from 0.0 to 1000000.0
      * @param startDurationFromBoot the point in time this data point begins
      * @param endDurationFromBoot the point in time this data point ends
      */
@@ -298,8 +308,8 @@ internal object DataPoints {
      * Creates a new [CumulativeDataPoint] of type [DataType.CALORIES_TOTAL] with the given
      * [kilocalories] that represents an accumulation over a longer period of time.
      *
-     * @param kilocalories total calories burned (BMR + Active) between [startTime] and
-     * [endTime], Range from 0.0 to 1000000.0
+     * @param kilocalories total calories burned (BMR + Active) between [startTime] and [endTime],
+     *   Range from 0.0 to 1000000.0
      * @param startTime the point in time this data point begins
      * @param endTime the point in time this data point ends
      */
@@ -307,7 +317,7 @@ internal object DataPoints {
     public fun caloriesTotal(
         @FloatRange(from = 0.0, to = 1000000.0) kilocalories: Double,
         startTime: Instant,
-        endTime: Instant
+        endTime: Instant,
     ): CumulativeDataPoint<Double> {
         if (kilocalories !in 0.0..1000000.0) {
             Log.w(TAG, "caloriesTotal value $kilocalories is out of range")
@@ -316,7 +326,7 @@ internal object DataPoints {
             dataType = DataType.CALORIES_TOTAL,
             total = kilocalories,
             start = startTime,
-            end = endTime
+            end = endTime,
         )
     }
 
@@ -325,7 +335,7 @@ internal object DataPoints {
      * [strokes].
      *
      * @param strokes total swimming strokes between [startDurationFromBoot] and
-     * [endDurationFromBoot], Range from 0 to 1000000
+     *   [endDurationFromBoot], Range from 0 to 1000000
      * @param startDurationFromBoot the point in time this data point begins
      * @param endDurationFromBoot the point in time this data point ends
      */
@@ -333,7 +343,7 @@ internal object DataPoints {
     public fun swimmingStrokes(
         @IntRange(from = 0, to = 1000000) strokes: Long,
         startDurationFromBoot: Duration,
-        endDurationFromBoot: Duration
+        endDurationFromBoot: Duration,
     ): IntervalDataPoint<Long> {
         if (strokes !in 0..1000000) {
             Log.w(TAG, "swimmingStrokes value $strokes is out of range")
@@ -342,15 +352,15 @@ internal object DataPoints {
             dataType = DataType.SWIMMING_STROKES,
             value = strokes,
             startDurationFromBoot = startDurationFromBoot,
-            endDurationFromBoot = endDurationFromBoot
+            endDurationFromBoot = endDurationFromBoot,
         )
     }
 
     /**
      * Creates a new [IntervalDataPoint] of type [DataType.GOLF_SHOT_COUNT] with the given [shots].
      *
-     * @param shots golf shots made between [startDurationFromBoot] and [endDurationFromBoot],
-     * Range from 0 to 1000000
+     * @param shots golf shots made between [startDurationFromBoot] and [endDurationFromBoot], Range
+     *   from 0 to 1000000
      * @param startDurationFromBoot the point in time this data point begins
      * @param endDurationFromBoot the point in time this data point ends
      */
@@ -379,10 +389,10 @@ internal object DataPoints {
      * @param longitude longitude at [timeDurationFromBoot], Range from -180.0 to 180.0
      * @param timeDurationFromBoot the point in time this data was recorded
      * @param altitude optional altitude or [LocationData.ALTITUDE_UNAVAILABLE] at
-     * [timeDurationFromBoot]
+     *   [timeDurationFromBoot]
      * @param bearing optional bearing or [LocationData.BEARING_UNAVAILABLE] at
-     * [timeDurationFromBoot], Range from 0.0 (inclusive) to 360.0 (exclusive).
-     * Value [LocationData.ALTITUDE_UNAVAILABLE] represents altitude is not available
+     *   [timeDurationFromBoot], Range from 0.0 (inclusive) to 360.0 (exclusive). Value
+     *   [LocationData.ALTITUDE_UNAVAILABLE] represents altitude is not available
      * @param accuracy optional [LocationAccuracy] describing this data or `null`
      */
     @JvmStatic
@@ -393,7 +403,7 @@ internal object DataPoints {
         timeDurationFromBoot: Duration,
         altitude: Double = LocationData.ALTITUDE_UNAVAILABLE,
         bearing: Double = LocationData.BEARING_UNAVAILABLE,
-        accuracy: LocationAccuracy? = null
+        accuracy: LocationAccuracy? = null,
     ): SampleDataPoint<LocationData> {
         if (latitude !in -90.0..90.0) {
             Log.w(TAG, "location: latitude value $latitude is out of range")
@@ -408,15 +418,15 @@ internal object DataPoints {
             dataType = DataType.LOCATION,
             value = LocationData(latitude, longitude, altitude, bearing),
             timeDurationFromBoot = timeDurationFromBoot,
-            accuracy = accuracy
+            accuracy = accuracy,
         )
     }
 
     /**
      * Creates a new [SampleDataPoint] of type [DataType.SPEED] with the given [metersPerSecond].
      *
-     * @param metersPerSecond speed in meters per second at [timeDurationFromBoot],
-     * Range from 0.0 to 1000000.0
+     * @param metersPerSecond speed in meters per second at [timeDurationFromBoot], Range from 0.0
+     *   to 1000000.0
      * @param timeDurationFromBoot the point in time [metersPerSecond] was recorded
      */
     @JvmStatic
@@ -444,12 +454,12 @@ internal object DataPoints {
     @JvmStatic
     public fun pace(
         durationPerKilometer: Duration,
-        timeDurationFromBoot: Duration
+        timeDurationFromBoot: Duration,
     ): SampleDataPoint<Double> =
         SampleDataPoint(
             dataType = DataType.PACE,
             value = (durationPerKilometer.toMillis()).toDouble(),
-            timeDurationFromBoot = timeDurationFromBoot
+            timeDurationFromBoot = timeDurationFromBoot,
         )
 
     /**
@@ -465,7 +475,7 @@ internal object DataPoints {
     public fun heartRate(
         @FloatRange(from = 0.0, to = 300.0) bpm: Double,
         timeDurationFromBoot: Duration,
-        accuracy: HeartRateAccuracy? = null
+        accuracy: HeartRateAccuracy? = null,
     ): SampleDataPoint<Double> {
         if (bpm !in 0.0..300.0) {
             Log.w(TAG, "heartRate value $bpm is out of range")
@@ -474,7 +484,7 @@ internal object DataPoints {
             dataType = DataType.HEART_RATE_BPM,
             value = bpm,
             timeDurationFromBoot = timeDurationFromBoot,
-            accuracy = accuracy
+            accuracy = accuracy,
         )
     }
 
@@ -482,12 +492,12 @@ internal object DataPoints {
      * Creates a new [StatisticalDataPoint] of type [DataType.HEART_RATE_BPM] with the given
      * min/max/average beats per minute.
      *
-     * @param minBpm lowest observed heart rate given in beats per minute in this interval,
-     * Range from 0.0 to 300.0
-     * @param maxBpm highest observed heart rate given in beats per minute in this interval,
-     * Range from 0.0 to 300.0
+     * @param minBpm lowest observed heart rate given in beats per minute in this interval, Range
+     *   from 0.0 to 300.0
+     * @param maxBpm highest observed heart rate given in beats per minute in this interval, Range
+     *   from 0.0 to 300.0
      * @param averageBpm average observed heart rate given in beats per minute in this interval,
-     * Range from 0.0 to 300.0
+     *   Range from 0.0 to 300.0
      * @param startTime the point in time this data point begins
      * @param endTime the point in time this data point ends
      */
@@ -514,7 +524,7 @@ internal object DataPoints {
             max = maxBpm,
             average = averageBpm,
             start = startTime,
-            end = endTime
+            end = endTime,
         )
     }
 
@@ -522,7 +532,7 @@ internal object DataPoints {
      * Creates a new [IntervalDataPoint] of type [DataType.STEPS_DAILY] with the given [dailySteps].
      *
      * @param dailySteps number of steps taken today, between [startDurationFromBoot] and
-     * [endDurationFromBoot], Range from 0 to 1000000
+     *   [endDurationFromBoot], Range from 0 to 1000000
      * @param startDurationFromBoot the point in time this data point begins
      * @param endDurationFromBoot the point in time this data point ends
      */
@@ -530,7 +540,7 @@ internal object DataPoints {
     public fun dailySteps(
         @IntRange(from = 0, to = 1000000) dailySteps: Long,
         startDurationFromBoot: Duration,
-        endDurationFromBoot: Duration
+        endDurationFromBoot: Duration,
     ): IntervalDataPoint<Long> {
         if (dailySteps !in 0..1000000) {
             Log.w(TAG, "dailySteps value $dailySteps is out of range")
@@ -539,7 +549,7 @@ internal object DataPoints {
             dataType = DataType.STEPS_DAILY,
             value = dailySteps,
             startDurationFromBoot = startDurationFromBoot,
-            endDurationFromBoot = endDurationFromBoot
+            endDurationFromBoot = endDurationFromBoot,
         )
     }
 
@@ -547,7 +557,7 @@ internal object DataPoints {
      * Creates a new [IntervalDataPoint] of type [DataType.FLOORS_DAILY] with the given [floors].
      *
      * @param floors number of floors ascended today, between [startDurationFromBoot] and
-     * [endDurationFromBoot], Range from 0.0 to 1000000.0
+     *   [endDurationFromBoot], Range from 0.0 to 1000000.0
      * @param startDurationFromBoot the point in time this data point begins
      * @param endDurationFromBoot the point in time this data point ends
      */
@@ -555,7 +565,7 @@ internal object DataPoints {
     public fun dailyFloors(
         @FloatRange(from = 0.0, to = 1000000.0) floors: Double,
         startDurationFromBoot: Duration,
-        endDurationFromBoot: Duration
+        endDurationFromBoot: Duration,
     ): IntervalDataPoint<Double> {
         if (floors !in 0.0..1000000.0) {
             Log.w(TAG, "dailyFloors value $floors is out of range")
@@ -564,7 +574,7 @@ internal object DataPoints {
             dataType = DataType.FLOORS_DAILY,
             value = floors,
             startDurationFromBoot = startDurationFromBoot,
-            endDurationFromBoot = endDurationFromBoot
+            endDurationFromBoot = endDurationFromBoot,
         )
     }
 
@@ -573,7 +583,7 @@ internal object DataPoints {
      * [calories].
      *
      * @param calories number of calories burned today including both active and passive / BMR,
-     * between [startDurationFromBoot] and [endDurationFromBoot], Range from 0.0 to 1000000.0
+     *   between [startDurationFromBoot] and [endDurationFromBoot], Range from 0.0 to 1000000.0
      * @param startDurationFromBoot the point in time this data point begins
      * @param endDurationFromBoot the point in time this data point ends
      */
@@ -581,7 +591,7 @@ internal object DataPoints {
     public fun dailyCalories(
         @FloatRange(from = 0.0, to = 1000000.0) calories: Double,
         startDurationFromBoot: Duration,
-        endDurationFromBoot: Duration
+        endDurationFromBoot: Duration,
     ): IntervalDataPoint<Double> {
         if (calories in 0.0..1000000.0) {
             Log.w(TAG, "dailyCalories value $calories is out of range")
@@ -590,7 +600,7 @@ internal object DataPoints {
             dataType = DataType.CALORIES_DAILY,
             value = calories,
             startDurationFromBoot = startDurationFromBoot,
-            endDurationFromBoot = endDurationFromBoot
+            endDurationFromBoot = endDurationFromBoot,
         )
     }
 
@@ -598,7 +608,7 @@ internal object DataPoints {
      * Creates a new [IntervalDataPoint] of type [DataType.DISTANCE_DAILY] with the given [meters].
      *
      * @param meters number of meters traveled today through active/passive exercise between
-     * [startDurationFromBoot] and [endDurationFromBoot], Range from 0.0 to 1000000.0
+     *   [startDurationFromBoot] and [endDurationFromBoot], Range from 0.0 to 1000000.0
      * @param startDurationFromBoot the point in time this data point begins
      * @param endDurationFromBoot the point in time this data point ends
      */
@@ -615,7 +625,7 @@ internal object DataPoints {
             dataType = DataType.DISTANCE_DAILY,
             value = meters,
             startDurationFromBoot = startDurationFromBoot,
-            endDurationFromBoot = endDurationFromBoot
+            endDurationFromBoot = endDurationFromBoot,
         )
     }
 
@@ -632,16 +642,16 @@ internal object DataPoints {
     public fun dailyElevationGain(
         @FloatRange(from = 0.0, to = 1000000.0) meters: Double,
         startDurationFromBoot: Duration,
-        endDurationFromBoot: Duration
-      ): IntervalDataPoint<Double> {
+        endDurationFromBoot: Duration,
+    ): IntervalDataPoint<Double> {
         if (meters !in 0.0..1000000.0) {
-          Log.w(TAG, "meters value $meters is out of range")
+            Log.w(TAG, "meters value $meters is out of range")
         }
         return IntervalDataPoint(
             dataType = DataType.ELEVATION_GAIN_DAILY,
             value = meters,
             startDurationFromBoot = startDurationFromBoot,
-            endDurationFromBoot = endDurationFromBoot
+            endDurationFromBoot = endDurationFromBoot,
         )
     }
 }

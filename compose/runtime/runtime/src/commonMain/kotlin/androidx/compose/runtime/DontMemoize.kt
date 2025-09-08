@@ -17,10 +17,9 @@
 package androidx.compose.runtime
 
 /**
- * Mark a lambda in composition to opt out of auto-memoization.
- * This annotation can be applied to individual lambdas e.g.
- * val foo = @DontMemoize { ... }
+ * Mark a lambda in composition to opt out of auto-memoization. This annotation can be applied to
+ * individual lambdas e.g. val foo = @DontMemoize { ... }
  */
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.EXPRESSION)
-annotation class DontMemoize
+public annotation class DontMemoize

@@ -25,14 +25,11 @@ import java.io.OutputStream
 class TestingSerializer(
     @Volatile var failReadWithCorruptionException: Boolean = false,
     @Volatile var failingRead: Boolean = false,
-    @Volatile var failingWrite: Boolean = false
+    @Volatile var failingWrite: Boolean = false,
 ) : Serializer<Byte> {
     override suspend fun readFrom(input: InputStream): Byte {
         if (failReadWithCorruptionException) {
-            throw CorruptionException(
-                "CorruptionException",
-                IOException()
-            )
+            throw CorruptionException("CorruptionException", IOException())
         }
 
         if (failingRead) {

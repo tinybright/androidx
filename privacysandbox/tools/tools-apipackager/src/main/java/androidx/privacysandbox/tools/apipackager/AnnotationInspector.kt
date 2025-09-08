@@ -30,20 +30,21 @@ import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 
 internal object AnnotationInspector {
-    private val privacySandboxAnnotations = setOf(
-        PrivacySandboxCallback::class,
-        PrivacySandboxInterface::class,
-        PrivacySandboxService::class,
-        PrivacySandboxValue::class,
-        GeneratedPublicApi::class,
-    )
+    private val privacySandboxAnnotations =
+        setOf(
+            PrivacySandboxCallback::class,
+            PrivacySandboxInterface::class,
+            PrivacySandboxService::class,
+            PrivacySandboxValue::class,
+            GeneratedPublicApi::class,
+        )
 
     fun hasPrivacySandboxAnnotation(classFile: Path): Boolean {
         val reader = ClassReader(classFile.readBytes())
         val annotationExtractor = AnnotationExtractor()
         reader.accept(
             annotationExtractor,
-            ClassReader.SKIP_CODE or ClassReader.SKIP_DEBUG or ClassReader.SKIP_FRAMES
+            ClassReader.SKIP_CODE or ClassReader.SKIP_DEBUG or ClassReader.SKIP_FRAMES,
         )
         return annotationExtractor.hasPrivacySandboxAnnotation
     }

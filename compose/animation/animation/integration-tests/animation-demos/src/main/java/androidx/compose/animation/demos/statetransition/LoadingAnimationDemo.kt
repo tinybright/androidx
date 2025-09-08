@@ -56,9 +56,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun LoadingAnimationDemo() {
     val isLoading = remember { mutableStateOf(true) }
-    Box(Modifier.fillMaxSize().background(BackgroundColor).clickable {
-        isLoading.value = false
-    }) {
+    Box(Modifier.fillMaxSize().background(BackgroundColor).clickable { isLoading.value = false }) {
         ActualContent()
         LoadingOverlay(isLoading = isLoading)
     }
@@ -72,43 +70,27 @@ fun LoadingAnimationDemo() {
 @Composable
 fun ActualContent() {
     Column(Modifier.padding(top = 20.dp, start = 20.dp, end = 20.dp)) {
-        Surface(
-            shape = RoundedCornerShape(10.dp),
-        ) {
+        Surface(shape = RoundedCornerShape(10.dp)) {
             val painter = painterResource(R.drawable.yt_profile)
-            Image(
-                painter,
-                "Profile Picture",
-            )
+            Image(painter, "Profile Picture")
         }
         Text(
             text = "YT (油条)",
             fontFamily = FontFamily(typeface = Typeface.SANS_SERIF),
             fontSize = 40.sp,
             color = Color(0xff173d6e),
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-                .padding(top = 10.dp, bottom = 5.dp)
+            modifier =
+                Modifier.align(Alignment.CenterHorizontally).padding(top = 10.dp, bottom = 5.dp),
         )
         Row {
-            Text(
-                "Age:",
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.width(80.dp)
-            )
+            Text("Age:", fontWeight = FontWeight.Bold, modifier = Modifier.width(80.dp))
             Text("10")
         }
         Row {
-            Text(
-                "Breed:",
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.width(80.dp)
-            )
+            Text("Breed:", fontWeight = FontWeight.Bold, modifier = Modifier.width(80.dp))
             Text("Tabby")
         }
-        Text(
-            "About Me:",
-            fontWeight = FontWeight.Bold,
-        )
+        Text("About Me:", fontWeight = FontWeight.Bold)
         Text(
             "I have been taking care of the humans in my household since 10 years ago." +
                 " They like to stare at various sized glowing boxes for hours on end. I need" +
@@ -125,9 +107,7 @@ val GradientColor: Color = Color(0xff173d6e)
 val BackgroundColor: Color = Color(0xffdbe5ef)
 
 @Composable
-fun LoadingOverlay(
-    isLoading: State<Boolean>
-) {
+fun LoadingOverlay(isLoading: State<Boolean>) {
     val fraction = remember { Animatable(0f) }
     var reveal by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -143,28 +123,21 @@ fun LoadingOverlay(
         Box(Modifier.fillMaxSize().background(BackgroundColor)) {
             Text(
                 "Tap anywhere to finish loading. \n Time out in 10 seconds.",
-                Modifier.align(Alignment.Center)
+                Modifier.align(Alignment.Center),
             )
         }
     }
 
     // Draw gradient..
     Box(
-        Modifier
-            .fillMaxSize()
-            .drawWithCache {
-                val gradient = Brush.verticalGradient(
-                    listOf(
-                        Color.Transparent,
-                        GradientColor.copy(alpha = 0.2f),
-                        BackgroundColor
-                    ),
+        Modifier.fillMaxSize().drawWithCache {
+            val gradient =
+                Brush.verticalGradient(
+                    listOf(Color.Transparent, GradientColor.copy(alpha = 0.2f), BackgroundColor),
                     startY = size.height * (fraction.value - 0.1f),
-                    endY = size.height * (fraction.value + 0.1f)
+                    endY = size.height * (fraction.value + 0.1f),
                 )
-                onDrawWithContent {
-                    drawRect(gradient)
-                }
-            }
+            onDrawWithContent { drawRect(gradient) }
+        }
     )
 }

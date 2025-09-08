@@ -36,8 +36,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @MediumTest
 class TextPreparedSelectionTest {
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     @Test
     fun textSelection_leftRightMovements() {
@@ -210,51 +209,47 @@ class TextPreparedSelectionTest {
         val prepared: BaseTextPreparedSelection<T>
     ) {
         fun expectedText(text: String) {
-            rule.runOnIdle {
-                Truth.assertThat(prepared.text).isEqualTo(text)
-            }
+            rule.runOnIdle { Truth.assertThat(prepared.text).isEqualTo(text) }
         }
 
         fun expectedSelection(selection: TextRange) {
-            rule.runOnIdle {
-                Truth.assertThat(prepared.selection).isEqualTo(selection)
-            }
+            rule.runOnIdle { Truth.assertThat(prepared.selection).isEqualTo(selection) }
         }
 
-        fun cursorAt(char: Char) =
-            TextRange(prepared.text.indexOf(char))
+        fun cursorAt(char: Char) = TextRange(prepared.text.indexOf(char))
 
-        fun cursorAfter(char: Char) =
-            TextRange(prepared.text.indexOf(char) + 1)
+        fun cursorAfter(char: Char) = TextRange(prepared.text.indexOf(char) + 1)
     }
 
     private fun selectionTest(
         initText: String = "",
         initSelection: TextRange = TextRange(0),
         rtl: Boolean = false,
-        test: SelectionScope<TextPreparedSelection>.(TextPreparedSelection) -> Unit
+        test: SelectionScope<TextPreparedSelection>.(TextPreparedSelection) -> Unit,
     ) {
         var textLayout: TextLayoutResult? = null
-        val direction = if (rtl) {
-            LayoutDirection.Rtl
-        } else {
-            LayoutDirection.Ltr
-        }
+        val direction =
+            if (rtl) {
+                LayoutDirection.Rtl
+            } else {
+                LayoutDirection.Ltr
+            }
         rule.setContent {
             CompositionLocalProvider(LocalLayoutDirection provides direction) {
                 BasicText(
                     text = initText,
                     style = TextStyle(fontFamily = TEST_FONT_FAMILY),
-                    onTextLayout = { textLayout = it }
+                    onTextLayout = { textLayout = it },
                 )
             }
         }
 
-        val prepared = TextPreparedSelection(
-            originalText = AnnotatedString(initText),
-            originalSelection = initSelection,
-            layoutResult = textLayout!!
-        )
+        val prepared =
+            TextPreparedSelection(
+                originalText = AnnotatedString(initText),
+                originalSelection = initSelection,
+                layoutResult = textLayout!!,
+            )
 
         test(SelectionScope(prepared), prepared)
     }

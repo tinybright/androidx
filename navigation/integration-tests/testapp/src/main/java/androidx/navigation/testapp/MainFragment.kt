@@ -30,15 +30,13 @@ import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.transition.Slide
 
-/**
- * Fragment used to show how to navigate to another destination
- */
+/** Fragment used to show how to navigate to another destination */
 class MainFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         enterTransition = Slide(Gravity.RIGHT)
         exitTransition = Slide(Gravity.LEFT)
@@ -70,15 +68,11 @@ class MainFragment : Fragment() {
         val b = view.findViewById<Button>(R.id.next_button)
         ViewCompat.setTransitionName(b, "next")
         b.setOnClickListener {
-            findNavController().navigate(
-                R.id.next, null, null,
-                FragmentNavigatorExtras(b to "next")
-            )
+            findNavController()
+                .navigate(R.id.next, null, null, FragmentNavigatorExtras(b to "next"))
         }
         view.findViewById<Button>(R.id.learn_more).setOnClickListener {
-            val args = Bundle().apply {
-                putString("myarg", myarg)
-            }
+            val args = Bundle().apply { putString("myarg", myarg) }
             findNavController().navigate(R.id.learn_more, args, null)
         }
     }

@@ -31,6 +31,7 @@ import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
 import androidx.work.testing.workers.TestListenableWorker
 import androidx.work.testing.workers.TestWorker
+import java.lang.IllegalStateException
 import java.util.UUID
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executor
@@ -41,6 +42,7 @@ import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.notNullValue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -86,19 +88,17 @@ class TestWorkerBuilderTest {
     @Test
     @SmallTest
     fun testBuilder() {
-        val request = OneTimeWorkRequestBuilder<TestWorker>()
-            .addTag("test")
-            .build()
+        val request = OneTimeWorkRequestBuilder<TestWorker>().addTag("test").build()
 
         val contentUris = arrayOf(Uri.parse("android.test://1"))
         val authorities = arrayOf("android.test")
 
-        val builder = TestListenableWorkerBuilder.from(context, request)
-            .setRunAttemptCount(2)
+        val builder = TestListenableWorkerBuilder.from(context, request).setRunAttemptCount(2)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            builder.setTriggeredContentAuthorities(authorities.toList())
-            .setTriggeredContentUris(contentUris.toList())
+            builder
+                .setTriggeredContentAuthorities(authorities.toList())
+                .setTriggeredContentUris(contentUris.toList())
         }
 
         val worker = builder.build()
@@ -138,13 +138,11 @@ class TestWorkerBuilderTest {
     @Test
     @SmallTest
     fun testWorkerBuilder_returnsExpectedType2() {
-        val listenableWorker: TestWorker = TestListenableWorkerBuilder<TestWorker>(context)
-            .setId(UUID.randomUUID())
-            .build()
+        val listenableWorker: TestWorker =
+            TestListenableWorkerBuilder<TestWorker>(context).setId(UUID.randomUUID()).build()
 
-        val worker: TestWorker = TestWorkerBuilder<TestWorker>(context, executor)
-            .setId(UUID.randomUUID())
-            .build()
+        val worker: TestWorker =
+            TestWorkerBuilder<TestWorker>(context, executor).setId(UUID.randomUUID()).build()
 
         assertThat(listenableWorker, notNullValue())
         assertThat(worker, notNullValue())
@@ -171,24 +169,71 @@ class TestWorkerBuilderTest {
     @MediumTest
     fun testWorkerBuilder_usesWorkerFactory() {
         var callCounter = 0
-        val workerFactory = object : WorkerFactory() {
-            override fun createWorker(
-                appContext: Context,
-                workerClassName: String,
-                workerParameters: WorkerParameters
-            ): ListenableWorker? {
-                callCounter++
-                return null
+        val workerFactory =
+            object : WorkerFactory() {
+                override fun createWorker(
+                    appContext: Context,
+                    workerClassName: String,
+                    workerParameters: WorkerParameters,
+                ): ListenableWorker? {
+                    callCounter++
+                    return null
+                }
             }
-        }
-        val worker = TestListenableWorkerBuilder<TestWorker>(context)
-            .setWorkerFactory(workerFactory)
-            .build()
+        val worker =
+            TestListenableWorkerBuilder<TestWorker>(context).setWorkerFactory(workerFactory).build()
 
         runBlocking {
             val result = worker.startWork().await()
             assertThat(callCounter, `is`(1))
             assertThat(result, `is`(Result.success()))
+        }
+    }
+
+    @Test
+    @MediumTest
+    fun testWorkerBuilder_workerFactoryCreatesCorrectTypeFromEnqueuedWorkerClass_succeeds() {
+        var callCounter = 0
+        val workerFactory =
+            object : WorkerFactory() {
+                override fun createWorker(
+                    appContext: Context,
+                    workerClassName: String,
+                    workerParameters: WorkerParameters,
+                ): ListenableWorker? {
+                    callCounter++
+                    return TestWorker(appContext, workerParameters)
+                }
+            }
+        val worker =
+            TestListenableWorkerBuilder<TestWorker>(context)
+                .setWorkerFactory(workerFactory)
+                .build(TestListenableWorker::class.java)
+
+        runBlocking {
+            val result = worker.startWork().await()
+            assertThat(callCounter, `is`(1))
+            assertThat(result, `is`(Result.success()))
+        }
+    }
+
+    @Test
+    @SmallTest
+    fun testWorkerBuilder_workerFactoryCreatesWrongTypeFromEnqueuedWorkerClass_throws() {
+        val workerBuilder = TestListenableWorkerBuilder<TestWorker>(context)
+
+        try {
+            workerBuilder.build(TestListenableWorker::class.java)
+            fail("Expected exception thrown from worker being wrong type")
+        } catch (e: IllegalStateException) {
+            assertThat(
+                e.message,
+                `is`(
+                    "Unexpected worker type class " +
+                        "androidx.work.testing.workers.TestListenableWorker " +
+                        "(expected class androidx.work.testing.workers.TestWorker )"
+                ),
+            )
         }
     }
 }

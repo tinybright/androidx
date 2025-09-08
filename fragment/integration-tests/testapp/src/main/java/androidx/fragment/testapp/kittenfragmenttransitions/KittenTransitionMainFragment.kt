@@ -23,19 +23,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.testapp.R
 
-/**
- * Main activity that holds our fragments
- */
+/** Main activity that holds our fragments */
 class KittenTransitionMainFragment : Fragment(R.layout.kitten_activity_main) {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         if (savedInstanceState == null) {
-            parentFragmentManager.beginTransaction()
-                .setPrimaryNavigationFragment(this)
-                .commit()
+            parentFragmentManager.beginTransaction().setPrimaryNavigationFragment(this).commit()
         }
 
         return super.onCreateView(inflater, container, savedInstanceState)

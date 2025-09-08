@@ -16,6 +16,9 @@
 
 package androidx.compose.foundation
 
+import android.content.Context
+import android.view.ViewConfiguration
+import androidx.compose.foundation.gestures.AndroidConfig
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -25,6 +28,8 @@ import androidx.compose.testutils.assertIsEqualTo
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.test.MouseInjectionScope
+import androidx.compose.ui.test.ScrollWheel
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertLeftPositionInRootIsEqualTo
@@ -42,8 +47,7 @@ import androidx.compose.ui.unit.dp
 import org.junit.Rule
 
 open class BaseLazyLayoutTestWithOrientation(private val orientation: Orientation) {
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     val vertical: Boolean
         get() = orientation == Orientation.Vertical
@@ -83,7 +87,7 @@ open class BaseLazyLayoutTestWithOrientation(private val orientation: Orientatio
                 swipeWithVelocity(
                     start = center,
                     end = Offset(center.x - offsetX, center.y - offsetY),
-                    endVelocity = 0f
+                    endVelocity = 0f,
                 )
             }
         }
@@ -111,11 +115,12 @@ open class BaseLazyLayoutTestWithOrientation(private val orientation: Orientatio
         }
 
     fun SemanticsNodeInteraction.assertStartPositionIsAlmost(expected: Dp) {
-        val position = if (vertical) {
-            getUnclippedBoundsInRoot().top
-        } else {
-            getUnclippedBoundsInRoot().left
-        }
+        val position =
+            if (vertical) {
+                getUnclippedBoundsInRoot().top
+            } else {
+                getUnclippedBoundsInRoot().left
+            }
         position.assertIsEqualTo(expected, tolerance = 1.dp)
     }
 
@@ -140,44 +145,50 @@ open class BaseLazyLayoutTestWithOrientation(private val orientation: Orientatio
             assertTopPositionInRootIsEqualTo(expectedStart)
         }
 
-    fun SemanticsNodeInteraction.assertAxisBounds(
-        offset: DpOffset,
-        size: DpSize
-    ) =
+    fun SemanticsNodeInteraction.assertAxisBounds(offset: DpOffset, size: DpSize) =
         assertMainAxisStartPositionInRootIsEqualTo(offset.y)
             .assertCrossAxisStartPositionInRootIsEqualTo(offset.x)
             .assertMainAxisSizeIsEqualTo(size.height)
             .assertCrossAxisSizeIsEqualTo(size.width)
 
-    fun PaddingValues(
-        mainAxis: Dp = 0.dp,
-        crossAxis: Dp = 0.dp
-    ) = PaddingValues(
-        beforeContent = mainAxis,
-        afterContent = mainAxis,
-        beforeContentCrossAxis = crossAxis,
-        afterContentCrossAxis = crossAxis
-    )
+    fun PaddingValues(mainAxis: Dp = 0.dp, crossAxis: Dp = 0.dp) =
+        PaddingValues(
+            beforeContent = mainAxis,
+            afterContent = mainAxis,
+            beforeContentCrossAxis = crossAxis,
+            afterContentCrossAxis = crossAxis,
+        )
 
     fun PaddingValues(
         beforeContent: Dp = 0.dp,
         afterContent: Dp = 0.dp,
         beforeContentCrossAxis: Dp = 0.dp,
         afterContentCrossAxis: Dp = 0.dp,
-    ) = if (vertical) {
-        androidx.compose.foundation.layout.PaddingValues(
-            start = beforeContentCrossAxis,
-            top = beforeContent,
-            end = afterContentCrossAxis,
-            bottom = afterContent
-        )
-    } else {
-        androidx.compose.foundation.layout.PaddingValues(
-            start = beforeContent,
-            top = beforeContentCrossAxis,
-            end = afterContent,
-            bottom = afterContentCrossAxis
-        )
+    ) =
+        if (vertical) {
+            androidx.compose.foundation.layout.PaddingValues(
+                start = beforeContentCrossAxis,
+                top = beforeContent,
+                end = afterContentCrossAxis,
+                bottom = afterContent,
+            )
+        } else {
+            androidx.compose.foundation.layout.PaddingValues(
+                start = beforeContent,
+                top = beforeContentCrossAxis,
+                end = afterContent,
+                bottom = afterContentCrossAxis,
+            )
+        }
+
+    fun MouseInjectionScope.mouseWheelScrollAcrossMainAxis(context: Context, deltaPx: Float) {
+        with(AndroidConfig(ViewConfiguration.get(context))) {
+            if (vertical) {
+                scroll(deltaPx / getVerticalScrollFactor(), ScrollWheel.Vertical)
+            } else {
+                scroll(deltaPx / getHorizontalScrollFactor(), ScrollWheel.Horizontal)
+            }
+        }
     }
 
     internal fun Modifier.debugBorder(color: Color = Color.Black) = border(1.dp, color)

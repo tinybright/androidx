@@ -24,13 +24,13 @@ import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSValueParameter
 
 /**
- * A synthetic element the represents and overload of constructor that exist
- * in kapt, but not in ksp.
+ * A synthetic element the represents and overload of constructor that exist in kapt, but not in
+ * ksp.
  */
 internal class KspSyntheticConstructorElement(
     env: KspProcessingEnv,
     declaration: KSFunctionDeclaration,
-    valueParameters: List<KSValueParameter>
+    valueParameters: List<KSValueParameter>,
 ) : KspConstructorElement(env, declaration) {
 
     override fun isSyntheticConstructorForJvmOverloads() = true
@@ -41,7 +41,7 @@ internal class KspSyntheticConstructorElement(
                 env = env,
                 enclosingElement = this,
                 parameter = param,
-                parameterIndex = index
+                parameterIndex = index,
             )
         }
     }

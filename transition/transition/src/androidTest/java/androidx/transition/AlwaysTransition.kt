@@ -19,9 +19,7 @@ import android.animation.Animator
 import android.animation.ValueAnimator
 import android.view.ViewGroup
 
-/**
- * A test transition that always provides an animation, regardless of start/end state
- */
+/** A test transition that always provides an animation, regardless of start/end state */
 class AlwaysTransition(private val keyPrefix: String) : Transition() {
     override fun captureStartValues(transitionValues: TransitionValues) {
         transitionValues.values[keyPrefix + Key] = AlwaysChangingValue++
@@ -36,7 +34,7 @@ class AlwaysTransition(private val keyPrefix: String) : Transition() {
     override fun createAnimator(
         sceneRoot: ViewGroup,
         startValues: TransitionValues?,
-        endValues: TransitionValues?
+        endValues: TransitionValues?,
     ): Animator = ValueAnimator.ofFloat(0f, 100f)
 
     companion object {

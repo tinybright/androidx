@@ -55,7 +55,7 @@ class SingleBufferedCanvasRendererTest {
         val topLeft: Int,
         val topRight: Int,
         val bottomLeft: Int,
-        val bottomRight: Int
+        val bottomRight: Int,
     )
 
     @Test
@@ -66,14 +66,14 @@ class SingleBufferedCanvasRendererTest {
                 topLeft = Color.RED,
                 topRight = Color.YELLOW,
                 bottomRight = Color.BLUE,
-                bottomLeft = Color.GREEN
+                bottomLeft = Color.GREEN,
             ),
             RectColors(
                 topLeft = Color.RED,
                 topRight = Color.YELLOW,
                 bottomRight = Color.BLUE,
-                bottomLeft = Color.GREEN
-            )
+                bottomLeft = Color.GREEN,
+            ),
         )
     }
 
@@ -86,14 +86,14 @@ class SingleBufferedCanvasRendererTest {
                 topLeft = Color.RED,
                 topRight = Color.YELLOW,
                 bottomRight = Color.BLUE,
-                bottomLeft = Color.GREEN
+                bottomLeft = Color.GREEN,
             ),
             RectColors(
                 topLeft = Color.YELLOW,
                 topRight = Color.BLUE,
                 bottomRight = Color.GREEN,
-                bottomLeft = Color.RED
-            )
+                bottomLeft = Color.RED,
+            ),
         )
     }
 
@@ -105,14 +105,14 @@ class SingleBufferedCanvasRendererTest {
                 topLeft = Color.RED,
                 topRight = Color.YELLOW,
                 bottomRight = Color.BLUE,
-                bottomLeft = Color.GREEN
+                bottomLeft = Color.GREEN,
             ),
             RectColors(
                 topLeft = Color.BLUE,
                 topRight = Color.GREEN,
                 bottomRight = Color.RED,
-                bottomLeft = Color.YELLOW
-            )
+                bottomLeft = Color.YELLOW,
+            ),
         )
     }
 
@@ -125,46 +125,49 @@ class SingleBufferedCanvasRendererTest {
                 topLeft = Color.RED,
                 topRight = Color.YELLOW,
                 bottomRight = Color.BLUE,
-                bottomLeft = Color.GREEN
+                bottomLeft = Color.GREEN,
             ),
             RectColors(
                 topLeft = Color.GREEN,
                 topRight = Color.RED,
                 bottomRight = Color.YELLOW,
-                bottomLeft = Color.BLUE
-            )
+                bottomLeft = Color.BLUE,
+            ),
         )
     }
 
     @Test
     fun testClearRenderer() {
-        val transformer = BufferTransformer().apply {
-            computeTransform(TEST_WIDTH, TEST_HEIGHT, BUFFER_TRANSFORM_IDENTITY)
-        }
+        val transformer =
+            BufferTransformer().apply {
+                computeTransform(TEST_WIDTH, TEST_HEIGHT, BUFFER_TRANSFORM_IDENTITY)
+            }
         val executor = HandlerThreadExecutor("thread")
         val firstRenderLatch = CountDownLatch(1)
         val clearLatch = CountDownLatch(2)
         var buffer: HardwareBuffer? = null
-        val renderer = SingleBufferedCanvasRenderer(
-            TEST_WIDTH,
-            TEST_HEIGHT,
-            transformer,
-            executor,
-            object : SingleBufferedCanvasRenderer.RenderCallbacks<Unit> {
-                override fun render(canvas: Canvas, width: Int, height: Int, param: Unit) {
-                    canvas.drawColor(Color.RED)
-                }
+        val renderer =
+            SingleBufferedCanvasRenderer(
+                TEST_WIDTH,
+                TEST_HEIGHT,
+                transformer,
+                executor,
+                object : SingleBufferedCanvasRenderer.RenderCallbacks<Unit> {
+                    override fun render(canvas: Canvas, width: Int, height: Int, param: Unit) {
+                        canvas.drawColor(Color.RED)
+                    }
 
-                override fun onBufferReady(
-                    hardwareBuffer: HardwareBuffer,
-                    syncFenceCompat: SyncFenceCompat?
-                ) {
-                    syncFenceCompat?.awaitForever()
-                    buffer = hardwareBuffer
-                    firstRenderLatch.countDown()
-                    clearLatch.countDown()
-                }
-            })
+                    override fun onBufferReady(
+                        hardwareBuffer: HardwareBuffer,
+                        syncFenceCompat: SyncFenceCompat?,
+                    ) {
+                        syncFenceCompat?.awaitForever()
+                        buffer = hardwareBuffer
+                        firstRenderLatch.countDown()
+                        clearLatch.countDown()
+                    }
+                },
+            )
         try {
             renderer.render(Unit)
             firstRenderLatch.await(3000, TimeUnit.MILLISECONDS)
@@ -172,8 +175,9 @@ class SingleBufferedCanvasRendererTest {
             assertTrue(clearLatch.await(3000, TimeUnit.MILLISECONDS))
             assertNotNull(buffer)
             val colorSpace = ColorSpace.get(ColorSpace.Named.LINEAR_SRGB)
-            val bitmap = Bitmap.wrapHardwareBuffer(buffer!!, colorSpace)
-                ?.copy(Bitmap.Config.ARGB_8888, false)
+            val bitmap =
+                Bitmap.wrapHardwareBuffer(buffer!!, colorSpace)
+                    ?.copy(Bitmap.Config.ARGB_8888, false)
             assertNotNull(bitmap)
             assertTrue(bitmap!!.isAllColor(Color.TRANSPARENT))
         } finally {
@@ -189,34 +193,37 @@ class SingleBufferedCanvasRendererTest {
     @Ignore // b/321800558
     @Test
     fun testCancelPending() {
-        val transformer = BufferTransformer().apply {
-            computeTransform(TEST_WIDTH, TEST_HEIGHT, BUFFER_TRANSFORM_IDENTITY)
-        }
+        val transformer =
+            BufferTransformer().apply {
+                computeTransform(TEST_WIDTH, TEST_HEIGHT, BUFFER_TRANSFORM_IDENTITY)
+            }
         val executor = HandlerThreadExecutor("thread")
         var buffer: HardwareBuffer? = null
         val initialDrawLatch = CountDownLatch(1)
 
         var drawCancelledRequestLatch: CountDownLatch? = null
-        val renderer = SingleBufferedCanvasRenderer(
-            TEST_WIDTH,
-            TEST_HEIGHT,
-            transformer,
-            executor,
-            object : SingleBufferedCanvasRenderer.RenderCallbacks<Int> {
-                override fun render(canvas: Canvas, width: Int, height: Int, param: Int) {
-                    canvas.drawColor(param)
-                }
+        val renderer =
+            SingleBufferedCanvasRenderer(
+                TEST_WIDTH,
+                TEST_HEIGHT,
+                transformer,
+                executor,
+                object : SingleBufferedCanvasRenderer.RenderCallbacks<Int> {
+                    override fun render(canvas: Canvas, width: Int, height: Int, param: Int) {
+                        canvas.drawColor(param)
+                    }
 
-                override fun onBufferReady(
-                    hardwareBuffer: HardwareBuffer,
-                    syncFenceCompat: SyncFenceCompat?
-                ) {
-                    syncFenceCompat?.awaitForever()
-                    buffer = hardwareBuffer
-                    initialDrawLatch.countDown()
-                    drawCancelledRequestLatch?.countDown()
-                }
-            })
+                    override fun onBufferReady(
+                        hardwareBuffer: HardwareBuffer,
+                        syncFenceCompat: SyncFenceCompat?,
+                    ) {
+                        syncFenceCompat?.awaitForever()
+                        buffer = hardwareBuffer
+                        initialDrawLatch.countDown()
+                        drawCancelledRequestLatch?.countDown()
+                    }
+                },
+            )
         try {
             renderer.render(Color.RED)
             assertTrue(initialDrawLatch.await(3000, TimeUnit.MILLISECONDS))
@@ -230,8 +237,9 @@ class SingleBufferedCanvasRendererTest {
             assertFalse(drawCancelledRequestLatch.await(1000, TimeUnit.MILLISECONDS))
             assertNotNull(buffer)
             val colorSpace = ColorSpace.get(ColorSpace.Named.LINEAR_SRGB)
-            val bitmap = Bitmap.wrapHardwareBuffer(buffer!!, colorSpace)
-                ?.copy(Bitmap.Config.ARGB_8888, false)
+            val bitmap =
+                Bitmap.wrapHardwareBuffer(buffer!!, colorSpace)
+                    ?.copy(Bitmap.Config.ARGB_8888, false)
             assertNotNull(bitmap)
             assertTrue(bitmap!!.isAllColor(Color.RED))
         } finally {
@@ -246,27 +254,30 @@ class SingleBufferedCanvasRendererTest {
 
     @Test
     fun testMultiReleasesDoesNotCrash() {
-        val transformer = BufferTransformer().apply {
-            computeTransform(TEST_WIDTH, TEST_HEIGHT, BUFFER_TRANSFORM_IDENTITY)
-        }
+        val transformer =
+            BufferTransformer().apply {
+                computeTransform(TEST_WIDTH, TEST_HEIGHT, BUFFER_TRANSFORM_IDENTITY)
+            }
         val executor = HandlerThreadExecutor("thread")
-        val renderer = SingleBufferedCanvasRenderer(
-            TEST_WIDTH,
-            TEST_HEIGHT,
-            transformer,
-            executor,
-            object : SingleBufferedCanvasRenderer.RenderCallbacks<Void> {
-                override fun render(canvas: Canvas, width: Int, height: Int, param: Void) {
-                    // NO-OP
-                }
+        val renderer =
+            SingleBufferedCanvasRenderer(
+                TEST_WIDTH,
+                TEST_HEIGHT,
+                transformer,
+                executor,
+                object : SingleBufferedCanvasRenderer.RenderCallbacks<Void> {
+                    override fun render(canvas: Canvas, width: Int, height: Int, param: Void) {
+                        // NO-OP
+                    }
 
-                override fun onBufferReady(
-                    hardwareBuffer: HardwareBuffer,
-                    syncFenceCompat: SyncFenceCompat?
-                ) {
-                    // NO-OP
-                }
-            })
+                    override fun onBufferReady(
+                        hardwareBuffer: HardwareBuffer,
+                        syncFenceCompat: SyncFenceCompat?,
+                    ) {
+                        // NO-OP
+                    }
+                },
+            )
         try {
             val latch = CountDownLatch(1)
             renderer.release(true) {
@@ -291,31 +302,34 @@ class SingleBufferedCanvasRendererTest {
         if (!supportsNativeAndroidFence) {
             return
         }
-        val transformer = BufferTransformer().apply {
-            computeTransform(TEST_WIDTH, TEST_HEIGHT, BUFFER_TRANSFORM_IDENTITY)
-        }
+        val transformer =
+            BufferTransformer().apply {
+                computeTransform(TEST_WIDTH, TEST_HEIGHT, BUFFER_TRANSFORM_IDENTITY)
+            }
         val executor = HandlerThreadExecutor("thread")
         var syncFenceNull = false
         var drawLatch: CountDownLatch? = null
-        val renderer = SingleBufferedCanvasRenderer(
-            TEST_WIDTH,
-            TEST_HEIGHT,
-            transformer,
-            executor,
-            object : SingleBufferedCanvasRenderer.RenderCallbacks<Int> {
-                override fun render(canvas: Canvas, width: Int, height: Int, param: Int) {
-                    canvas.drawColor(param)
-                }
+        val renderer =
+            SingleBufferedCanvasRenderer(
+                TEST_WIDTH,
+                TEST_HEIGHT,
+                transformer,
+                executor,
+                object : SingleBufferedCanvasRenderer.RenderCallbacks<Int> {
+                    override fun render(canvas: Canvas, width: Int, height: Int, param: Int) {
+                        canvas.drawColor(param)
+                    }
 
-                override fun onBufferReady(
-                    hardwareBuffer: HardwareBuffer,
-                    syncFenceCompat: SyncFenceCompat?
-                ) {
-                    syncFenceNull = syncFenceCompat == null
-                    syncFenceCompat?.awaitForever()
-                    drawLatch?.countDown()
-                }
-            })
+                    override fun onBufferReady(
+                        hardwareBuffer: HardwareBuffer,
+                        syncFenceCompat: SyncFenceCompat?,
+                    ) {
+                        syncFenceNull = syncFenceCompat == null
+                        syncFenceCompat?.awaitForever()
+                        drawLatch?.countDown()
+                    }
+                },
+            )
         try {
             renderer.isVisible = false
             drawLatch = CountDownLatch(1)
@@ -339,40 +353,43 @@ class SingleBufferedCanvasRendererTest {
 
     @Test
     fun testCancelMidRender() {
-        val transformer = BufferTransformer().apply {
-            computeTransform(TEST_WIDTH, TEST_HEIGHT, BUFFER_TRANSFORM_IDENTITY)
-        }
+        val transformer =
+            BufferTransformer().apply {
+                computeTransform(TEST_WIDTH, TEST_HEIGHT, BUFFER_TRANSFORM_IDENTITY)
+            }
         val cancelLatch = CountDownLatch(1)
         val renderStartLatch = CountDownLatch(1)
         val bufferLatch = CountDownLatch(1)
         var bufferRenderCancelled = false
         val executor = HandlerThreadExecutor("thread")
-        val renderer = SingleBufferedCanvasRenderer(
-            TEST_WIDTH,
-            TEST_HEIGHT,
-            transformer,
-            executor,
-            object : SingleBufferedCanvasRenderer.RenderCallbacks<Int> {
-                override fun render(canvas: Canvas, width: Int, height: Int, param: Int) {
-                    renderStartLatch.countDown()
-                    cancelLatch.await(3000, TimeUnit.MILLISECONDS)
-                }
+        val renderer =
+            SingleBufferedCanvasRenderer(
+                TEST_WIDTH,
+                TEST_HEIGHT,
+                transformer,
+                executor,
+                object : SingleBufferedCanvasRenderer.RenderCallbacks<Int> {
+                    override fun render(canvas: Canvas, width: Int, height: Int, param: Int) {
+                        renderStartLatch.countDown()
+                        cancelLatch.await(3000, TimeUnit.MILLISECONDS)
+                    }
 
-                override fun onBufferReady(
-                    hardwareBuffer: HardwareBuffer,
-                    syncFenceCompat: SyncFenceCompat?
-                ) {
-                    // NO-OP
-                }
+                    override fun onBufferReady(
+                        hardwareBuffer: HardwareBuffer,
+                        syncFenceCompat: SyncFenceCompat?,
+                    ) {
+                        // NO-OP
+                    }
 
-                override fun onBufferCancelled(
-                    hardwareBuffer: HardwareBuffer,
-                    syncFenceCompat: SyncFenceCompat?
-                ) {
-                    bufferRenderCancelled = true
-                    bufferLatch.countDown()
-                }
-            })
+                    override fun onBufferCancelled(
+                        hardwareBuffer: HardwareBuffer,
+                        syncFenceCompat: SyncFenceCompat?,
+                    ) {
+                        bufferRenderCancelled = true
+                        bufferLatch.countDown()
+                    }
+                },
+            )
         try {
             renderer.render(Color.RED)
             renderStartLatch.await(3000, TimeUnit.MILLISECONDS)
@@ -393,53 +410,56 @@ class SingleBufferedCanvasRendererTest {
     private fun testRenderWithTransform(
         transform: Int,
         actualColors: RectColors,
-        expectedColors: RectColors
+        expectedColors: RectColors,
     ) {
         val transformer = BufferTransformer()
         transformer.computeTransform(TEST_WIDTH, TEST_HEIGHT, transform)
         val executor = HandlerThreadExecutor("thread")
         var buffer: HardwareBuffer? = null
         val renderLatch = CountDownLatch(1)
-        val renderer = SingleBufferedCanvasRenderer(
-            TEST_WIDTH,
-            TEST_HEIGHT,
-            transformer,
-            executor,
-            object : SingleBufferedCanvasRenderer.RenderCallbacks<Int> {
-                override fun render(canvas: Canvas, width: Int, height: Int, param: Int) {
-                    drawSquares(
-                        canvas,
-                        width,
-                        height,
-                        actualColors.topLeft,
-                        actualColors.topRight,
-                        actualColors.bottomLeft,
-                        actualColors.bottomRight
-                    )
-                }
+        val renderer =
+            SingleBufferedCanvasRenderer(
+                TEST_WIDTH,
+                TEST_HEIGHT,
+                transformer,
+                executor,
+                object : SingleBufferedCanvasRenderer.RenderCallbacks<Int> {
+                    override fun render(canvas: Canvas, width: Int, height: Int, param: Int) {
+                        drawSquares(
+                            canvas,
+                            width,
+                            height,
+                            actualColors.topLeft,
+                            actualColors.topRight,
+                            actualColors.bottomLeft,
+                            actualColors.bottomRight,
+                        )
+                    }
 
-                override fun onBufferReady(
-                    hardwareBuffer: HardwareBuffer,
-                    syncFenceCompat: SyncFenceCompat?
-                ) {
-                    syncFenceCompat?.awaitForever()
-                    buffer = hardwareBuffer
-                    renderLatch.countDown()
-                }
-            })
+                    override fun onBufferReady(
+                        hardwareBuffer: HardwareBuffer,
+                        syncFenceCompat: SyncFenceCompat?,
+                    ) {
+                        syncFenceCompat?.awaitForever()
+                        buffer = hardwareBuffer
+                        renderLatch.countDown()
+                    }
+                },
+            )
         try {
             renderer.render(0)
             assertTrue(renderLatch.await(3000, TimeUnit.MILLISECONDS))
             assertNotNull(buffer)
             val colorSpace = ColorSpace.get(ColorSpace.Named.LINEAR_SRGB)
-            val bitmap = Bitmap.wrapHardwareBuffer(buffer!!, colorSpace)
-                ?.copy(Bitmap.Config.ARGB_8888, false)
+            val bitmap =
+                Bitmap.wrapHardwareBuffer(buffer!!, colorSpace)
+                    ?.copy(Bitmap.Config.ARGB_8888, false)
             assertNotNull(bitmap)
             bitmap!!.verifyQuadrants(
                 expectedColors.topLeft,
                 expectedColors.topRight,
                 expectedColors.bottomLeft,
-                expectedColors.bottomRight
+                expectedColors.bottomRight,
             )
         } finally {
             val latch = CountDownLatch(1)

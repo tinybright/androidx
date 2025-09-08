@@ -16,8 +16,10 @@
 package androidx.lifecycle
 
 import androidx.kruth.assertThat
+import androidx.lifecycle.viewmodel.IgnoreWebTarget
 import kotlin.test.Test
 
+@IgnoreWebTarget
 class ViewModelStoreTest {
 
     @Test
@@ -38,6 +40,7 @@ class ViewModelStoreTest {
 
     private open class TestViewModel : ViewModel() {
         var cleared = false
+
         public override fun onCleared() {
             cleared = true
         }

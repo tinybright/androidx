@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE") // b/407927787
 
 package androidx.compose.foundation.lazy.list
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
@@ -35,9 +35,12 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberOverscrollEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.LocalPinnableContainer
+import androidx.compose.ui.layout.PinnableContainer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
@@ -45,9 +48,13 @@ import androidx.compose.ui.test.assertLeftPositionInRootIsEqualTo
 import androidx.compose.ui.test.assertTopPositionInRootIsEqualTo
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -56,13 +63,11 @@ import org.junit.runner.RunWith
 
 @LargeTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalFoundationApi::class)
 class LazyListHeadersTest {
 
     private val LazyListTag = "LazyList"
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     @Test
     fun lazyColumnShowsHeader_withoutBeyondBoundsItemCount() {
@@ -73,36 +78,66 @@ class LazyListHeadersTest {
         rule.setContent {
             LazyColumn(Modifier.height(300.dp), beyondBoundsItemCount = 0) {
                 stickyHeader {
-                    Spacer(
-                        Modifier.height(101.dp).fillParentMaxWidth()
-                            .testTag(firstHeaderTag)
-                    )
+                    Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(firstHeaderTag))
                 }
 
-                items(items) {
-                    Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(it))
-                }
+                items(items) { Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(it)) }
 
                 stickyHeader {
-                    Spacer(
-                        Modifier.height(101.dp).fillParentMaxWidth()
-                            .testTag(secondHeaderTag)
-                    )
+                    Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(secondHeaderTag))
                 }
             }
         }
 
-        rule.onNodeWithTag(firstHeaderTag)
-            .assertIsDisplayed()
+        rule.onNodeWithTag(firstHeaderTag).assertIsDisplayed()
 
-        rule.onNodeWithTag("1")
-            .assertIsDisplayed()
+        rule.onNodeWithTag("1").assertIsDisplayed()
 
-        rule.onNodeWithTag("2")
-            .assertIsDisplayed()
+        rule.onNodeWithTag("2").assertIsDisplayed()
 
-        rule.onNodeWithTag(secondHeaderTag)
-            .assertDoesNotExist()
+        rule.onNodeWithTag(secondHeaderTag).assertDoesNotExist()
+    }
+
+    @Test
+    fun lazyColumnShowsHeader_withPinnedItem() {
+        val items = (1..2).map { it.toString() }
+        val firstHeaderTag = "firstHeaderTag"
+        val secondHeaderTag = "secondHeaderTag"
+        var pinnableItem: PinnableContainer? = null
+        rule.setContent {
+            LazyColumn(Modifier.height(300.dp), beyondBoundsItemCount = 0) {
+                stickyHeader {
+                    Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(firstHeaderTag))
+                }
+
+                items(items) {
+                    if (it == "1") {
+                        pinnableItem = LocalPinnableContainer.current
+                    }
+                    Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(it))
+                }
+
+                stickyHeader {
+                    Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(secondHeaderTag))
+                }
+
+                items(items) { Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(it)) }
+
+                items(items) { Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(it)) }
+            }
+        }
+
+        rule.runOnIdle { pinnableItem?.pin() }
+
+        rule.onNodeWithTag(firstHeaderTag).assertIsDisplayed()
+        rule.onNodeWithTag("1").assertIsDisplayed()
+        rule.onNodeWithTag("2").assertIsDisplayed()
+        rule.onNodeWithTag(secondHeaderTag).assertDoesNotExist()
+
+        rule.onRoot().performTouchInput { swipeUp() }
+
+        rule.onNodeWithTag(firstHeaderTag).assertIsNotDisplayed()
+        rule.onNodeWithTag(secondHeaderTag).assertIsDisplayed()
     }
 
     @Test
@@ -114,36 +149,24 @@ class LazyListHeadersTest {
         rule.setContent {
             LazyColumn(Modifier.height(300.dp), beyondBoundsItemCount = 1) {
                 stickyHeader {
-                    Spacer(
-                        Modifier.height(101.dp).fillParentMaxWidth()
-                            .testTag(firstHeaderTag)
-                    )
+                    Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(firstHeaderTag))
                 }
 
-                items(items) {
-                    Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(it))
-                }
+                items(items) { Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(it)) }
 
                 stickyHeader {
-                    Spacer(
-                        Modifier.height(101.dp).fillParentMaxWidth()
-                            .testTag(secondHeaderTag)
-                    )
+                    Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(secondHeaderTag))
                 }
             }
         }
 
-        rule.onNodeWithTag(firstHeaderTag)
-            .assertIsDisplayed()
+        rule.onNodeWithTag(firstHeaderTag).assertIsDisplayed()
 
-        rule.onNodeWithTag("1")
-            .assertIsDisplayed()
+        rule.onNodeWithTag("1").assertIsDisplayed()
 
-        rule.onNodeWithTag("2")
-            .assertIsDisplayed()
+        rule.onNodeWithTag("2").assertIsDisplayed()
 
-        rule.onNodeWithTag(secondHeaderTag)
-            .assertExists()
+        rule.onNodeWithTag(secondHeaderTag).assertExists()
     }
 
     @Test
@@ -156,32 +179,24 @@ class LazyListHeadersTest {
         rule.setContentWithTestViewConfiguration {
             LazyColumn(
                 Modifier.height(300.dp).testTag(LazyListTag),
-                rememberLazyListState().also { state = it }
+                rememberLazyListState().also { state = it },
             ) {
                 stickyHeader {
-                    Spacer(
-                        Modifier.height(101.dp).fillParentMaxWidth()
-                            .testTag(firstHeaderTag)
-                    )
+                    Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(firstHeaderTag))
                 }
 
-                items(items) {
-                    Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(it))
-                }
+                items(items) { Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(it)) }
 
                 stickyHeader {
-                    Spacer(
-                        Modifier.height(101.dp).fillParentMaxWidth()
-                            .testTag(secondHeaderTag)
-                    )
+                    Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(secondHeaderTag))
                 }
             }
         }
 
-        rule.onNodeWithTag(LazyListTag)
-            .scrollBy(y = 102.dp, density = rule.density)
+        rule.onNodeWithTag(LazyListTag).scrollBy(y = 102.dp, density = rule.density)
 
-        rule.onNodeWithTag(firstHeaderTag)
+        rule
+            .onNodeWithTag(firstHeaderTag)
             .assertIsDisplayed()
             .assertTopPositionInRootIsEqualTo(0.dp)
 
@@ -190,11 +205,9 @@ class LazyListHeadersTest {
             assertEquals(0, state.layoutInfo.visibleItemsInfo.first().offset)
         }
 
-        rule.onNodeWithTag("2")
-            .assertIsDisplayed()
+        rule.onNodeWithTag("2").assertIsDisplayed()
 
-        rule.onNodeWithTag(secondHeaderTag)
-            .assertIsDisplayed()
+        rule.onNodeWithTag(secondHeaderTag).assertIsDisplayed()
     }
 
     @Test
@@ -206,39 +219,26 @@ class LazyListHeadersTest {
         rule.setContentWithTestViewConfiguration {
             LazyColumn(Modifier.height(300.dp).testTag(LazyListTag)) {
                 stickyHeader {
-                    Spacer(
-                        Modifier.height(101.dp).fillParentMaxWidth()
-                            .testTag(firstHeaderTag)
-                    )
+                    Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(firstHeaderTag))
                 }
 
                 stickyHeader {
-                    Spacer(
-                        Modifier.height(101.dp).fillParentMaxWidth()
-                            .testTag(secondHeaderTag)
-                    )
+                    Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(secondHeaderTag))
                 }
 
-                items(items) {
-                    Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(it))
-                }
+                items(items) { Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(it)) }
             }
         }
 
-        rule.onNodeWithTag(LazyListTag)
-            .scrollBy(y = 105.dp, density = rule.density)
+        rule.onNodeWithTag(LazyListTag).scrollBy(y = 105.dp, density = rule.density)
 
-        rule.onNodeWithTag(firstHeaderTag)
-            .assertIsNotDisplayed()
+        rule.onNodeWithTag(firstHeaderTag).assertIsNotDisplayed()
 
-        rule.onNodeWithTag(secondHeaderTag)
-            .assertIsDisplayed()
+        rule.onNodeWithTag(secondHeaderTag).assertIsDisplayed()
 
-        rule.onNodeWithTag("1")
-            .assertIsDisplayed()
+        rule.onNodeWithTag("1").assertIsDisplayed()
 
-        rule.onNodeWithTag("2")
-            .assertIsDisplayed()
+        rule.onNodeWithTag("2").assertIsDisplayed()
     }
 
     @Test
@@ -250,36 +250,24 @@ class LazyListHeadersTest {
         rule.setContent {
             LazyRow(Modifier.width(300.dp), beyondBoundsItemCount = 0) {
                 stickyHeader {
-                    Spacer(
-                        Modifier.width(101.dp).fillParentMaxHeight()
-                            .testTag(firstHeaderTag)
-                    )
+                    Spacer(Modifier.width(101.dp).fillParentMaxHeight().testTag(firstHeaderTag))
                 }
 
-                items(items) {
-                    Spacer(Modifier.width(101.dp).fillParentMaxHeight().testTag(it))
-                }
+                items(items) { Spacer(Modifier.width(101.dp).fillParentMaxHeight().testTag(it)) }
 
                 stickyHeader {
-                    Spacer(
-                        Modifier.width(101.dp).fillParentMaxHeight()
-                            .testTag(secondHeaderTag)
-                    )
+                    Spacer(Modifier.width(101.dp).fillParentMaxHeight().testTag(secondHeaderTag))
                 }
             }
         }
 
-        rule.onNodeWithTag(firstHeaderTag)
-            .assertIsDisplayed()
+        rule.onNodeWithTag(firstHeaderTag).assertIsDisplayed()
 
-        rule.onNodeWithTag("1")
-            .assertIsDisplayed()
+        rule.onNodeWithTag("1").assertIsDisplayed()
 
-        rule.onNodeWithTag("2")
-            .assertIsDisplayed()
+        rule.onNodeWithTag("2").assertIsDisplayed()
 
-        rule.onNodeWithTag(secondHeaderTag)
-            .assertDoesNotExist()
+        rule.onNodeWithTag(secondHeaderTag).assertDoesNotExist()
     }
 
     @Test
@@ -291,36 +279,24 @@ class LazyListHeadersTest {
         rule.setContent {
             LazyRow(Modifier.width(300.dp), beyondBoundsItemCount = 1) {
                 stickyHeader {
-                    Spacer(
-                        Modifier.width(101.dp).fillParentMaxHeight()
-                            .testTag(firstHeaderTag)
-                    )
+                    Spacer(Modifier.width(101.dp).fillParentMaxHeight().testTag(firstHeaderTag))
                 }
 
-                items(items) {
-                    Spacer(Modifier.width(101.dp).fillParentMaxHeight().testTag(it))
-                }
+                items(items) { Spacer(Modifier.width(101.dp).fillParentMaxHeight().testTag(it)) }
 
                 stickyHeader {
-                    Spacer(
-                        Modifier.width(101.dp).fillParentMaxHeight()
-                            .testTag(secondHeaderTag)
-                    )
+                    Spacer(Modifier.width(101.dp).fillParentMaxHeight().testTag(secondHeaderTag))
                 }
             }
         }
 
-        rule.onNodeWithTag(firstHeaderTag)
-            .assertIsDisplayed()
+        rule.onNodeWithTag(firstHeaderTag).assertIsDisplayed()
 
-        rule.onNodeWithTag("1")
-            .assertIsDisplayed()
+        rule.onNodeWithTag("1").assertIsDisplayed()
 
-        rule.onNodeWithTag("2")
-            .assertIsDisplayed()
+        rule.onNodeWithTag("2").assertIsDisplayed()
 
-        rule.onNodeWithTag(secondHeaderTag)
-            .assertExists()
+        rule.onNodeWithTag(secondHeaderTag).assertExists()
     }
 
     @Test
@@ -333,32 +309,24 @@ class LazyListHeadersTest {
         rule.setContentWithTestViewConfiguration {
             LazyRow(
                 Modifier.width(300.dp).testTag(LazyListTag),
-                rememberLazyListState().also { state = it }
+                rememberLazyListState().also { state = it },
             ) {
                 stickyHeader {
-                    Spacer(
-                        Modifier.width(101.dp).fillParentMaxHeight()
-                            .testTag(firstHeaderTag)
-                    )
+                    Spacer(Modifier.width(101.dp).fillParentMaxHeight().testTag(firstHeaderTag))
                 }
 
-                items(items) {
-                    Spacer(Modifier.width(101.dp).fillParentMaxHeight().testTag(it))
-                }
+                items(items) { Spacer(Modifier.width(101.dp).fillParentMaxHeight().testTag(it)) }
 
                 stickyHeader {
-                    Spacer(
-                        Modifier.width(101.dp).fillParentMaxHeight()
-                            .testTag(secondHeaderTag)
-                    )
+                    Spacer(Modifier.width(101.dp).fillParentMaxHeight().testTag(secondHeaderTag))
                 }
             }
         }
 
-        rule.onNodeWithTag(LazyListTag)
-            .scrollBy(x = 102.dp, density = rule.density)
+        rule.onNodeWithTag(LazyListTag).scrollBy(x = 102.dp, density = rule.density)
 
-        rule.onNodeWithTag(firstHeaderTag)
+        rule
+            .onNodeWithTag(firstHeaderTag)
             .assertIsDisplayed()
             .assertLeftPositionInRootIsEqualTo(0.dp)
 
@@ -367,11 +335,9 @@ class LazyListHeadersTest {
             assertEquals(0, state.layoutInfo.visibleItemsInfo.first().offset)
         }
 
-        rule.onNodeWithTag("2")
-            .assertIsDisplayed()
+        rule.onNodeWithTag("2").assertIsDisplayed()
 
-        rule.onNodeWithTag(secondHeaderTag)
-            .assertIsDisplayed()
+        rule.onNodeWithTag(secondHeaderTag).assertIsDisplayed()
     }
 
     @Test
@@ -383,39 +349,26 @@ class LazyListHeadersTest {
         rule.setContentWithTestViewConfiguration {
             LazyRow(Modifier.width(300.dp).testTag(LazyListTag)) {
                 stickyHeader {
-                    Spacer(
-                        Modifier.width(101.dp).fillParentMaxHeight()
-                            .testTag(firstHeaderTag)
-                    )
+                    Spacer(Modifier.width(101.dp).fillParentMaxHeight().testTag(firstHeaderTag))
                 }
 
                 stickyHeader {
-                    Spacer(
-                        Modifier.width(101.dp).fillParentMaxHeight()
-                            .testTag(secondHeaderTag)
-                    )
+                    Spacer(Modifier.width(101.dp).fillParentMaxHeight().testTag(secondHeaderTag))
                 }
 
-                items(items) {
-                    Spacer(Modifier.width(101.dp).fillParentMaxHeight().testTag(it))
-                }
+                items(items) { Spacer(Modifier.width(101.dp).fillParentMaxHeight().testTag(it)) }
             }
         }
 
-        rule.onNodeWithTag(LazyListTag)
-            .scrollBy(x = 105.dp, density = rule.density)
+        rule.onNodeWithTag(LazyListTag).scrollBy(x = 105.dp, density = rule.density)
 
-        rule.onNodeWithTag(firstHeaderTag)
-            .assertIsNotDisplayed()
+        rule.onNodeWithTag(firstHeaderTag).assertIsNotDisplayed()
 
-        rule.onNodeWithTag(secondHeaderTag)
-            .assertIsDisplayed()
+        rule.onNodeWithTag(secondHeaderTag).assertIsDisplayed()
 
-        rule.onNodeWithTag("1")
-            .assertIsDisplayed()
+        rule.onNodeWithTag("1").assertIsDisplayed()
 
-        rule.onNodeWithTag("2")
-            .assertIsDisplayed()
+        rule.onNodeWithTag("2").assertIsDisplayed()
     }
 
     @Test
@@ -429,35 +382,27 @@ class LazyListHeadersTest {
             LazyColumn(
                 Modifier.requiredSize(itemIndexDp * 4),
                 state = rememberLazyListState().also { state = it },
-                contentPadding = PaddingValues(top = itemIndexDp * 2)
+                contentPadding = PaddingValues(top = itemIndexDp * 2),
             ) {
-                stickyHeader {
-                    Spacer(Modifier.requiredSize(itemIndexDp).testTag(headerTag))
-                }
+                stickyHeader { Spacer(Modifier.requiredSize(itemIndexDp).testTag(headerTag)) }
 
-                items((0..4).toList()) {
-                    Spacer(Modifier.requiredSize(itemIndexDp).testTag("$it"))
-                }
+                items((0..4).toList()) { Spacer(Modifier.requiredSize(itemIndexDp).testTag("$it")) }
             }
         }
 
-        rule.runOnIdle {
-            runBlocking { state.scrollToItem(1, itemIndexPx / 2) }
-        }
+        rule.runOnIdle { runBlocking { state.scrollToItem(1, itemIndexPx / 2) } }
 
-        rule.onNodeWithTag(headerTag)
-            .assertTopPositionInRootIsEqualTo(itemIndexDp / 2)
+        rule.onNodeWithTag(headerTag).assertTopPositionInRootIsEqualTo(itemIndexDp / 2)
 
         rule.runOnIdle {
             assertEquals(0, state.layoutInfo.visibleItemsInfo.first().index)
             assertEquals(
                 itemIndexPx / 2 - /* content padding size */ itemIndexPx * 2,
-                state.layoutInfo.visibleItemsInfo.first().offset
+                state.layoutInfo.visibleItemsInfo.first().offset,
             )
         }
 
-        rule.onNodeWithTag("0")
-            .assertTopPositionInRootIsEqualTo(itemIndexDp * 3 / 2)
+        rule.onNodeWithTag("0").assertTopPositionInRootIsEqualTo(itemIndexDp * 3 / 2)
     }
 
     @Test
@@ -472,15 +417,11 @@ class LazyListHeadersTest {
         rule.setContent {
             LazyColumn(Modifier.height(itemSizeDp * 3.5f), state) {
                 stickyHeader {
-                    Spacer(
-                        Modifier.height(itemSizeDp).fillParentMaxWidth()
-                            .testTag(firstHeaderTag)
-                    )
+                    Spacer(Modifier.height(itemSizeDp).fillParentMaxWidth().testTag(firstHeaderTag))
                 }
                 stickyHeader {
                     Spacer(
-                        Modifier.height(itemSizeDp).fillParentMaxWidth()
-                            .testTag(secondHeaderTag)
+                        Modifier.height(itemSizeDp).fillParentMaxWidth().testTag(secondHeaderTag)
                     )
                 }
 
@@ -490,16 +431,62 @@ class LazyListHeadersTest {
             }
         }
 
-        rule.runOnIdle {
-            runBlocking { state.scrollBy(scrollDistance.toFloat()) }
+        rule.runOnIdle { runBlocking { state.scrollBy(scrollDistance.toFloat()) } }
+
+        rule.onNodeWithTag(firstHeaderTag).assertTopPositionInRootIsEqualTo(-scrollDistanceDp)
+        rule
+            .onNodeWithTag(secondHeaderTag)
+            .assertTopPositionInRootIsEqualTo(itemSizeDp - scrollDistanceDp)
+        rule.onNodeWithTag("0").assertTopPositionInRootIsEqualTo(itemSizeDp * 2 - scrollDistanceDp)
+    }
+
+    @Test
+    fun lazyColumn_withEmptyHeader_shouldNotCrash() {
+        val items = (1..2).map { it.toString() }
+        val error = runCatching {
+            rule.setContent {
+                LazyColumn(Modifier.height(300.dp)) {
+                    stickyHeader {}
+
+                    items(items) {
+                        Spacer(Modifier.height(101.dp).fillParentMaxWidth().testTag(it))
+                    }
+                }
+            }
         }
 
-        rule.onNodeWithTag(firstHeaderTag)
-            .assertTopPositionInRootIsEqualTo(-scrollDistanceDp)
-        rule.onNodeWithTag(secondHeaderTag)
-            .assertTopPositionInRootIsEqualTo(itemSizeDp - scrollDistanceDp)
-        rule.onNodeWithTag("0")
-            .assertTopPositionInRootIsEqualTo(itemSizeDp * 2 - scrollDistanceDp)
+        assertTrue { error.isSuccess }
+    }
+
+    @Test
+    fun lazyColumn_withEmptyHeader_showsHeadersOnScroll() {
+        val headerTag = "headerTag"
+        lateinit var state: LazyListState
+
+        rule.setContentWithTestViewConfiguration {
+            LazyColumn(
+                Modifier.height(300.dp).testTag(LazyListTag),
+                rememberLazyListState().also { state = it },
+            ) {
+                stickyHeader { Spacer(Modifier.height(101.dp).fillMaxWidth().testTag(headerTag)) }
+
+                repeat(10) {
+                    item { Spacer(Modifier.height(101.dp).fillMaxWidth()) }
+
+                    // this empty header shouldn't be affecting the real header
+                    stickyHeader {}
+                }
+            }
+        }
+
+        rule.onNodeWithTag(LazyListTag).scrollBy(y = 10.dp, density = rule.density)
+
+        rule.onNodeWithTag(headerTag).assertIsDisplayed().assertTopPositionInRootIsEqualTo(0.dp)
+
+        rule.runOnIdle {
+            assertEquals(0, state.layoutInfo.visibleItemsInfo.first().index)
+            assertEquals(0, state.layoutInfo.visibleItemsInfo.first().offset)
+        }
     }
 }
 
@@ -515,7 +502,7 @@ private fun LazyColumn(
     flingBehavior: FlingBehavior = ScrollableDefaults.flingBehavior(),
     userScrollEnabled: Boolean = true,
     beyondBoundsItemCount: Int,
-    content: LazyListScope.() -> Unit
+    content: LazyListScope.() -> Unit,
 ) {
     LazyList(
         modifier = modifier,
@@ -527,8 +514,9 @@ private fun LazyColumn(
         isVertical = true,
         reverseLayout = reverseLayout,
         userScrollEnabled = userScrollEnabled,
+        overscrollEffect = rememberOverscrollEffect(),
         beyondBoundsItemCount = beyondBoundsItemCount,
-        content = content
+        content = content,
     )
 }
 
@@ -544,7 +532,7 @@ private fun LazyRow(
     flingBehavior: FlingBehavior = ScrollableDefaults.flingBehavior(),
     userScrollEnabled: Boolean = true,
     beyondBoundsItemCount: Int,
-    content: LazyListScope.() -> Unit
+    content: LazyListScope.() -> Unit,
 ) {
     LazyList(
         modifier = modifier,
@@ -556,7 +544,8 @@ private fun LazyRow(
         flingBehavior = flingBehavior,
         reverseLayout = reverseLayout,
         userScrollEnabled = userScrollEnabled,
+        overscrollEffect = rememberOverscrollEffect(),
         beyondBoundsItemCount = beyondBoundsItemCount,
-        content = content
+        content = content,
     )
 }

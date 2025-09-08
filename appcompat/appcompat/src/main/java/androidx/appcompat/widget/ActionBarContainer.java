@@ -21,17 +21,16 @@ import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.annotation.RestrictTo;
 import androidx.appcompat.R;
+
+import org.jspecify.annotations.NonNull;
 
 /**
  * This class acts as a container for the action bar view and action mode context views.
@@ -95,16 +94,13 @@ public class ActionBarContainer extends FrameLayout {
         if (bg != null) {
             bg.setCallback(this);
             if (mActionBarView != null) {
-                mBackground.setBounds(mActionBarView.getLeft(), mActionBarView.getTop(),
-                        mActionBarView.getRight(), mActionBarView.getBottom());
+                bg.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
             }
         }
         setWillNotDraw(mIsSplit ? mSplitBackground == null :
                 mBackground == null && mStackedBackground == null);
         invalidate();
-        if (Build.VERSION.SDK_INT >= 21) {
-            Api21Impl.invalidateOutline(this);
-        }
+        invalidateOutline();
     }
 
     public void setStackedBackground(Drawable bg) {
@@ -123,9 +119,7 @@ public class ActionBarContainer extends FrameLayout {
         setWillNotDraw(mIsSplit ? mSplitBackground == null :
                 mBackground == null && mStackedBackground == null);
         invalidate();
-        if (Build.VERSION.SDK_INT >= 21) {
-            Api21Impl.invalidateOutline(this);
-        }
+        invalidateOutline();
     }
 
     public void setSplitBackground(Drawable bg) {
@@ -143,9 +137,7 @@ public class ActionBarContainer extends FrameLayout {
         setWillNotDraw(mIsSplit ? mSplitBackground == null :
                 mBackground == null && mStackedBackground == null);
         invalidate();
-        if (Build.VERSION.SDK_INT >= 21) {
-            Api21Impl.invalidateOutline(this);
-        }
+        invalidateOutline();
     }
 
     @Override
@@ -282,6 +274,7 @@ public class ActionBarContainer extends FrameLayout {
         final int mode = MeasureSpec.getMode(heightMeasureSpec);
         if (mTabContainer != null && mTabContainer.getVisibility() != GONE
                 && mode != MeasureSpec.EXACTLY) {
+            final int verticalPadding = getPaddingTop() + getPaddingBottom();
             final int topMarginForTabs;
             if (!isCollapsed(mActionBarView)) {
                 topMarginForTabs = getMeasuredHeightWithMargins(mActionBarView);
@@ -293,7 +286,9 @@ public class ActionBarContainer extends FrameLayout {
             final int maxHeight = mode == MeasureSpec.AT_MOST ?
                     MeasureSpec.getSize(heightMeasureSpec) : Integer.MAX_VALUE;
             setMeasuredDimension(getMeasuredWidth(),
-                    Math.min(topMarginForTabs + getMeasuredHeightWithMargins(mTabContainer),
+                    Math.min(
+                            verticalPadding + topMarginForTabs
+                                    + getMeasuredHeightWithMargins(mTabContainer),
                             maxHeight));
         }
     }
@@ -321,13 +316,9 @@ public class ActionBarContainer extends FrameLayout {
             }
         } else {
             if (mBackground != null) {
-                if (mActionBarView.getVisibility() == View.VISIBLE) {
-                    mBackground.setBounds(mActionBarView.getLeft(), mActionBarView.getTop(),
-                            mActionBarView.getRight(), mActionBarView.getBottom());
-                } else if (mContextView != null &&
-                        mContextView.getVisibility() == View.VISIBLE) {
-                    mBackground.setBounds(mContextView.getLeft(), mContextView.getTop(),
-                            mContextView.getRight(), mContextView.getBottom());
+                if ((mActionBarView.getVisibility() == View.VISIBLE) || (mContextView != null
+                        && mContextView.getVisibility() == View.VISIBLE)) {
+                    mBackground.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
                 } else {
                     mBackground.setBounds(0, 0, 0, 0);
                 }
@@ -343,17 +334,6 @@ public class ActionBarContainer extends FrameLayout {
 
         if (needsInvalidate) {
             invalidate();
-        }
-    }
-
-    @RequiresApi(21)
-    private static class Api21Impl {
-        private Api21Impl() {
-            // Non-instantiable.
-        }
-
-        public static void invalidateOutline(ActionBarContainer drawable) {
-            drawable.invalidateOutline();
         }
     }
 }

@@ -24,8 +24,8 @@ import androidx.collection.IntList
  * @param nodeId is the id of the node the parameter belongs to
  * @param anchorId is the anchor hash of the node the parameter belongs to
  * @param kind is this a reference to a normal, merged, or unmerged semantic parameter.
- * @param parameterIndex index into [InspectorNode.parameters], [InspectorNode.mergedSemantics],
- *        or [InspectorNode.unMergedSemantics]
+ * @param parameterIndex index into [InspectorNode.parameters], [InspectorNode.mergedSemantics], or
+ *   [InspectorNode.unMergedSemantics]
  * @param indices are indices into the composite parameter
  */
 class NodeParameterReference(
@@ -33,7 +33,7 @@ class NodeParameterReference(
     val anchorId: Int,
     val kind: ParameterKind,
     val parameterIndex: Int,
-    val indices: IntList
+    val indices: IntList,
 ) {
     // For testing:
     override fun toString(): String {
@@ -42,11 +42,9 @@ class NodeParameterReference(
     }
 }
 
-/**
- * Identifies which kind of parameter the [NodeParameterReference] is a reference to.
- */
+/** Identifies which kind of parameter the [NodeParameterReference] is a reference to. */
 enum class ParameterKind {
     Normal,
     MergedSemantics,
-    UnmergedSemantics
+    UnmergedSemantics,
 }

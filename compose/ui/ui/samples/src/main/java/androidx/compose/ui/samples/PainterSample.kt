@@ -41,11 +41,7 @@ fun PainterModifierSample() {
             get() = Size(300.0f, 300.0f)
 
         override fun DrawScope.onDraw() {
-            drawCircle(
-                center = center,
-                radius = size.minDimension / 2.0f,
-                color = Color.Red
-            )
+            drawCircle(center = center, radius = size.minDimension / 2.0f, color = Color.Red)
         }
     }
 
@@ -55,7 +51,9 @@ fun PainterModifierSample() {
                 .padding(30.dp)
                 .background(color = Color.Yellow)
                 .paint(CustomPainter())
-    ) { /** intentionally empty */ }
+    ) {
+        /** intentionally empty */
+    }
 }
 
 @Sampled
@@ -67,6 +65,6 @@ fun PainterResourceSample() {
     Image(
         painterResource(R.drawable.ic_vector_or_png),
         contentDescription = null,
-        modifier = Modifier.requiredSize(50.dp)
+        modifier = Modifier.requiredSize(50.dp),
     )
 }

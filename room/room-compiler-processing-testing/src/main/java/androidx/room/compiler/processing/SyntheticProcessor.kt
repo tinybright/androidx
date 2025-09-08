@@ -17,9 +17,7 @@ package androidx.room.compiler.processing
 
 import androidx.room.compiler.processing.util.XTestInvocation
 
-/**
- * Common interface for SyntheticProcessors that we create for testing.
- */
+/** Common interface for SyntheticProcessors that we create for testing. */
 @ExperimentalProcessingApi
 internal interface SyntheticProcessor {
     /**
@@ -38,38 +36,37 @@ internal interface SyntheticProcessor {
      */
     fun getProcessingException(): Throwable?
 
-    /**
-     * Returns true if the processor expected to run another round.
-     */
+    /** Returns true if the processor expected to run another round. */
     fun expectsAnotherRound(): Boolean
 }
 
 /**
- * Helper class to implement [SyntheticProcessor] processor that handles the communication with
- * the testing infrastructure.
+ * Helper class to implement [SyntheticProcessor] processor that handles the communication with the
+ * testing infrastructure.
  */
 @ExperimentalProcessingApi
-internal class SyntheticProcessorImpl(
-    handlers: List<(XTestInvocation) -> Unit>
-) : SyntheticProcessor {
+internal class SyntheticProcessorImpl(handlers: List<(XTestInvocation) -> Unit>) :
+    SyntheticProcessor {
     private var result: Result<Unit>? = null
     override val invocationInstances = mutableListOf<XTestInvocation>()
     private val nextRunHandlers = handlers.toMutableList()
 
-    internal fun processingSteps() = listOf<XProcessingStep>(
-        // A processing step that just ensures we're run every round.
-        object : XProcessingStep {
-            override fun annotations(): Set<String> = setOf("*")
-            override fun process(
-                env: XProcessingEnv,
-                elementsByAnnotation: Map<String, Set<XElement>>,
-                isLastRound: Boolean
-            ): Set<XTypeElement> = emptySet()
-        }
-    )
+    internal fun processingSteps() =
+        listOf<XProcessingStep>(
+            // A processing step that just ensures we're run every round.
+            object : XProcessingStep {
+                override fun annotations(): Set<String> = setOf("*")
+
+                override fun process(
+                    env: XProcessingEnv,
+                    elementsByAnnotation: Map<String, Set<XElement>>,
+                    isLastRound: Boolean,
+                ): Set<XTypeElement> = emptySet()
+            }
+        )
 
     internal fun postRound(env: XProcessingEnv, round: XRoundEnv) {
-        if (canRunAnotherRound()) {
+        if (canRunAnotherRound(round)) {
             runNextRound(XTestInvocation(env, round))
         }
     }
@@ -82,9 +79,12 @@ internal class SyntheticProcessorImpl(
      * Returns true if this can run another round, which means previous round didn't throw an
      * exception and there is another handler in the queue.
      */
-    fun canRunAnotherRound(): Boolean {
+    fun canRunAnotherRound(round: XRoundEnv): Boolean {
         if (result?.exceptionOrNull() != null) {
             // if there is an existing failure from a previous run, stop
+            return false
+        }
+        if (round.isProcessingOver) {
             return false
         }
         return expectsAnotherRound()
@@ -101,20 +101,17 @@ internal class SyntheticProcessorImpl(
         return null
     }
 
-    /**
-     * Runs the next handler with the given test invocation.
-     */
-    fun runNextRound(
-        invocation: XTestInvocation
-    ) {
+    /** Runs the next handler with the given test invocation. */
+    fun runNextRound(invocation: XTestInvocation) {
         check(nextRunHandlers.isNotEmpty()) {
             "Called run next round w/o a runner to handle it. Looks like a testing infra bug"
         }
         val handler = nextRunHandlers.removeAt(0)
         invocationInstances.add(invocation)
-        result = kotlin.runCatching {
-            handler(invocation)
-            invocation.dispose()
-        }
+        result =
+            kotlin.runCatching {
+                handler(invocation)
+                invocation.dispose()
+            }
     }
 }

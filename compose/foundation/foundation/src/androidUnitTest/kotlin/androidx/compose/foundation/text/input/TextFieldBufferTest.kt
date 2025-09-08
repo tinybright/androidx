@@ -17,8 +17,11 @@
 package androidx.compose.foundation.text.input
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.text.input.internal.OffsetMappingCalculator
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.sp
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import java.text.ParseException
@@ -156,10 +159,11 @@ class TextFieldBufferTest {
     @Test
     fun resetTo_copiesTextAndSelection() {
         val expectedValue = TextFieldCharSequence("world", TextRange(5))
-        val state = TextFieldBuffer(
-            initialValue = TextFieldCharSequence("hello", TextRange(2)),
-            originalValue = expectedValue
-        )
+        val state =
+            TextFieldBuffer(
+                initialValue = TextFieldCharSequence("hello", TextRange(2)),
+                originalValue = expectedValue,
+            )
         state.revertAllChanges()
         assertThat(state.toTextFieldCharSequence()).isEqualTo(expectedValue)
         assertThat(state.changes.changeCount).isEqualTo(0)
@@ -169,24 +173,18 @@ class TextFieldBufferTest {
     fun placeCursorBeforeCharAt_emptyBuffer() {
         val buffer = TextFieldBuffer(TextFieldCharSequence(""))
 
-        assertFailsWith<IllegalArgumentException> {
-            buffer.placeCursorBeforeCharAt(-1)
-        }
+        assertFailsWith<IllegalArgumentException> { buffer.placeCursorBeforeCharAt(-1) }
 
         buffer.placeCursorBeforeCharAt(0)
         assertThat(buffer.selection).isEqualTo(TextRange(0))
 
-        assertFailsWith<IllegalArgumentException> {
-            buffer.placeCursorBeforeCharAt(1)
-        }
+        assertFailsWith<IllegalArgumentException> { buffer.placeCursorBeforeCharAt(1) }
     }
 
     @Test
     fun placeCursorBeforeCharAt_nonEmptyBuffer() {
         val buffer = TextFieldBuffer(TextFieldCharSequence("hello"))
-        assertFailsWith<IllegalArgumentException> {
-            buffer.placeCursorBeforeCharAt(-1)
-        }
+        assertFailsWith<IllegalArgumentException> { buffer.placeCursorBeforeCharAt(-1) }
 
         buffer.placeCursorBeforeCharAt(0)
         assertThat(buffer.selection).isEqualTo(TextRange(0))
@@ -197,9 +195,7 @@ class TextFieldBufferTest {
         buffer.placeCursorBeforeCharAt(5)
         assertThat(buffer.selection).isEqualTo(TextRange(5))
 
-        assertFailsWith<IllegalArgumentException> {
-            buffer.placeCursorBeforeCharAt(6)
-        }
+        assertFailsWith<IllegalArgumentException> { buffer.placeCursorBeforeCharAt(6) }
     }
 
     @Test
@@ -209,13 +205,9 @@ class TextFieldBufferTest {
         buffer.placeCursorAfterCharAt(-1)
         assertThat(buffer.selection).isEqualTo(TextRange(0))
 
-        assertFailsWith<IllegalArgumentException> {
-            buffer.placeCursorAfterCharAt(0)
-        }
+        assertFailsWith<IllegalArgumentException> { buffer.placeCursorAfterCharAt(0) }
 
-        assertFailsWith<IllegalArgumentException> {
-            buffer.placeCursorAfterCharAt(1)
-        }
+        assertFailsWith<IllegalArgumentException> { buffer.placeCursorAfterCharAt(1) }
     }
 
     @Test
@@ -234,9 +226,7 @@ class TextFieldBufferTest {
         buffer.placeCursorAfterCharAt(4)
         assertThat(buffer.selection).isEqualTo(TextRange(5))
 
-        assertFailsWith<IllegalArgumentException> {
-            buffer.placeCursorAfterCharAt(5)
-        }
+        assertFailsWith<IllegalArgumentException> { buffer.placeCursorAfterCharAt(5) }
     }
 
     @Test
@@ -246,9 +236,7 @@ class TextFieldBufferTest {
         buffer.selection = TextRange(0)
         assertThat(buffer.selection).isEqualTo(TextRange(0))
 
-        assertFailsWith<IllegalArgumentException> {
-            buffer.selection = TextRange(0, 1)
-        }
+        assertFailsWith<IllegalArgumentException> { buffer.selection = TextRange(0, 1) }
     }
 
     @Test
@@ -270,13 +258,9 @@ class TextFieldBufferTest {
         buffer.selection = TextRange(5, 5)
         assertThat(buffer.selection).isEqualTo(TextRange(5, 5))
 
-        assertFailsWith<IllegalArgumentException> {
-            buffer.selection = TextRange(5, 6)
-        }
+        assertFailsWith<IllegalArgumentException> { buffer.selection = TextRange(5, 6) }
 
-        assertFailsWith<IllegalArgumentException> {
-            buffer.selection = TextRange(6, 6)
-        }
+        assertFailsWith<IllegalArgumentException> { buffer.selection = TextRange(6, 6) }
     }
 
     @Test
@@ -471,21 +455,15 @@ class TextFieldBufferTest {
     fun charAt_throws_whenEmpty() {
         val buffer = TextFieldBuffer(TextFieldCharSequence())
 
-        assertFailsWith<IndexOutOfBoundsException> {
-            buffer.charAt(0)
-        }
+        assertFailsWith<IndexOutOfBoundsException> { buffer.charAt(0) }
     }
 
     @Test
     fun charAt_throws_whenOutOfBounds() {
         val buffer = TextFieldBuffer(TextFieldCharSequence("a"))
 
-        assertFailsWith<IndexOutOfBoundsException> {
-            buffer.charAt(1)
-        }
-        assertFailsWith<IndexOutOfBoundsException> {
-            buffer.charAt(-1)
-        }
+        assertFailsWith<IndexOutOfBoundsException> { buffer.charAt(1) }
+        assertFailsWith<IndexOutOfBoundsException> { buffer.charAt(-1) }
     }
 
     @Test
@@ -510,26 +488,20 @@ class TextFieldBufferTest {
     @Test
     fun replace_withSubSequence_crossedOffsets() {
         val buffer = TextFieldBuffer(TextFieldCharSequence(""))
-        val error = assertFailsWith<IllegalArgumentException> {
-            buffer.replace(0, 0, "hi", 2, 0)
-        }
+        val error = assertFailsWith<IllegalArgumentException> { buffer.replace(0, 0, "hi", 2, 0) }
         assertThat(error.message).isEqualTo("Expected textStart=2 <= textEnd=0")
     }
 
     @Test
     fun replace_withSubSequence_startTooSmall() {
         val buffer = TextFieldBuffer(TextFieldCharSequence(""))
-        assertFailsWith<IllegalArgumentException> {
-            buffer.replace(0, 0, "hi", -1, 0)
-        }
+        assertFailsWith<IllegalArgumentException> { buffer.replace(0, 0, "hi", -1, 0) }
     }
 
     @Test
     fun replace_withSubSequence_endTooBig() {
         val buffer = TextFieldBuffer(TextFieldCharSequence(""))
-        assertFailsWith<IndexOutOfBoundsException> {
-            buffer.replace(0, 0, "hi", 2, 3)
-        }
+        assertFailsWith<IndexOutOfBoundsException> { buffer.replace(0, 0, "hi", 2, 3) }
     }
 
     @Test
@@ -613,9 +585,7 @@ class TextFieldBufferTest {
             .isEqualTo(TextFieldCharSequence("hello", selection = TextRange(2)))
         assertThat("he_l_lo".parseAsTextEditState())
             .isEqualTo(TextFieldCharSequence("hello", selection = TextRange(2, 3)))
-        assertFailsWith<ParseException> {
-            "_he_llo_".parseAsTextEditState()
-        }
+        assertFailsWith<ParseException> { "_he_llo_".parseAsTextEditState() }
 
         listOf("", "_hello", "h_ello", "hello_", "_hello_", "he_ll_o").forEach {
             val value = it.parseAsTextEditState()
@@ -623,10 +593,93 @@ class TextFieldBufferTest {
         }
     }
 
+    @Test
+    fun createFromTextFieldState() {
+        val state = TextFieldState("Hello", TextRange(3))
+        val buffer = state.toTextFieldBuffer()
+
+        assertThat(buffer.asCharSequence().toString()).isEqualTo("Hello")
+        assertThat(buffer.selection).isEqualTo(TextRange(3))
+        assertThat(buffer.changes.changeCount).isEqualTo(0)
+
+        // guarding against future changes
+        assertThat(buffer.originalValue).isEqualTo(state.value)
+    }
+
+    @Test
+    fun changesToBuffer_doesNotPropagateToTextFieldState() {
+        val state = TextFieldState("Hello", TextRange(3))
+        val buffer = state.toTextFieldBuffer()
+
+        buffer.replace(0, 5, "World")
+
+        assertThat(buffer.asCharSequence().toString()).isEqualTo("World")
+        assertThat(state.text.toString()).isEqualTo("Hello")
+    }
+
+    @Test
+    fun toTextFieldBuffer_canCallAddStyle() {
+        val state = TextFieldState("Hello", TextRange(3))
+        val buffer = state.toTextFieldBuffer()
+
+        buffer.addStyle(SpanStyle(), 0, buffer.length)
+        // should not crash.
+    }
+
+    @Test
+    fun canCallAddStyle_isTrueByDefault_ifOffsetMappingCalculatorPresent() {
+        val buffer =
+            TextFieldBuffer(
+                TextFieldCharSequence("hello"),
+                offsetMappingCalculator = OffsetMappingCalculator(),
+            )
+        assertThat(buffer.canCallAddStyle).isTrue()
+    }
+
+    @Test
+    fun addStyle_addsToOutputAnnotations_ifCreatedForOutputTransformation() {
+        val buffer = TextFieldBuffer(TextFieldCharSequence("hello"))
+        // Act
+        val style = SpanStyle(fontSize = 12.sp)
+        buffer.canCallAddStyle = true
+        buffer.addStyle(style, 0, buffer.length)
+
+        // Assert
+        assertThat(buffer.outputTransformationAnnotations).hasSize(1)
+        assertThat(buffer.outputTransformationAnnotations?.get(0)?.item).isEqualTo(style)
+        assertThat(buffer.outputTransformationAnnotations?.get(0)?.start).isEqualTo(0)
+        assertThat(buffer.outputTransformationAnnotations?.get(0)?.end).isEqualTo(5)
+        assertThat(buffer.changes.changeCount).isEqualTo(0)
+    }
+
+    @Test
+    fun addStyle_crashes_ifNotCreatedForOutputTransformation() {
+        val buffer = TextFieldBuffer(TextFieldCharSequence("hello"))
+        val style = SpanStyle(fontSize = 12.sp)
+        assertFailsWith<IllegalStateException>(
+            "You can add styling to a [TextFieldBuffer] only from an [OutputTransformation]."
+        ) {
+            buffer.addStyle(style, 0, buffer.length)
+        }
+    }
+
+    @Test
+    fun addStyle_notRangeTracked() {
+        val buffer = TextFieldBuffer(TextFieldCharSequence("hello"))
+        val style = SpanStyle(fontSize = 12.sp)
+
+        buffer.canCallAddStyle = true
+        buffer.addStyle(style, 0, buffer.length)
+        buffer.insert(2, "world") // expand where style is applied
+
+        assertThat(buffer.outputTransformationAnnotations?.get(0)?.start).isEqualTo(0)
+        assertThat(buffer.outputTransformationAnnotations?.get(0)?.end).isEqualTo(5)
+    }
+
     private fun testSelectionAdjustment(
         initial: String,
         transform: TextFieldBuffer.() -> Unit,
-        expected: String
+        expected: String,
     ) {
         val state = TextFieldBuffer(initial.parseAsTextEditState())
         state.transform()
@@ -657,11 +710,12 @@ class TextFieldBufferTest {
 
         return TextFieldCharSequence(
             text = text,
-            selection = when {
-                firstMark == -1 -> TextRange.Zero
-                secondMark == -1 -> TextRange(firstMark)
-                else -> TextRange(firstMark, secondMark)
-            }
+            selection =
+                when {
+                    firstMark == -1 -> TextRange.Zero
+                    secondMark == -1 -> TextRange(firstMark)
+                    else -> TextRange(firstMark, secondMark)
+                },
         )
     }
 
@@ -678,13 +732,14 @@ class TextFieldBufferTest {
     private fun assertCommonPrefixAndSuffix(
         a: CharSequence,
         b: CharSequence,
-        expectedRanges: Pair<TextRange, TextRange>?
+        expectedRanges: Pair<TextRange, TextRange>?,
     ) {
         var result: Pair<TextRange, TextRange>? = null
         findCommonPrefixAndSuffix(a, b) { aStart, aEnd, bStart, bEnd ->
             result = Pair(TextRange(aStart, aEnd), TextRange(bStart, bEnd))
         }
         assertWithMessage("Expected findCommonPrefixAndSuffix(\"$a\", \"$b\") to report")
-            .that(result).isEqualTo(expectedRanges)
+            .that(result)
+            .isEqualTo(expectedRanges)
     }
 }

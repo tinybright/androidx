@@ -37,6 +37,7 @@ import androidx.compose.integration.demos.common.Demo
 import androidx.compose.integration.demos.common.DemoCategory
 import androidx.compose.integration.demos.common.FragmentDemo
 import androidx.compose.integration.demos.common.allLaunchableDemos
+import androidx.compose.integration.demos.settings.CursorBlinkSetting
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -63,6 +64,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalCursorBlinkEnabled
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -80,7 +82,7 @@ fun DemoApp(
     onNavigateToDemo: (Demo) -> Unit,
     canNavigateUp: Boolean,
     onNavigateUp: () -> Unit,
-    launchSettings: () -> Unit
+    launchSettings: () -> Unit,
 ) {
     val navigationIcon = (@Composable { AppBarIcons.Back(onNavigateUp) }).takeIf { canNavigateUp }
 
@@ -99,23 +101,17 @@ fun DemoApp(
                 filterText = filterText,
                 onFilter = { filterText = it },
                 onStartFiltering = onStartFiltering,
-                onEndFiltering = onEndFiltering
+                onEndFiltering = onEndFiltering,
             )
         },
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
     ) { innerPadding ->
-        val modifier = Modifier
-            // as scaffold currently doesn't consume - consume what's needed
-            .consumeWindowInsets(innerPadding)
-            .padding(innerPadding)
-        DemoContent(
-            modifier,
-            currentDemo,
-            isFiltering,
-            filterText,
-            onNavigateToDemo,
-            onNavigateUp
-        )
+        val modifier =
+            Modifier
+                // as scaffold currently doesn't consume - consume what's needed
+                .consumeWindowInsets(innerPadding)
+                .padding(innerPadding)
+        DemoContent(modifier, currentDemo, isFiltering, filterText, onNavigateToDemo, onNavigateUp)
     }
 }
 
@@ -126,7 +122,7 @@ private fun DemoContent(
     isFiltering: Boolean,
     filterText: String,
     onNavigate: (Demo) -> Unit,
-    onNavigateUp: () -> Unit
+    onNavigateUp: () -> Unit,
 ) {
     Crossfade(isFiltering to currentDemo) { (filtering, demo) ->
         Surface(modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -134,10 +130,14 @@ private fun DemoContent(
                 DemoFilter(
                     launchableDemos = AllDemosCategory.allLaunchableDemos(),
                     filterText = filterText,
-                    onNavigate = onNavigate
+                    onNavigate = onNavigate,
                 )
             } else {
-                DisplayDemo(demo, onNavigate, onNavigateUp)
+                CompositionLocalProvider(
+                    LocalCursorBlinkEnabled provides CursorBlinkSetting.asState().value
+                ) {
+                    DisplayDemo(demo, onNavigate, onNavigateUp)
+                }
             }
         }
     }
@@ -156,9 +156,9 @@ fun Material2LegacyTheme(content: @Composable () -> Unit) {
         content = {
             CompositionLocalProvider(
                 LocalContentColor provides androidx.compose.material.MaterialTheme.colors.onSurface,
-                content = content
+                content = content,
             )
-        }
+        },
     )
 }
 
@@ -178,11 +178,9 @@ private fun DisplayDemo(demo: Demo, onNavigate: (Demo) -> Unit, onNavigateUp: ()
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
                 factory = { context ->
-                    view = FragmentContainerView(context).also {
-                        it.id = R.id.fragment_container
-                    }
+                    view = FragmentContainerView(context).also { it.id = R.id.fragment_container }
                     view
-                }
+                },
             )
             DisposableEffect(demo) {
                 // TODO: This code could be cleaner using FragmentContainerView.getFragment().
@@ -192,7 +190,8 @@ private fun DisplayDemo(demo: Demo, onNavigate: (Demo) -> Unit, onNavigateUp: ()
                     .add(R.id.fragment_container, demo.fragmentClass.java, null, null)
                     .commit()
                 onDispose {
-                    fm.beginTransaction().remove(fm.findFragmentById(R.id.fragment_container)!!)
+                    fm.beginTransaction()
+                        .remove(fm.findFragmentById(R.id.fragment_container)!!)
                         .commit()
                 }
             }
@@ -207,10 +206,8 @@ private fun DisplayDemoCategory(category: DemoCategory, onNavigate: (Demo) -> Un
         category.demos.forEach { demo ->
             ListItem(onClick = { onNavigate(demo) }) {
                 Text(
-                    modifier = Modifier
-                        .height(56.dp)
-                        .wrapContentSize(Alignment.Center),
-                    text = demo.title
+                    modifier = Modifier.height(56.dp).wrapContentSize(Alignment.Center),
+                    text = demo.title,
                 )
             }
         }
@@ -229,27 +226,25 @@ private fun DemoAppBar(
     onFilter: (String) -> Unit,
     onStartFiltering: () -> Unit,
     onEndFiltering: () -> Unit,
-    launchSettings: () -> Unit
+    launchSettings: () -> Unit,
 ) {
     if (isFiltering) {
         FilterAppBar(
             filterText = filterText,
             onFilter = onFilter,
             onClose = onEndFiltering,
-            scrollBehavior = scrollBehavior
+            scrollBehavior = scrollBehavior,
         )
     } else {
         TopAppBar(
-            title = {
-                Text(title, Modifier.testTag(Tags.AppBarTitle))
-            },
+            title = { Text(title, Modifier.testTag(Tags.AppBarTitle)) },
             scrollBehavior = scrollBehavior,
             navigationIcon = navigationIcon,
             actions = {
                 AppBarIcons.AccessibilityNodeInspector()
                 AppBarIcons.Filter(onClick = onStartFiltering)
                 AppBarIcons.Settings(onClick = launchSettings)
-            }
+            },
         )
     }
 }
@@ -257,17 +252,13 @@ private fun DemoAppBar(
 private object AppBarIcons {
     @Composable
     fun Back(onClick: () -> Unit) {
-        IconButton(onClick = onClick) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
-        }
+        IconButton(onClick = onClick) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
     }
 
     @Composable
     fun AccessibilityNodeInspector() {
         AccessibilityNodeInspectorButton {
-            IconButton(onClick = {}) {
-                Icon(Icons.Filled.Api, contentDescription = null)
-            }
+            IconButton(onClick = {}) { Icon(Icons.Filled.Api, contentDescription = null) }
         }
     }
 
@@ -280,9 +271,7 @@ private object AppBarIcons {
 
     @Composable
     fun Settings(onClick: () -> Unit) {
-        IconButton(onClick = onClick) {
-            Icon(Icons.Filled.Settings, null)
-        }
+        IconButton(onClick = onClick) { Icon(Icons.Filled.Settings, null) }
     }
 }
 
@@ -290,7 +279,7 @@ private object AppBarIcons {
 internal fun ListItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable (() -> Unit)
+    content: @Composable (() -> Unit),
 ) {
     Box(
         modifier
@@ -299,6 +288,8 @@ internal fun ListItem(
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp)
             .wrapContentHeight(Alignment.CenterVertically),
-        contentAlignment = Alignment.CenterStart
-    ) { content() }
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        content()
+    }
 }

@@ -31,59 +31,60 @@ import kotlin.reflect.KType
 
 /**
  * Construct a new [DynamicActivityNavigator.Destination]
+ *
  * @param id Destination id.
  */
 @Suppress("Deprecation")
 @Deprecated(
     "Use routes to build your DynamicActivityDestination instead",
-    ReplaceWith("activity(route = id.toString()) { builder.invoke() }")
+    ReplaceWith("activity(route = id.toString()) { builder.invoke() }"),
 )
 public inline fun DynamicNavGraphBuilder.activity(
     @IdRes id: Int,
-    builder: DynamicActivityNavigatorDestinationBuilder.() -> Unit
-): Unit = destination(
-    DynamicActivityNavigatorDestinationBuilder(
-        provider[DynamicActivityNavigator::class],
-        id
-    ).apply(builder)
-)
+    builder: DynamicActivityNavigatorDestinationBuilder.() -> Unit,
+): Unit =
+    destination(
+        DynamicActivityNavigatorDestinationBuilder(provider[DynamicActivityNavigator::class], id)
+            .apply(builder)
+    )
 
 /**
  * Construct a new [DynamicActivityNavigator.Destination]
+ *
  * @param route Destination route.
  * @param builder the builder used to construct the graph
  */
 public inline fun DynamicNavGraphBuilder.activity(
     route: String,
-    builder: DynamicActivityNavigatorDestinationBuilder.() -> Unit
-): Unit = destination(
-    DynamicActivityNavigatorDestinationBuilder(
-        provider[DynamicActivityNavigator::class],
-        route
-    ).apply(builder)
-)
+    builder: DynamicActivityNavigatorDestinationBuilder.() -> Unit,
+): Unit =
+    destination(
+        DynamicActivityNavigatorDestinationBuilder(provider[DynamicActivityNavigator::class], route)
+            .apply(builder)
+    )
 
 /**
  * Construct a new [DynamicActivityNavigator.Destination]
+ *
  * @param T Destination route from a [KClass]
- * @param typeMap A mapping of KType to custom NavType<*> in the [T]. May be empty if [T]
- * does not use custom NavTypes.
+ * @param typeMap A mapping of KType to custom NavType<*> in the [T]. May be empty if [T] does not
+ *   use custom NavTypes.
  * @param builder the builder used to construct the graph
  */
 public inline fun <reified T : Any> DynamicNavGraphBuilder.activity(
     typeMap: Map<KType, @JvmSuppressWildcards NavType<*>> = emptyMap(),
-    builder: DynamicActivityNavigatorDestinationBuilder.() -> Unit
-): Unit = destination(
-    DynamicActivityNavigatorDestinationBuilder(
-        provider[DynamicActivityNavigator::class],
-        T::class,
-        typeMap
-    ).apply(builder)
-)
+    builder: DynamicActivityNavigatorDestinationBuilder.() -> Unit,
+): Unit =
+    destination(
+        DynamicActivityNavigatorDestinationBuilder(
+                provider[DynamicActivityNavigator::class],
+                T::class,
+                typeMap,
+            )
+            .apply(builder)
+    )
 
-/**
- * DSL for constructing a new [DynamicActivityNavigator.Destination]
- */
+/** DSL for constructing a new [DynamicActivityNavigator.Destination] */
 @NavDestinationDsl
 public class DynamicActivityNavigatorDestinationBuilder :
     NavDestinationBuilder<ActivityNavigator.Destination> {
@@ -94,18 +95,18 @@ public class DynamicActivityNavigatorDestinationBuilder :
         "Use routes to build your DynamicActivityDestination instead",
         ReplaceWith(
             "DynamicActivityNavigatorDestinationBuilder(activityNavigator, route = id.toString())"
-        )
+        ),
     )
     public constructor(
         activityNavigator: DynamicActivityNavigator,
-        @IdRes id: Int
+        @IdRes id: Int,
     ) : super(activityNavigator, id) {
         this.activityNavigator = activityNavigator
     }
 
     public constructor(
         activityNavigator: DynamicActivityNavigator,
-        route: String
+        route: String,
     ) : super(activityNavigator, route) {
         this.activityNavigator = activityNavigator
     }
@@ -116,12 +117,12 @@ public class DynamicActivityNavigatorDestinationBuilder :
      * @param activityNavigator navigator used to create the destination
      * @param route the route from a [KClass] of the destination
      * @param typeMap map of destination arguments' kotlin type [KType] to its respective custom
-     * [NavType]. May be empty if [route] does not use custom NavTypes.
+     *   [NavType]. May be empty if [route] does not use custom NavTypes.
      */
     public constructor(
         activityNavigator: DynamicActivityNavigator,
         route: KClass<*>,
-        typeMap: Map<KType, @JvmSuppressWildcards NavType<*>>
+        typeMap: Map<KType, @JvmSuppressWildcards NavType<*>>,
     ) : super(activityNavigator, route, typeMap) {
         this.activityNavigator = activityNavigator
     }
@@ -148,7 +149,7 @@ public class DynamicActivityNavigatorDestinationBuilder :
                         } else {
                             activityNavigator.packageName
                         },
-                        it
+                        it,
                     )
                 )
             }

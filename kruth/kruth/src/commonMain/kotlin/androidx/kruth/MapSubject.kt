@@ -23,12 +23,10 @@ import androidx.kruth.Fact.Companion.simpleFact
  * Propositions for [Map] subjects.
  *
  * @constructor Constructor for use by subclasses. If you want to create an instance of this class
- * itself, call [check(...)][Subject.check].[that(actual)][StandardSubjectBuilder.that].
+ *   itself, call [check(...)][Subject.check].[that(actual)][StandardSubjectBuilder.that].
  */
-open class MapSubject<K, V> protected constructor(
-    metadata: FailureMetadata,
-    actual: Map<K, V>?,
-) : Subject<Map<K, V>>(actual, metadata = metadata, typeDescriptionOverride = null) {
+open class MapSubject<K, V> protected constructor(metadata: FailureMetadata, actual: Map<K, V>?) :
+    Subject<Map<K, V>>(actual, metadata = metadata, typeDescriptionOverride = null) {
 
     internal constructor(actual: Map<K, V>?, metadata: FailureMetadata) : this(metadata, actual)
 
@@ -59,12 +57,12 @@ open class MapSubject<K, V> protected constructor(
         check("keys").that(requireNonNull(actual).keys).contains(key)
     }
 
-    /** Fails if the map contains the given key.  */
+    /** Fails if the map contains the given key. */
     fun doesNotContainKey(key: Any?) {
         check("keys").that(requireNonNull(actual).keys).doesNotContain(key)
     }
 
-    /** Fails if the map does not contain the given entry.  */
+    /** Fails if the map does not contain the given entry. */
     fun containsEntry(key: K, value: V) {
         val entry = key to value
 
@@ -117,8 +115,7 @@ open class MapSubject<K, V> protected constructor(
                 simpleFact("but did not"),
                 fact(
                     "though it did contain values",
-                    actual.values.retainMatchingToString(valueList)
-                        .countDuplicatesAndAddTypeInfo(),
+                    actual.values.retainMatchingToString(valueList).countDuplicatesAndAddTypeInfo(),
                 ),
             )
         } else {
@@ -126,7 +123,7 @@ open class MapSubject<K, V> protected constructor(
         }
     }
 
-    /** Fails if the map does not contain the given entry.  */
+    /** Fails if the map does not contain the given entry. */
     fun containsEntry(entry: Pair<K, V>) {
         containsEntry(key = entry.first, value = entry.second)
     }
@@ -153,10 +150,7 @@ open class MapSubject<K, V> protected constructor(
      */
     fun containsExactly(vararg entries: Pair<K, V>): Ordered =
         containsExactlyEntriesIn(
-            accumulateMap(
-                functionName = "containsExactly",
-                entries = entries.toList(),
-            )
+            accumulateMap(functionName = "containsExactly", entries = entries.toList())
         )
 
     /**
@@ -165,17 +159,13 @@ open class MapSubject<K, V> protected constructor(
      */
     fun containsAtLeast(vararg entries: Pair<K, V>): Ordered =
         containsAtLeastEntriesIn(
-            accumulateMap(
-                functionName = "containsAtLeast",
-                entries = entries.toList(),
-            )
+            accumulateMap(functionName = "containsAtLeast", entries = entries.toList())
         )
 
     /** Fails if the map does not contain exactly the given set of entries in the given map. */
     fun containsExactlyEntriesIn(expectedMap: Map<K, V>): Ordered {
-        requireNonNull(actual) { "Expected $expectedMap, but was null" }
-
         if (expectedMap.isEmpty()) {
+            requireNonNull(actual)
             if (actual.isNotEmpty()) {
                 isEmpty()
             }
@@ -188,7 +178,7 @@ open class MapSubject<K, V> protected constructor(
         return MapInOrder(expectedMap = expectedMap, allowUnexpected = false)
     }
 
-    /** Fails if the map does not contain at least the given set of entries in the given map.  */
+    /** Fails if the map does not contain at least the given set of entries in the given map. */
     fun containsAtLeastEntriesIn(expectedMap: Map<K, V>): Ordered {
         if (expectedMap.isEmpty()) {
             return NoopOrdered
@@ -199,10 +189,7 @@ open class MapSubject<K, V> protected constructor(
         return MapInOrder(expectedMap = expectedMap, allowUnexpected = true)
     }
 
-    private fun containsEntriesInAnyOrder(
-        expectedMap: Map<K, V>,
-        allowUnexpected: Boolean,
-    ) {
+    private fun containsEntriesInAnyOrder(expectedMap: Map<K, V>, allowUnexpected: Boolean) {
         val actual = requireNonNull(actual)
         val expectedSet = expectedMap.mapTo(HashSet()) { (key, value) -> key to value }
         val actualSet = actual.mapTo(HashSet()) { (key, value) -> key to value }

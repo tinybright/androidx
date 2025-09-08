@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -68,71 +69,77 @@ fun Component(
         onThemeChange = onThemeChange,
         onBackClick = onBackClick,
         favorite = favorite,
-        onFavoriteClick = onFavoriteClick
+        onFavoriteClick = onFavoriteClick,
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier.consumeWindowInsets(paddingValues),
-            contentPadding = PaddingValues(
-                start = paddingValues.calculateStartPadding(ltr) + ComponentPadding,
-                top = paddingValues.calculateTopPadding() + ComponentPadding,
-                end = paddingValues.calculateEndPadding(ltr) + ComponentPadding,
-                bottom = paddingValues.calculateBottomPadding() + ComponentPadding
-            )
+            contentPadding =
+                PaddingValues(
+                    start = paddingValues.calculateStartPadding(ltr) + ComponentPadding,
+                    top = paddingValues.calculateTopPadding() + ComponentPadding,
+                    end = paddingValues.calculateEndPadding(ltr) + ComponentPadding,
+                    bottom = paddingValues.calculateBottomPadding() + ComponentPadding,
+                ),
         ) {
             item {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = ComponentIconVerticalPadding)
+                    modifier =
+                        Modifier.fillMaxWidth().padding(vertical = ComponentIconVerticalPadding)
                 ) {
                     Image(
                         painter = painterResource(id = component.icon),
                         contentDescription = null,
-                        modifier = Modifier
-                            .size(ComponentIconSize)
-                            .align(Alignment.Center),
-                        colorFilter = if (component.tintIcon) {
-                            ColorFilter.tint(LocalContentColor.current)
-                        } else {
-                            null
-                        }
+                        modifier = Modifier.size(ComponentIconSize).align(Alignment.Center),
+                        colorFilter =
+                            if (component.tintIcon) {
+                                ColorFilter.tint(LocalContentColor.current)
+                            } else {
+                                null
+                            },
                     )
                 }
             }
             item {
                 Text(
                     text = stringResource(id = R.string.description),
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
                 )
                 Spacer(modifier = Modifier.height(ComponentPadding))
-                Text(
-                    text = component.description,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Text(text = component.description, style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.height(ComponentDescriptionPadding))
             }
             item {
                 Text(
                     text = stringResource(id = R.string.examples),
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
                 )
                 Spacer(modifier = Modifier.height(ComponentPadding))
             }
-            if (component.examples.isNotEmpty()) {
-                items(component.examples) { example ->
+            // In case the theme has a showOnlyExpressiveComponents setting, filter the
+            // examples list to include only those that are expressive.
+            val filteredExamples =
+                if (theme.showOnlyExpressiveComponents) {
+                    component.examples.filter { it.isExpressive }
+                } else {
+                    component.examples
+                }
+            if (filteredExamples.isNotEmpty()) {
+                items(filteredExamples) { example ->
                     ExampleItem(
                         example = example,
-                        onClick = onExampleClick
+                        markExpressiveComponents = theme.markExpressiveComponents,
+                        onClick = onExampleClick,
                     )
                     Spacer(modifier = Modifier.height(ExampleItemPadding))
                 }
             } else {
                 item {
-                    Text(
-                        text = stringResource(id = R.string.no_examples),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Spacer(modifier = Modifier.height(ComponentPadding))
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = stringResource(id = R.string.no_examples),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
                 }
             }
         }

@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.layout.windowInsetsEndWidth
 import androidx.compose.foundation.layout.windowInsetsStartWidth
 import androidx.compose.foundation.layout.windowInsetsTopHeight
@@ -45,10 +46,11 @@ fun insetsStartWidthSample() {
             setContent {
                 Box(Modifier.fillMaxSize()) {
                     // Background for navigation bar at the start
-                    Box(Modifier.windowInsetsStartWidth(WindowInsets.navigationBars)
-                        .fillMaxHeight()
-                        .align(Alignment.CenterStart)
-                        .background(Color.Red)
+                    Box(
+                        Modifier.windowInsetsStartWidth(WindowInsets.navigationBars)
+                            .fillMaxHeight()
+                            .align(Alignment.CenterStart)
+                            .background(Color.Red)
                     )
                     // app content
                 }
@@ -66,10 +68,11 @@ fun insetsTopHeightSample() {
             setContent {
                 Box(Modifier.fillMaxSize()) {
                     // Background for status bar at the top
-                    Box(Modifier.windowInsetsTopHeight(WindowInsets.statusBars)
-                        .fillMaxWidth()
-                        .align(Alignment.TopCenter)
-                        .background(Color.Red)
+                    Box(
+                        Modifier.windowInsetsTopHeight(WindowInsets.statusBars)
+                            .fillMaxWidth()
+                            .align(Alignment.TopCenter)
+                            .background(Color.Red)
                     )
                     // app content
                 }
@@ -87,10 +90,11 @@ fun insetsEndWidthSample() {
             setContent {
                 Box(Modifier.fillMaxSize()) {
                     // Background for navigation bar at the end
-                    Box(Modifier.windowInsetsEndWidth(WindowInsets.navigationBars)
-                        .fillMaxHeight()
-                        .align(Alignment.CenterEnd)
-                        .background(Color.Red)
+                    Box(
+                        Modifier.windowInsetsEndWidth(WindowInsets.navigationBars)
+                            .fillMaxHeight()
+                            .align(Alignment.CenterEnd)
+                            .background(Color.Red)
                     )
                     // app content
                 }
@@ -108,10 +112,11 @@ fun insetsBottomHeightSample() {
             setContent {
                 Box(Modifier.fillMaxSize()) {
                     // Background for navigation bar at the bottom
-                    Box(Modifier.windowInsetsTopHeight(WindowInsets.navigationBars)
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                        .background(Color.Red)
+                    Box(
+                        Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars)
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter)
+                            .background(Color.Red)
                     )
                     // app content
                 }

@@ -16,7 +16,6 @@
 
 package androidx.compose.ui.draw
 
-import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -40,23 +39,20 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @MediumTest
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 @RunWith(AndroidJUnit4::class)
 class NotHardwareAcceleratedActivityTest {
 
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<NotHardwareAcceleratedActivity>()
+    @get:Rule val composeTestRule = createAndroidComposeRule<NotHardwareAcceleratedActivity>()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_UI)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_UI)
 
     @Test
     fun layerTransformationsApplied() {
         composeTestRule.setContent {
             Box(Modifier.size(200.dp).background(Color.White).testTag("box")) {
                 Box(
-                    Modifier
-                        .layout { measurable, constraints ->
+                    Modifier.layout { measurable, constraints ->
                             val placeable = measurable.measure(constraints)
                             layout(placeable.width, placeable.height) {
                                 val offset = 50.dp.roundToPx()
@@ -73,7 +69,8 @@ class NotHardwareAcceleratedActivityTest {
             }
         }
 
-        composeTestRule.onNodeWithTag("box")
+        composeTestRule
+            .onNodeWithTag("box")
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "not_hardware_accelerated_activity")
     }

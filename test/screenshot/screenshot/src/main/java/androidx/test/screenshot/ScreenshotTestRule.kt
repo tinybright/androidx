@@ -26,12 +26,12 @@ import androidx.test.screenshot.matchers.BitmapMatcher
 import androidx.test.screenshot.matchers.MSSIMMatcher
 import androidx.test.screenshot.matchers.PixelPerfectMatcher
 import androidx.test.screenshot.proto.DiffResultProto
-import androidx.test.screenshot.proto.ScreenshotResultProto
-import androidx.test.screenshot.proto.ScreenshotResultProto.ScreenshotResult.Status
+import androidx.test.screenshot.proto.DiffResultProto.DiffResult.Status
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
+import java.security.MessageDigest
 import org.junit.Assume
 import org.junit.rules.TestRule
 import org.junit.rules.TestWatcher
@@ -47,24 +47,22 @@ import org.junit.runners.model.Statement
  * directory should be pointing to exactly the same path.
  *
  * @param repoRootPathForGoldens Path to the repo's root that contains the goldens. To be used by
- * CI.
+ *   CI.
  * @param pathToGoldensInRepo Relative path to goldens inside your [repoRootPathForGoldens].
  */
 class ScreenshotTestRuleConfig(
     val repoRootPathForGoldens: String = "",
-    val pathToGoldensInRepo: String = ""
+    val pathToGoldensInRepo: String = "",
 )
 
-/**
- * Type of file that can be produced by the [ScreenshotTestRule].
- */
+/** Type of file that can be produced by the [ScreenshotTestRule]. */
 internal enum class OutputFileType {
     IMAGE_ACTUAL,
     IMAGE_EXPECTED,
     IMAGE_DIFF,
     TEXT_RESULT_PROTO,
     DIFF_TEXT_RESULT_PROTO,
-    RESULT_PROTO
+    RESULT_PROTO,
 }
 
 /**
@@ -75,21 +73,18 @@ internal enum class OutputFileType {
  * into the device to be retrieved later.
  *
  * @param config To configure where this rule should look for goldens.
- *
  * @see Bitmap.assertAgainstGolden
  */
-open class ScreenshotTestRule(
-    config: ScreenshotTestRuleConfig = ScreenshotTestRuleConfig()
-) : TestRule {
+open class ScreenshotTestRule(config: ScreenshotTestRuleConfig = ScreenshotTestRuleConfig()) :
+    TestRule {
 
-    /**
-     * Directory on the device that is used to store the output files.
-     */
+    /** Directory on the device that is used to store the output files. */
     val deviceOutputDirectory
-        get() = File(
-            InstrumentationRegistry.getInstrumentation().getContext().externalCacheDir,
-            "androidx_screenshots"
-        )
+        get() =
+            File(
+                InstrumentationRegistry.getInstrumentation().getContext().externalCacheDir,
+                "androidx_screenshots",
+            )
 
     private val repoRootPathForGoldens = config.repoRootPathForGoldens.trim('/')
     private val pathToGoldensInRepo = config.pathToGoldensInRepo.trim('/')
@@ -107,28 +102,25 @@ open class ScreenshotTestRule(
 
     private var goldenIdentifierResolver: ((String) -> String) = ::resolveGoldenName
 
-    private val testWatcher = object : TestWatcher() {
-        override fun starting(description: Description?) {
-            deviceId = getDeviceModel()
-            testIdentifier = "${description!!.className}_${description.methodName}_$deviceId"
+    private val testWatcher =
+        object : TestWatcher() {
+            override fun starting(description: Description?) {
+                deviceId = getDeviceModel()
+                testIdentifier = "${description!!.className}_${description.methodName}_$deviceId"
+            }
         }
-    }
 
     override fun apply(base: Statement, description: Description?): Statement {
-        return ScreenshotTestStatement(base)
-            .run { testWatcher.apply(this, description) }
+        return ScreenshotTestStatement(base).run { testWatcher.apply(this, description) }
     }
 
     class ScreenshotTestStatement(private val base: Statement) : Statement() {
         override fun evaluate() {
             if (Build.MODEL.contains("gphone")) {
-                // We support emulators with API 33
-                Assume.assumeTrue(
-                    "Requires SDK 33.",
-                    Build.VERSION.SDK_INT == 33
-                )
+                // We support emulators with API 35
+                Assume.assumeTrue("Requires SDK 35.", Build.VERSION.SDK_INT == 35)
             } else {
-                Assume.assumeTrue("Requires API 33 emulator", false)
+                Assume.assumeTrue("Requires API 35 emulator", false)
             }
             base.evaluate()
         }
@@ -169,18 +161,16 @@ open class ScreenshotTestRule(
      * @param actual The bitmap captured during the test.
      * @param goldenIdentifier Name of the golden. Allowed characters: 'A-Za-z0-9_-'
      * @param matcher The algorithm to be used to perform the matching.
-     *
+     * @throws IllegalArgumentException If the golden identifier contains forbidden characters or is
+     *   empty.
      * @see MSSIMMatcher
      * @see PixelPerfectMatcher
      * @see Bitmap.assertAgainstGolden
-     *
-     * @throws IllegalArgumentException If the golden identifier contains forbidden characters or
-     * is empty.
      */
     fun assertBitmapAgainstGolden(
         actual: Bitmap,
         goldenIdentifier: String,
-        matcher: BitmapMatcher
+        matcher: BitmapMatcher,
     ) {
         if (!goldenIdentifier.matches("^[A-Za-z0-9_-]+$".toRegex())) {
             throw IllegalArgumentException(
@@ -192,9 +182,9 @@ open class ScreenshotTestRule(
         val expected = fetchExpectedImage(goldenIdentifier)
         if (expected == null) {
             reportResult(
-                status = Status.MISSING_GOLDEN,
+                status = Status.MISSING_REFERENCE,
                 goldenIdentifier = goldenIdentifier,
-                actual = actual
+                actual = actual,
             )
             throw AssertionError(
                 "Missing golden image " +
@@ -205,10 +195,10 @@ open class ScreenshotTestRule(
 
         if (actual.width != expected.width || actual.height != expected.height) {
             reportResult(
-                status = Status.SIZE_MISMATCH,
+                status = Status.FAILED,
                 goldenIdentifier = goldenIdentifier,
                 actual = actual,
-                expected = expected
+                expected = expected,
             )
             throw AssertionError(
                 "Sizes are different! Expected: [${expected.width}, ${expected
@@ -216,26 +206,27 @@ open class ScreenshotTestRule(
             )
         }
 
-        val comparisonResult = matcher.compareBitmaps(
-            expected = expected.toIntArray(),
-            given = actual.toIntArray(),
-            width = actual.width,
-            height = actual.height
-        )
+        val comparisonResult =
+            matcher.compareBitmaps(
+                expected = expected.toIntArray(),
+                given = actual.toIntArray(),
+                width = actual.width,
+                height = actual.height,
+            )
 
-        val status = if (comparisonResult.matches) {
-            Status.PASSED
-        } else {
-            Status.FAILED
-        }
+        val status =
+            if (comparisonResult.matches) {
+                Status.PASSED
+            } else {
+                Status.FAILED
+            }
 
         reportResult(
             status = status,
             goldenIdentifier = goldenIdentifier,
             actual = actual,
-            comparisonStatistics = comparisonResult.comparisonStatistics,
             expected = expected,
-            diff = comparisonResult.diff
+            diff = comparisonResult.diff,
         )
 
         if (!comparisonResult.matches) {
@@ -250,35 +241,10 @@ open class ScreenshotTestRule(
         status: Status,
         goldenIdentifier: String,
         actual: Bitmap,
-        comparisonStatistics: String? = null,
         expected: Bitmap? = null,
-        diff: Bitmap? = null
+        diff: Bitmap? = null,
     ) {
-        val statusType = when (status) {
-            Status.UNSPECIFIED -> DiffResultProto.DiffResult.Status.UNSPECIFIED
-            Status.PASSED -> DiffResultProto.DiffResult.Status.PASSED
-            Status.FAILED -> DiffResultProto.DiffResult.Status.FAILED
-            Status.MISSING_GOLDEN -> DiffResultProto.DiffResult.Status.MISSING_REFERENCE
-            Status.SIZE_MISMATCH -> DiffResultProto.DiffResult.Status.FLAKY
-            Status.UNRECOGNIZED -> DiffResultProto.DiffResult.Status.UNRECOGNIZED
-        }
-
-        val resultProto = ScreenshotResultProto.ScreenshotResult
-            .newBuilder()
-            .setResult(status)
-
-        val diffResultProto = DiffResultProto.DiffResult
-            .newBuilder()
-            .setResultType(statusType)
-
-        resultProto.comparisonStatistics = comparisonStatistics.orEmpty()
-        resultProto.repoRootPath = repoRootPathForGoldens
-        resultProto.locationOfGoldenInRepo =
-            if (pathToGoldensInRepo.isEmpty()) {
-                goldenIdentifierResolver(goldenIdentifier)
-            } else {
-                "$pathToGoldensInRepo/${goldenIdentifierResolver(goldenIdentifier)}"
-            }
+        val diffResultProto = DiffResultProto.DiffResult.newBuilder().setResultType(status)
 
         diffResultProto.setImageLocationGolden(
             if (pathToGoldensInRepo.isEmpty()) {
@@ -288,85 +254,89 @@ open class ScreenshotTestRule(
             }
         )
 
-        val metadata = DiffResultProto
-            .DiffResult
-            .Metadata
-            .newBuilder()
-            .setKey("repoRootPath")
-            .setValue(repoRootPathForGoldens)
-            .build()
+        val metadata =
+            DiffResultProto.DiffResult.Metadata.newBuilder()
+                .setKey("repoRootPath")
+                .setValue(repoRootPathForGoldens)
+                .build()
 
         diffResultProto.addMetadata(metadata)
 
         val report = Bundle()
 
         if (status != Status.PASSED) {
-            actual.writeToDevice(OutputFileType.IMAGE_ACTUAL, status).also {
-                resultProto.currentScreenshotFileName = it.name
+            actual.writeToDevice(OutputFileType.IMAGE_ACTUAL, status, goldenIdentifier).also {
                 diffResultProto.imageLocationTest = it.name
                 report.putString(bundleKeyPrefix + OutputFileType.IMAGE_ACTUAL, it.absolutePath)
             }
             diff?.run {
-                writeToDevice(OutputFileType.IMAGE_DIFF, status).also {
-                    resultProto.diffImageFileName = it.name
+                writeToDevice(OutputFileType.IMAGE_DIFF, status, goldenIdentifier).also {
                     diffResultProto.imageLocationDiff = it.name
                     report.putString(bundleKeyPrefix + OutputFileType.IMAGE_DIFF, it.absolutePath)
                 }
             }
             expected?.run {
-                writeToDevice(OutputFileType.IMAGE_EXPECTED, status).also {
-                    resultProto.expectedImageFileName = it.name
+                writeToDevice(OutputFileType.IMAGE_EXPECTED, status, goldenIdentifier).also {
                     diffResultProto.imageLocationReference = it.name
                     report.putString(
                         bundleKeyPrefix + OutputFileType.IMAGE_EXPECTED,
-                        it.absolutePath
+                        it.absolutePath,
                     )
                 }
             }
         }
 
-        writeToDevice(OutputFileType.TEXT_RESULT_PROTO, status) {
-            it.write(resultProto.build().toString().toByteArray())
-        }.also {
-            report.putString(bundleKeyPrefix + OutputFileType.TEXT_RESULT_PROTO, it.absolutePath)
-        }
+        writeToDevice(OutputFileType.DIFF_TEXT_RESULT_PROTO, status, goldenIdentifier) {
+                it.write(diffResultProto.build().toString().toByteArray())
+            }
+            .also {
+                report.putString(
+                    bundleKeyPrefix + OutputFileType.DIFF_TEXT_RESULT_PROTO,
+                    it.absolutePath,
+                )
+            }
 
-        writeToDevice(OutputFileType.DIFF_TEXT_RESULT_PROTO, status) {
-            it.write(diffResultProto.build().toString().toByteArray())
-        }.also {
-            report.putString(
-                bundleKeyPrefix + OutputFileType.DIFF_TEXT_RESULT_PROTO,
-                it.absolutePath
-            )
-        }
-
-        writeToDevice(OutputFileType.RESULT_PROTO, status) {
-            it.write(diffResultProto.build().toByteArray())
-        }.also {
-            report.putString(
-                bundleKeyPrefix + OutputFileType.RESULT_PROTO,
-                it.absolutePath
-            )
-        }
+        writeToDevice(OutputFileType.RESULT_PROTO, status, goldenIdentifier) {
+                it.write(diffResultProto.build().toByteArray())
+            }
+            .also {
+                report.putString(bundleKeyPrefix + OutputFileType.RESULT_PROTO, it.absolutePath)
+            }
 
         InstrumentationRegistry.getInstrumentation().sendStatus(bundleStatusInProgress, report)
     }
 
-    internal fun getPathOnDeviceFor(fileType: OutputFileType): File {
-        val fileName = when (fileType) {
-            OutputFileType.IMAGE_ACTUAL -> "${testIdentifier}_actual$imageExtension"
-            OutputFileType.IMAGE_EXPECTED -> "${testIdentifier}_expected$imageExtension"
-            OutputFileType.IMAGE_DIFF -> "${testIdentifier}_diff$imageExtension"
-            OutputFileType.TEXT_RESULT_PROTO -> "${testIdentifier}_$resultTextProtoFileSuffix"
-            OutputFileType.RESULT_PROTO -> "${testIdentifier}_diffResult_$resultProtoFileSuffix"
-            OutputFileType.DIFF_TEXT_RESULT_PROTO ->
-                "${testIdentifier}_diffResult_$resultTextProtoFileSuffix"
-        }
+    internal fun getPathOnDeviceFor(fileType: OutputFileType, goldenIdentifier: String): File {
+        val hashedGoldenIdentifier = goldenIdentifier.toShortHash()
+        val fileName =
+            when (fileType) {
+                OutputFileType.IMAGE_ACTUAL ->
+                    "${testIdentifier}_${hashedGoldenIdentifier}_actual$imageExtension"
+                OutputFileType.IMAGE_EXPECTED ->
+                    "${testIdentifier}_${hashedGoldenIdentifier}_expected$imageExtension"
+                OutputFileType.IMAGE_DIFF ->
+                    "${testIdentifier}_${hashedGoldenIdentifier}_diff$imageExtension"
+                OutputFileType.TEXT_RESULT_PROTO ->
+                    "${testIdentifier}_${hashedGoldenIdentifier}_$resultTextProtoFileSuffix"
+                OutputFileType.RESULT_PROTO ->
+                    "${testIdentifier}_${hashedGoldenIdentifier}_diffResult_$resultProtoFileSuffix"
+                OutputFileType.DIFF_TEXT_RESULT_PROTO ->
+                    "${testIdentifier}_${hashedGoldenIdentifier}_diffResult_$resultTextProtoFileSuffix"
+            }
         return File(deviceOutputDirectory, fileName)
     }
 
-    private fun Bitmap.writeToDevice(fileType: OutputFileType, status: Status): File {
-        return writeToDevice(fileType, status) {
+    private fun String.toShortHash(): String {
+        val bytes = MessageDigest.getInstance("MD5").digest(this.toByteArray())
+        return bytes.joinToString("") { "%02x".format(it) }.take(16)
+    }
+
+    private fun Bitmap.writeToDevice(
+        fileType: OutputFileType,
+        status: Status,
+        goldenIdentifier: String,
+    ): File {
+        return writeToDevice(fileType, status, goldenIdentifier) {
             compress(Bitmap.CompressFormat.PNG, 0 /*ignored for png*/, it)
         }
     }
@@ -374,24 +344,24 @@ open class ScreenshotTestRule(
     private fun writeToDevice(
         fileType: OutputFileType,
         status: Status,
-        writeAction: (FileOutputStream) -> Unit
+        goldenIdentifier: String,
+        writeAction: (FileOutputStream) -> Unit,
     ): File {
         if (!deviceOutputDirectory.exists() && !deviceOutputDirectory.mkdir()) {
             throw IOException("Could not create folder.")
         }
 
-        val file = getPathOnDeviceFor(fileType)
+        val file = getPathOnDeviceFor(fileType, goldenIdentifier)
         if (status != Status.UNSPECIFIED && status != Status.PASSED) {
             Log.d(javaClass.simpleName, "Writing screenshot test result $fileType to $file")
         }
         try {
-            FileOutputStream(file).use {
-                writeAction(it)
-            }
+            FileOutputStream(file).use { writeAction(it) }
         } catch (e: Exception) {
             throw IOException(
                 "Could not write file to storage (path: ${file.absolutePath}). " +
-                    " Stacktrace: " + e.stackTrace
+                    " Stacktrace: " +
+                    e.stackTrace
             )
         }
         return file
@@ -422,16 +392,15 @@ internal fun Bitmap.toIntArray(): IntArray {
  *
  * @param rule The screenshot test rule that provides the comparison and reporting.
  * @param goldenIdentifier Name of the golden. Allowed characters: 'A-Za-z0-9_-'
- * @param matcher The algorithm to be used to perform the matching. By default [MSSIMMatcher]
- * is used.
- *
+ * @param matcher The algorithm to be used to perform the matching. By default [MSSIMMatcher] is
+ *   used.
  * @see MSSIMMatcher
  * @see PixelPerfectMatcher
  */
 fun Bitmap.assertAgainstGolden(
     rule: ScreenshotTestRule,
     goldenIdentifier: String,
-    matcher: BitmapMatcher = MSSIMMatcher()
+    matcher: BitmapMatcher = MSSIMMatcher(),
 ) {
     rule.assertBitmapAgainstGolden(this, goldenIdentifier, matcher = matcher)
 }

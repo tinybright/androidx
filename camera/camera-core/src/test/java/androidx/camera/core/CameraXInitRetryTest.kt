@@ -16,6 +16,7 @@
 
 package androidx.camera.core
 
+import android.companion.virtual.VirtualDeviceManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -34,7 +35,10 @@ import androidx.camera.core.impl.CameraFactory
 import androidx.camera.core.impl.CameraFactory.Provider
 import androidx.camera.core.impl.CameraInternal
 import androidx.camera.core.impl.CameraThreadConfig
+import androidx.camera.core.impl.Observable
 import androidx.camera.core.impl.UseCaseConfigFactory
+import androidx.camera.core.impl.utils.ContextUtilTest
+import androidx.camera.core.internal.StreamSpecsCalculator
 import androidx.camera.testing.fakes.FakeCamera
 import androidx.camera.testing.fakes.FakeCameraInfoInternal
 import androidx.camera.testing.impl.fakes.FakeCameraCoordinator
@@ -63,13 +67,16 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.Implementation
+import org.robolectric.annotation.Implements
 import org.robolectric.annotation.internal.DoNotInstrument
 import org.robolectric.shadows.ShadowPackageManager
 import org.robolectric.shadows.ShadowSystemClock
+import org.robolectric.shadows.ShadowVirtualDeviceManager
+import org.robolectric.versioning.AndroidVersions
 
 @RunWith(RobolectricTestRunner::class)
 @DoNotInstrument
-@Config(minSdk = Build.VERSION_CODES.LOLLIPOP)
 @OptIn(ExperimentalCoroutinesApi::class)
 class CameraXInitRetryTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
@@ -552,6 +559,15 @@ class CameraXInitRetryTest {
                                 override fun getCameraManager(): Any? {
                                     throw testException
                                 }
+
+                                override fun getCameraPresenceSource():
+                                    Observable<List<CameraIdentifier?>?> {
+                                    throw testException
+                                }
+
+                                override fun onCameraIdsUpdated(cameraIds: List<String?>) {
+                                    throw testException
+                                }
                             }
                     )
                 )
@@ -577,13 +593,96 @@ class CameraXInitRetryTest {
             .isEqualTo(ExecutionState.STATUS_UNKNOWN_ERROR)
     }
 
+    @Test
+    @Config(minSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE, shadows = [TestShadowVDM::class])
+    fun testIgnoreVirtualCameraValidation_WithAvailableDevices() = runTest {
+        // Arrange.
+        var callCount = 0
+        val context =
+            ContextUtilTest.FakeContext(
+                "non-application",
+                baseContext = context,
+                deviceId = TEST_VDM_DEVICE_ID,
+            )
+
+        val configBuilder: CameraXConfig.Builder =
+            CameraXConfig.Builder.fromConfig(
+                    createCameraXConfig(
+                        cameraFactory =
+                            createFakeCameraFactory(frontCamera = true, backCamera = false)
+                    )
+                )
+                .setSchedulerHandler(handler)
+                .setCameraExecutor(handlerExecutor)
+                .setCameraProviderInitRetryPolicy {
+                    callCount++
+                    RetryConfig.Builder().setShouldRetry(false).build()
+                }
+
+        // Simulate the system time increases.
+        repeatingJob = simulateSystemTimeIncrease()
+
+        // Act.
+        val cameraX = CameraX(context) { configBuilder.build() }
+        cameraX.initializeFuture.await()
+
+        // Assert.
+        assertThat(cameraX.isInitialized).isTrue()
+        assertThat(callCount).isEqualTo(0)
+    }
+
+    @Test
+    @Config(minSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE, shadows = [TestShadowVDM::class])
+    fun testInitSucceedsOnVirtualDevice_NoAvailableDevices() = runTest {
+        // Arrange. Set up a simulated environment that no accessible cameras.
+        var callCount = 0
+        val configBuilder: CameraXConfig.Builder =
+            CameraXConfig.Builder.fromConfig(
+                    createCameraXConfig(
+                        cameraFactory =
+                            createFakeCameraFactory(frontCamera = false, backCamera = false)
+                    )
+                )
+                .setSchedulerHandler(handler)
+                .setCameraExecutor(handlerExecutor)
+                .setCameraProviderInitRetryPolicy {
+                    callCount++
+                    RetryConfig.Builder().setShouldRetry(false).build()
+                }
+
+        val context =
+            ContextUtilTest.FakeContext(
+                "non-application",
+                baseContext = context,
+                deviceId = TEST_VDM_DEVICE_ID,
+            )
+
+        // Simulate the system time increases.
+        repeatingJob = simulateSystemTimeIncrease()
+
+        // Act.
+        val cameraX = CameraX(context) { configBuilder.build() }
+        cameraX.initializeFuture.await()
+
+        // Assert.
+        assertThat(cameraX.isInitialized).isTrue()
+        assertThat(callCount).isEqualTo(0)
+        cameraX.shutdown().get()
+    }
+
     private fun createCameraXConfig(
         cameraFactory: CameraFactory = createFakeCameraFactory(),
         surfaceManager: CameraDeviceSurfaceManager? = FakeCameraDeviceSurfaceManager(),
-        useCaseConfigFactory: UseCaseConfigFactory? = FakeUseCaseConfigFactory()
+        useCaseConfigFactory: UseCaseConfigFactory? = FakeUseCaseConfigFactory(),
     ): CameraXConfig {
         val cameraFactoryProvider =
-            Provider { _: Context?, _: CameraThreadConfig?, _: CameraSelector?, _: Long ->
+            Provider {
+                _: Context?,
+                _: CameraThreadConfig?,
+                _: CameraSelector?,
+                _: Long,
+                _: CameraXConfig?,
+                _: StreamSpecsCalculator ->
                 cameraFactory
             }
         return CameraXConfig.Builder()
@@ -607,7 +706,7 @@ class CameraXInitRetryTest {
                     FakeCamera(
                         CAMERA_ID_0,
                         null,
-                        FakeCameraInfoInternal(CAMERA_ID_0, 0, CameraSelector.LENS_FACING_BACK)
+                        FakeCameraInfoInternal(CAMERA_ID_0, 0, CameraSelector.LENS_FACING_BACK),
                     )
                 }
             }
@@ -616,7 +715,7 @@ class CameraXInitRetryTest {
                     FakeCamera(
                         CAMERA_ID_1,
                         null,
-                        FakeCameraInfoInternal(CAMERA_ID_1, 0, CameraSelector.LENS_FACING_FRONT)
+                        FakeCameraInfoInternal(CAMERA_ID_1, 0, CameraSelector.LENS_FACING_FRONT),
                     )
                 }
             }
@@ -630,10 +729,25 @@ class CameraXInitRetryTest {
             if (SystemClock.elapsedRealtime() < currentTime) {
                 ShadowSystemClock.advanceBy(
                     currentTime - SystemClock.elapsedRealtime(),
-                    TimeUnit.MILLISECONDS
+                    TimeUnit.MILLISECONDS,
                 )
             }
             delay(FAKE_INIT_PROCESS_TIME_MS)
+        }
+    }
+
+    @Implements(
+        value = VirtualDeviceManager::class,
+        minSdk = AndroidVersions.U.SDK_INT,
+        isInAndroidSdk = false,
+    )
+    class TestShadowVDM : ShadowVirtualDeviceManager() {
+        @Implementation
+        override fun isValidVirtualDeviceId(deviceId: Int): Boolean {
+            if (deviceId == TEST_VDM_DEVICE_ID) {
+                return true
+            }
+            return super.isValidVirtualDeviceId(deviceId)
         }
     }
 
@@ -641,5 +755,6 @@ class CameraXInitRetryTest {
         private const val CAMERA_ID_0 = "0"
         private const val CAMERA_ID_1 = "1"
         private const val FAKE_INIT_PROCESS_TIME_MS = 33L
+        private const val TEST_VDM_DEVICE_ID = 2
     }
 }

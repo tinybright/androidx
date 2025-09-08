@@ -16,7 +16,6 @@
 
 package androidx.compose.foundation.lazy.staggeredgrid
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -37,18 +36,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
-@OptIn(ExperimentalFoundationApi::class)
 @RunWith(Parameterized::class)
-class LazyStaggeredGridReverseLayoutTest(
-    val orientation: Orientation,
-) : BaseLazyStaggeredGridWithOrientation(orientation) {
+class LazyStaggeredGridReverseLayoutTest(val orientation: Orientation) :
+    BaseLazyStaggeredGridWithOrientation(orientation) {
     companion object {
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
-        fun initOrientation(): Array<Any> = arrayOf(
-            Orientation.Vertical,
-            Orientation.Horizontal,
-        )
+        fun initOrientation(): Array<Any> = arrayOf(Orientation.Vertical, Orientation.Horizontal)
     }
 
     private val StaggeredGridTag = "LazyStaggeredGrid"
@@ -58,9 +52,7 @@ class LazyStaggeredGridReverseLayoutTest(
 
     @Before
     fun before() {
-        with(rule.density) {
-            itemSize = itemSizePx.toDp()
-        }
+        with(rule.density) { itemSize = itemSizePx.toDp() }
     }
 
     @Test
@@ -69,7 +61,7 @@ class LazyStaggeredGridReverseLayoutTest(
             LazyStaggeredGrid(
                 lanes = 2,
                 modifier = Modifier.axisSize(itemSize * 2, itemSize * 4),
-                reverseLayout = true
+                reverseLayout = true,
             ) {
                 item {
                     Box(Modifier.size(itemSize * 2).testTag("0"))
@@ -78,11 +70,13 @@ class LazyStaggeredGridReverseLayoutTest(
             }
         }
 
-        rule.onNodeWithTag("0")
+        rule
+            .onNodeWithTag("0")
             .assertMainAxisStartPositionInRootIsEqualTo(itemSize * 2)
             .assertMainAxisSizeIsEqualTo(itemSize * 2)
 
-        rule.onNodeWithTag("1")
+        rule
+            .onNodeWithTag("1")
             .assertMainAxisStartPositionInRootIsEqualTo(itemSize * 3)
             .assertMainAxisSizeIsEqualTo(itemSize)
     }
@@ -93,24 +87,26 @@ class LazyStaggeredGridReverseLayoutTest(
             LazyStaggeredGrid(
                 lanes = 2,
                 modifier = Modifier.axisSize(itemSize * 2, itemSize * 4),
-                reverseLayout = true
+                reverseLayout = true,
             ) {
-                items(4) {
-                    Box(Modifier.size(itemSize).testTag("$it"))
-                }
+                items(4) { Box(Modifier.size(itemSize).testTag("$it")) }
             }
         }
 
-        rule.onNodeWithTag("0")
+        rule
+            .onNodeWithTag("0")
             .assertMainAxisStartPositionInRootIsEqualTo(itemSize * 3)
             .assertCrossAxisStartPositionInRootIsEqualTo(0.dp)
-        rule.onNodeWithTag("1")
+        rule
+            .onNodeWithTag("1")
             .assertMainAxisStartPositionInRootIsEqualTo(itemSize * 3)
             .assertCrossAxisStartPositionInRootIsEqualTo(itemSize)
-        rule.onNodeWithTag("2")
+        rule
+            .onNodeWithTag("2")
             .assertMainAxisStartPositionInRootIsEqualTo(itemSize * 2)
             .assertCrossAxisStartPositionInRootIsEqualTo(0.dp)
-        rule.onNodeWithTag("3")
+        rule
+            .onNodeWithTag("3")
             .assertMainAxisStartPositionInRootIsEqualTo(itemSize * 2)
             .assertCrossAxisStartPositionInRootIsEqualTo(itemSize)
     }
@@ -123,11 +119,9 @@ class LazyStaggeredGridReverseLayoutTest(
                 lanes = 2,
                 modifier = Modifier.axisSize(itemSize * 2, itemSize * 4),
                 reverseLayout = true,
-                state = state
+                state = state,
             ) {
-                items(4) {
-                    Box(Modifier.size(itemSize).testTag("$it"))
-                }
+                items(4) { Box(Modifier.size(itemSize).testTag("$it")) }
             }
         }
 
@@ -145,27 +139,22 @@ class LazyStaggeredGridReverseLayoutTest(
                 lanes = 2,
                 modifier = Modifier.axisSize(itemSize * 2, itemSize * 4).testTag(StaggeredGridTag),
                 reverseLayout = true,
-                state = state
+                state = state,
             ) {
-                items(4) {
-                    Box(Modifier.size(itemSize).testTag("$it"))
-                }
+                items(4) { Box(Modifier.size(itemSize).testTag("$it")) }
             }
         }
 
         //  scroll down and as the scrolling is reversed it shouldn't affect anything
-        rule.onNodeWithTag(StaggeredGridTag)
-            .scrollMainAxisBy(itemSize)
+        rule.onNodeWithTag(StaggeredGridTag).scrollMainAxisBy(itemSize)
 
         rule.runOnIdle {
             assertThat(state.firstVisibleItemScrollOffset).isEqualTo(0)
             assertThat(state.firstVisibleItemIndex).isEqualTo(0)
         }
 
-        rule.onNodeWithTag("0")
-            .assertMainAxisStartPositionInRootIsEqualTo(itemSize * 3)
-        rule.onNodeWithTag("1")
-            .assertMainAxisStartPositionInRootIsEqualTo(itemSize * 3)
+        rule.onNodeWithTag("0").assertMainAxisStartPositionInRootIsEqualTo(itemSize * 3)
+        rule.onNodeWithTag("1").assertMainAxisStartPositionInRootIsEqualTo(itemSize * 3)
     }
 
     @Test
@@ -174,20 +163,15 @@ class LazyStaggeredGridReverseLayoutTest(
         rule.setContent {
             LazyStaggeredGrid(
                 lanes = 2,
-                modifier = Modifier
-                    .axisSize(itemSize * 2, itemSize * 2)
-                    .testTag(StaggeredGridTag),
+                modifier = Modifier.axisSize(itemSize * 2, itemSize * 2).testTag(StaggeredGridTag),
                 reverseLayout = true,
-                state = state
+                state = state,
             ) {
-                items(6) {
-                    Box(Modifier.size(itemSize).testTag("$it"))
-                }
+                items(6) { Box(Modifier.size(itemSize).testTag("$it")) }
             }
         }
 
-        rule.onNodeWithTag(StaggeredGridTag)
-            .scrollMainAxisBy(-itemSize * 0.5f)
+        rule.onNodeWithTag(StaggeredGridTag).scrollMainAxisBy(-itemSize * 0.5f)
 
         rule.runOnIdle {
             assertThat(state.firstVisibleItemIndex).isEqualTo(0)
@@ -196,17 +180,13 @@ class LazyStaggeredGridReverseLayoutTest(
 
         val scrolledByDp = with(rule.density) { state.firstVisibleItemScrollOffset.toDp() }
 
-        rule.onNodeWithTag("0")
-            .assertMainAxisStartPositionInRootIsEqualTo(itemSize + scrolledByDp)
+        rule.onNodeWithTag("0").assertMainAxisStartPositionInRootIsEqualTo(itemSize + scrolledByDp)
 
-        rule.onNodeWithTag("1")
-            .assertMainAxisStartPositionInRootIsEqualTo(itemSize + scrolledByDp)
+        rule.onNodeWithTag("1").assertMainAxisStartPositionInRootIsEqualTo(itemSize + scrolledByDp)
 
-        rule.onNodeWithTag("2")
-            .assertMainAxisStartPositionInRootIsEqualTo(scrolledByDp)
+        rule.onNodeWithTag("2").assertMainAxisStartPositionInRootIsEqualTo(scrolledByDp)
 
-        rule.onNodeWithTag("3")
-            .assertMainAxisStartPositionInRootIsEqualTo(scrolledByDp)
+        rule.onNodeWithTag("3").assertMainAxisStartPositionInRootIsEqualTo(scrolledByDp)
     }
 
     @Test
@@ -215,31 +195,24 @@ class LazyStaggeredGridReverseLayoutTest(
         rule.setContent {
             LazyStaggeredGrid(
                 lanes = 2,
-                modifier = Modifier
-                    .axisSize(itemSize * 2, itemSize * 2)
-                    .testTag(StaggeredGridTag),
+                modifier = Modifier.axisSize(itemSize * 2, itemSize * 2).testTag(StaggeredGridTag),
                 reverseLayout = true,
-                state = state
+                state = state,
             ) {
-                items(6) {
-                    Box(Modifier.size(itemSize).testTag("$it"))
-                }
+                items(6) { Box(Modifier.size(itemSize).testTag("$it")) }
             }
         }
 
-        rule.onNodeWithTag(StaggeredGridTag)
-            .scrollMainAxisBy(-itemSize * 10)
+        rule.onNodeWithTag(StaggeredGridTag).scrollMainAxisBy(-itemSize * 10)
 
         rule.runOnIdle {
             assertThat(state.firstVisibleItemIndex).isEqualTo(2)
             assertThat(state.firstVisibleItemScrollOffset).isEqualTo(0)
         }
 
-        rule.onNodeWithTag("4")
-            .assertMainAxisStartPositionInRootIsEqualTo(0.dp)
+        rule.onNodeWithTag("4").assertMainAxisStartPositionInRootIsEqualTo(0.dp)
 
-        rule.onNodeWithTag("5")
-            .assertMainAxisStartPositionInRootIsEqualTo(0.dp)
+        rule.onNodeWithTag("5").assertMainAxisStartPositionInRootIsEqualTo(0.dp)
     }
 
     @Test
@@ -249,32 +222,33 @@ class LazyStaggeredGridReverseLayoutTest(
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                 LazyStaggeredGrid(
                     lanes = 2,
-                    modifier = Modifier
-                        .axisSize(itemSize * 2, itemSize * 2)
-                        .testTag(StaggeredGridTag),
+                    modifier =
+                        Modifier.axisSize(itemSize * 2, itemSize * 2).testTag(StaggeredGridTag),
                     reverseLayout = true,
-                    state = state
+                    state = state,
                 ) {
-                    items(6) {
-                        Box(Modifier.size(itemSize).testTag("$it"))
-                    }
+                    items(6) { Box(Modifier.size(itemSize).testTag("$it")) }
                 }
             }
         }
 
         if (vertical) {
-            rule.onNodeWithTag("0")
+            rule
+                .onNodeWithTag("0")
                 .assertMainAxisStartPositionInRootIsEqualTo(itemSize)
                 .assertCrossAxisStartPositionInRootIsEqualTo(itemSize)
-            rule.onNodeWithTag("1")
+            rule
+                .onNodeWithTag("1")
                 .assertMainAxisStartPositionInRootIsEqualTo(itemSize)
                 .assertCrossAxisStartPositionInRootIsEqualTo(0.dp)
         } else {
             // double reverse horizontally
-            rule.onNodeWithTag("0")
+            rule
+                .onNodeWithTag("0")
                 .assertMainAxisStartPositionInRootIsEqualTo(0.dp)
                 .assertCrossAxisStartPositionInRootIsEqualTo(0.dp)
-            rule.onNodeWithTag("1")
+            rule
+                .onNodeWithTag("1")
                 .assertMainAxisStartPositionInRootIsEqualTo(0.dp)
                 .assertCrossAxisStartPositionInRootIsEqualTo(itemSize)
         }
@@ -287,22 +261,18 @@ class LazyStaggeredGridReverseLayoutTest(
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                 LazyStaggeredGrid(
                     lanes = 2,
-                    modifier = Modifier
-                        .axisSize(itemSize * 2, itemSize * 2)
-                        .testTag(StaggeredGridTag),
+                    modifier =
+                        Modifier.axisSize(itemSize * 2, itemSize * 2).testTag(StaggeredGridTag),
                     reverseLayout = true,
-                    state = state
+                    state = state,
                 ) {
-                    items(6) {
-                        Box(Modifier.size(itemSize).testTag("$it"))
-                    }
+                    items(6) { Box(Modifier.size(itemSize).testTag("$it")) }
                 }
             }
         }
 
         val scrollBy = itemSize * 10
-        rule.onNodeWithTag(StaggeredGridTag)
-            .scrollMainAxisBy(if (vertical) -scrollBy else scrollBy)
+        rule.onNodeWithTag(StaggeredGridTag).scrollMainAxisBy(if (vertical) -scrollBy else scrollBy)
 
         rule.runOnIdle {
             assertThat(state.firstVisibleItemIndex).isEqualTo(2)
@@ -310,20 +280,24 @@ class LazyStaggeredGridReverseLayoutTest(
         }
 
         if (vertical) {
-            rule.onNodeWithTag("4")
+            rule
+                .onNodeWithTag("4")
                 .assertMainAxisStartPositionInRootIsEqualTo(0.dp)
                 .assertCrossAxisStartPositionInRootIsEqualTo(itemSize)
 
-            rule.onNodeWithTag("5")
+            rule
+                .onNodeWithTag("5")
                 .assertMainAxisStartPositionInRootIsEqualTo(0.dp)
                 .assertCrossAxisStartPositionInRootIsEqualTo(0.dp)
         } else {
             // double reverse from RTL
-            rule.onNodeWithTag("4")
+            rule
+                .onNodeWithTag("4")
                 .assertMainAxisStartPositionInRootIsEqualTo(itemSize)
                 .assertCrossAxisStartPositionInRootIsEqualTo(0.dp)
 
-            rule.onNodeWithTag("5")
+            rule
+                .onNodeWithTag("5")
                 .assertMainAxisStartPositionInRootIsEqualTo(itemSize)
                 .assertCrossAxisStartPositionInRootIsEqualTo(itemSize)
         }
@@ -336,15 +310,11 @@ class LazyStaggeredGridReverseLayoutTest(
         rule.setContent {
             LazyStaggeredGrid(
                 lanes = 2,
-                modifier = Modifier
-                    .axisSize(itemSize * 2, itemSize * 2)
-                    .testTag(StaggeredGridTag),
+                modifier = Modifier.axisSize(itemSize * 2, itemSize * 2).testTag(StaggeredGridTag),
                 reverseLayout = reverseLayout,
-                state = state
+                state = state,
             ) {
-                items(6) {
-                    Box(Modifier.size(itemSize).testTag("$it"))
-                }
+                items(6) { Box(Modifier.size(itemSize).testTag("$it")) }
             }
         }
 
@@ -353,10 +323,8 @@ class LazyStaggeredGridReverseLayoutTest(
             assertThat(state.firstVisibleItemScrollOffset).isEqualTo(0)
         }
 
-        rule.onNodeWithTag("0")
-            .assertMainAxisStartPositionInRootIsEqualTo(0.dp)
-        rule.onNodeWithTag("1")
-            .assertMainAxisStartPositionInRootIsEqualTo(0.dp)
+        rule.onNodeWithTag("0").assertMainAxisStartPositionInRootIsEqualTo(0.dp)
+        rule.onNodeWithTag("1").assertMainAxisStartPositionInRootIsEqualTo(0.dp)
 
         reverseLayout = true
         rule.runOnIdle {
@@ -364,10 +332,8 @@ class LazyStaggeredGridReverseLayoutTest(
             assertThat(state.firstVisibleItemScrollOffset).isEqualTo(0)
         }
 
-        rule.onNodeWithTag("0")
-            .assertMainAxisStartPositionInRootIsEqualTo(itemSize)
-        rule.onNodeWithTag("1")
-            .assertMainAxisStartPositionInRootIsEqualTo(itemSize)
+        rule.onNodeWithTag("0").assertMainAxisStartPositionInRootIsEqualTo(itemSize)
+        rule.onNodeWithTag("1").assertMainAxisStartPositionInRootIsEqualTo(itemSize)
     }
 
     @Test
@@ -376,17 +342,13 @@ class LazyStaggeredGridReverseLayoutTest(
         rule.setContent {
             LazyStaggeredGrid(
                 lanes = 2,
-                modifier = Modifier
-                    .axisSize(itemSize * 2, itemSize * 5)
-                    .testTag(StaggeredGridTag),
+                modifier = Modifier.axisSize(itemSize * 2, itemSize * 5).testTag(StaggeredGridTag),
                 contentPadding =
                     PaddingValues(beforeContent = itemSize, afterContent = itemSize * 2),
                 reverseLayout = true,
-                state = state
+                state = state,
             ) {
-                items(6) {
-                    Box(Modifier.size(itemSize).testTag("$it"))
-                }
+                items(6) { Box(Modifier.size(itemSize).testTag("$it")) }
             }
         }
 
@@ -396,10 +358,8 @@ class LazyStaggeredGridReverseLayoutTest(
         }
 
         // bottom padding applies instead of the top
-        rule.onNodeWithTag("0")
-            .assertMainAxisStartPositionInRootIsEqualTo(itemSize * 2)
-        rule.onNodeWithTag("1")
-            .assertMainAxisStartPositionInRootIsEqualTo(itemSize * 2)
+        rule.onNodeWithTag("0").assertMainAxisStartPositionInRootIsEqualTo(itemSize * 2)
+        rule.onNodeWithTag("1").assertMainAxisStartPositionInRootIsEqualTo(itemSize * 2)
     }
 
     @Test
@@ -408,16 +368,12 @@ class LazyStaggeredGridReverseLayoutTest(
         rule.setContent {
             LazyStaggeredGrid(
                 lanes = 2,
-                modifier = Modifier
-                    .axisSize(itemSize * 2, itemSize * 5)
-                    .testTag(StaggeredGridTag),
+                modifier = Modifier.axisSize(itemSize * 2, itemSize * 5).testTag(StaggeredGridTag),
                 contentPadding = PaddingValues(afterContent = itemSize * 2),
                 reverseLayout = true,
-                state = state
+                state = state,
             ) {
-                items(6) {
-                    Box(Modifier.size(itemSize).testTag("$it"))
-                }
+                items(6) { Box(Modifier.size(itemSize).testTag("$it")) }
             }
         }
 
@@ -427,10 +383,8 @@ class LazyStaggeredGridReverseLayoutTest(
         }
 
         // bottom padding applies instead of the top
-        rule.onNodeWithTag("0")
-            .assertMainAxisStartPositionInRootIsEqualTo(itemSize * 2)
-        rule.onNodeWithTag("1")
-            .assertMainAxisStartPositionInRootIsEqualTo(itemSize * 2)
+        rule.onNodeWithTag("0").assertMainAxisStartPositionInRootIsEqualTo(itemSize * 2)
+        rule.onNodeWithTag("1").assertMainAxisStartPositionInRootIsEqualTo(itemSize * 2)
     }
 
     @Test
@@ -439,15 +393,11 @@ class LazyStaggeredGridReverseLayoutTest(
         rule.setContent {
             LazyStaggeredGrid(
                 lanes = 2,
-                modifier = Modifier
-                    .axisSize(itemSize * 2, itemSize * 2)
-                    .testTag(StaggeredGridTag),
+                modifier = Modifier.axisSize(itemSize * 2, itemSize * 2).testTag(StaggeredGridTag),
                 reverseLayout = true,
-                state = state
+                state = state,
             ) {
-                items(6) {
-                    Box(Modifier.size(itemSize).testTag("$it"))
-                }
+                items(6) { Box(Modifier.size(itemSize).testTag("$it")) }
             }
         }
 
@@ -457,10 +407,8 @@ class LazyStaggeredGridReverseLayoutTest(
         }
 
         // bottom padding applies instead of the top
-        rule.onNodeWithTag("0")
-            .assertMainAxisStartPositionInRootIsEqualTo(itemSize * 1.5f)
-        rule.onNodeWithTag("1")
-            .assertMainAxisStartPositionInRootIsEqualTo(itemSize * 1.5f)
+        rule.onNodeWithTag("0").assertMainAxisStartPositionInRootIsEqualTo(itemSize * 1.5f)
+        rule.onNodeWithTag("1").assertMainAxisStartPositionInRootIsEqualTo(itemSize * 1.5f)
     }
     // initial position
 }

@@ -36,8 +36,7 @@ import org.junit.runner.RunWith
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 class NestedScrollerBenchmark {
-    @get:Rule
-    val benchmarkRule = ComposeBenchmarkRule()
+    @get:Rule val benchmarkRule = ComposeBenchmarkRule()
 
     private val nestedScrollerCaseFactory = { NestedScrollerTestCase() }
 
@@ -70,7 +69,7 @@ class NestedScrollerBenchmark {
     fun changeScroll_measure() {
         benchmarkRule.toggleStateBenchmarkMeasure(
             nestedScrollerCaseFactory,
-            toggleCausesRecompose = false
+            toggleCausesRecompose = false,
         )
     }
 
@@ -78,7 +77,7 @@ class NestedScrollerBenchmark {
     fun changeScroll_layout() {
         benchmarkRule.toggleStateBenchmarkLayout(
             nestedScrollerCaseFactory,
-            toggleCausesRecompose = false
+            toggleCausesRecompose = false,
         )
     }
 
@@ -86,7 +85,7 @@ class NestedScrollerBenchmark {
     fun changeScroll_draw() {
         benchmarkRule.toggleStateBenchmarkDraw(
             nestedScrollerCaseFactory,
-            toggleCausesRecompose = false
+            toggleCausesRecompose = false,
         )
     }
 

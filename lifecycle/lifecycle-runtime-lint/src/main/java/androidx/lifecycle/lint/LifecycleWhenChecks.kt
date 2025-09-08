@@ -34,8 +34,6 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiWildcardType
 import com.intellij.psi.util.PsiTypesUtil
 import java.util.ArrayDeque
-import org.jetbrains.kotlin.asJava.elements.KtLightModifierList
-import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UDeclaration
@@ -52,19 +50,19 @@ import org.jetbrains.uast.visitor.AbstractUastVisitor
 import org.jetbrains.uast.visitor.UastVisitor
 
 // both old and new ones
-private val CONTINUATION_NAMES = setOf(
-    "kotlin.coroutines.Continuation<? super kotlin.Unit>",
-    "kotlin.coroutines.experimental.Continuation<? super kotlin.Unit>"
-)
+private val CONTINUATION_NAMES =
+    setOf(
+        "kotlin.coroutines.Continuation<? super kotlin.Unit>",
+        "kotlin.coroutines.experimental.Continuation<? super kotlin.Unit>",
+    )
 
 internal fun errorMessage(whenMethodName: String) =
     "Unsafe View access from finally/catch block inside of `Lifecycle.$whenMethodName` scope"
 
 internal const val SECONDARY_ERROR_MESSAGE = "Internal View access"
 
-private val LIFECYCLE_WHEN_APPLICABLE_METHOD_NAMES = listOf(
-    "whenCreated", "whenStarted", "whenResumed"
-)
+private val LIFECYCLE_WHEN_APPLICABLE_METHOD_NAMES =
+    listOf("whenCreated", "whenStarted", "whenResumed")
 
 class LifecycleWhenChecks : Detector(), SourceCodeScanner {
 
@@ -75,16 +73,20 @@ class LifecycleWhenChecks : Detector(), SourceCodeScanner {
         if (valueArguments.size != 1 || !method.isLifecycleWhenExtension(context)) {
             return
         }
-        (valueArguments[0] as? ULambdaExpression)?.body
+        (valueArguments[0] as? ULambdaExpression)
+            ?.body
             ?.accept(LifecycleWhenVisitor(context, method.name))
     }
 
     companion object {
-        val ISSUE = Issue.create(
-            id = "UnsafeLifecycleWhenUsage",
-            briefDescription = "Unsafe UI operation in finally/catch of " +
-                "Lifecycle.whenStarted of similar method",
-            explanation = """If the `Lifecycle` is destroyed within the block of \
+        val ISSUE =
+            Issue.create(
+                id = "UnsafeLifecycleWhenUsage",
+                briefDescription =
+                    "Unsafe UI operation in finally/catch of " +
+                        "Lifecycle.whenStarted of similar method",
+                explanation =
+                    """If the `Lifecycle` is destroyed within the block of \
                     `Lifecycle.whenStarted` or any similar `Lifecycle.when` method is suspended, \
                     the block will be cancelled, which will also cancel any child coroutine \
                     launched inside the block. As as a result, If you have a try finally block \
@@ -94,19 +96,24 @@ class LifecycleWhenChecks : Detector(), SourceCodeScanner {
                     if you have a catch statement that might catch `CancellationException`, \
                     you should check the `Lifecycle.isAtLeast` before accessing the UI. See \
                     documentation of `Lifecycle.whenStateAtLeast` for more details""",
-            category = Category.CORRECTNESS,
-            severity = Severity.ERROR,
-            implementation = Implementation(LifecycleWhenChecks::class.java, Scope.JAVA_FILE_SCOPE),
-            androidSpecific = true
-        )
+                category = Category.CORRECTNESS,
+                severity = Severity.ERROR,
+                implementation =
+                    Implementation(LifecycleWhenChecks::class.java, Scope.JAVA_FILE_SCOPE),
+                androidSpecific = true,
+            )
     }
 }
 
 internal class LifecycleWhenVisitor(
     private val context: JavaContext,
-    private val whenMethodName: String
+    private val whenMethodName: String,
 ) : AbstractUastVisitor() {
-    enum class SearchState { DONT_SEARCH, SEARCH, FOUND }
+    enum class SearchState {
+        DONT_SEARCH,
+        SEARCH,
+        FOUND,
+    }
 
     data class State(val checkUIAccess: Boolean, val suspendCallSearch: SearchState)
 
@@ -118,7 +125,9 @@ internal class LifecycleWhenVisitor(
         states.push(State(checkUIAccess = false, suspendCallSearch = DONT_SEARCH))
     }
 
-    private val currentState: State get() = states.first
+    private val currentState: State
+        get() = states.first
+
     private val recursiveHelper = RecursiveVisitHelper()
 
     fun withNewState(state: State, block: () -> Unit): State {
@@ -156,7 +165,7 @@ internal class LifecycleWhenVisitor(
     override fun visitCallExpression(node: UCallExpression): Boolean {
         val psiMethod = node.resolve() ?: return super.visitCallExpression(node)
 
-        if (psiMethod.isSuspend()) {
+        if (context.evaluator.isSuspend(psiMethod)) {
             updateSuspendCallSearch(FOUND)
             // go inside and check it doesn't access
             recursiveHelper.visitIfNeeded(psiMethod, this)
@@ -238,11 +247,6 @@ private fun ULambdaExpression.isSuspendLambda(): Boolean {
     } else {
         false
     }
-}
-
-private fun PsiMethod.isSuspend(): Boolean {
-    val modifiers = modifierList as? KtLightModifierList<*>
-    return modifiers?.kotlinOrigin?.hasModifier(KtTokens.SUSPEND_KEYWORD) ?: false
 }
 
 fun checkUiAccess(context: JavaContext, node: UCallExpression, whenMethodName: String) {

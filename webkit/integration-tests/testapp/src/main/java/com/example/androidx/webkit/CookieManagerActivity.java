@@ -22,10 +22,11 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.webkit.CookieManagerCompat;
 import androidx.webkit.WebViewFeature;
+
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -43,6 +44,7 @@ public class CookieManagerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_get_cookie_info);
         setTitle(R.string.cookie_manager_activity_title);
+        WebkitHelpers.enableEdgeToEdge(this);
         WebkitHelpers.appendWebViewVersionToTitle(this);
 
         if (!WebViewFeature.isFeatureSupported(WebViewFeature.GET_COOKIE_INFO)) {

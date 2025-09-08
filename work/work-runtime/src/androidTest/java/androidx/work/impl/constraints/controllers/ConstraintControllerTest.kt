@@ -19,7 +19,6 @@ package androidx.work.impl.constraints.controllers
 import android.app.job.JobParameters.STOP_REASON_CONSTRAINT_DEVICE_IDLE
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.SdkSuppress
 import androidx.test.filters.SmallTest
 import androidx.work.Constraints
 import androidx.work.OneTimeWorkRequest
@@ -37,7 +36,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-@SdkSuppress(minSdkVersion = 23)
 class ConstraintControllerTest {
     private val tracker = FakeConstraintTracker()
     private val testIdleController = TestDeviceIdleConstraintController(tracker)
@@ -61,8 +59,11 @@ class ConstraintControllerTest {
     @Test
     @SmallTest
     fun testIsConstrained() {
-        val constrained = OneTimeWorkRequest.Builder(TestWorker::class.java)
-            .setConstraints(Constraints(requiresDeviceIdle = true)).build().workSpec
+        val constrained =
+            OneTimeWorkRequest.Builder(TestWorker::class.java)
+                .setConstraints(Constraints(requiresDeviceIdle = true))
+                .build()
+                .workSpec
         val unconstrained = OneTimeWorkRequest.Builder(TestWorker::class.java).build().workSpec
         tracker.setDeviceActive()
         assertThat(testIdleController.isCurrentlyConstrained(unconstrained)).isFalse()
@@ -72,9 +73,8 @@ class ConstraintControllerTest {
         assertThat(testIdleController.isCurrentlyConstrained(constrained)).isFalse()
     }
 
-    private class TestDeviceIdleConstraintController(
-        tracker: ConstraintTracker<Boolean>
-    ) : BaseConstraintController<Boolean>(tracker) {
+    private class TestDeviceIdleConstraintController(tracker: ConstraintTracker<Boolean>) :
+        BaseConstraintController<Boolean>(tracker) {
         override val reason = WorkInfo.STOP_REASON_CONSTRAINT_DEVICE_IDLE
 
         override fun hasConstraint(workSpec: WorkSpec): Boolean {
@@ -84,12 +84,14 @@ class ConstraintControllerTest {
         override fun isConstrained(value: Boolean) = !value
     }
 
-    private class FakeConstraintTracker : ConstraintTracker<Boolean>(
-        ApplicationProvider.getApplicationContext(),
-        InstantWorkTaskExecutor()
-    ) {
+    private class FakeConstraintTracker :
+        ConstraintTracker<Boolean>(
+            ApplicationProvider.getApplicationContext(),
+            InstantWorkTaskExecutor(),
+        ) {
         var tracking = false
         var deviceIdle = false
+
         override fun startTracking() {
             tracking = true
         }

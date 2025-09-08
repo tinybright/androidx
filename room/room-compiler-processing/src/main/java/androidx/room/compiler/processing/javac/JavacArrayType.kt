@@ -24,55 +24,52 @@ import androidx.room.compiler.processing.XType
 import androidx.room.compiler.processing.javac.kotlin.KmTypeContainer
 import javax.lang.model.type.ArrayType
 
-internal class JavacArrayType private constructor(
+internal class JavacArrayType
+private constructor(
     env: JavacProcessingEnv,
     override val typeMirror: ArrayType,
     nullability: XNullability?,
     private val knownComponentNullability: XNullability?,
-    override val kotlinType: KmTypeContainer?
-) : JavacType(
-    env, typeMirror, nullability
-), XArrayType {
+    override val kotlinType: KmTypeContainer?,
+) : JavacType(env, typeMirror, nullability), XArrayType {
 
     constructor(
         env: JavacProcessingEnv,
-        typeMirror: ArrayType
+        typeMirror: ArrayType,
     ) : this(
         env = env,
         typeMirror = typeMirror,
         kotlinType = null,
         nullability = null,
-        knownComponentNullability = null
+        knownComponentNullability = null,
     )
 
     constructor(
         env: JavacProcessingEnv,
         typeMirror: ArrayType,
-        kotlinType: KmTypeContainer
+        kotlinType: KmTypeContainer,
     ) : this(
         env = env,
         typeMirror = typeMirror,
         nullability = kotlinType.nullability,
         knownComponentNullability = kotlinType.typeArguments.firstOrNull()?.nullability,
-        kotlinType = kotlinType
+        kotlinType = kotlinType,
     )
 
     constructor(
         env: JavacProcessingEnv,
         typeMirror: ArrayType,
         nullability: XNullability,
-        knownComponentNullability: XNullability?
+        knownComponentNullability: XNullability?,
     ) : this(
         env = env,
         typeMirror = typeMirror,
         nullability = nullability,
         knownComponentNullability = knownComponentNullability,
-        kotlinType = null
+        kotlinType = null,
     )
 
-    override val equalityItems: Array<out Any?> by lazy {
-        arrayOf(typeMirror)
-    }
+    override val equalityItems: Array<out Any?> by lazy { arrayOf(typeMirror) }
 
     private val xTypeName: XTypeName by lazy {
         XTypeName(
@@ -90,15 +87,16 @@ internal class JavacArrayType private constructor(
     override val componentType: XType by lazy {
         val componentType = typeMirror.componentType
         val componentTypeNullability =
-            knownComponentNullability ?: if (componentType.kind.isPrimitive) {
-                XNullability.NONNULL
-            } else {
-                XNullability.UNKNOWN
-            }
+            knownComponentNullability
+                ?: if (componentType.kind.isPrimitive) {
+                    XNullability.NONNULL
+                } else {
+                    XNullability.UNKNOWN
+                }
         env.wrap<JavacType>(
             typeMirror = componentType,
             kotlinType = kotlinType?.typeArguments?.firstOrNull(),
-            elementNullability = componentTypeNullability
+            elementNullability = componentTypeNullability,
         )
     }
 
@@ -108,7 +106,7 @@ internal class JavacArrayType private constructor(
             typeMirror = typeMirror,
             nullability = nullability,
             knownComponentNullability = knownComponentNullability,
-            kotlinType = kotlinType
+            kotlinType = kotlinType,
         )
     }
 }

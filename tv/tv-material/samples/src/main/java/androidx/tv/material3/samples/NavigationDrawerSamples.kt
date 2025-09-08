@@ -51,22 +51,19 @@ import androidx.tv.material3.Text
 fun SampleNavigationDrawer() {
     var selectedIndex by remember { mutableIntStateOf(0) }
 
-    val items = listOf(
-        "Home" to Icons.Default.Home,
-        "Settings" to Icons.Default.Settings,
-        "Favourites" to Icons.Default.Favorite,
-    )
+    val items =
+        listOf(
+            "Home" to Icons.Default.Home,
+            "Settings" to Icons.Default.Settings,
+            "Favourites" to Icons.Default.Favorite,
+        )
 
     NavigationDrawer(
         drawerContent = {
             Column(
-                Modifier
-                    .background(Color.Gray)
-                    .fillMaxHeight()
-                    .padding(12.dp)
-                    .selectableGroup(),
+                Modifier.background(Color.Gray).fillMaxHeight().padding(12.dp).selectableGroup(),
                 horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 items.forEachIndexed { index, item ->
                     val (text, icon) = item
@@ -74,12 +71,7 @@ fun SampleNavigationDrawer() {
                     NavigationDrawerItem(
                         selected = selectedIndex == index,
                         onClick = { selectedIndex = index },
-                        leadingContent = {
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                            )
-                        }
+                        leadingContent = { Icon(imageVector = icon, contentDescription = null) },
                     ) {
                         Text(text)
                     }
@@ -87,9 +79,7 @@ fun SampleNavigationDrawer() {
             }
         }
     ) {
-        Button(modifier = Modifier.height(100.dp).fillMaxWidth(), onClick = {}) {
-            Text("BUTTON")
-        }
+        Button(modifier = Modifier.height(100.dp).fillMaxWidth(), onClick = {}) { Text("BUTTON") }
     }
 }
 
@@ -98,24 +88,21 @@ fun SampleNavigationDrawer() {
 fun SampleModalNavigationDrawerWithSolidScrim() {
     var selectedIndex by remember { mutableIntStateOf(0) }
 
-    val items = listOf(
-        "Home" to Icons.Default.Home,
-        "Settings" to Icons.Default.Settings,
-        "Favourites" to Icons.Default.Favorite,
-    )
+    val items =
+        listOf(
+            "Home" to Icons.Default.Home,
+            "Settings" to Icons.Default.Settings,
+            "Favourites" to Icons.Default.Favorite,
+        )
 
     val closeDrawerWidth = 80.dp
     val backgroundContentPadding = 10.dp
     ModalNavigationDrawer(
         drawerContent = {
             Column(
-                Modifier
-                    .background(Color.Gray)
-                    .fillMaxHeight()
-                    .padding(12.dp)
-                    .selectableGroup(),
+                Modifier.background(Color.Gray).fillMaxHeight().padding(12.dp).selectableGroup(),
                 horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 items.forEachIndexed { index, item ->
                     val (text, icon) = item
@@ -123,12 +110,7 @@ fun SampleModalNavigationDrawerWithSolidScrim() {
                     NavigationDrawerItem(
                         selected = selectedIndex == index,
                         onClick = { selectedIndex = index },
-                        leadingContent = {
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                            )
-                        }
+                        leadingContent = { Icon(imageVector = icon, contentDescription = null) },
                     ) {
                         Text(text)
                     }
@@ -137,11 +119,11 @@ fun SampleModalNavigationDrawerWithSolidScrim() {
         }
     ) {
         Button(
-            modifier = Modifier
-                .padding(closeDrawerWidth + backgroundContentPadding)
-                .height(100.dp)
-                .fillMaxWidth(),
-            onClick = {}
+            modifier =
+                Modifier.padding(closeDrawerWidth + backgroundContentPadding)
+                    .height(100.dp)
+                    .fillMaxWidth(),
+            onClick = {},
         ) {
             Text("BUTTON")
         }
@@ -153,11 +135,12 @@ fun SampleModalNavigationDrawerWithSolidScrim() {
 fun SampleModalNavigationDrawerWithGradientScrim() {
     var selectedIndex by remember { mutableIntStateOf(0) }
 
-    val items = listOf(
-        "Home" to Icons.Default.Home,
-        "Settings" to Icons.Default.Settings,
-        "Favourites" to Icons.Default.Favorite,
-    )
+    val items =
+        listOf(
+            "Home" to Icons.Default.Home,
+            "Settings" to Icons.Default.Settings,
+            "Favourites" to Icons.Default.Favorite,
+        )
 
     val closeDrawerWidth = 80.dp
     val backgroundContentPadding = 10.dp
@@ -165,13 +148,9 @@ fun SampleModalNavigationDrawerWithGradientScrim() {
     ModalNavigationDrawer(
         drawerContent = {
             Column(
-                Modifier
-                    .background(Color.Gray)
-                    .fillMaxHeight()
-                    .padding(12.dp)
-                    .selectableGroup(),
+                Modifier.background(Color.Gray).fillMaxHeight().padding(12.dp).selectableGroup(),
                 horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 items.forEachIndexed { index, item ->
                     val (text, icon) = item
@@ -179,26 +158,21 @@ fun SampleModalNavigationDrawerWithGradientScrim() {
                     NavigationDrawerItem(
                         selected = selectedIndex == index,
                         onClick = { selectedIndex = index },
-                        leadingContent = {
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                            )
-                        }
+                        leadingContent = { Icon(imageVector = icon, contentDescription = null) },
                     ) {
                         Text(text)
                     }
                 }
             }
         },
-        scrimBrush = Brush.horizontalGradient(listOf(Color.DarkGray, Color.Transparent))
+        scrimBrush = Brush.horizontalGradient(listOf(Color.DarkGray, Color.Transparent)),
     ) {
         Button(
-            modifier = Modifier
-                .padding(closeDrawerWidth + backgroundContentPadding)
-                .height(100.dp)
-                .fillMaxWidth(),
-            onClick = {}
+            modifier =
+                Modifier.padding(closeDrawerWidth + backgroundContentPadding)
+                    .height(100.dp)
+                    .fillMaxWidth(),
+            onClick = {},
         ) {
             Text("BUTTON")
         }

@@ -19,36 +19,34 @@ import android.os.Bundle
 import android.view.View
 import java.util.concurrent.CopyOnWriteArrayList
 
-/**
- * Dispatcher for events to [FragmentManager.FragmentLifecycleCallbacks] instances
- */
+/** Dispatcher for events to [FragmentManager.FragmentLifecycleCallbacks] instances */
 internal class FragmentLifecycleCallbacksDispatcher(private val fragmentManager: FragmentManager) {
     private class FragmentLifecycleCallbacksHolder(
         val callback: FragmentManager.FragmentLifecycleCallbacks,
-        val recursive: Boolean
+        val recursive: Boolean,
     )
 
     private val lifecycleCallbacks = CopyOnWriteArrayList<FragmentLifecycleCallbacksHolder>()
 
     /**
-     * Registers a [FragmentManager.FragmentLifecycleCallbacks] to listen to fragment
-     * lifecycle events happening in this FragmentManager. All registered callbacks will be
-     * automatically unregistered when this FragmentManager is destroyed.
+     * Registers a [FragmentManager.FragmentLifecycleCallbacks] to listen to fragment lifecycle
+     * events happening in this FragmentManager. All registered callbacks will be automatically
+     * unregistered when this FragmentManager is destroyed.
      *
      * @param cb Callbacks to register
      * @param recursive true to automatically register this callback for all child FragmentManagers
      */
     fun registerFragmentLifecycleCallbacks(
         cb: FragmentManager.FragmentLifecycleCallbacks,
-        recursive: Boolean
+        recursive: Boolean,
     ) {
         lifecycleCallbacks.add(FragmentLifecycleCallbacksHolder(cb, recursive))
     }
 
     /**
-     * Unregisters a previously registered [FragmentManager.FragmentLifecycleCallbacks].
-     * If the callback was not previously registered this call has no effect. All registered
-     * callbacks will be automatically unregistered when this FragmentManager is destroyed.
+     * Unregisters a previously registered [FragmentManager.FragmentLifecycleCallbacks]. If the
+     * callback was not previously registered this call has no effect. All registered callbacks will
+     * be automatically unregistered when this FragmentManager is destroyed.
      *
      * @param cb Callbacks to unregister
      */
@@ -97,13 +95,16 @@ internal class FragmentLifecycleCallbacksDispatcher(private val fragmentManager:
     fun dispatchOnFragmentPreCreated(
         f: Fragment,
         savedInstanceState: Bundle?,
-        onlyRecursive: Boolean
+        onlyRecursive: Boolean,
     ) {
         val parent = fragmentManager.parent
         if (parent != null) {
             val parentManager = parent.getParentFragmentManager()
-            parentManager.lifecycleCallbacksDispatcher
-                .dispatchOnFragmentPreCreated(f, savedInstanceState, true)
+            parentManager.lifecycleCallbacksDispatcher.dispatchOnFragmentPreCreated(
+                f,
+                savedInstanceState,
+                true,
+            )
         }
         for (holder in lifecycleCallbacks) {
             if (!onlyRecursive || holder.recursive) {
@@ -115,13 +116,16 @@ internal class FragmentLifecycleCallbacksDispatcher(private val fragmentManager:
     fun dispatchOnFragmentCreated(
         f: Fragment,
         savedInstanceState: Bundle?,
-        onlyRecursive: Boolean
+        onlyRecursive: Boolean,
     ) {
         val parent = fragmentManager.parent
         if (parent != null) {
             val parentManager = parent.getParentFragmentManager()
-            parentManager.lifecycleCallbacksDispatcher
-                .dispatchOnFragmentCreated(f, savedInstanceState, true)
+            parentManager.lifecycleCallbacksDispatcher.dispatchOnFragmentCreated(
+                f,
+                savedInstanceState,
+                true,
+            )
         }
         for (holder in lifecycleCallbacks) {
             if (!onlyRecursive || holder.recursive) {
@@ -134,13 +138,16 @@ internal class FragmentLifecycleCallbacksDispatcher(private val fragmentManager:
     fun dispatchOnFragmentActivityCreated(
         f: Fragment,
         savedInstanceState: Bundle?,
-        onlyRecursive: Boolean
+        onlyRecursive: Boolean,
     ) {
         val parent = fragmentManager.parent
         if (parent != null) {
             val parentManager = parent.getParentFragmentManager()
-            parentManager.lifecycleCallbacksDispatcher
-                .dispatchOnFragmentActivityCreated(f, savedInstanceState, true)
+            parentManager.lifecycleCallbacksDispatcher.dispatchOnFragmentActivityCreated(
+                f,
+                savedInstanceState,
+                true,
+            )
         }
         for (holder in lifecycleCallbacks) {
             if (!onlyRecursive || holder.recursive) {
@@ -153,13 +160,17 @@ internal class FragmentLifecycleCallbacksDispatcher(private val fragmentManager:
         f: Fragment,
         v: View,
         savedInstanceState: Bundle?,
-        onlyRecursive: Boolean
+        onlyRecursive: Boolean,
     ) {
         val parent = fragmentManager.parent
         if (parent != null) {
             val parentManager = parent.getParentFragmentManager()
-            parentManager.lifecycleCallbacksDispatcher
-                .dispatchOnFragmentViewCreated(f, v, savedInstanceState, true)
+            parentManager.lifecycleCallbacksDispatcher.dispatchOnFragmentViewCreated(
+                f,
+                v,
+                savedInstanceState,
+                true,
+            )
         }
         for (holder in lifecycleCallbacks) {
             if (!onlyRecursive || holder.recursive) {
@@ -224,8 +235,11 @@ internal class FragmentLifecycleCallbacksDispatcher(private val fragmentManager:
         val parent = fragmentManager.parent
         if (parent != null) {
             val parentManager = parent.getParentFragmentManager()
-            parentManager.lifecycleCallbacksDispatcher
-                .dispatchOnFragmentSaveInstanceState(f, outState, true)
+            parentManager.lifecycleCallbacksDispatcher.dispatchOnFragmentSaveInstanceState(
+                f,
+                outState,
+                true,
+            )
         }
         for (holder in lifecycleCallbacks) {
             if (!onlyRecursive || holder.recursive) {

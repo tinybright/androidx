@@ -84,18 +84,18 @@ private fun Configuration() {
                 Column(padding.width(width)) {
                     Text(
                         text,
-                        style = style.copy(
-                            color = Color.Red,
-                            platformStyle = PlatformTextStyle(includeFontPadding = false)
-                        )
+                        style =
+                            style.copy(
+                                color = Color.Red,
+                                platformStyle = PlatformTextStyle(includeFontPadding = false),
+                            ),
                     )
                 }
                 Column(padding.width(width)) {
                     Text(
                         text,
-                        style = style.copy(
-                            platformStyle = PlatformTextStyle(includeFontPadding = true)
-                        )
+                        style =
+                            style.copy(platformStyle = PlatformTextStyle(includeFontPadding = true)),
                     )
                 }
             }
@@ -136,7 +136,7 @@ private fun FontPaddingColumn(text: String, overflow: TextOverflow) {
                     style = TextStyle(fontSize = fontSize),
                     softWrap = false,
                     modifier = backgroundModifier,
-                    overflow = overflow
+                    overflow = overflow,
                 )
             }
             Text(
@@ -144,7 +144,7 @@ private fun FontPaddingColumn(text: String, overflow: TextOverflow) {
                 style = TextStyle(fontSize = fontSize),
                 softWrap = false,
                 modifier = ghostModifier,
-                overflow = overflow
+                overflow = overflow,
             )
         }
 
@@ -156,14 +156,14 @@ private fun FontPaddingColumn(text: String, overflow: TextOverflow) {
                     style = TextStyle(fontSize = fontSize),
                     maxLines = 1,
                     modifier = backgroundModifier,
-                    overflow = overflow
+                    overflow = overflow,
                 )
             }
             Text(
                 text,
                 style = TextStyle(fontSize = fontSize),
                 modifier = softWrapGhostModifier,
-                overflow = overflow
+                overflow = overflow,
             )
         }
 
@@ -175,14 +175,14 @@ private fun FontPaddingColumn(text: String, overflow: TextOverflow) {
                     style = TextStyle(fontSize = fontSize),
                     modifier = backgroundModifier,
                     maxLines = 2,
-                    overflow = overflow
+                    overflow = overflow,
                 )
             }
             Text(
                 text,
                 style = TextStyle(fontSize = fontSize),
                 modifier = softWrapGhostModifier,
-                overflow = overflow
+                overflow = overflow,
             )
         }
     }
@@ -204,12 +204,9 @@ private fun CenteredInContainerColumn(text: String) {
     Column(
         modifier = Modifier.background(Color.DarkGray).height(height),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            text = text,
-            style = TextStyle(fontSize = fontSize, color = Color.White)
-        )
+        Text(text = text, style = TextStyle(fontSize = fontSize, color = Color.White))
     }
 }
 
@@ -232,12 +229,9 @@ private fun CenteredInCircle(text: String) {
     val size = with(LocalDensity.current) { fontSize.toDp() } * 3
     Box(
         modifier = Modifier.clip(CircleShape).background(Color.Red).size(size),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = text,
-            style = TextStyle(fontSize = fontSize, color = Color.White)
-        )
+        Text(text = text, style = TextStyle(fontSize = fontSize, color = Color.White))
     }
 }
 
@@ -249,9 +243,7 @@ private fun MultiStyleText() {
             append("a")
             // half the size of original size
             // as a tall script should not be extending the height since now it is shorter
-            withStyle(SpanStyle(fontSize = fontSize / 2)) {
-                append("ဩ")
-            }
+            withStyle(SpanStyle(fontSize = fontSize / 2)) { append("ဩ") }
         }
         Text(text = shorterTallChar.toString(), style = TextStyle(fontSize = fontSize))
         Spacer(Modifier.padding(16.dp))
@@ -261,9 +253,7 @@ private fun MultiStyleText() {
 
         val tallerTallChar = buildAnnotatedString {
             append("a")
-            withStyle(SpanStyle(fontSize = fontSize * 3)) {
-                append("ဩ")
-            }
+            withStyle(SpanStyle(fontSize = fontSize * 3)) { append("ဩ") }
         }
         Text(text = tallerTallChar, style = TextStyle(fontSize = fontSize))
     }
@@ -276,7 +266,7 @@ private fun InlineContent() {
         TextWithInlineContent(
             tallCharSize = 1.5.em,
             inlineContentSize = 1.em,
-            placeholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline
+            placeholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline,
         )
         Spacer(Modifier.padding(16.dp))
 
@@ -284,7 +274,7 @@ private fun InlineContent() {
         TextWithInlineContent(
             tallCharSize = 1.em,
             inlineContentSize = 2.em,
-            PlaceholderVerticalAlign.AboveBaseline
+            PlaceholderVerticalAlign.AboveBaseline,
         )
         Spacer(Modifier.padding(16.dp))
 
@@ -292,7 +282,7 @@ private fun InlineContent() {
         TextWithInlineContent(
             tallCharSize = 1.em,
             inlineContentSize = 1.em,
-            PlaceholderVerticalAlign.AboveBaseline
+            PlaceholderVerticalAlign.AboveBaseline,
         )
     }
 }
@@ -301,31 +291,26 @@ private fun InlineContent() {
 private fun TextWithInlineContent(
     tallCharSize: TextUnit,
     inlineContentSize: TextUnit,
-    placeholderVerticalAlign: PlaceholderVerticalAlign
+    placeholderVerticalAlign: PlaceholderVerticalAlign,
 ) {
     val fontSize = fontSize10
     val myId = "inlineContent"
     val smallerShape = buildAnnotatedString {
         append("a")
         appendInlineContent(myId, " ")
-        withStyle(SpanStyle(fontSize = tallCharSize)) {
-            append("ဩ")
-        }
+        withStyle(SpanStyle(fontSize = tallCharSize)) { append("ဩ") }
     }
 
-    val inlineContent = InlineTextContent(
-        Placeholder(
-            width = inlineContentSize,
-            height = inlineContentSize,
-            placeholderVerticalAlign = placeholderVerticalAlign
-        )
-    ) {
-        Box(
-            modifier = Modifier.fillMaxSize()
-                .clip(CircleShape)
-                .background(color = Color.Red)
-        )
-    }
+    val inlineContent =
+        InlineTextContent(
+            Placeholder(
+                width = inlineContentSize,
+                height = inlineContentSize,
+                placeholderVerticalAlign = placeholderVerticalAlign,
+            )
+        ) {
+            Box(modifier = Modifier.fillMaxSize().clip(CircleShape).background(color = Color.Red))
+        }
 
     val inlineContentMap = mapOf(Pair(myId, inlineContent))
 
@@ -333,6 +318,6 @@ private fun TextWithInlineContent(
         modifier = Modifier.background(Color.LightGray),
         text = smallerShape,
         style = TextStyle(fontSize = fontSize),
-        inlineContent = inlineContentMap
+        inlineContent = inlineContentMap,
     )
 }

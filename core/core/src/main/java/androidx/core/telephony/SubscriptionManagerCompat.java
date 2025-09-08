@@ -22,7 +22,6 @@ import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 import android.os.Build;
 import android.telephony.SubscriptionManager;
 
-import androidx.annotation.DoNotInline;
 import androidx.annotation.RequiresApi;
 
 import java.lang.reflect.InvocationTargetException;
@@ -31,7 +30,6 @@ import java.lang.reflect.Method;
 /**
  * Helper for accessing features in {@link SubscriptionManager}.
  */
-@RequiresApi(22)
 public class SubscriptionManagerCompat {
 
     private static Method sGetSlotIndexMethod;
@@ -78,7 +76,6 @@ public class SubscriptionManagerCompat {
     private static class Api29Impl {
         private Api29Impl() {}
 
-        @DoNotInline
         static int getSlotIndex(int subId) {
             return SubscriptionManager.getSlotIndex(subId);
         }

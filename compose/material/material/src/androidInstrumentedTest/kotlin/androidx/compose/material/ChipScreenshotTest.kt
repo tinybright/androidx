@@ -16,7 +16,6 @@
 
 package androidx.compose.material
 
-import android.os.Build
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
@@ -37,24 +36,18 @@ import org.junit.runner.RunWith
 
 @MediumTest
 @RunWith(AndroidJUnit4::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 @OptIn(ExperimentalMaterialApi::class)
 class ChipScreenshotTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL)
 
     @Test
     fun actionChip() {
         rule.setMaterialContent {
-            Chip(
-                onClick = {},
-                enabled = true,
-                modifier = Modifier.testTag(TestTag)
-            ) {
+            Chip(onClick = {}, enabled = true, modifier = Modifier.testTag(TestTag)) {
                 Text("Action Chip")
             }
         }
@@ -64,11 +57,7 @@ class ChipScreenshotTest {
     @Test
     fun actionChip_disabled() {
         rule.setMaterialContent {
-            Chip(
-                onClick = {},
-                enabled = false,
-                modifier = Modifier.testTag(TestTag)
-            ) {
+            Chip(onClick = {}, enabled = false, modifier = Modifier.testTag(TestTag)) {
                 Text("Action Chip")
             }
         }
@@ -83,7 +72,7 @@ class ChipScreenshotTest {
                 border = ChipDefaults.outlinedBorder,
                 colors = ChipDefaults.outlinedChipColors(),
                 enabled = true,
-                modifier = Modifier.testTag(TestTag)
+                modifier = Modifier.testTag(TestTag),
             ) {
                 Text("Action Chip")
             }
@@ -99,7 +88,7 @@ class ChipScreenshotTest {
                 border = ChipDefaults.outlinedBorder,
                 colors = ChipDefaults.outlinedChipColors(),
                 enabled = false,
-                modifier = Modifier.testTag(TestTag)
+                modifier = Modifier.testTag(TestTag),
             ) {
                 Text("Action Chip")
             }
@@ -118,9 +107,9 @@ class ChipScreenshotTest {
                     Icon(
                         imageVector = Icons.Filled.Done,
                         contentDescription = "Localized Description",
-                        modifier = Modifier.requiredSize(ChipDefaults.SelectedIconSize)
+                        modifier = Modifier.requiredSize(ChipDefaults.SelectedIconSize),
                     )
-                }
+                },
             ) {
                 Text("Filter Chip")
             }
@@ -136,18 +125,15 @@ class ChipScreenshotTest {
                 onClick = {},
                 modifier = Modifier.testTag(TestTag),
                 leadingIcon = {
-                    Icon(
-                        Icons.Filled.Home,
-                        contentDescription = "Localized Description"
-                    )
+                    Icon(Icons.Filled.Home, contentDescription = "Localized Description")
                 },
                 selectedIcon = {
                     Icon(
                         imageVector = Icons.Filled.Done,
                         contentDescription = "Localized Description",
-                        modifier = Modifier.requiredSize(ChipDefaults.SelectedIconSize)
+                        modifier = Modifier.requiredSize(ChipDefaults.SelectedIconSize),
                     )
-                }
+                },
             ) {
                 Text("Filter Chip")
             }
@@ -178,9 +164,9 @@ class ChipScreenshotTest {
                         imageVector = Icons.Filled.Done,
                         tint = LocalContentColor.current,
                         contentDescription = "Localized Description",
-                        modifier = Modifier.requiredSize(ChipDefaults.SelectedIconSize)
+                        modifier = Modifier.requiredSize(ChipDefaults.SelectedIconSize),
                     )
-                }
+                },
             ) {
                 Text("Filter Chip")
             }
@@ -197,18 +183,15 @@ class ChipScreenshotTest {
                 enabled = false,
                 modifier = Modifier.testTag(TestTag),
                 leadingIcon = {
-                    Icon(
-                        Icons.Filled.Home,
-                        contentDescription = "Localized Description"
-                    )
+                    Icon(Icons.Filled.Home, contentDescription = "Localized Description")
                 },
                 selectedIcon = {
                     Icon(
                         imageVector = Icons.Filled.Done,
                         contentDescription = "Localized Description",
-                        modifier = Modifier.requiredSize(ChipDefaults.SelectedIconSize)
+                        modifier = Modifier.requiredSize(ChipDefaults.SelectedIconSize),
                     )
-                }
+                },
             ) {
                 Text("Filter Chip")
             }
@@ -223,7 +206,7 @@ class ChipScreenshotTest {
                 selected = false,
                 onClick = {},
                 enabled = false,
-                modifier = Modifier.testTag(TestTag)
+                modifier = Modifier.testTag(TestTag),
             ) {
                 Text("filter Chip")
             }
@@ -232,7 +215,8 @@ class ChipScreenshotTest {
     }
 
     private fun assertChipAgainstGolden(goldenIdentifier: String) {
-        rule.onNodeWithTag(TestTag)
+        rule
+            .onNodeWithTag(TestTag)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, goldenIdentifier)
     }

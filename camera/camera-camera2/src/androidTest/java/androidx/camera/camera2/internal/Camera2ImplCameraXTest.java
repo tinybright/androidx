@@ -36,7 +36,6 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.TotalCaptureResult;
 import android.os.Build;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
 import androidx.camera.camera2.Camera2Config;
 import androidx.camera.camera2.internal.util.SemaphoreReleasingCamera2Callbacks;
@@ -59,9 +58,9 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
-import androidx.test.filters.SdkSuppress;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.jspecify.annotations.NonNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -86,7 +85,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 @OptIn(markerClass = ExperimentalCamera2Interop.class)
-@SdkSuppress(minSdkVersion = 21)
 public final class Camera2ImplCameraXTest {
     @CameraSelector.LensFacing
     private static final int DEFAULT_LENS_FACING = CameraSelector.LENS_FACING_BACK;

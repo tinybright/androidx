@@ -37,9 +37,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.tooling.events.FinishEvent
 
-/**
- * A no-operation implementation of [AnalyticsService] for unit tests.
- */
+/** A no-operation implementation of [AnalyticsService] for unit tests. */
 class FakeNoOpAnalyticsService : AnalyticsService() {
 
     override fun getParameters(): Params {
@@ -49,22 +47,38 @@ class FakeNoOpAnalyticsService : AnalyticsService() {
                     val profile = GradleBuildProfile.newBuilder().build().toByteArray()
                     return FakeGradleProperty(Base64.getEncoder().encodeToString(profile))
                 }
+
             override val anonymizer: Property<String>
                 get() = FakeGradleProperty(NameAnonymizerSerializer().toJson(NameAnonymizer()))
+
             override val projects: MapProperty<String, ProjectData>
-                get() = FakeObjectFactory.factory.mapProperty(
-                    String::class.java, ProjectData::class.java
-                )
+                get() =
+                    FakeObjectFactory.factory.mapProperty(
+                        String::class.java,
+                        ProjectData::class.java,
+                    )
+
             override val enableProfileJson: Property<Boolean>
                 get() = FakeGradleProperty(true)
+
+            @Suppress(
+                "UPPER_BOUND_VIOLATED_BASED_ON_JAVA_ANNOTATIONS",
+                "UPPER_BOUND_VIOLATED",
+                "UNCHECKED_CAST",
+            ) // b/429040474
             override val profileDir: Property<File?>
-                get() = FakeGradleProperty()
+                get(): Property<File?> = FakeGradleProperty<File>() as Property<File?>
+
             override val taskMetadata: MapProperty<String, TaskMetadata>
-                get() = FakeObjectFactory.factory.mapProperty(
-                    String::class.java, TaskMetadata::class.java
-                )
+                get() =
+                    FakeObjectFactory.factory.mapProperty(
+                        String::class.java,
+                        TaskMetadata::class.java,
+                    )
+
             override val rootProjectPath: Property<String>
                 get() = FakeGradleProperty("/path")
+
             override val applicationId: SetProperty<String>
                 get() = FakeObjectFactory.factory.setProperty(String::class.java)
         }
@@ -84,7 +98,7 @@ class FakeNoOpAnalyticsService : AnalyticsService() {
 
     override fun getVariantBuilder(
         projectPath: String,
-        variantName: String
+        variantName: String,
     ): GradleBuildVariant.Builder {
         return GradleBuildVariant.newBuilder()
     }
@@ -98,7 +112,7 @@ class FakeNoOpAnalyticsService : AnalyticsService() {
         transform: GradleTransformExecution?,
         projectPath: String,
         variantName: String,
-        block: Recorder.VoidBlock
+        block: Recorder.VoidBlock,
     ) {
         block.call()
     }

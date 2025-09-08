@@ -37,34 +37,28 @@ import androidx.glance.text.TextStyle
 
 @Composable
 fun FirstGlancePreview() {
-    Column(
-        modifier = GlanceModifier
-            .fillMaxSize()
-            .appWidgetBackground()
-            .padding(16.dp)
-    ) {
+    Column(modifier = GlanceModifier.fillMaxSize().appWidgetBackground().padding(16.dp)) {
         Text(
-            text = "First Glance widget, LocalSize = ${LocalSize.current.let {
+            text =
+                "First Glance widget, LocalSize = ${LocalSize.current.let {
                 if (it == DpSize.Unspecified) "Unspecified" else "${it.width} x ${it.height}"
             }}",
-            modifier = GlanceModifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
+            modifier = GlanceModifier.fillMaxWidth().padding(bottom = 8.dp),
             style = TextStyle(fontWeight = FontWeight.Bold),
         )
         Row(
             modifier = GlanceModifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Button(
                 text = "Button 1",
                 modifier = GlanceModifier.height(48.dp),
-                onClick = object : Action { }
+                onClick = object : Action {},
             )
             Button(
                 text = "Button 2",
                 modifier = GlanceModifier.height(48.dp),
-                onClick = object : Action { }
+                onClick = object : Action {},
             )
         }
     }

@@ -29,19 +29,17 @@ import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.tv.material3.tokens.ShapeTokens
 
-internal fun Modifier.tvSurfaceBorder(
-    shape: Shape,
-    border: Border,
-): Modifier {
+internal fun Modifier.tvSurfaceBorder(shape: Shape, border: Border): Modifier {
     return then(
         SurfaceBorderElement(
             shape = shape,
             border = border,
-            inspectorInfo = debugInspectorInfo {
-                name = "tvSurfaceBorder"
-                properties["shape"] = shape
-                properties["border"] = border
-            }
+            inspectorInfo =
+                debugInspectorInfo {
+                    name = "tvSurfaceBorder"
+                    properties["shape"] = shape
+                    properties["border"] = border
+                },
         )
     )
 }
@@ -49,20 +47,14 @@ internal fun Modifier.tvSurfaceBorder(
 private class SurfaceBorderElement(
     private val shape: Shape,
     private val border: Border,
-    private val inspectorInfo: InspectorInfo.() -> Unit
+    private val inspectorInfo: InspectorInfo.() -> Unit,
 ) : ModifierNodeElement<SurfaceBorderNode>() {
     override fun create(): SurfaceBorderNode {
-        return SurfaceBorderNode(
-            shape = shape,
-            border = border,
-        )
+        return SurfaceBorderNode(shape = shape, border = border)
     }
 
     override fun update(node: SurfaceBorderNode) {
-        node.reactToUpdates(
-            newShape = shape,
-            newBorder = border,
-        )
+        node.reactToUpdates(newShape = shape, newBorder = border)
     }
 
     override fun InspectorInfo.inspectableProperties() {
@@ -77,23 +69,17 @@ private class SurfaceBorderElement(
 
     override fun equals(other: Any?): Boolean {
         val otherTyped = other as? SurfaceBorderElement ?: return false
-        return shape == otherTyped.shape &&
-            border == otherTyped.border
+        return shape == otherTyped.shape && border == otherTyped.border
     }
 }
 
-private class SurfaceBorderNode(
-    private var shape: Shape,
-    private var border: Border,
-) : DrawModifierNode, Modifier.Node() {
+private class SurfaceBorderNode(private var shape: Shape, private var border: Border) :
+    DrawModifierNode, Modifier.Node() {
 
     private var shapeOutlineCache: SurfaceShapeOutlineCache? = null
     private var outlineStrokeCache: OutlineStrokeCache? = null
 
-    fun reactToUpdates(
-        newShape: Shape,
-        newBorder: Border,
-    ) {
+    fun reactToUpdates(newShape: Shape, newBorder: Border) {
         shape = newShape
         border = newBorder
     }
@@ -104,55 +90,51 @@ private class SurfaceBorderNode(
         val borderStroke = border.border
 
         val borderShape =
-            if (border.shape == ShapeTokens.BorderDefaultShape) shape
-            else border.shape
+            if (border.shape == ShapeTokens.BorderDefaultShape) shape else border.shape
 
         if (shapeOutlineCache == null) {
-            shapeOutlineCache = SurfaceShapeOutlineCache(
-                shape = borderShape,
-                size = size,
-                layoutDirection = layoutDirection,
-                density = this
-            )
+            shapeOutlineCache =
+                SurfaceShapeOutlineCache(
+                    shape = borderShape,
+                    size = size,
+                    layoutDirection = layoutDirection,
+                    density = this,
+                )
         }
 
         if (outlineStrokeCache == null) {
-            outlineStrokeCache = OutlineStrokeCache(
-                widthPx = borderStroke.width.toPx()
-            )
+            outlineStrokeCache = OutlineStrokeCache(widthPx = borderStroke.width.toPx())
         }
 
         inset(inset = -border.inset.toPx()) {
-            val shapeOutline = shapeOutlineCache!!.updatedOutline(
-                shape = borderShape,
-                size = size,
-                layoutDirection = layoutDirection,
-                density = this
-            )
+            val shapeOutline =
+                shapeOutlineCache!!.updatedOutline(
+                    shape = borderShape,
+                    size = size,
+                    layoutDirection = layoutDirection,
+                    density = this,
+                )
 
-            val outlineStroke = outlineStrokeCache!!.updatedOutlineStroke(
-                widthPx = borderStroke.width.toPx()
-            )
+            val outlineStroke =
+                outlineStrokeCache!!.updatedOutlineStroke(widthPx = borderStroke.width.toPx())
 
             drawOutline(
                 outline = shapeOutline,
                 brush = borderStroke.brush,
                 alpha = 1f,
-                style = outlineStroke
+                style = outlineStroke,
             )
         }
     }
 }
 
-/**
- * Caches the outline stroke across re-compositions
- */
+/** Caches the outline stroke across re-compositions */
 private class OutlineStrokeCache(private var widthPx: Float) {
     private var outlineStroke: Stroke? = null
 
     /**
-     * If there are updates to the arguments, creates a new outline
-     * stroke based on the updated values, else, returns the cached value
+     * If there are updates to the arguments, creates a new outline stroke based on the updated
+     * values, else, returns the cached value
      */
     fun updatedOutlineStroke(widthPx: Float): Stroke {
         if (outlineStroke == null || this.widthPx != widthPx) {
@@ -163,9 +145,6 @@ private class OutlineStrokeCache(private var widthPx: Float) {
     }
 
     private fun createOutlineStroke() {
-        outlineStroke = Stroke(
-            width = widthPx,
-            cap = StrokeCap.Round
-        )
+        outlineStroke = Stroke(width = widthPx, cap = StrokeCap.Round)
     }
 }

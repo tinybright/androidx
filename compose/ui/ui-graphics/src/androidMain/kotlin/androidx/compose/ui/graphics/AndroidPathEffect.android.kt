@@ -18,9 +18,7 @@ package androidx.compose.ui.graphics
 
 import android.graphics.PathDashPathEffect
 
-/**
- * Obtain a reference to the Android PathEffect type
- */
+/** Obtain a reference to the Android PathEffect type */
 internal class AndroidPathEffect(val nativePathEffect: android.graphics.PathEffect) : PathEffect
 
 fun PathEffect.asAndroidPathEffect(): android.graphics.PathEffect =
@@ -38,7 +36,7 @@ internal actual fun actualChainPathEffect(outer: PathEffect, inner: PathEffect):
     AndroidPathEffect(
         android.graphics.ComposePathEffect(
             (outer as AndroidPathEffect).nativePathEffect,
-            (inner as AndroidPathEffect).nativePathEffect
+            (inner as AndroidPathEffect).nativePathEffect,
         )
     )
 
@@ -46,14 +44,14 @@ internal actual fun actualStampedPathEffect(
     shape: Path,
     advance: Float,
     phase: Float,
-    style: StampedPathEffectStyle
+    style: StampedPathEffectStyle,
 ): PathEffect =
     AndroidPathEffect(
         PathDashPathEffect(
             shape.asAndroidPath(),
             advance,
             phase,
-            style.toAndroidPathDashPathEffectStyle()
+            style.toAndroidPathDashPathEffectStyle(),
         )
     )
 

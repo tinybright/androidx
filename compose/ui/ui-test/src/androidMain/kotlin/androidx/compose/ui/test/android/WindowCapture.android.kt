@@ -25,13 +25,11 @@ import android.view.PixelCopy
 import android.view.View
 import android.view.ViewTreeObserver
 import android.view.Window
-import androidx.annotation.DoNotInline
 import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.test.ComposeTimeoutException
-import androidx.compose.ui.test.InternalTestApi
 import androidx.compose.ui.test.MainTestClock
 import androidx.compose.ui.test.TestContext
 import androidx.test.platform.graphics.HardwareRendererCompat
@@ -69,7 +67,7 @@ internal fun runWithRetryWhenNoData(retryBlock: () -> Unit) {
             if (e.copyResultStatus == PixelCopy.ERROR_SOURCE_NO_DATA && retryAttempts >= 2) {
                 throw PixelCopyException(
                     e.copyResultStatus,
-                    "PixelCopy failed with result ERROR_SOURCE_NO_DATA after 3 retry attempts!"
+                    "PixelCopy failed with result ERROR_SOURCE_NO_DATA after 3 retry attempts!",
                 )
             } else if (e.copyResultStatus == PixelCopy.ERROR_SOURCE_NO_DATA) {
                 shouldRetry = true
@@ -104,23 +102,25 @@ internal fun View.forceRedraw(testContext: TestContext) {
                 drawDone = true
             }
         } else {
-            viewTreeObserver.addOnDrawListener(object : ViewTreeObserver.OnDrawListener {
-                var handled = false
-                override fun onDraw() {
-                    if (!handled) {
-                        handled = true
-                        handler.postAtFrontOfQueue {
-                            drawDone = true
-                            viewTreeObserver.removeOnDrawListener(this)
+            viewTreeObserver.addOnDrawListener(
+                object : ViewTreeObserver.OnDrawListener {
+                    var handled = false
+
+                    override fun onDraw() {
+                        if (!handled) {
+                            handled = true
+                            handler.postAtFrontOfQueue {
+                                drawDone = true
+                                viewTreeObserver.removeOnDrawListener(this)
+                            }
                         }
                     }
                 }
-            })
+            )
         }
         invalidate()
     }
 
-    @OptIn(InternalTestApi::class)
     testContext.testOwner.mainClock.waitUntil(timeoutMillis = 2_000) { drawDone }
 }
 
@@ -130,7 +130,7 @@ private fun Window.generateBitmap(boundsInWindow: Rect): Bitmap {
         Bitmap.createBitmap(
             boundsInWindow.width(),
             boundsInWindow.height(),
-            Bitmap.Config.ARGB_8888
+            Bitmap.Config.ARGB_8888,
         )
     generateBitmapFromPixelCopy(boundsInWindow, destBitmap)
     return destBitmap
@@ -140,16 +140,17 @@ private fun Window.generateBitmap(boundsInWindow: Rect): Bitmap {
 private fun Window.generateBitmapFromPixelCopy(boundsInWindow: Rect, destBitmap: Bitmap) {
     val latch = CountDownLatch(1)
     var copyResult = 0
-    val onCopyFinished = PixelCopy.OnPixelCopyFinishedListener { result ->
-        copyResult = result
-        latch.countDown()
-    }
+    val onCopyFinished =
+        PixelCopy.OnPixelCopyFinishedListener { result ->
+            copyResult = result
+            latch.countDown()
+        }
     PixelCopyHelper.request(
         this,
         boundsInWindow,
         destBitmap,
         onCopyFinished,
-        Handler(Looper.getMainLooper())
+        Handler(Looper.getMainLooper()),
     )
 
     if (!latch.await(1, TimeUnit.SECONDS)) {
@@ -160,12 +161,8 @@ private fun Window.generateBitmapFromPixelCopy(boundsInWindow: Rect, destBitmap:
     }
 }
 
-internal class PixelCopyException(
-    val copyResultStatus: Int,
-    message: String? = null
-) : RuntimeException(
-    message ?: "PixelCopy failed with result $copyResultStatus!"
-)
+internal class PixelCopyException(val copyResultStatus: Int, message: String? = null) :
+    RuntimeException(message ?: "PixelCopy failed with result $copyResultStatus!")
 
 // Unfortunately this is a copy paste from AndroidComposeTestRule. At this moment it is a bit
 // tricky to share this method. We can expose it on TestOwner in theory.
@@ -178,16 +175,13 @@ private fun MainTestClock.waitUntil(timeoutMillis: Long, condition: () -> Boolea
         // Let Android run measure, draw and in general any other async operations.
         Thread.sleep(10)
         if (System.nanoTime() - startTime > timeoutMillis * 1_000_000) {
-            throw ComposeTimeoutException(
-                "Condition still not satisfied after $timeoutMillis ms"
-            )
+            throw ComposeTimeoutException("Condition still not satisfied after $timeoutMillis ms")
         }
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.Q)
 private object FrameCommitCallbackHelper {
-    @DoNotInline
     fun registerFrameCommitCallback(viewTreeObserver: ViewTreeObserver, runnable: Runnable) {
         viewTreeObserver.registerFrameCommitCallback(runnable)
     }
@@ -195,13 +189,12 @@ private object FrameCommitCallbackHelper {
 
 @RequiresApi(Build.VERSION_CODES.O)
 private object PixelCopyHelper {
-    @DoNotInline
     fun request(
         source: Window,
         srcRect: Rect?,
         dest: Bitmap,
         listener: PixelCopy.OnPixelCopyFinishedListener,
-        listenerThread: Handler
+        listenerThread: Handler,
     ) {
         PixelCopy.request(source, srcRect, dest, listener, listenerThread)
     }

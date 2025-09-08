@@ -32,11 +32,11 @@ import androidx.test.screenshot.matchers.MSSIMMatcher
  *
  * @param rule The screenshot test rule that provides the comparison and reporting.
  * @param goldenIdentifier Name of the golden. Allowed characters: 'A-Za-z0-9_-'
- * @param matcher The algorithm to be used to perform the matching. By default [MSSIMMatcher]
- * is used.
+ * @param matcher The algorithm to be used to perform the matching. By default [MSSIMMatcher] is
+ *   used.
  */
 fun ImageBitmap.assertAgainstGolden(
     rule: ScreenshotTestRule,
     goldenIdentifier: String,
-    matcher: BitmapMatcher = MSSIMMatcher()
+    matcher: BitmapMatcher = MSSIMMatcher(),
 ) = asAndroidBitmap().assertAgainstGolden(rule, goldenIdentifier, matcher)

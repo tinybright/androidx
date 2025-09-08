@@ -25,7 +25,6 @@ import android.widget.FrameLayout
 import androidx.fragment.app.test.FragmentTestActivity
 import androidx.fragment.test.R
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.SdkSuppress
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
@@ -37,7 +36,6 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@SdkSuppress(minSdkVersion = 21) // FragmentTransitionCompat21 requires API 21
 class EpicenterTest {
 
     @Suppress("DEPRECATION")
@@ -45,8 +43,8 @@ class EpicenterTest {
 
     // Detect leaks BEFORE and AFTER activity is destroyed
     @get:Rule
-    val ruleChain: RuleChain = RuleChain.outerRule(DetectLeaksAfterTestSuccess())
-        .around(activityRule)
+    val ruleChain: RuleChain =
+        RuleChain.outerRule(DetectLeaksAfterTestSuccess()).around(activityRule)
 
     @Test
     fun defaultEpicenter() {
@@ -55,9 +53,7 @@ class EpicenterTest {
 
     @Test
     fun rotatedViewEpicenter() {
-        testViewEpicenter {
-            rotation = 180f
-        }
+        testViewEpicenter { rotation = 180f }
     }
 
     @Test
@@ -82,14 +78,11 @@ class EpicenterTest {
         view.matrix.mapRect(rect)
 
         rect.offset(view.left.toFloat(), view.top.toFloat())
-        val (parentX, parentY) = IntArray(2).apply {
-            (view.parent as View).getLocationOnScreen(this)
-        }
+        val (parentX, parentY) =
+            IntArray(2).apply { (view.parent as View).getLocationOnScreen(this) }
         rect.offset(parentX.toFloat(), parentY.toFloat())
 
-        val expected = Rect().also {
-            rect.round(it)
-        }
+        val expected = Rect().also { rect.round(it) }
 
         assertThat(transition.epicenter).isEqualTo(expected)
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
@@ -97,20 +90,17 @@ class EpicenterTest {
         }
     }
 
-    /**
-     * Returns a view of size 100x100 located at (50, 50)
-     */
+    /** Returns a view of size 100x100 located at (50, 50) */
     private fun setupEpicenterTestView(): View {
         val view = View(activityRule.activity)
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             val root = activityRule.activity.findViewById<ViewGroup>(R.id.content)
             root.addView(
                 view,
-                FrameLayout.LayoutParams(100, 100)
-                    .apply {
-                        leftMargin = 50
-                        topMargin = 50
-                    }
+                FrameLayout.LayoutParams(100, 100).apply {
+                    leftMargin = 50
+                    topMargin = 50
+                },
             )
             view.left = 50
             view.top = 50

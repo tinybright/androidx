@@ -16,38 +16,70 @@
 
 package androidx.room.integration.kotlintestapp.test
 
+import android.content.Context
 import androidx.kruth.assertThat
+import androidx.room.ExperimentalRoomApi
+import androidx.room.Room
+import androidx.room.integration.kotlintestapp.TestDatabase
+import androidx.room.integration.kotlintestapp.vo.Author
 import androidx.room.integration.kotlintestapp.vo.Book
 import androidx.room.integration.kotlintestapp.vo.Playlist
 import androidx.room.integration.kotlintestapp.vo.PlaylistSongXRef
 import androidx.room.integration.kotlintestapp.vo.PlaylistWithSongs
+import androidx.room.integration.kotlintestapp.vo.Publisher
 import androidx.room.integration.kotlintestapp.vo.Song
 import androidx.room.withTransaction
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.sqlite.driver.AndroidSQLiteDriver
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.filters.MediumTest
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.test.Ignore
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.produceIn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
 import org.junit.After
 import org.junit.Assert.fail
+import org.junit.AssumptionViolatedException
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
+import org.junit.runners.Parameterized.Parameters
 
-@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 @MediumTest
-@RunWith(AndroidJUnit4::class)
-class FlowQueryTest : TestDatabaseTest() {
+@RunWith(Parameterized::class)
+class FlowQueryTest(driver: UseDriver) : TestDatabaseTest(driver) {
+
+    private companion object {
+        @JvmStatic
+        @Parameters(name = "useDriver={0}")
+        fun parameters() = UseDriver.entries.toTypedArray()
+    }
 
     @After
     fun teardown() {
@@ -63,8 +95,7 @@ class FlowQueryTest : TestDatabaseTest() {
         booksDao.addBooks(TestUtil.BOOK_1, TestUtil.BOOK_2)
 
         booksDao.getBooksFlow().take(1).collect {
-            assertThat(it)
-                .isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
+            assertThat(it).isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
         }
     }
 
@@ -75,12 +106,17 @@ class FlowQueryTest : TestDatabaseTest() {
         booksDao.addBooks(TestUtil.BOOK_1, TestUtil.BOOK_2)
 
         val result = booksDao.getBooksFlow().first()
-        assertThat(result)
-            .isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
+        assertThat(result).isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
     }
 
     @Test
     fun collectBooks_first_inTransaction() = runBlocking {
+        if (useDriver != UseDriver.NONE) {
+            throw AssumptionViolatedException(
+                "Tests uses SupportSQLite APIs, not supported with drivers installed."
+            )
+        }
+
         booksDao.addAuthors(TestUtil.AUTHOR_1)
         booksDao.addPublishers(TestUtil.PUBLISHER)
         booksDao.addBooks(TestUtil.BOOK_1)
@@ -88,8 +124,7 @@ class FlowQueryTest : TestDatabaseTest() {
         database.withTransaction {
             booksDao.insertBookSuspend(TestUtil.BOOK_2)
             val result = booksDao.getBooksFlow().first()
-            assertThat(result)
-                .isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
+            assertThat(result).isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
         }
     }
 
@@ -100,13 +135,13 @@ class FlowQueryTest : TestDatabaseTest() {
         booksDao.addBooks(TestUtil.BOOK_1, TestUtil.BOOK_2)
 
         val latch = CountDownLatch(1)
-        val job = async(Dispatchers.IO) {
-            booksDao.getBooksFlow().collect {
-                assertThat(it)
-                    .isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
-                latch.countDown()
+        val job =
+            launch(Dispatchers.IO) {
+                booksDao.getBooksFlow().collect {
+                    assertThat(it).isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
+                    latch.countDown()
+                }
             }
-        }
 
         latch.await()
         job.cancelAndJoin()
@@ -121,31 +156,30 @@ class FlowQueryTest : TestDatabaseTest() {
         val firstResultLatch = CountDownLatch(1)
         val secondResultLatch = CountDownLatch(1)
         val results = mutableListOf<List<Book>>()
-        val job = async(Dispatchers.IO) {
-            booksDao.getBooksFlow().collect {
-                when (results.size) {
-                    0 -> {
-                        results.add(it)
-                        firstResultLatch.countDown()
+        val job =
+            launch(Dispatchers.IO) {
+                booksDao.getBooksFlow().collect {
+                    when (results.size) {
+                        0 -> {
+                            results.add(it)
+                            firstResultLatch.countDown()
+                        }
+                        1 -> {
+                            results.add(it)
+                            secondResultLatch.countDown()
+                        }
+                        else -> fail("Should have only collected 2 results.")
                     }
-                    1 -> {
-                        results.add(it)
-                        secondResultLatch.countDown()
-                    }
-                    else -> fail("Should have only collected 2 results.")
                 }
             }
-        }
 
         firstResultLatch.await()
         booksDao.insertBookSuspend(TestUtil.BOOK_3)
 
         secondResultLatch.await()
         assertThat(results.size).isEqualTo(2)
-        assertThat(results[0])
-            .isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
-        assertThat(results[1])
-            .isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2, TestUtil.BOOK_3))
+        assertThat(results[0]).isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
+        assertThat(results[1]).isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2, TestUtil.BOOK_3))
 
         job.cancelAndJoin()
     }
@@ -157,8 +191,7 @@ class FlowQueryTest : TestDatabaseTest() {
         booksDao.addBooks(TestUtil.BOOK_1, TestUtil.BOOK_2)
 
         val channel = booksDao.getBooksFlow().produceIn(this)
-        assertThat(channel.receive())
-            .isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
+        assertThat(channel.receive()).isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
         assertThat(channel.isEmpty).isTrue()
 
         channel.cancel()
@@ -172,8 +205,7 @@ class FlowQueryTest : TestDatabaseTest() {
 
         val channel = booksDao.getBooksFlow().produceIn(this)
 
-        assertThat(channel.receive())
-            .isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
+        assertThat(channel.receive()).isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
 
         booksDao.insertBookSuspend(TestUtil.BOOK_3)
         drain() // drain async invalidate
@@ -188,6 +220,12 @@ class FlowQueryTest : TestDatabaseTest() {
 
     @Test
     fun receiveBooks_update_viaSupportDatabase() = runBlocking {
+        if (useDriver != UseDriver.NONE) {
+            throw AssumptionViolatedException(
+                "Tests uses SupportSQLite APIs, not supported with drivers installed."
+            )
+        }
+
         booksDao.addAuthors(TestUtil.AUTHOR_1)
         booksDao.addPublishers(TestUtil.PUBLISHER)
         booksDao.addBooks(TestUtil.BOOK_1)
@@ -218,13 +256,10 @@ class FlowQueryTest : TestDatabaseTest() {
         booksDao.addPublishers(TestUtil.PUBLISHER)
         booksDao.addBooks(TestUtil.BOOK_1, TestUtil.BOOK_2)
 
-        val channels = Array(4) {
-            booksDao.getBooksFlow().produceIn(this)
-        }
+        val channels = Array(4) { booksDao.getBooksFlow().produceIn(this) }
 
         channels.forEach {
-            assertThat(it.receive())
-                .isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
+            assertThat(it.receive()).isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
         }
 
         booksDao.insertBookSuspend(TestUtil.BOOK_3)
@@ -245,13 +280,10 @@ class FlowQueryTest : TestDatabaseTest() {
         booksDao.addPublishers(TestUtil.PUBLISHER)
         booksDao.addBooks(TestUtil.BOOK_1, TestUtil.BOOK_2)
 
-        val channels = Array(4) {
-            booksDao.getBooksFlowInTransaction().produceIn(this)
-        }
+        val channels = Array(4) { booksDao.getBooksFlowInTransaction().produceIn(this) }
 
         channels.forEach {
-            assertThat(it.receive())
-                .isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
+            assertThat(it.receive()).isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
         }
 
         booksDao.insertBookSuspend(TestUtil.BOOK_3)
@@ -266,6 +298,7 @@ class FlowQueryTest : TestDatabaseTest() {
         }
     }
 
+    @Ignore("Due to b/365506854.")
     @Test
     fun receiveBooks_latestUpdateOnly() = runBlocking {
         booksDao.addAuthors(TestUtil.AUTHOR_1)
@@ -274,8 +307,7 @@ class FlowQueryTest : TestDatabaseTest() {
 
         val channel = booksDao.getBooksFlow().buffer(Channel.CONFLATED).produceIn(this)
 
-        assertThat(channel.receive())
-            .isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
+        assertThat(channel.receive()).isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
 
         booksDao.insertBookSuspend(TestUtil.BOOK_3)
         drain() // drain async invalidate
@@ -284,8 +316,7 @@ class FlowQueryTest : TestDatabaseTest() {
         drain() // drain async invalidate
         yield()
 
-        assertThat(channel.receive())
-            .isEqualTo(listOf(TestUtil.BOOK_2, TestUtil.BOOK_3))
+        assertThat(channel.receive()).isEqualTo(listOf(TestUtil.BOOK_2, TestUtil.BOOK_3))
         assertThat(channel.isEmpty).isTrue()
 
         channel.cancel()
@@ -298,13 +329,13 @@ class FlowQueryTest : TestDatabaseTest() {
         booksDao.addBooks(TestUtil.BOOK_1, TestUtil.BOOK_2)
 
         val latch = CountDownLatch(1)
-        val job = async(Dispatchers.IO) {
-            for (result in booksDao.getBooksFlow().produceIn(this)) {
-                assertThat(result)
-                    .isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
-                latch.countDown()
+        val job =
+            async(Dispatchers.IO) {
+                for (result in booksDao.getBooksFlow().produceIn(this)) {
+                    assertThat(result).isEqualTo(listOf(TestUtil.BOOK_1, TestUtil.BOOK_2))
+                    latch.countDown()
+                }
             }
-        }
 
         latch.await()
         job.cancelAndJoin()
@@ -319,31 +350,30 @@ class FlowQueryTest : TestDatabaseTest() {
         val firstResultLatch = CountDownLatch(1)
         val secondResultLatch = CountDownLatch(1)
         val results = mutableListOf<Book?>()
-        val job = async(Dispatchers.IO) {
-            booksDao.getOneBooksFlow(TestUtil.BOOK_1.bookId).collect {
-                when (results.size) {
-                    0 -> {
-                        results.add(it)
-                        firstResultLatch.countDown()
+        val job =
+            async(Dispatchers.IO) {
+                booksDao.getOneBooksFlow(TestUtil.BOOK_1.bookId).collect {
+                    when (results.size) {
+                        0 -> {
+                            results.add(it)
+                            firstResultLatch.countDown()
+                        }
+                        1 -> {
+                            results.add(it)
+                            secondResultLatch.countDown()
+                        }
+                        else -> fail("Should have only collected 2 results.")
                     }
-                    1 -> {
-                        results.add(it)
-                        secondResultLatch.countDown()
-                    }
-                    else -> fail("Should have only collected 2 results.")
                 }
             }
-        }
 
         firstResultLatch.await()
         booksDao.deleteBookSuspend(TestUtil.BOOK_1)
 
         secondResultLatch.await()
         assertThat(results.size).isEqualTo(2)
-        assertThat(results[0])
-            .isEqualTo(TestUtil.BOOK_1)
-        assertThat(results[1])
-            .isNull()
+        assertThat(results[0]).isEqualTo(TestUtil.BOOK_1)
+        assertThat(results[1]).isNull()
 
         job.cancelAndJoin()
     }
@@ -351,42 +381,26 @@ class FlowQueryTest : TestDatabaseTest() {
     @Test
     fun playlistSongs_async_update(): Unit = runBlocking {
         val musicDao = database.musicDao()
-        val song1 = Song(
-            1,
-            "I Know Places",
-            "Taylor Swift",
-            "1989",
-            195,
-            2014
-        );
-        val song2 = Song(
-            2,
-            "Blank Space",
-            "Taylor Swift",
-            "1989",
-            241,
-            2014
-        )
+        val song1 = Song(1, "Thriller", "Michael Jackson", "Thriller", 357, 1982)
+        val song2 = Song(2, "Billie Jean", "Michael Jackson", "Thriller", 297, 1982)
         musicDao.addSongs(song1, song2)
-        musicDao.addPlaylists(
-            Playlist(1),
-            Playlist(2)
-        )
+        musicDao.addPlaylists(Playlist(1), Playlist(2))
         musicDao.addPlaylistSongRelations(PlaylistSongXRef(1, 1))
 
         val latches = Array(3) { CountDownLatch(1) }
         val results = mutableListOf<PlaylistWithSongs>()
         var collectCall = 0
-        val job = async(Dispatchers.IO) {
-            musicDao.getPlaylistsWithSongsFlow(1).collect {
-                if (collectCall >= latches.size) {
-                    fail("Should have only collected 3 results.")
+        val job =
+            async(Dispatchers.IO) {
+                musicDao.getPlaylistsWithSongsFlow(1).collect {
+                    if (collectCall >= latches.size) {
+                        fail("Should have only collected 3 results.")
+                    }
+                    results.add(it)
+                    latches[collectCall].countDown()
+                    collectCall++
                 }
-                results.add(it)
-                latches[collectCall].countDown()
-                collectCall++
             }
-        }
 
         latches[0].await()
         assertThat(results.size).isEqualTo(1)
@@ -416,4 +430,162 @@ class FlowQueryTest : TestDatabaseTest() {
 
         job.cancelAndJoin()
     }
+
+    @Test
+    fun collectBooks_autoClose(): Unit = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        context.deleteDatabase("auto-close-test.db")
+
+        @OptIn(ExperimentalRoomApi::class)
+        val database =
+            Room.databaseBuilder<TestDatabase>(context, "auto-close-test.db")
+                .setAutoCloseTimeout(1, TimeUnit.SECONDS)
+                .build()
+
+        database.booksDao().insertPublisher(TestUtil.PUBLISHER.publisherId, TestUtil.PUBLISHER.name)
+
+        val collectJob = launch {
+            var collections = 0
+            database.booksDao().getBooksFlow().collect {
+                when (collections) {
+                    0 -> {
+                        assertThat(it).isEmpty()
+                    }
+                    1 -> {
+                        assertThat(it).containsExactly(TestUtil.BOOK_1)
+                        throw CancellationException()
+                    }
+                    else -> {
+                        fail("Received too many Flow.collect")
+                    }
+                }
+                collections++
+            }
+        }
+
+        val insertJob = launch {
+            delay(2.seconds)
+            database.booksDao().insertBookSuspend(TestUtil.BOOK_1)
+        }
+
+        withTimeout(TimeUnit.SECONDS.toMillis(3)) { listOf(collectJob, insertJob).joinAll() }
+
+        database.close()
+    }
+
+    /**
+     * A repeated test that validates async readers with an async writing racing but at the end of
+     * it all, both readers should always get the latest value. b/432365736
+     */
+    @Test
+    fun collectBooks_async_update_async() =
+        repeat(1000) {
+            val context = ApplicationProvider.getApplicationContext() as Context
+            context.deleteDatabase("test_db")
+            val db =
+                Room.databaseBuilder<TestDatabase>(context, "test_db")
+                    .setQueryCoroutineContext(Dispatchers.IO)
+                    .apply {
+                        if (useDriver == UseDriver.ANDROID) {
+                            setDriver(AndroidSQLiteDriver())
+                        } else if (useDriver == UseDriver.BUNDLED) {
+                            setDriver(BundledSQLiteDriver())
+                        }
+                    }
+                    .build()
+            val dao = db.booksDao()
+            dao.addAuthors(TestUtil.AUTHOR_1)
+            dao.addPublishers(TestUtil.PUBLISHER)
+
+            runBlocking {
+                val readers =
+                    List(2) {
+                        launch(Dispatchers.IO) {
+                            val book =
+                                dao.getOneBooksFlow(TestUtil.BOOK_1.bookId).first { it != null }
+                            assertThat(book).isEqualTo(TestUtil.BOOK_1)
+                        }
+                    }
+                val writer = launch(Dispatchers.IO) { dao.insertBookSuspend(TestUtil.BOOK_1) }
+                withTimeout(10.seconds) {
+                    writer.join()
+                    readers.joinAll()
+                }
+            }
+            db.close()
+        }
+
+    /**
+     * A repeated test that validates async cancellations of flows (due to flatMapLatest) due not
+     * race during triggers sync (adding / removing) such that a notification on established flows
+     * are not missed. b/432365736 and b/439232923
+     */
+    @Test
+    fun flow_cancellations_flatMapLatest_combine() =
+        repeat(1000) {
+            val context = ApplicationProvider.getApplicationContext() as Context
+            context.deleteDatabase("test_db")
+            val db =
+                Room.databaseBuilder<TestDatabase>(context, "test_db")
+                    .setQueryCoroutineContext(Dispatchers.IO)
+                    .apply {
+                        if (useDriver == UseDriver.ANDROID) {
+                            setDriver(AndroidSQLiteDriver())
+                        } else if (useDriver == UseDriver.BUNDLED) {
+                            setDriver(BundledSQLiteDriver())
+                        }
+                    }
+                    .build()
+            val dao = db.booksDao()
+
+            runBlocking {
+                val input = MutableStateFlow(1)
+
+                launch(Dispatchers.IO) { input.update { it + 1 } }
+
+                val authors =
+                    dao.getAuthorsFlow()
+                        .transform {
+                            if (it.isNotEmpty()) {
+                                emit(it)
+                            } else {
+                                dao.addAuthorsSuspend(TestUtil.AUTHOR_1)
+                            }
+                        }
+                        .flowOn(Dispatchers.IO)
+
+                val publishers =
+                    dao.getPublishersFlow()
+                        .transform {
+                            if (it.isNotEmpty()) {
+                                emit(it)
+                            } else {
+                                dao.addPublishersSuspend(TestUtil.PUBLISHER)
+                            }
+                        }
+                        .flowOn(Dispatchers.IO)
+
+                val result =
+                    input
+                        .flatMapLatest { combine(authors, publishers) { a, b -> a to b } }
+                        .stateIn(
+                            CoroutineScope(Dispatchers.IO),
+                            SharingStarted.Eagerly,
+                            emptyList<Author>() to emptyList<Publisher>(),
+                        )
+                val job =
+                    launch(Dispatchers.IO) {
+                        result.collect { pair ->
+                            if (pair.first.isEmpty() || pair.second.isEmpty()) {
+                                return@collect
+                            }
+                            assertThat(pair.first.single()).isEqualTo(TestUtil.AUTHOR_1)
+                            assertThat(pair.second.single()).isEqualTo(TestUtil.PUBLISHER)
+                            throw CancellationException()
+                        }
+                    }
+                withTimeout(10.seconds) { job.join() }
+                db.close()
+            }
+        }
 }

@@ -17,11 +17,11 @@
 package androidx.compose.runtime
 
 /**
- * This will prevent composable calls from happening inside of the
- * function that it applies to. This is usually applied to lambda parameters of inline composable
- * functions that ought to be inlined but cannot safely have composable calls in them.
+ * This will prevent composable calls from happening inside of the function that it applies to. This
+ * is usually applied to lambda parameters of inline composable functions that ought to be inlined
+ * but cannot safely have composable calls in them.
  */
 @MustBeDocumented
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.TYPE)
-annotation class DisallowComposableCalls
+public annotation class DisallowComposableCalls

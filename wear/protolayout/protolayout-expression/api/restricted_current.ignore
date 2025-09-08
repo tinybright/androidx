@@ -1,0 +1,7 @@
+// Baseline format: 1.0
+RemovedFromBytecode: androidx.wear.protolayout.expression.DynamicDataMap#contains(androidx.wear.protolayout.expression.DynamicDataKey<T>):
+    Binary breaking change: method androidx.wear.protolayout.expression.DynamicDataMap.contains(androidx.wear.protolayout.expression.DynamicDataKey<T>) has been removed from bytecode
+
+
+RemovedFromJava: androidx.wear.protolayout.expression.DynamicDataMap#contains(androidx.wear.protolayout.expression.DynamicDataKey<T>):
+    Source breaking change: method androidx.wear.protolayout.expression.DynamicDataMap.contains(androidx.wear.protolayout.expression.DynamicDataKey<T>) can no longer be resolved from Java source

@@ -56,19 +56,21 @@ import org.robolectric.Shadows
 @RunWith(RobolectricTestRunner::class)
 class PassiveListenerServiceTest {
     private fun Int.duration() = Duration.ofSeconds(this.toLong())
+
     private fun Int.instant() = Instant.ofEpochMilli(this.toLong())
 
     private val context = ApplicationProvider.getApplicationContext<Application>()
     private lateinit var service: FakeService
     private lateinit var stub: IPassiveListenerService
 
-    private val connection: ServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(componentName: ComponentName, binder: IBinder) {
-            stub = IPassiveListenerService.Stub.asInterface(binder)
-        }
+    private val connection: ServiceConnection =
+        object : ServiceConnection {
+            override fun onServiceConnected(componentName: ComponentName, binder: IBinder) {
+                stub = IPassiveListenerService.Stub.asInterface(binder)
+            }
 
-        override fun onServiceDisconnected(componentName: ComponentName) {}
-    }
+            override fun onServiceDisconnected(componentName: ComponentName) {}
+        }
 
     @Before
     fun setUp() {
@@ -78,7 +80,7 @@ class PassiveListenerServiceTest {
         Shadows.shadowOf(context)
             .setComponentNameAndServiceForBindService(
                 ComponentName(context, FakeService::class.java),
-                service.IPassiveListenerServiceWrapper()
+                service.IPassiveListenerServiceWrapper(),
             )
     }
 
@@ -87,20 +89,19 @@ class PassiveListenerServiceTest {
         context.bindService(
             Intent(context, FakeService::class.java),
             connection,
-            Context.BIND_AUTO_CREATE
+            Context.BIND_AUTO_CREATE,
         )
-        val listenerEvent = PassiveListenerEvent.createPassiveUpdateResponse(
-            PassiveMonitoringUpdateResponse(
-                PassiveMonitoringUpdate(
-                    DataPointContainer(
-                        listOf(
-                            DataPoints.dailySteps(100, 10.duration(), 20.duration())
-                        )
-                    ),
-                    listOf()
+        val listenerEvent =
+            PassiveListenerEvent.createPassiveUpdateResponse(
+                PassiveMonitoringUpdateResponse(
+                    PassiveMonitoringUpdate(
+                        DataPointContainer(
+                            listOf(DataPoints.dailySteps(100, 10.duration(), 20.duration()))
+                        ),
+                        listOf(),
+                    )
                 )
             )
-        )
 
         stub.onPassiveListenerEvent(listenerEvent)
 
@@ -115,16 +116,17 @@ class PassiveListenerServiceTest {
         context.bindService(
             Intent(context, FakeService::class.java),
             connection,
-            Context.BIND_AUTO_CREATE
+            Context.BIND_AUTO_CREATE,
         )
-        val listenerEvent = PassiveListenerEvent.createPassiveUpdateResponse(
-            PassiveMonitoringUpdateResponse(
-                PassiveMonitoringUpdate(
-                    DataPointContainer(listOf()),
-                    listOf(UserActivityInfo(USER_ACTIVITY_PASSIVE, null, 42.instant()))
+        val listenerEvent =
+            PassiveListenerEvent.createPassiveUpdateResponse(
+                PassiveMonitoringUpdateResponse(
+                    PassiveMonitoringUpdate(
+                        DataPointContainer(listOf()),
+                        listOf(UserActivityInfo(USER_ACTIVITY_PASSIVE, null, 42.instant())),
+                    )
                 )
             )
-        )
 
         stub.onPassiveListenerEvent(listenerEvent)
 
@@ -139,25 +141,26 @@ class PassiveListenerServiceTest {
         context.bindService(
             Intent(context, FakeService::class.java),
             connection,
-            Context.BIND_AUTO_CREATE
+            Context.BIND_AUTO_CREATE,
         )
-        val listenerEvent = PassiveListenerEvent.createPassiveUpdateResponse(
-            PassiveMonitoringUpdateResponse(
-                PassiveMonitoringUpdate(
-                    DataPointContainer(listOf()),
-                    listOf(
-                        UserActivityInfo(
-                            USER_ACTIVITY_EXERCISE,
-                            ExerciseInfo(
-                                ExerciseTrackedStatus.OWNED_EXERCISE_IN_PROGRESS,
-                                ExerciseType.RUNNING
-                            ),
-                            42.instant()
-                        )
+        val listenerEvent =
+            PassiveListenerEvent.createPassiveUpdateResponse(
+                PassiveMonitoringUpdateResponse(
+                    PassiveMonitoringUpdate(
+                        DataPointContainer(listOf()),
+                        listOf(
+                            UserActivityInfo(
+                                USER_ACTIVITY_EXERCISE,
+                                ExerciseInfo(
+                                    ExerciseTrackedStatus.OWNED_EXERCISE_IN_PROGRESS,
+                                    ExerciseType.RUNNING,
+                                ),
+                                42.instant(),
+                            )
+                        ),
                     )
                 )
             )
-        )
 
         stub.onPassiveListenerEvent(listenerEvent)
 
@@ -174,19 +177,14 @@ class PassiveListenerServiceTest {
         context.bindService(
             Intent(context, FakeService::class.java),
             connection,
-            Context.BIND_AUTO_CREATE
+            Context.BIND_AUTO_CREATE,
         )
-        val listenerEvent = PassiveListenerEvent.createPassiveGoalResponse(
-            PassiveMonitoringGoalResponse(
-                PassiveGoal(
-                    DataTypeCondition(
-                        STEPS_DAILY,
-                        100,
-                        ComparisonType.GREATER_THAN
-                    )
+        val listenerEvent =
+            PassiveListenerEvent.createPassiveGoalResponse(
+                PassiveMonitoringGoalResponse(
+                    PassiveGoal(DataTypeCondition(STEPS_DAILY, 100, ComparisonType.GREATER_THAN))
                 )
             )
-        )
 
         stub.onPassiveListenerEvent(listenerEvent)
 
@@ -201,17 +199,18 @@ class PassiveListenerServiceTest {
         context.bindService(
             Intent(context, FakeService::class.java),
             connection,
-            Context.BIND_AUTO_CREATE
+            Context.BIND_AUTO_CREATE,
         )
-        val listenerEvent = PassiveListenerEvent.createHealthEventResponse(
-            HealthEventResponse(
-                HealthEvent(
-                    FALL_DETECTED,
-                    42.instant(),
-                    DataPointContainer(listOf(DataPoints.heartRate(42.0, 84.duration())))
+        val listenerEvent =
+            PassiveListenerEvent.createHealthEventResponse(
+                HealthEventResponse(
+                    HealthEvent(
+                        FALL_DETECTED,
+                        42.instant(),
+                        DataPointContainer(listOf(DataPoints.heartRate(42.0, 84.duration()))),
+                    )
                 )
             )
-        )
 
         stub.onPassiveListenerEvent(listenerEvent)
 
@@ -227,7 +226,7 @@ class PassiveListenerServiceTest {
         context.bindService(
             Intent(context, FakeService::class.java),
             connection,
-            Context.BIND_AUTO_CREATE
+            Context.BIND_AUTO_CREATE,
         )
 
         stub.onPassiveListenerEvent(PassiveListenerEvent.createPermissionLostResponse())

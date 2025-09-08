@@ -24,14 +24,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.assertLeftPositionInRootIsEqualTo
 import androidx.compose.ui.test.assertRangeInfoEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onChild
-import androidx.compose.ui.test.onChildAt
+import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
@@ -42,8 +45,7 @@ import org.junit.Rule
 import org.junit.Test
 
 public class InlineSliderTest {
-    @get:Rule
-    public val rule = createComposeRule()
+    @get:Rule public val rule = createComposeRule()
 
     @Test
     public fun supports_testtag() {
@@ -53,7 +55,7 @@ public class InlineSliderTest {
                 onValueChange = {},
                 valueRange = 0f..10f,
                 steps = 5,
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
@@ -70,14 +72,11 @@ public class InlineSliderTest {
                 onValueChange = { state.value = it },
                 valueRange = 0f..10f,
                 steps = 4,
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
-        rule.runOnIdle {
-            state.value = 20f
-        }
-        rule.onNodeWithTag(TEST_TAG)
-            .assertRangeInfoEquals(ProgressBarRangeInfo(10f, 0f..10f, 4))
+        rule.runOnIdle { state.value = 20f }
+        rule.onNodeWithTag(TEST_TAG).assertRangeInfoEquals(ProgressBarRangeInfo(10f, 0f..10f, 4))
     }
 
     @Test
@@ -90,25 +89,17 @@ public class InlineSliderTest {
                 onValueChange = { state.value = it },
                 valueRange = 0f..10f,
                 steps = 4,
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
-        rule.runOnIdle {
-            state.value = -20f
-        }
-        rule.onNodeWithTag(TEST_TAG)
-            .assertRangeInfoEquals(ProgressBarRangeInfo(0f, 0f..10f, 4))
+        rule.runOnIdle { state.value = -20f }
+        rule.onNodeWithTag(TEST_TAG).assertRangeInfoEquals(ProgressBarRangeInfo(0f, 0f..10f, 4))
     }
 
     @Test(expected = IllegalArgumentException::class)
     public fun throws_when_steps_negative() {
         rule.setContent {
-            DefaultInlineSlider(
-                value = 0f,
-                valueRange = 0f..10f,
-                onValueChange = {},
-                steps = -1
-            )
+            DefaultInlineSlider(value = 0f, valueRange = 0f..10f, onValueChange = {}, steps = -1)
         }
     }
 
@@ -123,16 +114,13 @@ public class InlineSliderTest {
                 value = state.value,
                 onValueChange = { state.value = it },
                 steps = 4,
-                valueRange = range
+                valueRange = range,
             )
         }
 
-        rule.runOnUiThread {
-            state.value = 0.6f
-        }
+        rule.runOnUiThread { state.value = 0.6f }
 
-        rule.onNodeWithTag(TEST_TAG)
-            .assertRangeInfoEquals(ProgressBarRangeInfo(0.6f, range, 4))
+        rule.onNodeWithTag(TEST_TAG).assertRangeInfoEquals(ProgressBarRangeInfo(0.6f, range, 4))
     }
 
     @Test
@@ -146,16 +134,13 @@ public class InlineSliderTest {
                 value = state.value,
                 onValueChange = { state.value = it },
                 steps = 4,
-                valueRange = range
+                valueRange = range,
             )
         }
 
-        rule.runOnUiThread {
-            state.value = 0.65f
-        }
+        rule.runOnUiThread { state.value = 0.65f }
 
-        rule.onNodeWithTag(TEST_TAG)
-            .assertRangeInfoEquals(ProgressBarRangeInfo(0.6f, range, 4))
+        rule.onNodeWithTag(TEST_TAG).assertRangeInfoEquals(ProgressBarRangeInfo(0.6f, range, 4))
     }
 
     @Test
@@ -169,16 +154,13 @@ public class InlineSliderTest {
                 value = state.value,
                 onValueChange = { state.value = it },
                 steps = 4,
-                valueRange = range
+                valueRange = range,
             )
         }
 
-        rule.runOnUiThread {
-            state.value = 0.55f
-        }
+        rule.runOnUiThread { state.value = 0.55f }
 
-        rule.onNodeWithTag(TEST_TAG)
-            .assertRangeInfoEquals(ProgressBarRangeInfo(0.6f, range, 4))
+        rule.onNodeWithTag(TEST_TAG).assertRangeInfoEquals(ProgressBarRangeInfo(0.6f, range, 4))
     }
 
     @Test
@@ -190,14 +172,12 @@ public class InlineSliderTest {
                 value = state.value,
                 onValueChange = { state.value = it },
                 valueRange = 1f..4f,
-                steps = 2
+                steps = 2,
             )
         }
 
         rule.onNodeWithTag(TEST_TAG).performTouchInput { click(Offset(15f, height / 2f)) }
-        rule.runOnIdle {
-            Truth.assertThat(state.value).isWithin(0.001f).of(1f)
-        }
+        rule.runOnIdle { Truth.assertThat(state.value).isWithin(0.001f).of(1f) }
     }
 
     @Test
@@ -209,14 +189,12 @@ public class InlineSliderTest {
                 value = state.value,
                 onValueChange = { state.value = it },
                 valueRange = 1f..4f,
-                steps = 2
+                steps = 2,
             )
         }
 
         rule.onNodeWithTag(TEST_TAG).performTouchInput { click(Offset(width - 15f, height / 2f)) }
-        rule.runOnIdle {
-            Truth.assertThat(state.value).isWithin(0.001f).of(3f)
-        }
+        rule.runOnIdle { Truth.assertThat(state.value).isWithin(0.001f).of(3f) }
     }
 
     @Test
@@ -231,14 +209,12 @@ public class InlineSliderTest {
                 decreaseIcon = { Icon(InlineSliderDefaults.Decrease, "Decrease") },
                 onValueChange = { state.value = it },
                 valueRange = 1f..4f,
-                steps = 2
+                steps = 2,
             )
         }
 
         rule.onNodeWithTag(TEST_TAG).performTouchInput { click(Offset(15f, height / 2f)) }
-        rule.runOnIdle {
-            Truth.assertThat(state.value).isWithin(0.001f).of(2f)
-        }
+        rule.runOnIdle { Truth.assertThat(state.value).isWithin(0.001f).of(2f) }
     }
 
     @Test
@@ -253,14 +229,12 @@ public class InlineSliderTest {
                 increaseIcon = { Icon(InlineSliderDefaults.Increase, "Increase") },
                 decreaseIcon = { Icon(InlineSliderDefaults.Decrease, "Decrease") },
                 valueRange = 1f..4f,
-                steps = 2
+                steps = 2,
             )
         }
 
         rule.onNodeWithTag(TEST_TAG).performTouchInput { click(Offset(width - 15f, height / 2f)) }
-        rule.runOnIdle {
-            Truth.assertThat(state.value).isWithin(0.001f).of(2f)
-        }
+        rule.runOnIdle { Truth.assertThat(state.value).isWithin(0.001f).of(2f) }
     }
 
     @Test
@@ -272,14 +246,12 @@ public class InlineSliderTest {
                 value = state.value,
                 onValueChange = { state.value = it },
                 valueRange = 1f..4f,
-                steps = 2
+                steps = 2,
             )
         }
 
         rule.onNodeWithTag(TEST_TAG).performTouchInput { click(Offset(15f, height / 2f)) }
-        rule.runOnIdle {
-            Truth.assertThat(state.value).isWithin(0.001f).of(1f)
-        }
+        rule.runOnIdle { Truth.assertThat(state.value).isWithin(0.001f).of(1f) }
     }
 
     @Test
@@ -291,14 +263,12 @@ public class InlineSliderTest {
                 value = state.value,
                 onValueChange = { state.value = it },
                 valueRange = 1f..4f,
-                steps = 2
+                steps = 2,
             )
         }
 
         rule.onNodeWithTag(TEST_TAG).performTouchInput { click(Offset(width - 15f, height / 2f)) }
-        rule.runOnIdle {
-            Truth.assertThat(state.value).isWithin(0.001f).of(4f)
-        }
+        rule.runOnIdle { Truth.assertThat(state.value).isWithin(0.001f).of(4f) }
     }
 
     @Test
@@ -310,20 +280,21 @@ public class InlineSliderTest {
                 modifier = Modifier.testTag(TEST_TAG),
                 value = 0f,
                 steps = 5,
-                onValueChange = { },
+                onValueChange = {},
                 increaseIcon = { Icon(InlineSliderDefaults.Increase, "Increase") },
                 decreaseIcon = {
                     Icon(
                         modifier = Modifier.testTag(iconTag),
                         imageVector = Icons.Default.Star,
-                        contentDescription = ""
+                        contentDescription = "",
                     )
-                }
+                },
             )
         }
 
         rule.waitForIdle()
-        rule.onNodeWithTag(iconTag, true)
+        rule
+            .onNodeWithTag(iconTag, true)
             .assertExists()
             .assertLeftPositionInRootIsEqualTo(IconsOuterHorizontalMargin)
     }
@@ -337,25 +308,25 @@ public class InlineSliderTest {
                 modifier = Modifier.testTag(TEST_TAG),
                 value = 0f,
                 steps = 5,
-                onValueChange = { },
+                onValueChange = {},
                 increaseIcon = {
                     Icon(
                         modifier = Modifier.testTag(iconTag),
                         imageVector = Icons.Default.Star,
-                        contentDescription = ""
+                        contentDescription = "",
                     )
                 },
-                decreaseIcon = { Icon(InlineSliderDefaults.Decrease, "Decrease") }
+                decreaseIcon = { Icon(InlineSliderDefaults.Decrease, "Decrease") },
             )
         }
         val unclippedBoundsInRoot = rule.onRoot().getUnclippedBoundsInRoot()
 
         rule.waitForIdle()
-        rule.onNodeWithTag(iconTag, true)
+        rule
+            .onNodeWithTag(iconTag, true)
             .assertExists()
             .assertLeftPositionInRootIsEqualTo(
-                unclippedBoundsInRoot.width -
-                    IconsOuterHorizontalMargin - DefaultIconWidth
+                unclippedBoundsInRoot.width - IconsOuterHorizontalMargin - DefaultIconWidth
             )
     }
 
@@ -365,20 +336,19 @@ public class InlineSliderTest {
 
         rule.setContentWithTheme {
             InlineSlider(
-                modifier = Modifier.testTag(TEST_TAG),
                 value = 0f,
                 steps = 5,
                 increaseIcon = { Icon(InlineSliderDefaults.Increase, "Increase") },
                 decreaseIcon = { Icon(InlineSliderDefaults.Decrease, testContentDescription) },
-                onValueChange = { },
+                onValueChange = {},
             )
         }
 
         rule.waitForIdle()
-        rule.onNodeWithTag(TEST_TAG, true)
-            // 0 is the index of decrease button, 1 - increase button
-            .onChildAt(0)
-            .onChild()
+        rule
+            .onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
+            // The decrease button is first, the increase button is last
+            .onFirst()
             .assertContentDescriptionContains(testContentDescription)
     }
 
@@ -388,20 +358,19 @@ public class InlineSliderTest {
 
         rule.setContentWithTheme {
             InlineSlider(
-                modifier = Modifier.testTag(TEST_TAG),
                 value = 0f,
                 steps = 5,
                 increaseIcon = { Icon(InlineSliderDefaults.Increase, testContentDescription) },
                 decreaseIcon = { Icon(InlineSliderDefaults.Decrease, "Decrease") },
-                onValueChange = { },
+                onValueChange = {},
             )
         }
 
         rule.waitForIdle()
-        rule.onNodeWithTag(TEST_TAG, true)
-            // 0 is the index of decrease button, 1 - increase button
-            .onChildAt(1)
-            .onChild()
+        rule
+            .onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
+            // The decrease button is first, the increase button is last
+            .onLast()
             .assertContentDescriptionContains(testContentDescription)
     }
 
@@ -410,8 +379,7 @@ public class InlineSliderTest {
 }
 
 public class IntegerInlineSliderTest {
-    @get:Rule
-    public val rule = createComposeRule()
+    @get:Rule public val rule = createComposeRule()
 
     @Test
     public fun supports_testtag() {
@@ -420,7 +388,7 @@ public class IntegerInlineSliderTest {
                 value = 1,
                 onValueChange = {},
                 valueProgression = 0..10,
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
@@ -434,12 +402,11 @@ public class IntegerInlineSliderTest {
                 value = 2,
                 onValueChange = {},
                 valueProgression = 0..10,
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
-        rule.onNodeWithTag(TEST_TAG)
-            .assertRangeInfoEquals(ProgressBarRangeInfo(2f, 0f..10f, 9))
+        rule.onNodeWithTag(TEST_TAG).assertRangeInfoEquals(ProgressBarRangeInfo(2f, 0f..10f, 9))
     }
 
     @Test
@@ -449,12 +416,11 @@ public class IntegerInlineSliderTest {
                 value = 2,
                 onValueChange = {},
                 valueProgression = IntProgression.fromClosedRange(0, 10, 2),
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
-        rule.onNodeWithTag(TEST_TAG)
-            .assertRangeInfoEquals(ProgressBarRangeInfo(2f, 0f..10f, 4))
+        rule.onNodeWithTag(TEST_TAG).assertRangeInfoEquals(ProgressBarRangeInfo(2f, 0f..10f, 4))
     }
 
     @Test
@@ -464,12 +430,11 @@ public class IntegerInlineSliderTest {
                 value = 6,
                 onValueChange = {},
                 valueProgression = IntProgression.fromClosedRange(0, 16, 6),
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
 
-        rule.onNodeWithTag(TEST_TAG)
-            .assertRangeInfoEquals(ProgressBarRangeInfo(6f, 0f..12f, 1))
+        rule.onNodeWithTag(TEST_TAG).assertRangeInfoEquals(ProgressBarRangeInfo(6f, 0f..12f, 1))
     }
 
     @Test
@@ -481,14 +446,11 @@ public class IntegerInlineSliderTest {
                 value = state.value,
                 onValueChange = { state.value = it },
                 valueProgression = 0..10,
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
-        rule.runOnIdle {
-            state.value = 20
-        }
-        rule.onNodeWithTag(TEST_TAG)
-            .assertRangeInfoEquals(ProgressBarRangeInfo(10f, 0f..10f, 9))
+        rule.runOnIdle { state.value = 20 }
+        rule.onNodeWithTag(TEST_TAG).assertRangeInfoEquals(ProgressBarRangeInfo(10f, 0f..10f, 9))
     }
 
     @Test
@@ -500,14 +462,11 @@ public class IntegerInlineSliderTest {
                 value = state.value,
                 onValueChange = { state.value = it },
                 valueProgression = 0..10,
-                modifier = Modifier.testTag(TEST_TAG)
+                modifier = Modifier.testTag(TEST_TAG),
             )
         }
-        rule.runOnIdle {
-            state.value = -20
-        }
-        rule.onNodeWithTag(TEST_TAG)
-            .assertRangeInfoEquals(ProgressBarRangeInfo(0f, 0f..10f, 9))
+        rule.runOnIdle { state.value = -20 }
+        rule.onNodeWithTag(TEST_TAG).assertRangeInfoEquals(ProgressBarRangeInfo(0f, 0f..10f, 9))
     }
 
     @Test
@@ -519,16 +478,13 @@ public class IntegerInlineSliderTest {
                 modifier = Modifier.testTag(TEST_TAG),
                 value = state.value,
                 onValueChange = { state.value = it },
-                valueProgression = IntProgression.fromClosedRange(0, 12, 3)
+                valueProgression = IntProgression.fromClosedRange(0, 12, 3),
             )
         }
 
-        rule.runOnUiThread {
-            state.value = 6
-        }
+        rule.runOnUiThread { state.value = 6 }
 
-        rule.onNodeWithTag(TEST_TAG)
-            .assertRangeInfoEquals(ProgressBarRangeInfo(6f, 0f..12f, 3))
+        rule.onNodeWithTag(TEST_TAG).assertRangeInfoEquals(ProgressBarRangeInfo(6f, 0f..12f, 3))
     }
 
     @Test
@@ -540,16 +496,13 @@ public class IntegerInlineSliderTest {
                 modifier = Modifier.testTag(TEST_TAG),
                 value = state.value,
                 onValueChange = { state.value = it },
-                valueProgression = IntProgression.fromClosedRange(0, 12, 3)
+                valueProgression = IntProgression.fromClosedRange(0, 12, 3),
             )
         }
 
-        rule.runOnUiThread {
-            state.value = 7
-        }
+        rule.runOnUiThread { state.value = 7 }
 
-        rule.onNodeWithTag(TEST_TAG)
-            .assertRangeInfoEquals(ProgressBarRangeInfo(6f, 0f..12f, 3))
+        rule.onNodeWithTag(TEST_TAG).assertRangeInfoEquals(ProgressBarRangeInfo(6f, 0f..12f, 3))
     }
 
     @Test
@@ -561,16 +514,13 @@ public class IntegerInlineSliderTest {
                 modifier = Modifier.testTag(TEST_TAG),
                 value = state.value,
                 onValueChange = { state.value = it },
-                valueProgression = IntProgression.fromClosedRange(0, 12, 3)
+                valueProgression = IntProgression.fromClosedRange(0, 12, 3),
             )
         }
 
-        rule.runOnUiThread {
-            state.value = 8
-        }
+        rule.runOnUiThread { state.value = 8 }
 
-        rule.onNodeWithTag(TEST_TAG)
-            .assertRangeInfoEquals(ProgressBarRangeInfo(9f, 0f..12f, 3))
+        rule.onNodeWithTag(TEST_TAG).assertRangeInfoEquals(ProgressBarRangeInfo(9f, 0f..12f, 3))
     }
 
     @Test
@@ -586,9 +536,7 @@ public class IntegerInlineSliderTest {
         }
 
         rule.onNodeWithTag(TEST_TAG).performTouchInput { click(Offset(15f, height / 2f)) }
-        rule.runOnIdle {
-            Truth.assertThat(state.value).isEqualTo(1)
-        }
+        rule.runOnIdle { Truth.assertThat(state.value).isEqualTo(1) }
     }
 
     @Test
@@ -604,9 +552,7 @@ public class IntegerInlineSliderTest {
         }
 
         rule.onNodeWithTag(TEST_TAG).performTouchInput { click(Offset(width - 15f, height / 2f)) }
-        rule.runOnIdle {
-            Truth.assertThat(state.value).isEqualTo(3)
-        }
+        rule.runOnIdle { Truth.assertThat(state.value).isEqualTo(3) }
     }
 
     @Test
@@ -625,9 +571,7 @@ public class IntegerInlineSliderTest {
         }
 
         rule.onNodeWithTag(TEST_TAG).performTouchInput { click(Offset(15f, height / 2f)) }
-        rule.runOnIdle {
-            Truth.assertThat(state.value).isEqualTo(2)
-        }
+        rule.runOnIdle { Truth.assertThat(state.value).isEqualTo(2) }
     }
 
     @Test
@@ -643,9 +587,7 @@ public class IntegerInlineSliderTest {
         }
 
         rule.onNodeWithTag(TEST_TAG).performTouchInput { click(Offset(15f, height / 2f)) }
-        rule.runOnIdle {
-            Truth.assertThat(state.value).isEqualTo(1)
-        }
+        rule.runOnIdle { Truth.assertThat(state.value).isEqualTo(1) }
     }
 
     @Test
@@ -661,9 +603,7 @@ public class IntegerInlineSliderTest {
         }
 
         rule.onNodeWithTag(TEST_TAG).performTouchInput { click(Offset(width - 15f, height / 2f)) }
-        rule.runOnIdle {
-            Truth.assertThat(state.value).isEqualTo(4)
-        }
+        rule.runOnIdle { Truth.assertThat(state.value).isEqualTo(4) }
     }
 }
 
@@ -673,7 +613,7 @@ internal fun DefaultInlineSlider(
     onValueChange: (Float) -> Unit,
     modifier: Modifier = Modifier,
     valueRange: ClosedFloatingPointRange<Float>,
-    steps: Int
+    steps: Int,
 ) {
     InlineSlider(
         modifier = modifier,
@@ -682,7 +622,7 @@ internal fun DefaultInlineSlider(
         decreaseIcon = { Icon(InlineSliderDefaults.Decrease, "Decrease") },
         onValueChange = onValueChange,
         valueRange = valueRange,
-        steps = steps
+        steps = steps,
     )
 }
 
@@ -691,7 +631,7 @@ internal fun DefaultInlineSlider(
     value: Int,
     onValueChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    valueProgression: IntProgression
+    valueProgression: IntProgression,
 ) {
     InlineSlider(
         modifier = modifier,

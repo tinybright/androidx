@@ -24,12 +24,13 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import io.reactivex.subscribers.TestSubscriber;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import io.reactivex.subscribers.TestSubscriber;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -48,6 +49,11 @@ public class RxJava2WithInstantTaskExecutorTest {
                 // allowing main thread queries, just for testing
                 .allowMainThreadQueries()
                 .build();
+    }
+
+    @After
+    public void closeDb() {
+        mDatabase.close();
     }
 
     @SuppressWarnings("deprecation")

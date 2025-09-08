@@ -54,8 +54,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class TextFieldCodepointTransformationTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     private val inputMethodInterceptor = InputMethodInterceptor(rule)
 
@@ -69,7 +68,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 codepointTransformation = { _, codepoint -> codepoint + 1 },
-                modifier = Modifier.testTag(Tag)
+                modifier = Modifier.testTag(Tag),
             )
         }
 
@@ -86,7 +85,7 @@ class TextFieldCodepointTransformationTest {
                 codepointTransformation = { index, codepoint ->
                     if (index % 2 == 0) codepoint + 1 else codepoint - 1
                 },
-                modifier = Modifier.testTag(Tag)
+                modifier = Modifier.testTag(Tag),
             )
         }
 
@@ -103,7 +102,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 codepointTransformation = codepointTransformation,
-                modifier = Modifier.testTag(Tag)
+                modifier = Modifier.testTag(Tag),
             )
         }
 
@@ -123,7 +122,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 codepointTransformation = CodepointTransformation.mask(mask),
-                modifier = Modifier.testTag(Tag)
+                modifier = Modifier.testTag(Tag),
             )
         }
 
@@ -138,14 +137,13 @@ class TextFieldCodepointTransformationTest {
     fun textField_removingCodepointTransformation_rendersTextNormally() {
         val state = TextFieldState()
         state.setTextAndPlaceCursorAtEnd("Hello")
-        var codepointTransformation by mutableStateOf<CodepointTransformation?>(
-            CodepointTransformation.mask('*')
-        )
+        var codepointTransformation by
+            mutableStateOf<CodepointTransformation?>(CodepointTransformation.mask('*'))
         rule.setContent {
             BasicTextField(
                 state = state,
                 codepointTransformation = codepointTransformation,
-                modifier = Modifier.testTag(Tag)
+                modifier = Modifier.testTag(Tag),
             )
         }
 
@@ -164,7 +162,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 codepointTransformation = CodepointTransformation.mask('*'),
-                modifier = Modifier.testTag(Tag)
+                modifier = Modifier.testTag(Tag),
             )
         }
 
@@ -182,7 +180,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 lineLimits = TextFieldLineLimits.SingleLine,
-                modifier = Modifier.testTag(Tag)
+                modifier = Modifier.testTag(Tag),
             )
         }
 
@@ -199,7 +197,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 lineLimits = TextFieldLineLimits.SingleLine,
-                modifier = Modifier.testTag(Tag)
+                modifier = Modifier.testTag(Tag),
             )
         }
 
@@ -215,7 +213,7 @@ class TextFieldCodepointTransformationTest {
                 state = state,
                 lineLimits = TextFieldLineLimits.SingleLine,
                 codepointTransformation = { _, codepoint -> codepoint },
-                modifier = Modifier.testTag(Tag)
+                modifier = Modifier.testTag(Tag),
             )
         }
 
@@ -229,7 +227,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.testTag(Tag),
-                codepointTransformation = MaskWithNonSurrogate
+                codepointTransformation = MaskWithNonSurrogate,
             )
         }
 
@@ -243,7 +241,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.testTag(Tag),
-                codepointTransformation = MaskWithNonSurrogate
+                codepointTransformation = MaskWithNonSurrogate,
             )
         }
 
@@ -257,7 +255,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.testTag(Tag),
-                codepointTransformation = MaskWithNonSurrogate
+                codepointTransformation = MaskWithNonSurrogate,
             )
         }
 
@@ -271,7 +269,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.testTag(Tag),
-                codepointTransformation = MaskWithSurrogate
+                codepointTransformation = MaskWithSurrogate,
             )
         }
 
@@ -285,7 +283,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.testTag(Tag),
-                codepointTransformation = MaskWithSurrogate
+                codepointTransformation = MaskWithSurrogate,
             )
         }
 
@@ -301,7 +299,7 @@ class TextFieldCodepointTransformationTest {
                 modifier = Modifier.testTag(Tag),
                 codepointTransformation = { i, codepoint ->
                     if (i == 1) SurrogateCodepoint else codepoint
-                }
+                },
             )
         }
 
@@ -315,7 +313,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.testTag(Tag),
-                codepointTransformation = MaskWithNonSurrogate
+                codepointTransformation = MaskWithNonSurrogate,
             )
         }
 
@@ -335,7 +333,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.testTag(Tag),
-                codepointTransformation = MaskWithSurrogate
+                codepointTransformation = MaskWithSurrogate,
             )
         }
 
@@ -363,14 +361,16 @@ class TextFieldCodepointTransformationTest {
                 modifier = Modifier.testTag(Tag),
                 codepointTransformation = { i, codepoint ->
                     when (codepoint) {
-                        'a'.code, 'c'.code -> SurrogateCodepoint
+                        'a'.code,
+                        'c'.code -> SurrogateCodepoint
                         SurrogateCodepoint -> 'b'.code
-                        else -> fail(
-                            "unrecognized codepoint at index $i: " +
-                                String(intArrayOf(codepoint), 0, 1)
-                        )
+                        else ->
+                            fail(
+                                "unrecognized codepoint at index $i: " +
+                                    String(intArrayOf(codepoint), 0, 1)
+                            )
                     }
-                }
+                },
             )
         }
 
@@ -421,12 +421,13 @@ class TextFieldCodepointTransformationTest {
                         'a'.code -> SurrogateCodepoint
                         SurrogateCodepoint -> 'b'.code
                         'c'.code -> SurrogateCodepoint
-                        else -> fail(
-                            "unrecognized codepoint at index $i: " +
-                                String(intArrayOf(codepoint), 0, 1)
-                        )
+                        else ->
+                            fail(
+                                "unrecognized codepoint at index $i: " +
+                                    String(intArrayOf(codepoint), 0, 1)
+                            )
                     }
-                }
+                },
             )
         }
 
@@ -436,11 +437,10 @@ class TextFieldCodepointTransformationTest {
         listOf(0, 1, 3, 4).forEachIndexed { i, expectedCursor ->
             rule.runOnIdle {
                 assertWithMessage("After pressing right arrow $i times")
-                    .that(state.selection).isEqualTo(TextRange(expectedCursor))
+                    .that(state.selection)
+                    .isEqualTo(TextRange(expectedCursor))
             }
-            rule.onNodeWithTag(Tag).performKeyInput {
-                pressKey(Key.DirectionRight)
-            }
+            rule.onNodeWithTag(Tag).performKeyInput { pressKey(Key.DirectionRight) }
         }
     }
 
@@ -456,32 +456,29 @@ class TextFieldCodepointTransformationTest {
                         'a'.code -> SurrogateCodepoint
                         SurrogateCodepoint -> 'b'.code
                         'c'.code -> SurrogateCodepoint
-                        else -> fail(
-                            "unrecognized codepoint at index $i: " +
-                                String(intArrayOf(codepoint), 0, 1)
-                        )
+                        else ->
+                            fail(
+                                "unrecognized codepoint at index $i: " +
+                                    String(intArrayOf(codepoint), 0, 1)
+                            )
                     }
-                }
+                },
             )
         }
 
         rule.onNodeWithTag(Tag).requestFocus()
         rule.onNodeWithTag(Tag).performTextInputSelection(TextRange(0))
 
-        listOf(
-            TextRange(0),
-            TextRange(0, 1),
-            TextRange(0, 3),
-            TextRange(0, 4)
-        ).forEachIndexed { i, expectedSelection ->
+        listOf(TextRange(0), TextRange(0, 1), TextRange(0, 3), TextRange(0, 4)).forEachIndexed {
+            i,
+            expectedSelection ->
             rule.runOnIdle {
                 assertWithMessage("After pressing shift+right arrow $i times")
-                    .that(state.selection).isEqualTo(expectedSelection)
+                    .that(state.selection)
+                    .isEqualTo(expectedSelection)
             }
             rule.onNodeWithTag(Tag).performKeyInput {
-                withKeyDown(Key.ShiftLeft) {
-                    pressKey(Key.DirectionRight)
-                }
+                withKeyDown(Key.ShiftLeft) { pressKey(Key.DirectionRight) }
             }
         }
     }
@@ -498,32 +495,29 @@ class TextFieldCodepointTransformationTest {
                         'a'.code -> SurrogateCodepoint
                         SurrogateCodepoint -> 'b'.code
                         'c'.code -> SurrogateCodepoint
-                        else -> fail(
-                            "unrecognized codepoint at index $i: " +
-                                String(intArrayOf(codepoint), 0, 1)
-                        )
+                        else ->
+                            fail(
+                                "unrecognized codepoint at index $i: " +
+                                    String(intArrayOf(codepoint), 0, 1)
+                            )
                     }
-                }
+                },
             )
         }
 
         rule.onNodeWithTag(Tag).requestFocus()
         rule.onNodeWithTag(Tag).performTextInputSelection(TextRange(4))
 
-        listOf(
-            TextRange(4),
-            TextRange(4, 3),
-            TextRange(4, 1),
-            TextRange(4, 0)
-        ).forEachIndexed { i, expectedSelection ->
+        listOf(TextRange(4), TextRange(4, 3), TextRange(4, 1), TextRange(4, 0)).forEachIndexed {
+            i,
+            expectedSelection ->
             rule.runOnIdle {
                 assertWithMessage("After pressing shift+left arrow $i times")
-                    .that(state.selection).isEqualTo(expectedSelection)
+                    .that(state.selection)
+                    .isEqualTo(expectedSelection)
             }
             rule.onNodeWithTag(Tag).performKeyInput {
-                withKeyDown(Key.ShiftLeft) {
-                    pressKey(Key.DirectionLeft)
-                }
+                withKeyDown(Key.ShiftLeft) { pressKey(Key.DirectionLeft) }
             }
         }
     }
@@ -535,7 +529,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.testTag(Tag),
-                codepointTransformation = MaskWithSurrogate
+                codepointTransformation = MaskWithSurrogate,
             )
         }
         rule.onNodeWithTag(Tag).requestFocus()
@@ -562,7 +556,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.testTag(Tag),
-                codepointTransformation = MaskWithNonSurrogate
+                codepointTransformation = MaskWithNonSurrogate,
             )
         }
         rule.onNodeWithTag(Tag).requestFocus()
@@ -589,7 +583,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.testTag(Tag),
-                codepointTransformation = MaskWithSurrogate
+                codepointTransformation = MaskWithSurrogate,
             )
         }
         rule.onNodeWithTag(Tag).requestFocus()
@@ -615,7 +609,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.testTag(Tag),
-                codepointTransformation = MaskWithNonSurrogate
+                codepointTransformation = MaskWithNonSurrogate,
             )
         }
         rule.onNodeWithTag(Tag).requestFocus()
@@ -641,7 +635,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.testTag(Tag),
-                codepointTransformation = MaskWithSurrogate
+                codepointTransformation = MaskWithSurrogate,
             )
         }
         rule.onNodeWithTag(Tag).requestFocus()
@@ -672,7 +666,7 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.testTag(Tag),
-                codepointTransformation = MaskWithNonSurrogate
+                codepointTransformation = MaskWithNonSurrogate,
             )
         }
         rule.onNodeWithTag(Tag).requestFocus()
@@ -703,15 +697,13 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.testTag(Tag),
-                codepointTransformation = MaskWithNonSurrogate
+                codepointTransformation = MaskWithNonSurrogate,
             )
         }
         rule.onNodeWithTag(Tag).requestFocus()
         rule.onNodeWithTag(Tag).performTextInputSelection(TextRange(6))
 
-        rule.onNodeWithTag(Tag).performKeyInput {
-            pressKey(Key.Backspace)
-        }
+        rule.onNodeWithTag(Tag).performKeyInput { pressKey(Key.Backspace) }
 
         rule.runOnIdle {
             assertThat(state.text.toString())
@@ -727,19 +719,16 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.testTag(Tag),
-                codepointTransformation = MaskWithNonSurrogate
+                codepointTransformation = MaskWithNonSurrogate,
             )
         }
         rule.onNodeWithTag(Tag).requestFocus()
         rule.onNodeWithTag(Tag).performTextInputSelection(TextRange(6))
 
-        rule.onNodeWithTag(Tag).performKeyInput {
-            pressKey(Key.Backspace)
-        }
+        rule.onNodeWithTag(Tag).performKeyInput { pressKey(Key.Backspace) }
 
         rule.runOnIdle {
-            assertThat(state.text.toString())
-                .isEqualTo("aa$SingleSurrogateCodepointString")
+            assertThat(state.text.toString()).isEqualTo("aa$SingleSurrogateCodepointString")
         }
         assertVisualTextLength(3)
     }
@@ -751,15 +740,13 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.testTag(Tag),
-                codepointTransformation = MaskWithSurrogate
+                codepointTransformation = MaskWithSurrogate,
             )
         }
         rule.onNodeWithTag(Tag).requestFocus()
         rule.onNodeWithTag(Tag).performTextInputSelection(TextRange(6))
 
-        rule.onNodeWithTag(Tag).performKeyInput {
-            pressKey(Key.Backspace)
-        }
+        rule.onNodeWithTag(Tag).performKeyInput { pressKey(Key.Backspace) }
 
         rule.runOnIdle {
             assertThat(state.text.toString())
@@ -775,19 +762,16 @@ class TextFieldCodepointTransformationTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.testTag(Tag),
-                codepointTransformation = MaskWithSurrogate
+                codepointTransformation = MaskWithSurrogate,
             )
         }
         rule.onNodeWithTag(Tag).requestFocus()
         rule.onNodeWithTag(Tag).performTextInputSelection(TextRange(6))
 
-        rule.onNodeWithTag(Tag).performKeyInput {
-            pressKey(Key.Backspace)
-        }
+        rule.onNodeWithTag(Tag).performKeyInput { pressKey(Key.Backspace) }
 
         rule.runOnIdle {
-            assertThat(state.text.toString())
-                .isEqualTo("aa$SingleSurrogateCodepointString")
+            assertThat(state.text.toString()).isEqualTo("aa$SingleSurrogateCodepointString")
         }
         assertVisualTextLength(6)
     }
@@ -806,15 +790,20 @@ class TextFieldCodepointTransformationTest {
         vararg mappings: Pair<TextRange, TextRange>
     ) {
         mappings.forEach { (write, expected) ->
-            val existingSelection = rule.onNodeWithTag(Tag)
-                .fetchSemanticsNode().config[SemanticsProperties.TextSelectionRange]
+            val existingSelection =
+                rule
+                    .onNodeWithTag(Tag)
+                    .fetchSemanticsNode()
+                    .config[SemanticsProperties.TextSelectionRange]
             // Setting the selection to the current selection will return false.
             if (existingSelection != write) {
                 assertWithMessage("Expected to be able to select $write")
-                    .that(performSelectionOnVisualText(write)).isTrue()
+                    .that(performSelectionOnVisualText(write))
+                    .isTrue()
                 rule.runOnIdle {
                     assertWithMessage("Visual selection $write to mapped")
-                        .that(selection).isEqualTo(expected)
+                        .that(selection)
+                        .isEqualTo(expected)
                 }
             }
         }

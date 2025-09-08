@@ -67,21 +67,21 @@ fun TextFieldsInScrollableDemo() {
         Row(verticalAlignment = Alignment.CenterVertically) {
             RadioButton(
                 selected = scrollableType == ScrollableColumn,
-                onClick = { scrollableType = ScrollableColumn }
+                onClick = { scrollableType = ScrollableColumn },
             )
             Text("Scrollable column")
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             RadioButton(
                 selected = scrollableType == LazyColumn,
-                onClick = { scrollableType = LazyColumn }
+                onClick = { scrollableType = LazyColumn },
             )
             Text("LazyColumn")
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             RadioButton(
                 selected = scrollableType == EditTextsInScrollView,
-                onClick = { scrollableType = EditTextsInScrollView }
+                onClick = { scrollableType = EditTextsInScrollView },
             )
             Text("ScrollView")
         }
@@ -97,23 +97,15 @@ fun TextFieldsInScrollableDemo() {
 @Preview(showBackground = true)
 @Composable
 private fun TextFieldInScrollableColumn() {
-    Column(
-        Modifier.verticalScroll(rememberScrollState())
-    ) {
-        repeat(50) { index ->
-            DemoTextField(index)
-        }
+    Column(Modifier.verticalScroll(rememberScrollState())) {
+        repeat(50) { index -> DemoTextField(index) }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun TextFieldInLazyColumn() {
-    LazyColumn {
-        items(50) { index ->
-            DemoTextField(index)
-        }
-    }
+    LazyColumn { items(50) { index -> DemoTextField(index) } }
 }
 
 @Preview(showBackground = true)
@@ -129,10 +121,7 @@ private fun DemoTextField(index: Int) {
         value = text,
         onValueChange = { text = it },
         leadingIcon = { Text(index.toString()) },
-        modifier = Modifier
-            .padding(4.dp)
-            .border(1.dp, Color.Black)
-            .fillMaxWidth()
+        modifier = Modifier.padding(4.dp).border(1.dp, Color.Black).fillMaxWidth(),
     )
 }
 
@@ -141,20 +130,23 @@ private class EditTextsInScrollableView(context: Context) : ScrollView(context) 
         val column = LinearLayout(context)
         column.orientation = LinearLayout.VERTICAL
         addView(
-            column, ViewGroup.LayoutParams(
+            column,
+            ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+            ),
         )
 
         repeat(30) {
             val text = EditText(context)
-            column.addView(text, LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            ).also {
-                it.setMargins(20)
-            })
+            column.addView(
+                text,
+                LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                    )
+                    .also { it.setMargins(20) },
+            )
         }
     }
 }

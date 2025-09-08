@@ -26,7 +26,7 @@ import kotlinx.coroutines.runBlocking
 private class FakeSource<Value : Any>(
     private val leadingNulls: Int,
     private val trailingNulls: Int,
-    private val data: List<Value>
+    private val data: List<Value>,
 ) : PagingSource<Any, Value>() {
     override suspend fun load(params: LoadParams<Any>): LoadResult<Any, Value> {
         if (params is LoadParams.Refresh) {
@@ -35,13 +35,11 @@ private class FakeSource<Value : Any>(
                 prevKey = null,
                 nextKey = null,
                 itemsBefore = leadingNulls,
-                itemsAfter = trailingNulls
+                itemsAfter = trailingNulls,
             )
         }
         // TODO: prevent null-key load start/end
-        return Error(
-            IllegalArgumentException("This test source only supports initial load")
-        )
+        return Error(IllegalArgumentException("This test source only supports initial load"))
     }
 
     override fun getRefreshKey(state: PagingState<Any, Value>): Any? = null
@@ -52,22 +50,23 @@ private class FakeSource<Value : Any>(
 fun StringPagedList(
     leadingNulls: Int,
     trailingNulls: Int,
-    vararg items: String
+    vararg items: String,
 ): PagedList<String> = runBlocking {
     PagedList.create(
-        initialPage = Page<Any, String>(
-            data = items.toList(),
-            prevKey = null,
-            nextKey = null,
-            itemsBefore = leadingNulls,
-            itemsAfter = trailingNulls
-        ),
+        initialPage =
+            Page<Any, String>(
+                data = items.toList(),
+                prevKey = null,
+                nextKey = null,
+                itemsBefore = leadingNulls,
+                itemsAfter = trailingNulls,
+            ),
         pagingSource = FakeSource(leadingNulls, trailingNulls, items.toList()),
         coroutineScope = GlobalScope,
         notifyDispatcher = DirectDispatcher,
         fetchDispatcher = DirectDispatcher,
         boundaryCallback = null,
         config = Config(1, prefetchDistance = 0),
-        key = null
+        key = null,
     )
 }

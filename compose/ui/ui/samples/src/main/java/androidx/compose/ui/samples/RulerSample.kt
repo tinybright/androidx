@@ -25,7 +25,9 @@ import androidx.compose.foundation.layout.safeContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.HorizontalRuler
+import androidx.compose.ui.layout.VerticalRuler
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Dp
 import kotlin.math.roundToInt
 
 val SafeBottomRuler = HorizontalRuler()
@@ -35,51 +37,101 @@ val SafeBottomRuler = HorizontalRuler()
 fun RulerProducerUsage(content: @Composable BoxScope.() -> Unit) {
     val safeInsets = WindowInsets.safeContent
 
-    Box(Modifier.fillMaxSize().layout { measurable, constraints ->
-        val placeable = measurable.measure(constraints)
-        layout(
-            width = placeable.width,
-            height = placeable.height,
-            rulers = {
-                val height = coordinates.size.height
-                SafeBottomRuler provides (height - safeInsets.getBottom(this)).toFloat()
+    Box(
+        Modifier.fillMaxSize().layout { measurable, constraints ->
+            val placeable = measurable.measure(constraints)
+            layout(
+                width = placeable.width,
+                height = placeable.height,
+                rulers = {
+                    val height = coordinates.size.height
+                    SafeBottomRuler provides (height - safeInsets.getBottom(this)).toFloat()
+                },
+            ) {
+                placeable.place(0, 0)
             }
-        ) {
-            placeable.place(0, 0)
-        }
-    }, content = content)
+        },
+        content = content,
+    )
 }
 
 @Sampled
 @Composable
 fun RulerConsumerUsage(content: @Composable BoxScope.() -> Unit) {
-    Box(Modifier.layout { measurable, constraints ->
-        if (!constraints.hasBoundedHeight || !constraints.hasBoundedWidth) {
-            // Can't use the ruler. We don't know our size
-            val placeable = measurable.measure(constraints)
-            layout(placeable.width, placeable.height) {
-                placeable.place(0, 0)
-            }
-        } else {
-            // Use the entire space available
-            layout(constraints.maxWidth, constraints.maxHeight) {
-                // Child is measured to fit above the IME
-                val imePosition = SafeBottomRuler.current(-1f)
-                val maxHeight: Int
-                if (imePosition <= 0 || imePosition >= constraints.maxHeight) {
-                    // IME ruler is outside the bounds of this layout
-                    maxHeight = constraints.maxHeight
-                } else {
-                    maxHeight = imePosition.roundToInt()
+    Box(
+        Modifier.layout { measurable, constraints ->
+            if (!constraints.hasBoundedHeight || !constraints.hasBoundedWidth) {
+                // Can't use the ruler. We don't know our size
+                val placeable = measurable.measure(constraints)
+                layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+            } else {
+                // Use the entire space available
+                layout(constraints.maxWidth, constraints.maxHeight) {
+                    // Child is measured to fit above the IME
+                    val imePosition = SafeBottomRuler.current(-1f)
+                    val maxHeight: Int
+                    if (imePosition <= 0 || imePosition >= constraints.maxHeight) {
+                        // IME ruler is outside the bounds of this layout
+                        maxHeight = constraints.maxHeight
+                    } else {
+                        maxHeight = imePosition.roundToInt()
+                    }
+                    val minHeight = constraints.minHeight.coerceAtMost(maxHeight)
+                    val childConstraints =
+                        constraints.copy(minHeight = minHeight, maxHeight = maxHeight)
+                    val placeable = measurable.measure(childConstraints)
+                    placeable.place(0, 0)
                 }
-                val minHeight = constraints.minHeight.coerceAtMost(maxHeight)
-                val childConstraints = constraints.copy(
-                    minHeight = minHeight,
-                    maxHeight = maxHeight
-                )
-                val placeable = measurable.measure(childConstraints)
-                placeable.place(0, 0)
             }
-        }
-    }, content = content)
+        },
+        content = content,
+    )
+}
+
+@Sampled
+fun DerivedVerticalRulerUsage() {
+    class PaddedRulers(val ruler: VerticalRuler, val padding: Dp) {
+        val left =
+            VerticalRuler.derived { defaultValue ->
+                val rulerValue = ruler.current(Float.NaN)
+                if (rulerValue.isNaN()) {
+                    defaultValue
+                } else {
+                    rulerValue + padding.toPx()
+                }
+            }
+        val right =
+            VerticalRuler.derived { defaultValue ->
+                val rulerValue = ruler.current(Float.NaN)
+                if (rulerValue.isNaN()) {
+                    defaultValue
+                } else {
+                    rulerValue - padding.toPx()
+                }
+            }
+    }
+}
+
+@Sampled
+fun DerivedHorizontalRulerUsage() {
+    class PaddedRulers(val ruler: HorizontalRuler, val padding: Dp) {
+        val top =
+            HorizontalRuler.derived { defaultValue ->
+                val rulerValue = ruler.current(Float.NaN)
+                if (rulerValue.isNaN()) {
+                    defaultValue
+                } else {
+                    rulerValue + padding.toPx()
+                }
+            }
+        val bottom =
+            HorizontalRuler.derived { defaultValue ->
+                val rulerValue = ruler.current(Float.NaN)
+                if (rulerValue.isNaN()) {
+                    defaultValue
+                } else {
+                    rulerValue - padding.toPx()
+                }
+            }
+    }
 }

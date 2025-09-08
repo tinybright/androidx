@@ -37,16 +37,20 @@ class CreatePublicKeyCredentialResponseTest {
     fun constructor_emptyJson_throwsIllegalArgumentException() {
         Assert.assertThrows(
             "Expected empty Json to throw error",
-            IllegalArgumentException::class.java
-        ) { CreatePublicKeyCredentialResponse("") }
+            IllegalArgumentException::class.java,
+        ) {
+            CreatePublicKeyCredentialResponse("")
+        }
     }
 
     @Test
     fun constructor_invalidJson_throwsIllegalArgumentException() {
         Assert.assertThrows(
             "Expected empty Json to throw error",
-            IllegalArgumentException::class.java
-        ) { CreatePublicKeyCredentialResponse("invalid") }
+            IllegalArgumentException::class.java,
+        ) {
+            CreatePublicKeyCredentialResponse("invalid")
+        }
     }
 
     @Test
@@ -68,7 +72,7 @@ class CreatePublicKeyCredentialResponseTest {
         val expectedData = Bundle()
         expectedData.putString(
             CreatePublicKeyCredentialResponse.BUNDLE_KEY_REGISTRATION_RESPONSE_JSON,
-            registrationResponseJsonExpected
+            registrationResponseJsonExpected,
         )
 
         val response = CreatePublicKeyCredentialResponse(registrationResponseJsonExpected)
@@ -91,13 +95,10 @@ class CreatePublicKeyCredentialResponseTest {
 
         val convertedResponse = createFrom(response.type, data)
 
-        assertThat(convertedResponse).isInstanceOf(
-            CreatePublicKeyCredentialResponse::class.java
-        )
+        assertThat(convertedResponse).isInstanceOf(CreatePublicKeyCredentialResponse::class.java)
         val convertedSubclassResponse = convertedResponse as CreatePublicKeyCredentialResponse
         assertThat(convertedSubclassResponse.registrationResponseJson)
             .isEqualTo(response.registrationResponseJson)
-        assertThat(convertedResponse.data.getCharSequence(customDataKey))
-            .isEqualTo(customDataValue)
+        assertThat(convertedResponse.data.getCharSequence(customDataKey)).isEqualTo(customDataValue)
     }
 }

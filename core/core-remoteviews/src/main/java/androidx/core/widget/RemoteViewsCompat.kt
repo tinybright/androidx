@@ -30,7 +30,6 @@ import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.annotation.DimenRes
-import androidx.annotation.DoNotInline
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
@@ -38,9 +37,7 @@ import androidx.annotation.Px
 import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 
-/**
- * Helper for accessing features in [RemoteViews].
- */
+/** Helper for accessing features in [RemoteViews]. */
 public object RemoteViewsCompat {
     /**
      * Creates a simple Adapter for the widgetId and viewId specified. The viewId must point to an
@@ -48,20 +45,20 @@ public object RemoteViewsCompat {
      * [android.widget.StackView], or [android.widget.AdapterViewAnimator].
      *
      * This is a simpler but less flexible approach to populating collection widgets. Its use is
-     * encouraged for most scenarios, as long as the total memory within the list of RemoteViews
-     * is relatively small (ie. doesn't contain large or numerous Bitmaps, see
-     * [RemoteViews.setImageViewBitmap]). In the case of numerous images, the use of API is
-     * still possible by setting image URIs instead of Bitmaps, see [RemoteViews.setImageViewUri].
+     * encouraged for most scenarios, as long as the total memory within the list of RemoteViews is
+     * relatively small (ie. doesn't contain large or numerous Bitmaps, see
+     * [RemoteViews.setImageViewBitmap]). In the case of numerous images, the use of API is still
+     * possible by setting image URIs instead of Bitmaps, see [RemoteViews.setImageViewUri].
      *
-     * If you use this API, you should not call
-     * [AppWidgetManager.notifyAppWidgetViewDataChanged] and should instead update
-     * your app widget, calling this method with the new [RemoteCollectionItems].
+     * If you use this API, you should not call [AppWidgetManager.notifyAppWidgetViewDataChanged]
+     * and should instead update your app widget, calling this method with the new
+     * [RemoteCollectionItems].
      *
-     * @param context     The [Context] of the app providing the widget.
+     * @param context The [Context] of the app providing the widget.
      * @param remoteViews The [RemoteViews] to receive the adapter.
      * @param appWidgetId the id of the widget for which the adapter is being set.
-     * @param viewId      The id of the [android.widget.AdapterView].
-     * @param items       The items to display in the [android.widget.AdapterView].
+     * @param viewId The id of the [android.widget.AdapterView].
+     * @param items The items to display in the [android.widget.AdapterView].
      */
     @JvmStatic
     @Suppress("DEPRECATION")
@@ -70,7 +67,7 @@ public object RemoteViewsCompat {
         remoteViews: RemoteViews,
         appWidgetId: Int,
         @IdRes viewId: Int,
-        items: RemoteCollectionItems
+        items: RemoteCollectionItems,
     ) {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) {
             // Due to an inefficient Parcelable implementation, the platform collections API is
@@ -88,7 +85,7 @@ public object RemoteViewsCompat {
         AppWidgetManager.getInstance(context).notifyAppWidgetViewDataChanged(appWidgetId, viewId)
     }
 
-    /** Representation of a fixed list of items to be displayed in a RemoteViews collection.  */
+    /** Representation of a fixed list of items to be displayed in a RemoteViews collection. */
     public class RemoteCollectionItems {
         private val mIds: LongArray
         private val mViews: Array<RemoteViews>
@@ -99,7 +96,7 @@ public object RemoteViewsCompat {
             ids: LongArray,
             views: Array<RemoteViews>,
             hasStableIds: Boolean,
-            viewTypeCount: Int
+            viewTypeCount: Int,
         ) {
             mIds = ids
             mViews = views
@@ -185,8 +182,8 @@ public object RemoteViewsCompat {
             /**
              * Adds a [RemoteViews] to the collection.
              *
-             * @param id   Id to associate with the row. Use [.setHasStableIds] to
-             * indicate that ids are stable across changes to the collection.
+             * @param id Id to associate with the row. Use [.setHasStableIds] to indicate that ids
+             *   are stable across changes to the collection.
              * @param view RemoteViews to display for the row.
              */
             // Covered by getItemId, getItemView, getItemCount.
@@ -212,9 +209,9 @@ public object RemoteViewsCompat {
              * to the maximum number of different layout ids that will be used by RemoteViews in
              * this collection.
              *
-             * If this value is not set, then a value will be inferred from the provided items. As
-             * a result, the adapter may need to be recreated when the list is updated with
-             * previously unseen RemoteViews layouts for new items.
+             * If this value is not set, then a value will be inferred from the provided items. As a
+             * result, the adapter may need to be recreated when the list is updated with previously
+             * unseen RemoteViews layouts for new items.
              *
              * @see android.widget.Adapter.getViewTypeCount
              */
@@ -223,7 +220,7 @@ public object RemoteViewsCompat {
                 return this
             }
 
-            /** Creates the [RemoteCollectionItems] defined by this builder.  */
+            /** Creates the [RemoteCollectionItems] defined by this builder. */
             public fun build(): RemoteCollectionItems {
                 if (mViewTypeCount < 1) {
                     // If a view type count wasn't specified, set it to be the number of distinct
@@ -234,7 +231,7 @@ public object RemoteViewsCompat {
                     mIds.toLongArray(),
                     mViews.toTypedArray(),
                     mHasStableIds,
-                    maxOf(mViewTypeCount, 1)
+                    maxOf(mViewTypeCount, 1),
                 )
             }
         }
@@ -243,7 +240,7 @@ public object RemoteViewsCompat {
             /** Reads a non-null array of [T] of [size] from the [Parcel]. */
             inline fun <reified T : Any> Parcel.readNonNullTypedArray(
                 size: Int,
-                creator: Parcelable.Creator<T>
+                creator: Parcelable.Creator<T>,
             ): Array<T> {
                 val array = arrayOfNulls<T?>(size)
                 readTypedArray(array, creator)
@@ -258,7 +255,6 @@ public object RemoteViewsCompat {
      */
     @RequiresApi(31)
     private object CollectionItemsApi31Impl {
-        @DoNotInline
         fun setRemoteAdapter(remoteViews: RemoteViews, viewId: Int, items: RemoteCollectionItems) {
             remoteViews.setRemoteAdapter(viewId, toPlatformCollectionItems(items))
         }
@@ -266,7 +262,6 @@ public object RemoteViewsCompat {
         /**
          * Returns a [RemoteViews.RemoteCollectionItems] equivalent to this [RemoteCollectionItems].
          */
-        @DoNotInline
         private fun toPlatformCollectionItems(
             items: RemoteCollectionItems
         ): RemoteViews.RemoteCollectionItems {
@@ -286,8 +281,8 @@ public object RemoteViewsCompat {
      * Equivalent to calling [android.widget.Chronometer.setBase].
      *
      * @param viewId The id of the target view
-     * @param base The time at which the timer would have read 0:00. This
-     * time should be based off of [android.os.SystemClock.elapsedRealtime].
+     * @param base The time at which the timer would have read 0:00. This time should be based off
+     *   of [android.os.SystemClock.elapsedRealtime].
      */
     @JvmStatic
     public fun RemoteViews.setChronometerBase(@IdRes viewId: Int, base: Long) {
@@ -326,7 +321,7 @@ public object RemoteViewsCompat {
     @RequiresApi(31)
     @JvmStatic
     public fun RemoteViews.setCompoundButtonIcon(@IdRes viewId: Int, icon: Icon?) {
-        Api23Impl.setIcon(this, viewId, "setButtonIcon", icon)
+        setIcon(viewId, "setButtonIcon", icon)
     }
 
     /**
@@ -339,7 +334,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setCompoundButtonTintBlendMode(
         @IdRes viewId: Int,
-        tintMode: BlendMode?
+        tintMode: BlendMode?,
     ) {
         Api31Impl.setBlendMode(this, viewId, "setButtonTintBlendMode", tintMode)
     }
@@ -360,7 +355,8 @@ public object RemoteViewsCompat {
      * Equivalent to calling [android.widget.CompoundButton.setButtonTintList].
      *
      * @param viewId The id of the target view
-     * @param notNight The tint to apply when the UI is not in night mode, may be null to clear tint.
+     * @param notNight The tint to apply when the UI is not in night mode, may be null to clear
+     *   tint.
      * @param night The tint to apply when the UI is in night mode, may be null to clear tint.
      */
     @RequiresApi(31)
@@ -368,7 +364,7 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setCompoundButtonTintList(
         @IdRes viewId: Int,
         notNight: ColorStateList?,
-        night: ColorStateList?
+        night: ColorStateList?,
     ) {
         Api31Impl.setColorStateList(this, viewId, "setButtonTintList", notNight, night)
     }
@@ -406,7 +402,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setFrameLayoutForegroundGravity(
         @IdRes viewId: Int,
-        foregroundGravity: Int
+        foregroundGravity: Int,
     ) {
         setInt(viewId, "setForegroundGravity", foregroundGravity)
     }
@@ -420,7 +416,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setFrameLayoutMeasureAllChildren(
         @IdRes viewId: Int,
-        measureAll: Boolean
+        measureAll: Boolean,
     ) {
         setBoolean(viewId, "setMeasureAllChildren", measureAll)
     }
@@ -430,7 +426,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param alignmentMode Either [android.widget.GridLayout.ALIGN_BOUNDS] or
-     * [android.widget.GridLayout.ALIGN_MARGINS].
+     *   [android.widget.GridLayout.ALIGN_MARGINS].
      */
     @RequiresApi(31)
     @JvmStatic
@@ -485,7 +481,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setGridViewColumnWidthDimen(
         @IdRes viewId: Int,
-        @DimenRes columnWidth: Int
+        @DimenRes columnWidth: Int,
     ) {
         Api31Impl.setIntDimen(this, viewId, "setColumnWidth", columnWidth)
     }
@@ -500,7 +496,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setGridViewColumnWidthDimenAttr(
         @IdRes viewId: Int,
-        @AttrRes columnWidth: Int
+        @AttrRes columnWidth: Int,
     ) {
         Api31Impl.setIntDimenAttr(this, viewId, "setColumnWidth", columnWidth)
     }
@@ -529,7 +525,7 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setGridViewHorizontalSpacing(
         @IdRes viewId: Int,
         value: Float,
-        unit: Int
+        unit: Int,
     ) {
         Api31Impl.setIntDimen(this, viewId, "setHorizontalSpacing", value, unit)
     }
@@ -539,13 +535,13 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId The resource id of a dimension resource for the amount of horizontal space
-     * between items.
+     *   between items.
      */
     @RequiresApi(31)
     @JvmStatic
     public fun RemoteViews.setGridViewHorizontalSpacingDimen(
         @IdRes viewId: Int,
-        @DimenRes resId: Int
+        @DimenRes resId: Int,
     ) {
         Api31Impl.setIntDimen(this, viewId, "setHorizontalSpacing", resId)
     }
@@ -555,13 +551,13 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId The resource id of a dimension attribute for the amount of horizontal space
-     * between items.
+     *   between items.
      */
     @RequiresApi(31)
     @JvmStatic
     public fun RemoteViews.setGridViewHorizontalSpacingDimenAttr(
         @IdRes viewId: Int,
-        @AttrRes resId: Int
+        @AttrRes resId: Int,
     ) {
         Api31Impl.setIntDimenAttr(this, viewId, "setHorizontalSpacing", resId)
     }
@@ -583,8 +579,9 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param stretchMode Either [android.widget.GridView.NO_STRETCH],
-     * [android.widget.GridView.STRETCH_SPACING], [android.widget.GridView.STRETCH_SPACING_UNIFORM],
-     * or [android.widget.GridView.STRETCH_COLUMN_WIDTH].
+     *   [android.widget.GridView.STRETCH_SPACING],
+     *   [android.widget.GridView.STRETCH_SPACING_UNIFORM], or
+     *   [android.widget.GridView.STRETCH_COLUMN_WIDTH].
      */
     @RequiresApi(31)
     @JvmStatic
@@ -610,13 +607,13 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId The resource id of a dimension resource for the amount of vertical space between
-     * items.
+     *   items.
      */
     @RequiresApi(31)
     @JvmStatic
     public fun RemoteViews.setGridViewVerticalSpacingDimen(
         @IdRes viewId: Int,
-        @DimenRes resId: Int
+        @DimenRes resId: Int,
     ) {
         Api31Impl.setIntDimen(this, viewId, "setVerticalSpacing", resId)
     }
@@ -626,13 +623,13 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId The resource id of a dimension attribute for the amount of vertical space
-     * between items.
+     *   between items.
      */
     @RequiresApi(31)
     @JvmStatic
     public fun RemoteViews.setGridViewVerticalSpacingDimenAttr(
         @IdRes viewId: Int,
-        @AttrRes resId: Int
+        @AttrRes resId: Int,
     ) {
         Api31Impl.setIntDimenAttr(this, viewId, "setVerticalSpacing", resId)
     }
@@ -642,12 +639,12 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param adjustViewBounds Whether to adjust the bounds of this view to preserve the original
-     * aspect ratio of the drawable.
+     *   aspect ratio of the drawable.
      */
     @JvmStatic
     public fun RemoteViews.setImageViewAdjustViewBounds(
         @IdRes viewId: Int,
-        adjustViewBounds: Boolean
+        adjustViewBounds: Boolean,
     ) {
         setBoolean(viewId, "setAdjustViewBounds", adjustViewBounds)
     }
@@ -675,7 +672,7 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setImageViewColorFilter(
         @IdRes viewId: Int,
         @ColorInt notNight: Int,
-        @ColorInt night: Int
+        @ColorInt night: Int,
     ) {
         Api31Impl.setColorInt(this, viewId, "setColorFilter", notNight, night)
     }
@@ -690,7 +687,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setImageViewColorFilterResource(
         @IdRes viewId: Int,
-        @ColorRes resId: Int
+        @ColorRes resId: Int,
     ) {
         Api31Impl.setColor(this, viewId, "setColorFilter", resId)
     }
@@ -723,7 +720,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param alpha The alpha value that should be applied to the image (between 0 and 255
-     * inclusive, with 0 being transparent and 255 being opaque)
+     *   inclusive, with 0 being transparent and 255 being opaque)
      */
     @JvmStatic
     public fun RemoteViews.setImageViewImageAlpha(@IdRes viewId: Int, alpha: Int) {
@@ -741,7 +738,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setImageViewImageTintBlendMode(
         @IdRes viewId: Int,
-        blendMode: BlendMode?
+        blendMode: BlendMode?,
     ) {
         Api31Impl.setBlendMode(this, viewId, "setImageTintBlendMode", blendMode)
     }
@@ -763,7 +760,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param notNightTint The tint to apply when the UI is not in night mode, may be null to clear
-     * tint.
+     *   tint.
      * @param nightTint The tint to apply when the UI is in night mode, may be null to clear tint.
      */
     @RequiresApi(31)
@@ -771,7 +768,7 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setImageViewImageTintList(
         @IdRes viewId: Int,
         notNightTint: ColorStateList?,
-        nightTint: ColorStateList?
+        nightTint: ColorStateList?,
     ) {
         Api31Impl.setColorStateList(this, viewId, "setImageTintList", notNightTint, nightTint)
     }
@@ -905,7 +902,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setLinearLayoutBaselineAligned(
         @IdRes viewId: Int,
-        baselineAligned: Boolean
+        baselineAligned: Boolean,
     ) {
         setBoolean(viewId, "setBaselineAligned", baselineAligned)
     }
@@ -941,7 +938,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setLinearLayoutHorizontalGravity(
         @IdRes viewId: Int,
-        horizontalGravity: Int
+        horizontalGravity: Int,
     ) {
         setInt(viewId, "setHorizontalGravity", horizontalGravity)
     }
@@ -955,7 +952,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setLinearLayoutVerticalGravity(
         @IdRes viewId: Int,
-        verticalGravity: Int
+        verticalGravity: Int,
     ) {
         setInt(viewId, "setVerticalGravity", verticalGravity)
     }
@@ -965,12 +962,12 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param enabled True to measure children with a weight using the minimum size of the largest
-     * child, false otherwise.
+     *   child, false otherwise.
      */
     @JvmStatic
     public fun RemoteViews.setLinearLayoutMeasureWithLargestChildEnabled(
         @IdRes viewId: Int,
-        enabled: Boolean
+        enabled: Boolean,
     ) {
         setBoolean(viewId, "setMeasureWithLargestChildEnabled", enabled)
     }
@@ -980,7 +977,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param weightSum A number greater than 0.0f, or a number lower than or equals to 0.0f if the
-     * weight sum should be computed from the children's layout_weight
+     *   weight sum should be computed from the children's layout_weight
      */
     @JvmStatic
     public fun RemoteViews.setLinearLayoutWeightSum(@IdRes viewId: Int, weightSum: Float) {
@@ -1008,7 +1005,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setProgressBarIndeterminateTintBlendMode(
         @IdRes viewId: Int,
-        blendMode: BlendMode?
+        blendMode: BlendMode?,
     ) {
         Api31Impl.setBlendMode(this, viewId, "setIndeterminateTintBlendMode", blendMode)
     }
@@ -1023,7 +1020,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setProgressBarIndeterminateTintList(
         @IdRes viewId: Int,
-        tint: ColorStateList?
+        tint: ColorStateList?,
     ) {
         Api31Impl.setColorStateList(this, viewId, "setIndeterminateTintList", tint)
     }
@@ -1033,7 +1030,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param notNightTint The tint to apply when the UI is not in night mode, may be null to clear
-     * tint.
+     *   tint.
      * @param nightTint The tint to apply when the UI is in night mode, may be null to clear tint.
      */
     @RequiresApi(31)
@@ -1041,14 +1038,14 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setProgressBarIndeterminateTintList(
         @IdRes viewId: Int,
         notNightTint: ColorStateList?,
-        nightTint: ColorStateList?
+        nightTint: ColorStateList?,
     ) {
         Api31Impl.setColorStateList(
             this,
             viewId,
             "setIndeterminateTintList",
             notNightTint,
-            nightTint
+            nightTint,
         )
     }
 
@@ -1062,7 +1059,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setProgressBarIndeterminateTintList(
         @IdRes viewId: Int,
-        @ColorRes resId: Int
+        @ColorRes resId: Int,
     ) {
         Api31Impl.setColorStateList(this, viewId, "setIndeterminateTintList", resId)
     }
@@ -1077,7 +1074,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setProgressBarIndeterminateTintListAttr(
         @IdRes viewId: Int,
-        @AttrRes resId: Int
+        @AttrRes resId: Int,
     ) {
         Api31Impl.setColorStateListAttr(this, viewId, "setIndeterminateTintList", resId)
     }
@@ -1116,7 +1113,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setProgressBarProgressTintBlendMode(
         @IdRes viewId: Int,
-        blendMode: BlendMode?
+        blendMode: BlendMode?,
     ) {
         Api31Impl.setBlendMode(this, viewId, "setProgressTintBlendMode", blendMode)
     }
@@ -1142,7 +1139,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setProgressBarProgressTintList(
         @IdRes viewId: Int,
-        tint: ColorStateList?
+        tint: ColorStateList?,
     ) {
         Api31Impl.setColorStateList(this, viewId, "setProgressTintList", tint)
     }
@@ -1152,7 +1149,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param notNightTint The tint to apply when the UI is not in night mode, may be null to clear
-     * tint.
+     *   tint.
      * @param nightTint The tint to apply when the UI is in night mode, may be null to clear tint.
      */
     @RequiresApi(31)
@@ -1160,7 +1157,7 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setProgressBarProgressTintList(
         @IdRes viewId: Int,
         notNightTint: ColorStateList?,
-        nightTint: ColorStateList?
+        nightTint: ColorStateList?,
     ) {
         Api31Impl.setColorStateList(this, viewId, "setProgressTintList", notNightTint, nightTint)
     }
@@ -1175,7 +1172,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setProgressBarProgressTintList(
         @IdRes viewId: Int,
-        @ColorRes resId: Int
+        @ColorRes resId: Int,
     ) {
         Api31Impl.setColorStateList(this, viewId, "setProgressTintList", resId)
     }
@@ -1190,7 +1187,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setProgressBarProgressTintListAttr(
         @IdRes viewId: Int,
-        @AttrRes resId: Int
+        @AttrRes resId: Int,
     ) {
         Api31Impl.setColorStateListAttr(this, viewId, "setProgressTintList", resId)
     }
@@ -1205,7 +1202,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setProgressBarProgressBackgroundTintBlendMode(
         @IdRes viewId: Int,
-        blendMode: BlendMode?
+        blendMode: BlendMode?,
     ) {
         Api31Impl.setBlendMode(this, viewId, "setProgressBackgroundTintBlendMode", blendMode)
     }
@@ -1220,7 +1217,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setProgressBarProgressBackgroundTintList(
         @IdRes viewId: Int,
-        tint: ColorStateList?
+        tint: ColorStateList?,
     ) {
         Api31Impl.setColorStateList(this, viewId, "setProgressBackgroundTintList", tint)
     }
@@ -1230,7 +1227,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param notNightTint The tint to apply when the UI is not in night mode, may be null to clear
-     * tint.
+     *   tint.
      * @param nightTint The tint to apply when the UI is in night mode, may be null to clear tint.
      */
     @RequiresApi(31)
@@ -1238,14 +1235,14 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setProgressBarProgressBackgroundTintList(
         @IdRes viewId: Int,
         notNightTint: ColorStateList?,
-        nightTint: ColorStateList?
+        nightTint: ColorStateList?,
     ) {
         Api31Impl.setColorStateList(
             this,
             viewId,
             "setProgressBackgroundTintList",
             notNightTint,
-            nightTint
+            nightTint,
         )
     }
 
@@ -1259,7 +1256,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setProgressBarProgressBackgroundTintList(
         @IdRes viewId: Int,
-        @ColorRes resId: Int
+        @ColorRes resId: Int,
     ) {
         Api31Impl.setColorStateList(this, viewId, "setProgressBackgroundTintList", resId)
     }
@@ -1274,7 +1271,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setProgressBarProgressBackgroundTintListAttr(
         @IdRes viewId: Int,
-        @AttrRes resId: Int
+        @AttrRes resId: Int,
     ) {
         Api31Impl.setColorStateListAttr(this, viewId, "setProgressBackgroundTintList", resId)
     }
@@ -1288,7 +1285,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setProgressBarSecondaryProgress(
         @IdRes viewId: Int,
-        secondaryProgress: Int
+        secondaryProgress: Int,
     ) {
         setInt(viewId, "setSecondaryProgress", secondaryProgress)
     }
@@ -1303,7 +1300,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setProgressBarSecondaryProgressTintBlendMode(
         @IdRes viewId: Int,
-        blendMode: BlendMode?
+        blendMode: BlendMode?,
     ) {
         Api31Impl.setBlendMode(this, viewId, "setSecondaryProgressTintBlendMode", blendMode)
     }
@@ -1318,7 +1315,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setProgressBarSecondaryProgressTintList(
         @IdRes viewId: Int,
-        tint: ColorStateList?
+        tint: ColorStateList?,
     ) {
         Api31Impl.setColorStateList(this, viewId, "setSecondaryProgressTintList", tint)
     }
@@ -1328,7 +1325,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param notNightTint The tint to apply when the UI is not in night mode, may be null to clear
-     * tint.
+     *   tint.
      * @param nightTint The tint to apply when the UI is in night mode, may be null to clear tint.
      */
     @RequiresApi(31)
@@ -1336,14 +1333,14 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setProgressBarSecondaryProgressTintList(
         @IdRes viewId: Int,
         notNightTint: ColorStateList?,
-        nightTint: ColorStateList?
+        nightTint: ColorStateList?,
     ) {
         Api31Impl.setColorStateList(
             this,
             viewId,
             "setSecondaryProgressTintList",
             notNightTint,
-            nightTint
+            nightTint,
         )
     }
 
@@ -1357,7 +1354,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setProgressBarSecondaryProgressTintList(
         @IdRes viewId: Int,
-        @ColorRes resId: Int
+        @ColorRes resId: Int,
     ) {
         Api31Impl.setColorStateList(this, viewId, "setSecondaryProgressTintList", resId)
     }
@@ -1372,7 +1369,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setProgressBarSecondaryProgressTintListAttr(
         @IdRes viewId: Int,
-        @AttrRes resId: Int
+        @AttrRes resId: Int,
     ) {
         Api31Impl.setColorStateListAttr(this, viewId, "setSecondaryProgressTintList", resId)
     }
@@ -1382,13 +1379,13 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param stateDescription The state description, or null to reset to the default ProgressBar
-     * state description.
+     *   state description.
      */
     @RequiresApi(31)
     @JvmStatic
     public fun RemoteViews.setProgressBarStateDescription(
         @IdRes viewId: Int,
-        stateDescription: CharSequence?
+        stateDescription: CharSequence?,
     ) {
         requireSdk(31, "setStateDescription")
         setCharSequence(viewId, "setStateDescription", stateDescription)
@@ -1399,13 +1396,13 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId The resource id of the state description, or 0 to reset to the default
-     * ProgressBar state description.
+     *   ProgressBar state description.
      */
     @RequiresApi(31)
     @JvmStatic
     public fun RemoteViews.setProgressBarStateDescription(
         @IdRes viewId: Int,
-        @StringRes resId: Int
+        @StringRes resId: Int,
     ) {
         Api31Impl.setCharSequence(this, viewId, "setStateDescription", resId)
     }
@@ -1415,13 +1412,13 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId The attribute id of the state description, or 0 to reset to the default
-     * ProgressBar state description.
+     *   ProgressBar state description.
      */
     @RequiresApi(31)
     @JvmStatic
     public fun RemoteViews.setProgressBarStateDescriptionAttr(
         @IdRes viewId: Int,
-        @AttrRes resId: Int
+        @AttrRes resId: Int,
     ) {
         Api31Impl.setCharSequenceAttr(this, viewId, "setStateDescription", resId)
     }
@@ -1446,7 +1443,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setRelativeLayoutHorizontalGravity(
         @IdRes viewId: Int,
-        horizontalGravity: Int
+        horizontalGravity: Int,
     ) {
         setInt(viewId, "setHorizontalGravity", horizontalGravity)
     }
@@ -1456,12 +1453,12 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param childViewId The id of the child View to be ignored by gravity, or 0 if no View should
-     * be ignored.
+     *   be ignored.
      */
     @JvmStatic
     public fun RemoteViews.setRelativeLayoutIgnoreGravity(
         @IdRes viewId: Int,
-        @IdRes childViewId: Int
+        @IdRes childViewId: Int,
     ) {
         setInt(viewId, "setIgnoreGravity", childViewId)
     }
@@ -1475,7 +1472,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setRelativeLayoutVerticalGravity(
         @IdRes viewId: Int,
-        verticalGravity: Int
+        verticalGravity: Int,
     ) {
         setInt(viewId, "setVerticalGravity", verticalGravity)
     }
@@ -1598,7 +1595,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId The resource id for the text displayed when the button is not in the checked
-     * state.
+     *   state.
      */
     @RequiresApi(31)
     @JvmStatic
@@ -1611,7 +1608,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId The attribute id for the text displayed when the button is not in the checked
-     * state.
+     *   state.
      */
     @RequiresApi(31)
     @JvmStatic
@@ -1664,7 +1661,7 @@ public object RemoteViewsCompat {
     @RequiresApi(31)
     @JvmStatic
     public fun RemoteViews.setSwitchThumbIcon(@IdRes viewId: Int, icon: Icon?) {
-        Api23Impl.setIcon(this, viewId, "setThumbIcon", icon)
+        setIcon(viewId, "setThumbIcon", icon)
     }
 
     /**
@@ -1672,9 +1669,9 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param notNight An Icon holding the desired thumb when the UI is not in night mode, or null
-     * to clear the thumb.
-     * @param night An Icon holding the desired thumb when the UI is in night mode, or null to
-     * clear the thumb.
+     *   to clear the thumb.
+     * @param night An Icon holding the desired thumb when the UI is in night mode, or null to clear
+     *   the thumb.
      */
     @RequiresApi(31)
     @JvmStatic
@@ -1718,7 +1715,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setSwitchThumbTextPaddingDimen(
         @IdRes viewId: Int,
-        @DimenRes resId: Int
+        @DimenRes resId: Int,
     ) {
         Api31Impl.setIntDimen(this, viewId, "setThumbTextPadding", resId)
     }
@@ -1728,13 +1725,13 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId The id of a dimension attribute for the horizontal padding for switch thumb
-     * text.
+     *   text.
      */
     @RequiresApi(31)
     @JvmStatic
     public fun RemoteViews.setSwitchThumbTextPaddingDimenAttr(
         @IdRes viewId: Int,
-        @AttrRes resId: Int
+        @AttrRes resId: Int,
     ) {
         Api31Impl.setIntDimenAttr(this, viewId, "setThumbTextPadding", resId)
     }
@@ -1768,7 +1765,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param notNight The tint to apply when the UI is not in night mode, may be null to clear
-     * tint.
+     *   tint.
      * @param night The tint to apply when the UI is in night mode, may be null to clear tint.
      */
     @RequiresApi(31)
@@ -1776,7 +1773,7 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setSwitchThumbTintList(
         @IdRes viewId: Int,
         notNight: ColorStateList?,
-        night: ColorStateList?
+        night: ColorStateList?,
     ) {
         Api31Impl.setColorStateList(this, viewId, "setThumbTintList", notNight, night)
     }
@@ -1814,7 +1811,7 @@ public object RemoteViewsCompat {
     @RequiresApi(31)
     @JvmStatic
     public fun RemoteViews.setSwitchTrackIcon(@IdRes viewId: Int, icon: Icon?) {
-        Api23Impl.setIcon(this, viewId, "setTrackIcon", icon)
+        setIcon(viewId, "setTrackIcon", icon)
     }
 
     /**
@@ -1822,9 +1819,9 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param notNight An Icon holding the desired track when the UI is not in night mode, or null
-     * to clear the track.
-     * @param night An Icon holding the desired track when the UI is in night mode, or null to
-     * clear the track.
+     *   to clear the track.
+     * @param night An Icon holding the desired track when the UI is in night mode, or null to clear
+     *   the track.
      */
     @RequiresApi(31)
     @JvmStatic
@@ -1874,7 +1871,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param notNight The tint to apply when the UI is not in night mode, may be null to clear
-     * tint.
+     *   tint.
      * @param night The tint to apply when the UI is in night mode, may be null to clear tint.
      */
     @RequiresApi(31)
@@ -1882,7 +1879,7 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setSwitchTrackTintList(
         @IdRes viewId: Int,
         notNight: ColorStateList?,
-        night: ColorStateList?
+        night: ColorStateList?,
     ) {
         Api31Impl.setColorStateList(this, viewId, "setTrackTintList", notNight, night)
     }
@@ -1916,11 +1913,10 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param format A date/time formatting pattern as described in
-     * [android.text.format.DateFormat].
+     *   [android.text.format.DateFormat].
      */
     @JvmStatic
     public fun RemoteViews.setTextClockFormat12Hour(@IdRes viewId: Int, format: CharSequence?) {
-        requireSdk(17, "setFormat12Hour")
         setCharSequence(viewId, "setFormat12Hour", format)
     }
 
@@ -1929,7 +1925,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId A resource id for a date/time formatting pattern as described in
-     * [android.text.format.DateFormat].
+     *   [android.text.format.DateFormat].
      */
     @RequiresApi(31)
     @JvmStatic
@@ -1942,7 +1938,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId An attribute id for a date/time formatting pattern as described in
-     * [android.text.format.DateFormat].
+     *   [android.text.format.DateFormat].
      */
     @RequiresApi(31)
     @JvmStatic
@@ -1955,11 +1951,10 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param format A date/time formatting pattern as described in
-     * [android.text.format.DateFormat].
+     *   [android.text.format.DateFormat].
      */
     @JvmStatic
     public fun RemoteViews.setTextClockFormat24Hour(@IdRes viewId: Int, format: CharSequence?) {
-        requireSdk(17, "setFormat24Hour")
         setCharSequence(viewId, "setFormat24Hour", format)
     }
 
@@ -1968,7 +1963,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId A resource id for a date/time formatting pattern as described in
-     * [android.text.format.DateFormat].
+     *   [android.text.format.DateFormat].
      */
     @RequiresApi(31)
     @JvmStatic
@@ -1981,7 +1976,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId An attribute id for a date/time formatting pattern as described in
-     * [android.text.format.DateFormat].
+     *   [android.text.format.DateFormat].
      */
     @RequiresApi(31)
     @JvmStatic
@@ -1994,11 +1989,10 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param timeZone The desired time zone's ID as specified in [java.util.TimeZone] or null to
-     * use the time zone specified by the user (system time zone).
+     *   use the time zone specified by the user (system time zone).
      */
     @JvmStatic
     public fun RemoteViews.setTextClockTimeZone(@IdRes viewId: Int, timeZone: String?) {
-        requireSdk(17, "setTimeZone")
         setString(viewId, "setTimeZone", timeZone)
     }
 
@@ -2034,7 +2028,6 @@ public object RemoteViewsCompat {
      */
     @JvmStatic
     public fun RemoteViews.setTextViewCompoundDrawablePadding(@IdRes viewId: Int, @Px pad: Int) {
-        requireSdk(16, "setCompoundDrawablePadding")
         setInt(viewId, "setCompoundDrawablePadding", pad)
     }
 
@@ -2050,7 +2043,7 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setTextViewCompoundDrawablePadding(
         @IdRes viewId: Int,
         value: Float,
-        unit: Int
+        unit: Int,
     ) {
         Api31Impl.setIntDimen(this, viewId, "setCompoundDrawablePadding", value, unit)
     }
@@ -2060,13 +2053,13 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId The id of a dimension resource for the padding between the compound drawables
-     * and the text.
+     *   and the text.
      */
     @RequiresApi(31)
     @JvmStatic
     public fun RemoteViews.setTextViewCompoundDrawablePaddingDimen(
         @IdRes viewId: Int,
-        @DimenRes resId: Int
+        @DimenRes resId: Int,
     ) {
         Api31Impl.setIntDimen(this, viewId, "setCompoundDrawablePadding", resId)
     }
@@ -2076,13 +2069,13 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId The id of a dimension attribute for the padding between the compound drawables
-     * and the text.
+     *   and the text.
      */
     @RequiresApi(31)
     @JvmStatic
     public fun RemoteViews.setTextViewCompoundDrawablePaddingDimenAttr(
         @IdRes viewId: Int,
-        @AttrRes resId: Int
+        @AttrRes resId: Int,
     ) {
         Api31Impl.setIntDimenAttr(this, viewId, "setCompoundDrawablePadding", resId)
     }
@@ -2141,13 +2134,11 @@ public object RemoteViewsCompat {
      * @param viewId The id of the target view
      * @param fontFeatureSettings Font feature settings represented as CSS compatible string.
      */
-    @RequiresApi(21)
     @JvmStatic
     public fun RemoteViews.setTextViewFontFeatureSettings(
         @IdRes viewId: Int,
-        fontFeatureSettings: String
+        fontFeatureSettings: String,
     ) {
-        requireSdk(21, "setFontFeatureSettings")
         setString(viewId, "setFontFeatureSettings", fontFeatureSettings)
     }
 
@@ -2235,7 +2226,7 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setTextViewHighlightColor(
         @IdRes viewId: Int,
         @ColorInt notNight: Int,
-        @ColorInt night: Int
+        @ColorInt night: Int,
     ) {
         Api31Impl.setColorInt(this, viewId, "setHighlightColor", notNight, night)
     }
@@ -2250,7 +2241,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setTextViewHighlightColorResource(
         @IdRes viewId: Int,
-        @ColorRes resId: Int
+        @ColorRes resId: Int,
     ) {
         Api31Impl.setColor(this, viewId, "setHighlightColor", resId)
     }
@@ -2326,7 +2317,7 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setTextViewHintTextColor(
         @IdRes viewId: Int,
         @ColorInt notNight: Int,
-        @ColorInt night: Int
+        @ColorInt night: Int,
     ) {
         Api31Impl.setColorInt(this, viewId, "setHintTextColor", notNight, night)
     }
@@ -2341,7 +2332,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setTextViewHintTextColorResource(
         @IdRes viewId: Int,
-        @ColorRes resId: Int
+        @ColorRes resId: Int,
     ) {
         Api31Impl.setColor(this, viewId, "setHintTextColor", resId)
     }
@@ -2368,7 +2359,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setTextViewJustificationMode(
         @IdRes viewId: Int,
-        justificationMode: Int
+        justificationMode: Int,
     ) {
         requireSdk(31, "setJustificationMode")
         setInt(viewId, "setJustificationMode", justificationMode)
@@ -2380,10 +2371,8 @@ public object RemoteViewsCompat {
      * @param viewId The id of the target view
      * @param letterSpacing A text letter-space value in ems.
      */
-    @RequiresApi(21)
     @JvmStatic
     public fun RemoteViews.setTextViewLetterSpacing(@IdRes viewId: Int, letterSpacing: Float) {
-        requireSdk(21, "setLetterSpacing")
         setFloat(viewId, "setLetterSpacing", letterSpacing)
     }
 
@@ -2458,7 +2447,7 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setTextViewLinkTextColor(
         @IdRes viewId: Int,
         @ColorInt notNight: Int,
-        @ColorInt night: Int
+        @ColorInt night: Int,
     ) {
         Api31Impl.setColorInt(this, viewId, "setLinkTextColor", notNight, night)
     }
@@ -2473,7 +2462,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setTextViewLinkTextColorResource(
         @IdRes viewId: Int,
-        @ColorRes resId: Int
+        @ColorRes resId: Int,
     ) {
         Api31Impl.setColor(this, viewId, "setLinkTextColor", resId)
     }
@@ -2757,7 +2746,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setTextViewSelectAllOnFocus(
         @IdRes viewId: Int,
-        selectAllOnFocus: Boolean
+        selectAllOnFocus: Boolean,
     ) {
         setBoolean(viewId, "setSelectAllOnFocus", selectAllOnFocus)
     }
@@ -2833,7 +2822,7 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setTextViewTextColor(
         @IdRes viewId: Int,
         notNight: ColorStateList,
-        night: ColorStateList
+        night: ColorStateList,
     ) {
         Api31Impl.setColorStateList(this, viewId, "setTextColor", notNight, night)
     }
@@ -2850,7 +2839,7 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setTextViewTextColor(
         @IdRes viewId: Int,
         @ColorInt notNight: Int,
-        @ColorInt night: Int
+        @ColorInt night: Int,
     ) {
         Api31Impl.setColorInt(this, viewId, "setTextColor", notNight, night)
     }
@@ -3007,7 +2996,7 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setViewBackgroundColor(
         @IdRes viewId: Int,
         @ColorInt notNight: Int,
-        @ColorInt night: Int
+        @ColorInt night: Int,
     ) {
         Api31Impl.setColorInt(this, viewId, "setBackgroundColor", notNight, night)
     }
@@ -3021,7 +3010,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setViewBackgroundColorResource(
         @IdRes viewId: Int,
-        @ColorRes resId: Int
+        @ColorRes resId: Int,
     ) {
         if (Build.VERSION.SDK_INT >= 31) {
             Api31Impl.setColor(this, viewId, "setBackgroundColor", resId)
@@ -3064,7 +3053,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setViewBackgroundTintBlendMode(
         @IdRes viewId: Int,
-        blendMode: BlendMode?
+        blendMode: BlendMode?,
     ) {
         Api31Impl.setBlendMode(this, viewId, "setBackgroundTintBlendMode", blendMode)
     }
@@ -3093,7 +3082,7 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setViewBackgroundTintList(
         @IdRes viewId: Int,
         notNightTint: ColorStateList?,
-        nightTint: ColorStateList?
+        nightTint: ColorStateList?,
     ) {
         Api31Impl.setColorStateList(this, viewId, "setBackgroundTintList", notNightTint, nightTint)
     }
@@ -3127,7 +3116,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param clipToOutline Whether the View's Outline should be used to clip the contents of the
-     * View.
+     *   View.
      */
     @RequiresApi(31)
     @JvmStatic
@@ -3145,7 +3134,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setViewContentDescription(
         @IdRes viewId: Int,
-        contentDescription: CharSequence?
+        contentDescription: CharSequence?,
     ) {
         setCharSequence(viewId, "setContentDescription", contentDescription)
     }
@@ -3244,7 +3233,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param focusable One of [android.view.View.NOT_FOCUSABLE], [android.view.View.FOCUSABLE], or
-     * [android.view.View.FOCUSABLE_AUTO].
+     *   [android.view.View.FOCUSABLE_AUTO].
      */
     @RequiresApi(31)
     @JvmStatic
@@ -3263,7 +3252,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setViewFocusedByDefault(
         @IdRes viewId: Int,
-        isFocusedByDefault: Boolean
+        isFocusedByDefault: Boolean,
     ) {
         requireSdk(31, "setFocusedByDefault")
         setBoolean(viewId, "setFocusedByDefault", isFocusedByDefault)
@@ -3279,7 +3268,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setViewFocusableInTouchMode(
         @IdRes viewId: Int,
-        focusableInTouchMode: Boolean
+        focusableInTouchMode: Boolean,
     ) {
         requireSdk(31, "setFocusableInTouchMode")
         setBoolean(viewId, "setFocusableInTouchMode", focusableInTouchMode)
@@ -3295,7 +3284,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setViewForegroundTintBlendMode(
         @IdRes viewId: Int,
-        blendMode: BlendMode?
+        blendMode: BlendMode?,
     ) {
         Api31Impl.setBlendMode(this, viewId, "setForegroundTintBlendMode", blendMode)
     }
@@ -3324,7 +3313,7 @@ public object RemoteViewsCompat {
     public fun RemoteViews.setViewForegroundTintList(
         @IdRes viewId: Int,
         notNightTint: ColorStateList?,
-        nightTint: ColorStateList?
+        nightTint: ColorStateList?,
     ) {
         Api31Impl.setColorStateList(this, viewId, "setForegroundTintList", notNightTint, nightTint)
     }
@@ -3358,12 +3347,11 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param layoutDirection One of [android.view.View.LAYOUT_DIRECTION_LTR],
-     * [android.view.View.LAYOUT_DIRECTION_RTL], [android.view.View.LAYOUT_DIRECTION_INHERIT], or
-     * [android.view.View.LAYOUT_DIRECTION_LOCALE].
+     *   [android.view.View.LAYOUT_DIRECTION_RTL], [android.view.View.LAYOUT_DIRECTION_INHERIT], or
+     *   [android.view.View.LAYOUT_DIRECTION_LOCALE].
      */
     @JvmStatic
     public fun RemoteViews.setViewLayoutDirection(@IdRes viewId: Int, layoutDirection: Int) {
-        requireSdk(17, "setLayoutDirection")
         setInt(viewId, "setLayoutDirection", layoutDirection)
     }
 
@@ -3550,7 +3538,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param scrollIndicators A bitmask of indicators that should be enabled, or 0 to disable all
-     * indicators.
+     *   indicators.
      */
     @RequiresApi(31)
     @JvmStatic
@@ -3569,7 +3557,7 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setViewStateDescription(
         @IdRes viewId: Int,
-        stateDescription: CharSequence?
+        stateDescription: CharSequence?,
     ) {
         requireSdk(30, "setStateDescription")
         setCharSequence(viewId, "setStateDescription", stateDescription)
@@ -3606,11 +3594,10 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param inflatedId A positive integer used to identify the inflated view or
-     * [android.view.View.NO_ID] if the inflated view should keep its id.
+     *   [android.view.View.NO_ID] if the inflated view should keep its id.
      */
     @JvmStatic
     public fun RemoteViews.setViewStubInflatedId(@IdRes viewId: Int, inflatedId: Int) {
-        requireSdk(16, "setInflatedId")
         setInt(viewId, "setInflatedId", inflatedId)
     }
 
@@ -3625,9 +3612,8 @@ public object RemoteViewsCompat {
     @JvmStatic
     public fun RemoteViews.setViewStubLayoutResource(
         @IdRes viewId: Int,
-        @LayoutRes layoutResource: Int
+        @LayoutRes layoutResource: Int,
     ) {
-        requireSdk(16, "setLayoutResource")
         setInt(viewId, "setLayoutResource", layoutResource)
     }
 
@@ -3649,7 +3635,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId The id of a dimension resource for the horizontal position of this view relative
-     * to its left position.
+     *   to its left position.
      */
     @RequiresApi(31)
     @JvmStatic
@@ -3661,8 +3647,8 @@ public object RemoteViewsCompat {
      * Equivalent to calling [android.view.View.setTranslationX].
      *
      * @param viewId The id of the target view
-     * @param resId The id of a dimension attribute for the horizontal position of this view relative
-     * to its left position.
+     * @param resId The id of a dimension attribute for the horizontal position of this view
+     *   relative to its left position.
      */
     @RequiresApi(31)
     @JvmStatic
@@ -3687,8 +3673,8 @@ public object RemoteViewsCompat {
      * Equivalent to calling [android.view.View.setTranslationY].
      *
      * @param viewId The id of the target view
-     * @param resId The id of a dimension resource for the vertical position of this
-     * view relative to its top position.
+     * @param resId The id of a dimension resource for the vertical position of this view relative
+     *   to its top position.
      */
     @RequiresApi(31)
     @JvmStatic
@@ -3701,7 +3687,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId The id of a dimension attribute for the vertical position of this view relative
-     * to its top position.
+     *   to its top position.
      */
     @RequiresApi(31)
     @JvmStatic
@@ -3727,7 +3713,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId The id of a dimension resource for the depth of this view relative to its
-     * elevation.
+     *   elevation.
      */
     @RequiresApi(31)
     @JvmStatic
@@ -3740,7 +3726,7 @@ public object RemoteViewsCompat {
      *
      * @param viewId The id of the target view
      * @param resId The id of a dimension attribute for the depth of this view relative to its
-     * elevation.
+     *   elevation.
      */
     @RequiresApi(31)
     @JvmStatic
@@ -3761,169 +3747,143 @@ public object RemoteViewsCompat {
         }
     }
 
-    @RequiresApi(23)
-    private object Api23Impl {
-        @DoNotInline
-        @JvmStatic
-        fun setIcon(rv: RemoteViews, @IdRes id: Int, method: String, icon: Icon?) {
-            rv.setIcon(id, method, icon)
-        }
-    }
-
     @RequiresApi(31)
     private object Api31Impl {
-        @DoNotInline
         @JvmStatic
         fun setBlendMode(rv: RemoteViews, @IdRes id: Int, method: String, mode: BlendMode?) {
             rv.setBlendMode(id, method, mode)
         }
 
-        @DoNotInline
         @JvmStatic
         fun setCharSequence(
             rv: RemoteViews,
             @IdRes id: Int,
             method: String,
-            @StringRes resId: Int
+            @StringRes resId: Int,
         ) {
             rv.setCharSequence(id, method, resId)
         }
 
-        @DoNotInline
         @JvmStatic
         fun setCharSequenceAttr(
             rv: RemoteViews,
             @IdRes id: Int,
             method: String,
-            @AttrRes resId: Int
+            @AttrRes resId: Int,
         ) {
             rv.setCharSequenceAttr(id, method, resId)
         }
 
-        @DoNotInline
         @JvmStatic
         fun setColor(rv: RemoteViews, @IdRes id: Int, method: String, @ColorRes resId: Int) {
             rv.setColor(id, method, resId)
         }
 
-        @DoNotInline
         @JvmStatic
         fun setColorAttr(rv: RemoteViews, @IdRes id: Int, method: String, @AttrRes resId: Int) {
             rv.setColorAttr(id, method, resId)
         }
 
-        @DoNotInline
         @JvmStatic
         fun setColorInt(
             rv: RemoteViews,
             @IdRes id: Int,
             method: String,
             @ColorInt notNight: Int,
-            @ColorInt night: Int
+            @ColorInt night: Int,
         ) {
             rv.setColorInt(id, method, notNight, night)
         }
 
-        @DoNotInline
         @JvmStatic
         fun setColorStateList(
             rv: RemoteViews,
             @IdRes id: Int,
             method: String,
-            colorStateList: ColorStateList?
+            colorStateList: ColorStateList?,
         ) {
             rv.setColorStateList(id, method, colorStateList)
         }
 
-        @DoNotInline
         @JvmStatic
         fun setColorStateList(
             rv: RemoteViews,
             @IdRes id: Int,
             method: String,
             notNight: ColorStateList?,
-            night: ColorStateList?
+            night: ColorStateList?,
         ) {
             rv.setColorStateList(id, method, notNight, night)
         }
 
-        @DoNotInline
         @JvmStatic
         fun setColorStateList(
             rv: RemoteViews,
             @IdRes id: Int,
             method: String,
-            @ColorRes resId: Int
+            @ColorRes resId: Int,
         ) {
             rv.setColorStateList(id, method, resId)
         }
 
-        @DoNotInline
         @JvmStatic
         fun setColorStateListAttr(
             rv: RemoteViews,
             @IdRes id: Int,
             method: String,
-            @AttrRes resId: Int
+            @AttrRes resId: Int,
         ) {
             rv.setColorStateListAttr(id, method, resId)
         }
 
-        @DoNotInline
         @JvmStatic
         fun setIcon(
             rv: RemoteViews,
             @IdRes id: Int,
             method: String,
             notNight: Icon?,
-            night: Icon?
+            night: Icon?,
         ) {
             rv.setIcon(id, method, notNight, night)
         }
 
-        @DoNotInline
         @JvmStatic
         fun setIntDimen(rv: RemoteViews, @IdRes id: Int, method: String, value: Float, unit: Int) {
             rv.setIntDimen(id, method, value, unit)
         }
 
-        @DoNotInline
         @JvmStatic
         fun setIntDimen(rv: RemoteViews, @IdRes id: Int, method: String, @DimenRes resId: Int) {
             rv.setIntDimen(id, method, resId)
         }
 
-        @DoNotInline
         @JvmStatic
         fun setIntDimenAttr(rv: RemoteViews, @IdRes id: Int, method: String, @AttrRes resId: Int) {
             rv.setIntDimenAttr(id, method, resId)
         }
 
-        @DoNotInline
         @JvmStatic
         fun setFloatDimen(
             rv: RemoteViews,
             @IdRes id: Int,
             method: String,
             value: Float,
-            unit: Int
+            unit: Int,
         ) {
             rv.setFloatDimen(id, method, value, unit)
         }
 
-        @DoNotInline
         @JvmStatic
         fun setFloatDimen(rv: RemoteViews, @IdRes id: Int, method: String, @DimenRes resId: Int) {
             rv.setFloatDimen(id, method, resId)
         }
 
-        @DoNotInline
         @JvmStatic
         fun setFloatDimenAttr(
             rv: RemoteViews,
             @IdRes id: Int,
             method: String,
-            @AttrRes resId: Int
+            @AttrRes resId: Int,
         ) {
             rv.setFloatDimenAttr(id, method, resId)
         }

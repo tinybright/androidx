@@ -53,8 +53,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ReusableAndroidViewBindingTest {
 
-    @get:Rule
-    val rule = createAndroidComposeRule<EmptyFragmentActivity>()
+    @get:Rule val rule = createAndroidComposeRule<EmptyFragmentActivity>()
 
     @Test
     fun testViewIsReused_whenMovedAndUpdated() {
@@ -75,7 +74,7 @@ class ReusableAndroidViewBindingTest {
                 update = {
                     events += "update"
                     myButton.text = "Button in slot $slotWithContent"
-                }
+                },
             )
         }
 
@@ -83,9 +82,7 @@ class ReusableAndroidViewBindingTest {
             Column {
                 repeat(10) { slot ->
                     if (slot == slotWithContent) {
-                        ReusableContent(Unit) {
-                            movableContext()
-                        }
+                        ReusableContent(Unit) { movableContext() }
                     } else {
                         BasicText("Slot $slot")
                     }
@@ -101,7 +98,7 @@ class ReusableAndroidViewBindingTest {
             "Binding did not experience the expected event sequence when being " +
                 "initialized in its first position",
             listOf("inflate", "update"),
-            events
+            events,
         )
 
         events.clear()
@@ -115,7 +112,7 @@ class ReusableAndroidViewBindingTest {
             "Binding did not experience expected events when moving to its new position " +
                 "when the moved content is updated via composition",
             listOf("update"),
-            events
+            events,
         )
     }
 
@@ -142,7 +139,7 @@ class ReusableAndroidViewBindingTest {
                         update = {
                             events += "update"
                             myButton.text = "My Button"
-                        }
+                        },
                     )
                 }
             }
@@ -156,19 +153,18 @@ class ReusableAndroidViewBindingTest {
             "Binding did not experience the expected event sequence when being " +
                 "created for the first time",
             listOf("inflate", "update"),
-            events
+            events,
         )
 
         events.clear()
         includeContent = false
 
-        onView(withClassName(`is`(ButtonFqClassName)))
-            .check(doesNotExist())
+        onView(withClassName(`is`(ButtonFqClassName))).check(doesNotExist())
 
         assertEquals(
             "Binding should be released when its containing group is removed from composition",
             listOf("release"),
-            events
+            events,
         )
 
         events.clear()
@@ -182,19 +178,18 @@ class ReusableAndroidViewBindingTest {
             "Binding should re-experience its creation lifecycle when its previously removed " +
                 "group is re-added to the composition",
             listOf("inflate", "update"),
-            events
+            events,
         )
 
         events.clear()
         enableContent = false
 
-        onView(withClassName(`is`(ButtonFqClassName)))
-            .check(doesNotExist())
+        onView(withClassName(`is`(ButtonFqClassName))).check(doesNotExist())
 
         assertEquals(
             "Binding should be reset when its parent ReusableContentHost is deactivated",
             listOf("reset"),
-            events
+            events,
         )
 
         events.clear()
@@ -207,7 +202,7 @@ class ReusableAndroidViewBindingTest {
         assertEquals(
             "Binding should be re-awoken when its parent ReusableContentHost becomes active again",
             listOf("update"),
-            events
+            events,
         )
     }
 
@@ -224,7 +219,7 @@ class ReusableAndroidViewBindingTest {
                 modifier = Modifier.heightIn(max = 200.dp),
                 onReset = { events += "reset" },
                 onRelease = { events += "release" },
-                update = { events += "update" }
+                update = { events += "update" },
             )
         }
 
@@ -232,9 +227,7 @@ class ReusableAndroidViewBindingTest {
             Column {
                 repeat(10) { slot ->
                     if (slot == slotWithContent) {
-                        ReusableContent(Unit) {
-                            movableContext()
-                        }
+                        ReusableContent(Unit) { movableContext() }
                     } else {
                         BasicText("Slot $slot")
                     }
@@ -248,7 +241,7 @@ class ReusableAndroidViewBindingTest {
             "Binding did not experience the expected event sequence when being " +
                 "initialized in its first position",
             listOf("inflate", "update"),
-            events
+            events,
         )
 
         events.clear()
@@ -258,7 +251,7 @@ class ReusableAndroidViewBindingTest {
         assertEquals(
             "Binding should not experience any events when moving to its new position",
             emptyList<String>(),
-            events
+            events,
         )
     }
 
@@ -279,7 +272,7 @@ class ReusableAndroidViewBindingTest {
                         modifier = Modifier.heightIn(max = 200.dp),
                         onReset = { events += "reset" },
                         onRelease = { events += "release" },
-                        update = { events += "update" }
+                        update = { events += "update" },
                     )
                 }
             }
@@ -290,7 +283,7 @@ class ReusableAndroidViewBindingTest {
             "Binding did not experience the expected event sequence when being " +
                 "created for the first time",
             listOf("inflate", "update"),
-            events
+            events,
         )
 
         events.clear()
@@ -300,7 +293,7 @@ class ReusableAndroidViewBindingTest {
         assertEquals(
             "Binding should be released when its containing group is removed from composition",
             listOf("release"),
-            events
+            events,
         )
 
         events.clear()
@@ -311,7 +304,7 @@ class ReusableAndroidViewBindingTest {
             "Binding should re-experience its creation lifecycle when its previously removed " +
                 "group is re-added to the composition",
             listOf("inflate", "update"),
-            events
+            events,
         )
 
         events.clear()
@@ -321,7 +314,7 @@ class ReusableAndroidViewBindingTest {
         assertEquals(
             "Binding should be reset when its parent ReusableContentHost is deactivated",
             listOf("reset"),
-            events
+            events,
         )
 
         events.clear()
@@ -331,7 +324,7 @@ class ReusableAndroidViewBindingTest {
         assertEquals(
             "Binding should be re-awoken when its parent ReusableContentHost becomes active again",
             listOf("update"),
-            events
+            events,
         )
     }
 

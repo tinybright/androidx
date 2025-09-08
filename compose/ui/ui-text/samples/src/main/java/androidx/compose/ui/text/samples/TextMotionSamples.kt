@@ -39,22 +39,23 @@ import androidx.compose.ui.text.style.TextMotion
 @Composable
 fun TextMotionSample() {
     val infiniteTransition = rememberInfiniteTransition()
-    val scale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 8f,
-        animationSpec = infiniteRepeatable(tween(1000), RepeatMode.Reverse)
-    )
+    val scale by
+        infiniteTransition.animateFloat(
+            initialValue = 1f,
+            targetValue = 8f,
+            animationSpec = infiniteRepeatable(tween(1000), RepeatMode.Reverse),
+        )
 
     Text(
         text = "Hello",
-        modifier = Modifier
-            .graphicsLayer {
+        modifier =
+            Modifier.graphicsLayer {
                 scaleX = scale
                 scaleY = scale
                 transformOrigin = TransformOrigin.Center
             },
         // Text composable does not take TextMotion as a parameter.
         // Provide it via style argument but make sure that we are copying from current theme
-        style = LocalTextStyle.current.copy(textMotion = TextMotion.Animated)
+        style = LocalTextStyle.current.copy(textMotion = TextMotion.Animated),
     )
 }

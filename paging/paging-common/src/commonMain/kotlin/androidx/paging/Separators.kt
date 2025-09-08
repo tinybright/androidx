@@ -39,8 +39,8 @@ public enum class TerminalSeparatorType {
      *
      * End of paginations occurs when [CombinedLoadStates] has set
      * [LoadState.endOfPaginationReached] to `true` for both [CombinedLoadStates.source] and
-     * [CombinedLoadStates.mediator] in the [PREPEND] direction for the header and in the
-     * [APPEND] direction for the footer.
+     * [CombinedLoadStates.mediator] in the [PREPEND] direction for the header and in the [APPEND]
+     * direction for the footer.
      *
      * In cases where [RemoteMediator] isn't used, only [CombinedLoadStates.source] will be
      * considered.
@@ -101,25 +101,24 @@ internal suspend fun <R : Any, T : R> TransformablePage<T>.insertInternalSeparat
             originalPageOffsets = originalPageOffsets,
             data = outputList,
             hintOriginalPageOffset = hintOriginalPageOffset,
-            hintOriginalIndices = outputIndices
+            hintOriginalIndices = outputIndices,
         )
     }
 }
 
-/**
- * Create a [TransformablePage] with the given separator (or empty, if the separator is null)
- */
+/** Create a [TransformablePage] with the given separator (or empty, if the separator is null) */
 internal fun <T : Any> separatorPage(
     separator: T,
     originalPageOffsets: IntArray,
     hintOriginalPageOffset: Int,
-    hintOriginalIndex: Int
-): TransformablePage<T> = TransformablePage(
-    originalPageOffsets = originalPageOffsets,
-    data = listOf(separator),
-    hintOriginalPageOffset = hintOriginalPageOffset,
-    hintOriginalIndices = listOf(hintOriginalIndex)
-)
+    hintOriginalIndex: Int,
+): TransformablePage<T> =
+    TransformablePage(
+        originalPageOffsets = originalPageOffsets,
+        data = listOf(separator),
+        hintOriginalPageOffset = hintOriginalPageOffset,
+        hintOriginalIndices = listOf(hintOriginalIndex),
+    )
 
 /**
  * Create a [TransformablePage] with the given separator, and add it if [separator] is non-null
@@ -131,16 +130,17 @@ internal fun <T : Any> MutableList<TransformablePage<T>>.addSeparatorPage(
     separator: T?,
     originalPageOffsets: IntArray,
     hintOriginalPageOffset: Int,
-    hintOriginalIndex: Int
+    hintOriginalIndex: Int,
 ) {
     if (separator == null) return
 
-    val separatorPage = separatorPage(
-        separator = separator,
-        originalPageOffsets = originalPageOffsets,
-        hintOriginalPageOffset = hintOriginalPageOffset,
-        hintOriginalIndex = hintOriginalIndex
-    )
+    val separatorPage =
+        separatorPage(
+            separator = separator,
+            originalPageOffsets = originalPageOffsets,
+            hintOriginalPageOffset = hintOriginalPageOffset,
+            hintOriginalIndex = hintOriginalIndex,
+        )
     add(separatorPage)
 }
 
@@ -155,38 +155,40 @@ internal fun <R : Any, T : R> MutableList<TransformablePage<R>>.addSeparatorPage
     adjacentPageBefore: TransformablePage<T>?,
     adjacentPageAfter: TransformablePage<T>?,
     hintOriginalPageOffset: Int,
-    hintOriginalIndex: Int
+    hintOriginalIndex: Int,
 ) {
     val beforeOffsets = adjacentPageBefore?.originalPageOffsets
     val afterOffsets = adjacentPageAfter?.originalPageOffsets
     addSeparatorPage(
         separator = separator,
-        originalPageOffsets = when {
-            beforeOffsets != null && afterOffsets != null -> {
-                (beforeOffsets + afterOffsets).distinct().sorted().toIntArray()
-            }
-            beforeOffsets == null && afterOffsets != null -> afterOffsets
-            beforeOffsets != null && afterOffsets == null -> beforeOffsets
-            else -> throw IllegalArgumentException(
-                "Separator page expected adjacentPageBefore or adjacentPageAfter, but both were" +
-                    " null."
-            )
-        },
+        originalPageOffsets =
+            when {
+                beforeOffsets != null && afterOffsets != null -> {
+                    (beforeOffsets + afterOffsets).distinct().sorted().toIntArray()
+                }
+                beforeOffsets == null && afterOffsets != null -> afterOffsets
+                beforeOffsets != null && afterOffsets == null -> beforeOffsets
+                else ->
+                    throw IllegalArgumentException(
+                        "Separator page expected adjacentPageBefore or adjacentPageAfter, but both were" +
+                            " null."
+                    )
+            },
         hintOriginalPageOffset = hintOriginalPageOffset,
-        hintOriginalIndex = hintOriginalIndex
+        hintOriginalIndex = hintOriginalIndex,
     )
 }
 
 private class SeparatorState<R : Any, T : R>(
     val terminalSeparatorType: TerminalSeparatorType,
-    val generator: suspend (before: T?, after: T?) -> R?
+    val generator: suspend (before: T?, after: T?) -> R?,
 ) {
     /**
      * Lookup table of previously emitted pages, that skips empty pages.
      *
-     * This table is used to keep track of originalPageOffsets for separators that would span
-     * across empty pages. It includes a simplified version of loaded pages which only has the
-     * first and last item in each page to reduce memory pressure.
+     * This table is used to keep track of originalPageOffsets for separators that would span across
+     * empty pages. It includes a simplified version of loaded pages which only has the first and
+     * last item in each page to reduce memory pressure.
      *
      * Note: [TransformablePage] added to this stash must always have
      * [TransformablePage.originalPageOffsets] defined, since it needs to keep track of the
@@ -210,20 +212,21 @@ private class SeparatorState<R : Any, T : R>(
     var headerAdded = false
 
     @Suppress("UNCHECKED_CAST")
-    suspend fun onEvent(event: PageEvent<T>): PageEvent<R> = when (event) {
-        is Insert<T> -> onInsert(event)
-        is Drop -> onDrop(event)
-        is LoadStateUpdate -> onLoadStateUpdate(event)
-        is StaticList -> onStaticList(event)
-    }.also {
-        // validate internal state after each modification
-        if (endTerminalSeparatorDeferred) {
-            check(pageStash.isEmpty()) { "deferred endTerm, page stash should be empty" }
+    suspend fun onEvent(event: PageEvent<T>): PageEvent<R> =
+        when (event) {
+            is Insert<T> -> onInsert(event)
+            is Drop -> onDrop(event)
+            is LoadStateUpdate -> onLoadStateUpdate(event)
+            is StaticList -> onStaticList(event)
+        }.also {
+            // validate internal state after each modification
+            if (endTerminalSeparatorDeferred) {
+                check(pageStash.isEmpty()) { "deferred endTerm, page stash should be empty" }
+            }
+            if (startTerminalSeparatorDeferred) {
+                check(pageStash.isEmpty()) { "deferred startTerm, page stash should be empty" }
+            }
         }
-        if (startTerminalSeparatorDeferred) {
-            check(pageStash.isEmpty()) { "deferred startTerm, page stash should be empty" }
-        }
-    }
 
     fun Insert<T>.asRType(): Insert<R> {
         @Suppress("UNCHECKED_CAST")
@@ -371,7 +374,7 @@ private class SeparatorState<R : Any, T : R>(
                 adjacentPageBefore = null,
                 adjacentPageAfter = pageAfter,
                 hintOriginalPageOffset = pageAfter.hintOriginalPageOffset,
-                hintOriginalIndex = pageAfter.hintOriginalIndices?.first() ?: 0
+                hintOriginalIndex = pageAfter.hintOriginalIndices?.first() ?: 0,
             )
         }
 
@@ -391,7 +394,7 @@ private class SeparatorState<R : Any, T : R>(
                     adjacentPageBefore = lastStash,
                     adjacentPageAfter = firstNonEmptyPage,
                     hintOriginalPageOffset = firstNonEmptyPage.hintOriginalPageOffset,
-                    hintOriginalIndex = firstNonEmptyPage.hintOriginalIndices?.first() ?: 0
+                    hintOriginalIndex = firstNonEmptyPage.hintOriginalIndices?.first() ?: 0,
                 )
             }
 
@@ -411,16 +414,19 @@ private class SeparatorState<R : Any, T : R>(
                             separator = separator,
                             adjacentPageBefore = pageBefore,
                             adjacentPageAfter = page,
-                            hintOriginalPageOffset = if (event.loadType == PREPEND) {
-                                pageBefore.hintOriginalPageOffset
-                            } else {
-                                page.hintOriginalPageOffset
-                            },
-                            hintOriginalIndex = if (event.loadType == PREPEND) {
-                                pageBefore.hintOriginalIndices?.last() ?: pageBefore.data.lastIndex
-                            } else {
-                                page.hintOriginalIndices?.first() ?: 0
-                            }
+                            hintOriginalPageOffset =
+                                if (event.loadType == PREPEND) {
+                                    pageBefore.hintOriginalPageOffset
+                                } else {
+                                    page.hintOriginalPageOffset
+                                },
+                            hintOriginalIndex =
+                                if (event.loadType == PREPEND) {
+                                    pageBefore.hintOriginalIndices?.last()
+                                        ?: pageBefore.data.lastIndex
+                                } else {
+                                    page.hintOriginalIndices?.first() ?: 0
+                                },
                         )
                     }
 
@@ -443,8 +449,9 @@ private class SeparatorState<R : Any, T : R>(
                     adjacentPageBefore = lastNonEmptyPage,
                     adjacentPageAfter = pageAfter,
                     hintOriginalPageOffset = lastNonEmptyPage.hintOriginalPageOffset,
-                    hintOriginalIndex = lastNonEmptyPage.hintOriginalIndices?.last()
-                        ?: lastNonEmptyPage.data.lastIndex
+                    hintOriginalIndex =
+                        lastNonEmptyPage.hintOriginalIndices?.last()
+                            ?: lastNonEmptyPage.data.lastIndex,
                 )
             }
 
@@ -465,8 +472,8 @@ private class SeparatorState<R : Any, T : R>(
                 adjacentPageBefore = pageBefore,
                 adjacentPageAfter = null,
                 hintOriginalPageOffset = pageBefore.hintOriginalPageOffset,
-                hintOriginalIndex = pageBefore.hintOriginalIndices?.last()
-                    ?: pageBefore.data.lastIndex
+                hintOriginalIndex =
+                    pageBefore.hintOriginalIndices?.last() ?: pageBefore.data.lastIndex,
             )
         }
 
@@ -481,9 +488,7 @@ private class SeparatorState<R : Any, T : R>(
         return event.transformPages { outList }
     }
 
-    /**
-     * Process a [Drop] event to update [pageStash] stage.
-     */
+    /** Process a [Drop] event to update [pageStash] stage. */
     fun onDrop(event: Drop<T>): Drop<R> {
         sourceStates.set(type = event.loadType, state = NotLoading.Incomplete)
         if (event.loadType == PREPEND) {
@@ -530,25 +535,31 @@ private class SeparatorState<R : Any, T : R>(
         // isn't possible to add a separator to. Note: Adding a separate insert event also
         // doesn't work in the case where .insertSeparators() is called multiple times on the
         // same page event stream - we have to transform the terminating LoadStateUpdate event.
-        if (event.mediator != null && event.mediator.prepend.endOfPaginationReached &&
-            prevMediator?.prepend != event.mediator.prepend
+        if (
+            event.mediator != null &&
+                event.mediator.prepend.endOfPaginationReached &&
+                prevMediator?.prepend != event.mediator.prepend
         ) {
-            val prependTerminalInsert: Insert<T> = Insert.Prepend(
-                pages = emptyList(),
-                placeholdersBefore = placeholdersBefore,
-                sourceLoadStates = event.source,
-                mediatorLoadStates = event.mediator,
-            )
+            val prependTerminalInsert: Insert<T> =
+                Insert.Prepend(
+                    pages = emptyList(),
+                    placeholdersBefore = placeholdersBefore,
+                    sourceLoadStates = event.source,
+                    mediatorLoadStates = event.mediator,
+                )
             return onInsert(prependTerminalInsert)
-        } else if (event.mediator != null && event.mediator.append.endOfPaginationReached &&
-            prevMediator?.append != event.mediator.append
+        } else if (
+            event.mediator != null &&
+                event.mediator.append.endOfPaginationReached &&
+                prevMediator?.append != event.mediator.append
         ) {
-            val appendTerminalInsert: Insert<T> = Insert.Append(
-                pages = emptyList(),
-                placeholdersAfter = placeholdersAfter,
-                sourceLoadStates = event.source,
-                mediatorLoadStates = event.mediator,
-            )
+            val appendTerminalInsert: Insert<T> =
+                Insert.Append(
+                    pages = emptyList(),
+                    placeholdersAfter = placeholdersAfter,
+                    sourceLoadStates = event.source,
+                    mediatorLoadStates = event.mediator,
+                )
             return onInsert(appendTerminalInsert)
         }
         @Suppress("UNCHECKED_CAST")
@@ -584,24 +595,24 @@ private class SeparatorState<R : Any, T : R>(
             originalPageOffsets = originalPage.originalPageOffsets,
             data = listOf(originalPage.data.first(), originalPage.data.last()),
             hintOriginalPageOffset = originalPage.hintOriginalPageOffset,
-            hintOriginalIndices = listOf(
-                originalPage.hintOriginalIndices?.first() ?: 0,
-                originalPage.hintOriginalIndices?.last() ?: originalPage.data.lastIndex
-            )
+            hintOriginalIndices =
+                listOf(
+                    originalPage.hintOriginalIndices?.first() ?: 0,
+                    originalPage.hintOriginalIndices?.last() ?: originalPage.data.lastIndex,
+                ),
         )
     }
 }
 
 /**
- * This is intentionally not named insertSeparators to avoid creating a clashing import
- * with PagingData.insertSeparators, which is public
+ * This is intentionally not named insertSeparators to avoid creating a clashing import with
+ * PagingData.insertSeparators, which is public
  */
 internal fun <T : R, R : Any> Flow<PageEvent<T>>.insertEventSeparators(
     terminalSeparatorType: TerminalSeparatorType,
-    generator: suspend (T?, T?) -> R?
+    generator: suspend (T?, T?) -> R?,
 ): Flow<PageEvent<R>> {
-    val separatorState = SeparatorState(terminalSeparatorType) { before: T?, after: T? ->
-        generator(before, after)
-    }
+    val separatorState =
+        SeparatorState(terminalSeparatorType) { before: T?, after: T? -> generator(before, after) }
     return map { separatorState.onEvent(it) }
 }

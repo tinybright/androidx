@@ -22,6 +22,7 @@ import androidx.room.compiler.processing.XConstructorType
 internal class KspConstructorType<ConstructorElement>(
     env: KspProcessingEnv,
     override val origin: ConstructorElement,
-    containing: KspType?
-) : KspExecutableType(env, origin, containing), XConstructorType
-    where ConstructorElement : KspExecutableElement, ConstructorElement : XConstructorElement
+    containing: KspType?,
+) : KspExecutableType(env, origin, containing), XConstructorType where
+ConstructorElement : KspExecutableElement,
+ConstructorElement : XConstructorElement

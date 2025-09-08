@@ -15,7 +15,6 @@
  */
 package androidx.wear.compose.foundation
 
-import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -51,17 +50,14 @@ import org.junit.runner.RunWith
 
 @MediumTest
 @RunWith(AndroidJUnit4::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 class CurvedScreenshotTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(SCREENSHOT_GOLDEN_PATH)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(SCREENSHOT_GOLDEN_PATH)
 
-    @get:Rule
-    val testName = TestName()
+    @get:Rule val testName = TestName()
 
     @Test
     fun curved_row_and_column() = verify_screenshot {
@@ -87,9 +83,8 @@ class CurvedScreenshotTest {
         val size = 0.15f
         val rgb = listOf(Color.Red, Color.Green, Color.Blue)
         curvedColumn(
-            CurvedModifier.size(sweepDegrees = 20f, thickness = 30.dp)
-                .radialGradientBackground(rgb)
-        ) { }
+            CurvedModifier.size(sweepDegrees = 20f, thickness = 30.dp).radialGradientBackground(rgb)
+        ) {}
         curvedColumn(
             CurvedModifier.size(sweepDegrees = 20f, thickness = 30.dp)
                 .radialGradientBackground(
@@ -97,11 +92,11 @@ class CurvedScreenshotTest {
                     0.5f to Color.Blue,
                     (0.5f + size) to Color.Red,
                 )
-        ) { }
+        ) {}
         curvedColumn(
             CurvedModifier.size(sweepDegrees = 20f, thickness = 30.dp)
                 .angularGradientBackground(rgb)
-        ) { }
+        ) {}
         curvedColumn(
             CurvedModifier.size(sweepDegrees = 20f, thickness = 30.dp)
                 .angularGradientBackground(
@@ -109,16 +104,19 @@ class CurvedScreenshotTest {
                     0.5f to Color.Blue,
                     (0.5f + size) to Color.Red,
                 )
-        ) { }
+        ) {}
     }
 
     @Test
     fun curved_padding() = verify_screenshot {
         basicCurvedText(
             "Text",
-            CurvedModifier.background(Color.Red).padding(3.dp)
-                .background(Color.Green).padding(angular = 5.dp)
-                .background(Color.Blue).padding(radial = 4.dp)
+            CurvedModifier.background(Color.Red)
+                .padding(3.dp)
+                .background(Color.Green)
+                .padding(angular = 5.dp)
+                .background(Color.Blue)
+                .padding(radial = 4.dp),
         )
     }
 
@@ -131,80 +129,75 @@ class CurvedScreenshotTest {
                     @Suppress("DEPRECATION")
                     BasicText(
                         text = "Text",
-                        style = TextStyle(
-                            platformStyle = PlatformTextStyle(includeFontPadding = true)
-                        )
+                        style =
+                            TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = true)),
                     )
                     Box(Modifier.size(15.dp).background(Color.Red))
                 }
             }
-            curvedComposable {
-                Box(Modifier.size(15.dp).background(Color.Blue))
-            }
+            curvedComposable { Box(Modifier.size(15.dp).background(Color.Blue)) }
         }
     }
 
     @Test
     fun curved_alignment() = verify_screenshot {
         listOf(
-            CurvedAlignment.Angular.Start,
-            CurvedAlignment.Angular.Center,
-            CurvedAlignment.Angular.End
-        ).forEachIndexed { ix, align ->
-            curvedColumn(
-                CurvedModifier.angularSize(45f)
-                    .angularGradientBackground(listOf(Color.Red, Color.Green)),
-                angularAlignment = align
-            ) {
-                curvedComposable { Box(Modifier.size(15.dp).background(Color.Blue)) }
-                basicCurvedText(listOf("Start", "Center", "End")[ix])
-            }
-        }
-        curvedColumn(
-            CurvedModifier.angularSize(45f)
-        ) {
-            listOf(
-                CurvedAlignment.Radial.Inner,
-                CurvedAlignment.Radial.Center,
-                CurvedAlignment.Radial.Outer,
-            ).forEachIndexed { ix, align ->
-                curvedRow(
-                    CurvedModifier.size(45f, 20.dp)
-                        .radialGradientBackground(listOf(Color.Red, Color.Green)),
-                    radialAlignment = align
+                CurvedAlignment.Angular.Start,
+                CurvedAlignment.Angular.Center,
+                CurvedAlignment.Angular.End,
+            )
+            .forEachIndexed { ix, align ->
+                curvedColumn(
+                    CurvedModifier.angularSize(45f)
+                        .angularGradientBackground(listOf(Color.Red, Color.Green)),
+                    angularAlignment = align,
                 ) {
-                    curvedComposable { Box(Modifier.size(10.dp).background(Color.Blue)) }
-                    basicCurvedText(
-                        listOf("Inner", "Center", "Outer")[ix],
-                        style = CurvedTextStyle(fontSize = 10.sp)
-                    )
+                    curvedComposable { Box(Modifier.size(15.dp).background(Color.Blue)) }
+                    basicCurvedText(listOf("Start", "Center", "End")[ix])
                 }
             }
+        curvedColumn(CurvedModifier.angularSize(45f)) {
+            listOf(
+                    CurvedAlignment.Radial.Inner,
+                    CurvedAlignment.Radial.Center,
+                    CurvedAlignment.Radial.Outer,
+                )
+                .forEachIndexed { ix, align ->
+                    curvedRow(
+                        CurvedModifier.size(45f, 20.dp)
+                            .radialGradientBackground(listOf(Color.Red, Color.Green)),
+                        radialAlignment = align,
+                    ) {
+                        curvedComposable { Box(Modifier.size(10.dp).background(Color.Blue)) }
+                        basicCurvedText(
+                            listOf("Inner", "Center", "Outer")[ix],
+                            style = CurvedTextStyle(fontSize = 10.sp),
+                        )
+                    }
+                }
         }
     }
 
-    @Test
-    public fun layout_direction_rtl() = layout_direction(LayoutDirection.Rtl)
+    @Test public fun layout_direction_rtl() = layout_direction(LayoutDirection.Rtl)
 
-    @Test
-    public fun layout_direction_ltr() = layout_direction(LayoutDirection.Ltr)
+    @Test public fun layout_direction_ltr() = layout_direction(LayoutDirection.Ltr)
 
     private fun layout_direction(layoutDirection: LayoutDirection) = verify_composable_screenshot {
         CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
             CurvedLayout(
                 Modifier.fillMaxSize(),
-                angularDirection = CurvedDirection.Angular.Clockwise
+                angularDirection = CurvedDirection.Angular.Clockwise,
             ) {
                 curvedRow(
                     CurvedModifier.background(Color.Green),
-                    angularDirection = CurvedDirection.Angular.Normal
+                    angularDirection = CurvedDirection.Angular.Normal,
                 ) {
                     layout_direction_block()
                 }
                 curvedComposable { Spacer(Modifier.size(10.dp)) }
                 curvedRow(
                     CurvedModifier.background(Color.Red),
-                    angularDirection = CurvedDirection.Angular.Clockwise
+                    angularDirection = CurvedDirection.Angular.Clockwise,
                 ) {
                     layout_direction_block()
                 }
@@ -213,18 +206,18 @@ class CurvedScreenshotTest {
             CurvedLayout(
                 Modifier.fillMaxSize(),
                 anchor = 90f,
-                angularDirection = CurvedDirection.Angular.CounterClockwise
+                angularDirection = CurvedDirection.Angular.CounterClockwise,
             ) {
                 curvedRow(
                     CurvedModifier.background(Color.Green),
-                    angularDirection = CurvedDirection.Angular.Reversed
+                    angularDirection = CurvedDirection.Angular.Reversed,
                 ) {
                     layout_direction_block()
                 }
                 curvedComposable { Spacer(Modifier.size(10.dp)) }
                 curvedRow(
                     CurvedModifier.background(Color.Red),
-                    angularDirection = CurvedDirection.Angular.CounterClockwise
+                    angularDirection = CurvedDirection.Angular.CounterClockwise,
                 ) {
                     layout_direction_block()
                 }
@@ -238,10 +231,11 @@ class CurvedScreenshotTest {
             CurvedLayout(
                 Modifier.fillMaxSize(),
                 angularDirection = CurvedDirection.Angular.Clockwise,
-                anchor = 270f
+                anchor = 270f,
             ) {
                 curvedRow(CurvedModifier.background(Color.Green)) {
-                    basicCurvedText("Top Text Goes Here",
+                    basicCurvedText(
+                        "Top Text Goes Here",
                         CurvedModifier.angularSize(45f),
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -250,12 +244,114 @@ class CurvedScreenshotTest {
             CurvedLayout(
                 Modifier.fillMaxSize(),
                 angularDirection = CurvedDirection.Angular.CounterClockwise,
-                anchor = 90f
+                anchor = 90f,
             ) {
                 curvedRow(CurvedModifier.background(Color.Green)) {
-                    basicCurvedText("Bottom Text Goes Here",
+                    basicCurvedText(
+                        "Bottom Text Goes Here",
                         CurvedModifier.angularSize(45f),
-                        overflow = TextOverflow.Ellipsis)
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun composable_rotationLock() {
+        verify_composable_screenshot {
+            CurvedLayout(Modifier.fillMaxSize()) {
+                curvedComposable { Box(Modifier.size(20.dp).background(Color.Red)) }
+                curvedComposable(rotationLocked = true) {
+                    Box(Modifier.size(20.dp).background(Color.Green))
+                }
+            }
+        }
+    }
+
+    @Test
+    fun letter_spacing_top_and_bottom() {
+        verify_composable_screenshot {
+            val style =
+                CurvedTextStyle(letterSpacing = 0.6.sp, letterSpacingCounterClockwise = 1.4.sp)
+            Box {
+                CurvedLayout(modifier = Modifier.fillMaxSize()) {
+                    basicCurvedText("Clockwise", style = style)
+                }
+                CurvedLayout(
+                    modifier = Modifier.fillMaxSize(),
+                    angularDirection = CurvedDirection.Angular.CounterClockwise,
+                    anchor = 90f,
+                ) {
+                    basicCurvedText("Counter Clockwise", style = style)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun line_height_test() {
+        verify_composable_screenshot {
+            val baseStyle =
+                CurvedTextStyle(color = Color.White, background = Color.Gray, fontSize = 16.sp)
+            CurvedLayout(
+                modifier = Modifier.fillMaxSize(),
+                radialAlignment = CurvedAlignment.Radial.Center,
+            ) {
+                basicCurvedText("Line Height 10.sp", style = baseStyle.copy(lineHeight = 10.sp))
+                curvedBox(CurvedModifier.angularSizeDp(1.dp)) {}
+                basicCurvedText("Base", style = baseStyle)
+                curvedBox(CurvedModifier.angularSizeDp(1.dp)) {}
+                basicCurvedText("Line Height 24.sp", style = baseStyle.copy(lineHeight = 24.sp))
+            }
+        }
+    }
+
+    @Test
+    fun warp_test() {
+        verify_composable_screenshot {
+            val baseStyle =
+                CurvedTextStyle(color = Color.White, background = Color.Gray, fontSize = 30.sp)
+            CurvedLayout(
+                modifier = Modifier.fillMaxSize().background(Color.Black),
+                radialAlignment = CurvedAlignment.Radial.Center,
+            ) {
+                listOf(
+                        "No" to CurvedTextStyle.WarpOffset.None,
+                        "D" to CurvedTextStyle.WarpOffset.Descent,
+                        "B" to CurvedTextStyle.WarpOffset.Baseline,
+                        "H" to CurvedTextStyle.WarpOffset.HalfOpticalHeight,
+                        "A2" to CurvedTextStyle.WarpOffset.HalfAscent,
+                        "A" to CurvedTextStyle.WarpOffset.Ascent,
+                    )
+                    .forEachIndexed { ix, (text, offset) ->
+                        if (ix != 0) curvedBox(CurvedModifier.angularSizeDp(5.dp)) {}
+                        curvedColumn(angularAlignment = CurvedAlignment.Angular.Center) {
+                            basicCurvedText("HHH", style = baseStyle.copy(warpOffset = offset))
+                            basicCurvedText(
+                                text,
+                                style = baseStyle.copy(background = Color.Transparent),
+                            )
+                        }
+                    }
+            }
+        }
+    }
+
+    @Test
+    fun arabic_test() {
+        verify_composable_screenshot {
+            val style =
+                CurvedTextStyle(
+                    color = Color.White,
+                    background = Color.Gray,
+                    fontSize = 30.sp,
+                    warpOffset = CurvedTextStyle.WarpOffset.HalfOpticalHeight,
+                )
+            Box(Modifier.fillMaxSize().background(Color.Black)) {
+                CurvedLayout { basicCurvedText("مرحبا 👋 بالعالم 🌏!", style) }
+                CurvedLayout(anchor = 90f, angularDirection = CurvedDirection.Angular.Reversed) {
+                    basicCurvedText("مرحبا 👋 بالعالم 🌏!", style)
                 }
             }
         }
@@ -279,25 +375,25 @@ class CurvedScreenshotTest {
     }
 
     private fun verify_screenshot(contentBuilder: CurvedScope.() -> Unit) =
-        verify_composable_screenshot(content = {
-            CurvedLayout(
-                modifier = Modifier.fillMaxSize(),
-                contentBuilder = contentBuilder
-            )
-        })
+        verify_composable_screenshot(
+            content = {
+                CurvedLayout(modifier = Modifier.fillMaxSize(), contentBuilder = contentBuilder)
+            }
+        )
 
     private fun verify_composable_screenshot(content: @Composable BoxScope.() -> Unit) {
         rule.setContent {
             Box(
                 modifier = Modifier.size(200.dp).background(Color.White).testTag(TEST_TAG),
-                content = content
+                content = content,
             )
         }
 
-        rule.onNodeWithTag(TEST_TAG)
+        rule
+            .onNodeWithTag(TEST_TAG)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, testName.methodName)
     }
 }
 
-internal const val SCREENSHOT_GOLDEN_PATH = "wear/compose/foundation"
+internal const val SCREENSHOT_GOLDEN_PATH = "wear/compose/compose-foundation"

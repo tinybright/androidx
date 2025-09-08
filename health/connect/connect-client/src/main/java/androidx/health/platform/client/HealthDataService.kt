@@ -22,7 +22,6 @@ import androidx.health.platform.client.impl.ipc.ClientConfiguration
 /**
  * Entry point for connecting to Health Data Provider on the device and creating instances of
  * [HealthDataAsyncClient].
- *
  */
 internal object HealthDataService {
 
@@ -40,7 +39,7 @@ internal object HealthDataService {
             ClientConfiguration(
                 ANDROID_HEALTH_PLATFORM_CLIENT_NAME,
                 ANDROID_HEALTH_PLATFORM_PROVIDER_PACKAGE,
-                ANDROID_HEALTH_PLATFORM_SERVICE_BIND_ACTION
+                ANDROID_HEALTH_PLATFORM_SERVICE_BIND_ACTION,
             )
         return ServiceBackedHealthDataClient(context, configuration)
     }
@@ -74,7 +73,7 @@ internal object HealthDataService {
             context,
             clientName = ANDROID_HEALTH_PLATFORM_CLIENT_NAME,
             servicePackageName = enabledPackage,
-            bindAction = ANDROID_HEALTH_PLATFORM_SERVICE_BIND_ACTION
+            bindAction = ANDROID_HEALTH_PLATFORM_SERVICE_BIND_ACTION,
         )
     }
 }

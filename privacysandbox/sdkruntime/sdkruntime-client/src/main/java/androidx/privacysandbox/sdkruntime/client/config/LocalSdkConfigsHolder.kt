@@ -18,13 +18,9 @@ package androidx.privacysandbox.sdkruntime.client.config
 import android.content.Context
 import java.io.FileNotFoundException
 
-/**
- * Holds information about all SDKs bundled with App.
- *
- */
-internal class LocalSdkConfigsHolder private constructor(
-    private val configs: Map<String, LocalSdkConfig>
-) {
+/** Holds information about all SDKs bundled with App. */
+internal class LocalSdkConfigsHolder
+private constructor(private val configs: Map<String, LocalSdkConfig>) {
 
     fun getSdkConfig(sdkName: String): LocalSdkConfig? {
         return configs[sdkName]
@@ -35,18 +31,15 @@ internal class LocalSdkConfigsHolder private constructor(
 
         fun load(
             context: Context,
-            sdkTableAssetName: String = SDK_TABLE_ASSET_NAME
+            sdkTableAssetName: String = SDK_TABLE_ASSET_NAME,
         ): LocalSdkConfigsHolder {
             val sdkTable = loadSdkTable(context, sdkTableAssetName)
 
             val data = buildMap {
                 for ((packageName, versionMajor, configPath) in sdkTable) {
                     context.assets.open(configPath).use { sdkConfigAsset ->
-                        val sdkInfo = LocalSdkConfigParser.parse(
-                            sdkConfigAsset,
-                            packageName,
-                            versionMajor
-                        )
+                        val sdkInfo =
+                            LocalSdkConfigParser.parse(sdkConfigAsset, packageName, versionMajor)
                         put(packageName, sdkInfo)
                     }
                 }
@@ -57,7 +50,7 @@ internal class LocalSdkConfigsHolder private constructor(
 
         private fun loadSdkTable(
             context: Context,
-            sdkTableAssetName: String
+            sdkTableAssetName: String,
         ): Set<SdkTableConfigParser.SdkTableEntry> {
             try {
                 context.assets.open(sdkTableAssetName).use { sdkTableAsset ->

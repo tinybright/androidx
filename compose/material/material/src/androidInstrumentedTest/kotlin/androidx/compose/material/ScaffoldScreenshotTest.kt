@@ -16,7 +16,6 @@
 
 package androidx.compose.material
 
-import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,14 +46,12 @@ import org.junit.runner.RunWith
 
 @LargeTest
 @RunWith(AndroidJUnit4::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 class ScaffoldScreenshotTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+    @get:Rule val composeTestRule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL)
 
     @Test
     fun onlyContent() {
@@ -64,14 +61,12 @@ class ScaffoldScreenshotTest {
                     showTopAppBar = false,
                     showBottomAppBar = false,
                     showSnackbar = false,
-                    showFab = false
+                    showFab = false,
                 )
             }
         }
 
-        assertScaffoldMatches(
-            "scaffold_onlyContent"
-        )
+        assertScaffoldMatches("scaffold_onlyContent")
     }
 
     @Test
@@ -82,14 +77,12 @@ class ScaffoldScreenshotTest {
                     showTopAppBar = true,
                     showBottomAppBar = false,
                     showSnackbar = false,
-                    showFab = false
+                    showFab = false,
                 )
             }
         }
 
-        assertScaffoldMatches(
-            "scaffold_topAppBar"
-        )
+        assertScaffoldMatches("scaffold_topAppBar")
     }
 
     @Test
@@ -100,7 +93,7 @@ class ScaffoldScreenshotTest {
                     showTopAppBar = false,
                     showBottomAppBar = true,
                     showSnackbar = false,
-                    showFab = false
+                    showFab = false,
                 )
             }
         }
@@ -116,7 +109,7 @@ class ScaffoldScreenshotTest {
                     showTopAppBar = true,
                     showBottomAppBar = true,
                     showSnackbar = false,
-                    showFab = false
+                    showFab = false,
                 )
             }
         }
@@ -134,7 +127,7 @@ class ScaffoldScreenshotTest {
                     showSnackbar = false,
                     showFab = true,
                     fabPosition = FabPosition.Start,
-                    rtl = false
+                    rtl = false,
                 )
             }
         }
@@ -152,7 +145,7 @@ class ScaffoldScreenshotTest {
                     showSnackbar = false,
                     showFab = true,
                     fabPosition = FabPosition.Start,
-                    rtl = true
+                    rtl = true,
                 )
             }
         }
@@ -169,7 +162,7 @@ class ScaffoldScreenshotTest {
                     showBottomAppBar = false,
                     showSnackbar = false,
                     showFab = true,
-                    fabPosition = FabPosition.Center
+                    fabPosition = FabPosition.Center,
                 )
             }
         }
@@ -187,7 +180,7 @@ class ScaffoldScreenshotTest {
                     showSnackbar = false,
                     showFab = true,
                     fabPosition = FabPosition.End,
-                    rtl = false
+                    rtl = false,
                 )
             }
         }
@@ -205,7 +198,7 @@ class ScaffoldScreenshotTest {
                     showSnackbar = false,
                     showFab = true,
                     fabPosition = FabPosition.End,
-                    rtl = true
+                    rtl = true,
                 )
             }
         }
@@ -223,7 +216,7 @@ class ScaffoldScreenshotTest {
                     showSnackbar = false,
                     showFab = true,
                     fabPosition = FabPosition.Start,
-                    rtl = false
+                    rtl = false,
                 )
             }
         }
@@ -241,7 +234,7 @@ class ScaffoldScreenshotTest {
                     showSnackbar = false,
                     showFab = true,
                     fabPosition = FabPosition.Start,
-                    rtl = true
+                    rtl = true,
                 )
             }
         }
@@ -258,7 +251,7 @@ class ScaffoldScreenshotTest {
                     showBottomAppBar = false,
                     showSnackbar = false,
                     showFab = true,
-                    fabPosition = FabPosition.Center
+                    fabPosition = FabPosition.Center,
                 )
             }
         }
@@ -276,7 +269,7 @@ class ScaffoldScreenshotTest {
                     showSnackbar = false,
                     showFab = true,
                     fabPosition = FabPosition.End,
-                    rtl = false
+                    rtl = false,
                 )
             }
         }
@@ -294,7 +287,7 @@ class ScaffoldScreenshotTest {
                     showSnackbar = false,
                     showFab = true,
                     fabPosition = FabPosition.End,
-                    rtl = true
+                    rtl = true,
                 )
             }
         }
@@ -313,7 +306,7 @@ class ScaffoldScreenshotTest {
                     showFab = true,
                     dockedFab = false,
                     fabPosition = FabPosition.Start,
-                    rtl = false
+                    rtl = false,
                 )
             }
         }
@@ -332,7 +325,7 @@ class ScaffoldScreenshotTest {
                     showFab = true,
                     dockedFab = false,
                     fabPosition = FabPosition.Start,
-                    rtl = true
+                    rtl = true,
                 )
             }
         }
@@ -350,7 +343,7 @@ class ScaffoldScreenshotTest {
                     showSnackbar = false,
                     showFab = true,
                     dockedFab = false,
-                    fabPosition = FabPosition.Center
+                    fabPosition = FabPosition.Center,
                 )
             }
         }
@@ -369,7 +362,7 @@ class ScaffoldScreenshotTest {
                     showFab = true,
                     dockedFab = false,
                     fabPosition = FabPosition.End,
-                    rtl = false
+                    rtl = false,
                 )
             }
         }
@@ -388,7 +381,7 @@ class ScaffoldScreenshotTest {
                     showFab = true,
                     dockedFab = false,
                     fabPosition = FabPosition.End,
-                    rtl = true
+                    rtl = true,
                 )
             }
         }
@@ -406,7 +399,7 @@ class ScaffoldScreenshotTest {
                     showSnackbar = false,
                     showFab = true,
                     dockedFab = true,
-                    fabPosition = FabPosition.Center
+                    fabPosition = FabPosition.Center,
                 )
             }
         }
@@ -425,7 +418,7 @@ class ScaffoldScreenshotTest {
                     showFab = true,
                     dockedFab = true,
                     fabCutout = false,
-                    fabPosition = FabPosition.Center
+                    fabPosition = FabPosition.Center,
                 )
             }
         }
@@ -444,7 +437,7 @@ class ScaffoldScreenshotTest {
                     showFab = true,
                     dockedFab = true,
                     fabPosition = FabPosition.End,
-                    rtl = false
+                    rtl = false,
                 )
             }
         }
@@ -463,7 +456,7 @@ class ScaffoldScreenshotTest {
                     showFab = true,
                     dockedFab = true,
                     fabPosition = FabPosition.End,
-                    rtl = true
+                    rtl = true,
                 )
             }
         }
@@ -482,7 +475,7 @@ class ScaffoldScreenshotTest {
                     showFab = true,
                     dockedFab = false,
                     fabPosition = FabPosition.Start,
-                    rtl = false
+                    rtl = false,
                 )
             }
         }
@@ -501,7 +494,7 @@ class ScaffoldScreenshotTest {
                     showFab = true,
                     dockedFab = false,
                     fabPosition = FabPosition.Start,
-                    rtl = true
+                    rtl = true,
                 )
             }
         }
@@ -519,7 +512,7 @@ class ScaffoldScreenshotTest {
                     showSnackbar = false,
                     showFab = true,
                     dockedFab = false,
-                    fabPosition = FabPosition.Center
+                    fabPosition = FabPosition.Center,
                 )
             }
         }
@@ -538,7 +531,7 @@ class ScaffoldScreenshotTest {
                     showFab = true,
                     dockedFab = false,
                     fabPosition = FabPosition.End,
-                    rtl = false
+                    rtl = false,
                 )
             }
         }
@@ -557,7 +550,7 @@ class ScaffoldScreenshotTest {
                     showFab = true,
                     dockedFab = false,
                     fabPosition = FabPosition.End,
-                    rtl = true
+                    rtl = true,
                 )
             }
         }
@@ -575,7 +568,7 @@ class ScaffoldScreenshotTest {
                     showSnackbar = false,
                     showFab = true,
                     dockedFab = true,
-                    fabPosition = FabPosition.Center
+                    fabPosition = FabPosition.Center,
                 )
             }
         }
@@ -594,7 +587,7 @@ class ScaffoldScreenshotTest {
                     showFab = true,
                     dockedFab = true,
                     fabPosition = FabPosition.End,
-                    rtl = false
+                    rtl = false,
                 )
             }
         }
@@ -613,7 +606,7 @@ class ScaffoldScreenshotTest {
                     showFab = true,
                     dockedFab = true,
                     fabPosition = FabPosition.End,
-                    rtl = true
+                    rtl = true,
                 )
             }
         }
@@ -629,7 +622,7 @@ class ScaffoldScreenshotTest {
                     showTopAppBar = false,
                     showBottomAppBar = false,
                     showSnackbar = true,
-                    showFab = false
+                    showFab = false,
                 )
             }
         }
@@ -645,7 +638,7 @@ class ScaffoldScreenshotTest {
                     showTopAppBar = true,
                     showBottomAppBar = false,
                     showSnackbar = true,
-                    showFab = false
+                    showFab = false,
                 )
             }
         }
@@ -661,7 +654,7 @@ class ScaffoldScreenshotTest {
                     showTopAppBar = false,
                     showBottomAppBar = true,
                     showSnackbar = true,
-                    showFab = false
+                    showFab = false,
                 )
             }
         }
@@ -677,7 +670,7 @@ class ScaffoldScreenshotTest {
                     showTopAppBar = true,
                     showBottomAppBar = true,
                     showSnackbar = true,
-                    showFab = false
+                    showFab = false,
                 )
             }
         }
@@ -695,7 +688,7 @@ class ScaffoldScreenshotTest {
                     showSnackbar = true,
                     showFab = true,
                     dockedFab = false,
-                    fabPosition = FabPosition.Center
+                    fabPosition = FabPosition.Center,
                 )
             }
         }
@@ -713,7 +706,7 @@ class ScaffoldScreenshotTest {
                     showSnackbar = true,
                     showFab = true,
                     dockedFab = true,
-                    fabPosition = FabPosition.Center
+                    fabPosition = FabPosition.Center,
                 )
             }
         }
@@ -726,11 +719,10 @@ class ScaffoldScreenshotTest {
      *
      * @param goldenIdentifier the identifier for the corresponding screenshot
      */
-    private fun assertScaffoldMatches(
-        goldenIdentifier: String
-    ) {
+    private fun assertScaffoldMatches(goldenIdentifier: String) {
         // Capture and compare screenshots
-        composeTestRule.onNodeWithTag(Tag)
+        composeTestRule
+            .onNodeWithTag(Tag)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, goldenIdentifier)
     }
@@ -743,11 +735,11 @@ class ScaffoldScreenshotTest {
  * @param showBottomAppBar whether to show a [BottomAppBar] or not
  * @param showFab whether to show a [FloatingActionButton] or not
  * @param dockedFab whether the FAB (if present) is docked to the [BottomAppBar] or not
- * @param fabCutout whether the [BottomAppBar] (if present) should draw a cutout where the FAB
- * (if present) is, when docked to the [BottomAppBar].
+ * @param fabCutout whether the [BottomAppBar] (if present) should draw a cutout where the FAB (if
+ *   present) is, when docked to the [BottomAppBar].
  * @param fabPosition the [FabPosition] of the FAB (if present)
  * @param rtl whether to set [LayoutDirection.Rtl] as the [LayoutDirection] for this Scaffold and
- * its content
+ *   its content
  */
 @Composable
 private fun ScreenshotScaffold(
@@ -758,53 +750,55 @@ private fun ScreenshotScaffold(
     dockedFab: Boolean = false,
     fabCutout: Boolean = true,
     fabPosition: FabPosition = FabPosition.End,
-    rtl: Boolean = false
+    rtl: Boolean = false,
 ) {
-    val topAppBar = @Composable {
-        if (showTopAppBar) {
-            TopAppBar(title = { Text("Scaffold") })
+    val topAppBar =
+        @Composable {
+            if (showTopAppBar) {
+                TopAppBar(title = { Text("Scaffold") })
+            }
         }
-    }
 
-    val bottomAppBar = @Composable {
-        if (showBottomAppBar) {
-            val cutoutShape = if (fabCutout) CircleShape else null
-            BottomAppBar(cutoutShape = cutoutShape) {
-                IconButton(onClick = {}) {
-                    Icon(Icons.Filled.Menu, null)
+    val bottomAppBar =
+        @Composable {
+            if (showBottomAppBar) {
+                val cutoutShape = if (fabCutout) CircleShape else null
+                BottomAppBar(cutoutShape = cutoutShape) {
+                    IconButton(onClick = {}) { Icon(Icons.Filled.Menu, null) }
                 }
             }
         }
-    }
 
-    val snackbar = @Composable {
-        if (showSnackbar) {
-            val snackbarData = object : SnackbarData {
-                override val message = "Snackbar"
-                override val actionLabel = "Click me"
-                override fun dismiss() {}
-                override fun performAction() {}
-                override val duration = SnackbarDuration.Indefinite
+    val snackbar =
+        @Composable {
+            if (showSnackbar) {
+                val snackbarData =
+                    object : SnackbarData {
+                        override val message = "Snackbar"
+                        override val actionLabel = "Click me"
+
+                        override fun dismiss() {}
+
+                        override fun performAction() {}
+
+                        override val duration = SnackbarDuration.Indefinite
+                    }
+                Snackbar(snackbarData)
             }
-            Snackbar(snackbarData)
         }
-    }
 
-    val fab = @Composable {
-        if (showFab) {
-            FloatingActionButton(
-                content = { Icon(Icons.Filled.Favorite, null) },
-                onClick = {}
-            )
+    val fab =
+        @Composable {
+            if (showFab) {
+                FloatingActionButton(content = { Icon(Icons.Filled.Favorite, null) }, onClick = {})
+            }
         }
-    }
 
     val layoutDirection = if (rtl) LayoutDirection.Rtl else LayoutDirection.Ltr
 
     CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
         Box(
-            Modifier
-                .fillMaxSize(0.5f)
+            Modifier.fillMaxSize(0.5f)
                 .wrapContentSize()
                 .semantics(mergeDescendants = true) {}
                 .testTag(Tag)
@@ -818,17 +812,17 @@ private fun ScreenshotScaffold(
                 isFloatingActionButtonDocked = dockedFab,
                 content = { innerPadding ->
                     Box(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .fillMaxSize()
-                            .background(MaterialTheme.colors.secondary.copy(alpha = 0.3f))
+                        modifier =
+                            Modifier.padding(innerPadding)
+                                .fillMaxSize()
+                                .background(MaterialTheme.colors.secondary.copy(alpha = 0.3f))
                     ) {
                         Text(
                             text = "Scaffold Content",
-                            modifier = Modifier.fillMaxSize().wrapContentSize()
+                            modifier = Modifier.fillMaxSize().wrapContentSize(),
                         )
                     }
-                }
+                },
             )
         }
     }

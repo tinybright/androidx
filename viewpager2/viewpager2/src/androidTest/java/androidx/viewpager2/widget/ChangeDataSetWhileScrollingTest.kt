@@ -40,9 +40,7 @@ class ChangeDataSetWhileScrollingTest : BaseTest() {
             setAdapterSync(adapterProvider.provider(items))
             assertBasicState(0, items[0])
 
-            viewPager.post {
-                viewPager.setCurrentItem(1, true)
-            }
+            viewPager.post { viewPager.setCurrentItem(1, true) }
 
             viewPager.post {
                 items.remove("51")
@@ -61,7 +59,7 @@ class ChangeDataSetWhileScrollingTest : BaseTest() {
                     if (!isStable) {
                         Log.d(
                             "ChangeDataSetWhileScrollingTest",
-                            "Final item not reached despite VP2 idle. $debugInfo"
+                            "Final item not reached despite VP2 idle. $debugInfo",
                         )
                     }
                     isStable
@@ -87,7 +85,7 @@ class ChangeDataSetWhileScrollingTest : BaseTest() {
         val rvScrollState: Int,
         val vpScrollState: Int,
         val rvIsAnimating: Boolean,
-        val firstItemTranslationX: Float?
+        val firstItemTranslationX: Float?,
     )
 
     private val Context.debugInfo: DebugInfo
@@ -108,13 +106,14 @@ class ChangeDataSetWhileScrollingTest : BaseTest() {
                 recyclerView.scrollState,
                 viewPager.scrollState,
                 recyclerView.isAnimating,
-                firstCompletelyVisibleItem?.translationX
+                firstCompletelyVisibleItem?.translationX,
             )
         }
 
     private val View.locationOnScreenX: Int
-        get() = IntArray(2).let { result ->
-            getLocationOnScreen(result)
-            result[0]
-        }
+        get() =
+            IntArray(2).let { result ->
+                getLocationOnScreen(result)
+                result[0]
+            }
 }

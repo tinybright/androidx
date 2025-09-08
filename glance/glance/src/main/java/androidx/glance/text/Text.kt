@@ -32,11 +32,11 @@ import androidx.glance.unit.ColorProvider
  * @param text The text to be displayed.
  * @param modifier [GlanceModifier] to apply to this layout node.
  * @param style [TextStyle]] configuration for the text such as color, font, text align etc.
- * @param maxLines An optional maximum number of lines for the text to span, wrapping if
- * necessary. If the text exceeds the given number of lines, it will be truncated.
+ * @param maxLines An optional maximum number of lines for the text to span, wrapping if necessary.
+ *   If the text exceeds the given number of lines, it will be truncated.
  */
 @Composable
-fun Text(
+public fun Text(
     text: String,
     modifier: GlanceModifier = GlanceModifier,
     style: TextStyle = defaultTextStyle,
@@ -49,25 +49,26 @@ fun Text(
             this.set(modifier) { this.modifier = it }
             this.set(style) { this.style = it }
             this.set(maxLines) { this.maxLines = it }
-        }
+        },
     )
 }
 
-object TextDefaults {
-    val defaultTextColor = ColorProvider(Color.Black)
-    val defaultTextStyle: TextStyle = TextStyle(color = defaultTextColor)
+public object TextDefaults {
+    public val defaultTextColor: ColorProvider = ColorProvider(Color.Black)
+    public val defaultTextStyle: TextStyle = TextStyle(color = defaultTextColor)
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class EmittableText : EmittableWithText() {
+public class EmittableText : EmittableWithText() {
     override var modifier: GlanceModifier = GlanceModifier
 
-    override fun copy(): Emittable = EmittableText().also {
-        it.modifier = modifier
-        it.text = text
-        it.style = style
-        it.maxLines = maxLines
-    }
+    override fun copy(): Emittable =
+        EmittableText().also {
+            it.modifier = modifier
+            it.text = text
+            it.style = style
+            it.maxLines = maxLines
+        }
 
     override fun toString(): String =
         "EmittableText($text, style=$style, modifier=$modifier, maxLines=$maxLines)"

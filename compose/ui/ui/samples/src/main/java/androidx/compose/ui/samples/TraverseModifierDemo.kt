@@ -87,9 +87,11 @@ const val DESCENDANTS_LABEL = "Descendants"
 class CustomTraversableModifierNode : Modifier.Node(), TraversableNode {
     override val traverseKey = TRAVERSAL_NODE_KEY
 
-    fun doSomethingWithAncestor() { }
-    fun doSomethingWithChild() { }
-    fun doSomethingWithDescendant() { }
+    fun doSomethingWithAncestor() {}
+
+    fun doSomethingWithChild() {}
+
+    fun doSomethingWithDescendant() {}
 }
 
 /**
@@ -230,21 +232,20 @@ fun traverseDescendantsDemo() {
  * Demonstrates how to use TraversableNode to traverse Modifier.Node ancestors, children, and
  * descendants of the same key. This is done in 5 main steps:
  *
- *  Step 1: Create a unique key for your TraversableNode.
- *  Step 2: Create a custom Modifier.Node class that implements TraversableNode.
- *  Step 3: Create a custom Modifier.Element class that uses that custom Modifier.Node.
- *  Step 4: Create an extension function on Modifier that uses the Modifier.Element.
- *  Step 5: Traverse the Modifier chain when you need to find your node(s).
+ * Step 1: Create a unique key for your TraversableNode. Step 2: Create a custom Modifier.Node class
+ * that implements TraversableNode. Step 3: Create a custom Modifier.Element class that uses that
+ * custom Modifier.Node. Step 4: Create an extension function on Modifier that uses the
+ * Modifier.Element. Step 5: Traverse the Modifier chain when you need to find your node(s).
  *
  * You can see the impact visually of traversing a particular direction from a TraversableNode by
  * the TraversableNode(s) above or below changing their color to green. You can always reset the
  * colors to try out a different traversal methods or nodes.
  *
  * Important Note: References are maintained to all the TraversableNode(s) in this UI, so we can
- * directly call the traversable functions to see how they impact the tree. (We see this visually
- * by the nodes changing color to green.) However, you most likely won't need a block parameter in
- * your code to assign a reference. You will probably just trigger your traversals based on some
- * other event (like a PointerEvent).
+ * directly call the traversable functions to see how they impact the tree. (We see this visually by
+ * the nodes changing color to green.) However, you most likely won't need a block parameter in your
+ * code to assign a reference. You will probably just trigger your traversals based on some other
+ * event (like a PointerEvent).
  *
  * See Compose Foundation's PointerHoverIconModifierNode or the DragAndDropNode implementations for
  * real life examples. (PointerHoverIconModifierNode also skips subtrees.)
@@ -255,16 +256,12 @@ fun traverseDescendantsDemo() {
  * Simplified UI hierarchy for this demo (starts at first TraversableNode and ignores
  * non-traversable Row, Spacers, and Text label composables along the way):
  *
- *  Column Root (TraversableBackgroundModifierNode)
- *    ⤷ Column A (TraversableBackgroundModifierNode)
- *        ⤷ Box A (TraversableBackgroundModifierNode)
- *        ⤷ Box B (NON-TRAVERSABLE Box)
- *        ⤷ Box C (TraversableBackgroundModifierNode)
+ * Column Root (TraversableBackgroundModifierNode) ⤷ Column A (TraversableBackgroundModifierNode) ⤷
+ * Box A (TraversableBackgroundModifierNode) ⤷ Box B (NON-TRAVERSABLE Box) ⤷ Box C
+ * (TraversableBackgroundModifierNode)
  *
- *    ⤷ Column B (TraversableBackgroundModifierNode)
- *        ⤷ Box D (NON-TRAVERSABLE Box)
- *        ⤷ Box E (TraversableBackgroundModifierNode)
- *        ⤷ Box F (NON-TRAVERSABLE Box)
+ * ⤷ Column B (TraversableBackgroundModifierNode) ⤷ Box D (NON-TRAVERSABLE Box) ⤷ Box E
+ * (TraversableBackgroundModifierNode) ⤷ Box F (NON-TRAVERSABLE Box)
  */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -304,23 +301,24 @@ fun TraverseModifierDemo() {
     var nodeMenuSelectedOptionText by remember { mutableStateOf(nodeMenuOptions[0]) }
 
     // Menu options for picking the actual traversal call made on the node
-    val traversalMenuOptions =
-        listOf(ANCESTORS_LABEL, DESCENDANTS_LABEL)
+    val traversalMenuOptions = listOf(ANCESTORS_LABEL, DESCENDANTS_LABEL)
     var traversalMenuExpanded by remember { mutableStateOf(false) }
     var traversalMenuSelectedOptionText by remember { mutableStateOf(traversalMenuOptions[1]) }
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(10.dp)
-        .border(width = 1.dp, color = Color.Black)
-        .padding(10.dp)
+    Column(
+        modifier =
+            Modifier.fillMaxSize()
+                .padding(10.dp)
+                .border(width = 1.dp, color = Color.Black)
+                .padding(10.dp)
     ) {
         Text(
             modifier = Modifier.fillMaxWidth(),
-            text = "Select the Traversable Node and traversal type you want to run.\n\n" +
-                "You can see the results of the tree by which Node is green.\n\n" +
-                "The UI matches the structure of the Composable UI tree.\n\n" +
-                "To reset the colors, click the \"Reset\" button\n."
+            text =
+                "Select the Traversable Node and traversal type you want to run.\n\n" +
+                    "You can see the results of the tree by which Node is green.\n\n" +
+                    "The UI matches the structure of the Composable UI tree.\n\n" +
+                    "To reset the colors, click the \"Reset\" button\n.",
         )
 
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -329,7 +327,7 @@ fun TraverseModifierDemo() {
             ExposedDropdownMenuBox(
                 modifier = Modifier.weight(4f),
                 expanded = nodeMenuExpanded,
-                onExpandedChange = { nodeMenuExpanded = !nodeMenuExpanded }
+                onExpandedChange = { nodeMenuExpanded = !nodeMenuExpanded },
             ) {
                 TextField(
                     readOnly = true,
@@ -339,11 +337,11 @@ fun TraverseModifierDemo() {
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = nodeMenuExpanded)
                     },
-                    colors = ExposedDropdownMenuDefaults.textFieldColors()
+                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
                 )
                 ExposedDropdownMenu(
                     expanded = nodeMenuExpanded,
-                    onDismissRequest = { nodeMenuExpanded = false }
+                    onDismissRequest = { nodeMenuExpanded = false },
                 ) {
                     nodeMenuOptions.forEach { selectionOption ->
                         DropdownMenuItem(
@@ -363,7 +361,7 @@ fun TraverseModifierDemo() {
             ExposedDropdownMenuBox(
                 modifier = Modifier.weight(5f),
                 expanded = traversalMenuExpanded,
-                onExpandedChange = { traversalMenuExpanded = !traversalMenuExpanded }
+                onExpandedChange = { traversalMenuExpanded = !traversalMenuExpanded },
             ) {
                 TextField(
                     readOnly = true,
@@ -373,13 +371,11 @@ fun TraverseModifierDemo() {
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = traversalMenuExpanded)
                     },
-                    colors = ExposedDropdownMenuDefaults.textFieldColors()
+                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
                 )
                 ExposedDropdownMenu(
                     expanded = traversalMenuExpanded,
-                    onDismissRequest = {
-                        traversalMenuExpanded = false
-                    }
+                    onDismissRequest = { traversalMenuExpanded = false },
                 ) {
                     traversalMenuOptions.forEach { selectionOption ->
                         DropdownMenuItem(
@@ -399,13 +395,27 @@ fun TraverseModifierDemo() {
                 onClick = {
                     val selectedNode =
                         when (nodeMenuSelectedOptionText) {
-                            ROOT_LABEL -> { rootTraversableModifierNode }
-                            COLUMN_A_LABEL -> { columnATraversableModifierNode }
-                            BOX_A_LABEL -> { boxATraversableModifierNode }
-                            BOX_C_LABEL -> { boxCTraversableModifierNode }
-                            COLUMN_B_LABEL -> { columnBTraversableModifierNode }
-                            BOX_E_LABEL -> { boxETraversableModifierNode }
-                            else -> { null }
+                            ROOT_LABEL -> {
+                                rootTraversableModifierNode
+                            }
+                            COLUMN_A_LABEL -> {
+                                columnATraversableModifierNode
+                            }
+                            BOX_A_LABEL -> {
+                                boxATraversableModifierNode
+                            }
+                            BOX_C_LABEL -> {
+                                boxCTraversableModifierNode
+                            }
+                            COLUMN_B_LABEL -> {
+                                columnBTraversableModifierNode
+                            }
+                            BOX_E_LABEL -> {
+                                boxETraversableModifierNode
+                            }
+                            else -> {
+                                null
+                            }
                         }
 
                     selectedNode?.let {
@@ -416,7 +426,7 @@ fun TraverseModifierDemo() {
                             it.traverseDescendantsAndChangeColorToGreen()
                         }
                     }
-                }
+                },
             ) {
                 Text(text = "Run")
             }
@@ -424,95 +434,92 @@ fun TraverseModifierDemo() {
 
         Button(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { rootTraversableModifierNode?.resetColor() }
+            onClick = { rootTraversableModifierNode?.resetColor() },
         ) {
             Text(text = "Reset Colors")
         }
 
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp)
-                .border(width = 1.dp, color = Color.Black)
-                .traversableBackground(color = ROOT_TRAVERSABLE_DEFAULT_COLOR) {
-                    rootTraversableModifierNode = this
-                },
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(top = 10.dp)
+                    .border(width = 1.dp, color = Color.Black)
+                    .traversableBackground(color = ROOT_TRAVERSABLE_DEFAULT_COLOR) {
+                        rootTraversableModifierNode = this
+                    },
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                textAlign = TextAlign.Center,
-                text = "Traversable Root"
-            )
+            Text(textAlign = TextAlign.Center, text = "Traversable Root")
 
             Spacer(Modifier.height(10.dp))
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(width = 1.dp, color = Color.Black)
-                    .padding(10.dp)
-                    .background(Color.Blue)
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .border(width = 1.dp, color = Color.Black)
+                        .padding(10.dp)
+                        .background(Color.Blue)
             ) {
 
                 // Column A
                 Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxSize()
-                        .border(width = 1.dp, color = Color.Black)
-                        .padding(10.dp)
-                        .traversableBackground(color = COLUMN_TRAVERSABLE_DEFAULT_COLOR) {
-                            columnATraversableModifierNode = this
-                        },
+                    modifier =
+                        Modifier.weight(1f)
+                            .fillMaxSize()
+                            .border(width = 1.dp, color = Color.Black)
+                            .padding(10.dp)
+                            .traversableBackground(color = COLUMN_TRAVERSABLE_DEFAULT_COLOR) {
+                                columnATraversableModifierNode = this
+                            },
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
                         modifier = Modifier.padding(4.dp),
                         textAlign = TextAlign.Center,
-                        text = "Traversable\nColumn A"
+                        text = "Traversable\nColumn A",
                     )
 
                     Box(
-                        modifier = Modifier
-                            .border(width = 1.dp, color = Color.Black)
-                            .traversableBackground(color = BOX_TRAVERSABLE_DEFAULT_COLOR) {
-                                boxATraversableModifierNode = this
-                            }
+                        modifier =
+                            Modifier.border(width = 1.dp, color = Color.Black)
+                                .traversableBackground(color = BOX_TRAVERSABLE_DEFAULT_COLOR) {
+                                    boxATraversableModifierNode = this
+                                }
                     ) {
                         Text(
                             modifier = Modifier.padding(4.dp),
                             textAlign = TextAlign.Center,
-                            text = "Traversable\nBox A"
+                            text = "Traversable\nBox A",
                         )
                     }
 
                     Spacer(Modifier.height(10.dp))
 
                     Box(
-                        modifier = Modifier
-                            .border(width = 1.dp, color = Color.Black)
-                            .background(BOX_NON_TRAVERSABLE_DEFAULT_COLOR)
+                        modifier =
+                            Modifier.border(width = 1.dp, color = Color.Black)
+                                .background(BOX_NON_TRAVERSABLE_DEFAULT_COLOR)
                     ) {
                         Text(
                             modifier = Modifier.padding(4.dp),
                             textAlign = TextAlign.Center,
-                            text = "NON-Traversable\nBox B"
+                            text = "NON-Traversable\nBox B",
                         )
                     }
 
                     Spacer(Modifier.height(10.dp))
 
                     Box(
-                        modifier = Modifier
-                            .border(width = 1.dp, color = Color.Black)
-                            .traversableBackground(color = BOX_TRAVERSABLE_DEFAULT_COLOR) {
-                                boxCTraversableModifierNode = this
-                            }
+                        modifier =
+                            Modifier.border(width = 1.dp, color = Color.Black)
+                                .traversableBackground(color = BOX_TRAVERSABLE_DEFAULT_COLOR) {
+                                    boxCTraversableModifierNode = this
+                                }
                     ) {
                         Text(
                             modifier = Modifier.padding(4.dp),
                             textAlign = TextAlign.Center,
-                            text = "Traversable\nBox C"
+                            text = "Traversable\nBox C",
                         )
                     }
                 }
@@ -521,61 +528,61 @@ fun TraverseModifierDemo() {
 
                 // Column B
                 Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxSize()
-                        .border(width = 1.dp, color = Color.Black)
-                        .padding(10.dp)
-                        .traversableBackground(color = COLUMN_TRAVERSABLE_DEFAULT_COLOR) {
-                            columnBTraversableModifierNode = this
-                        },
+                    modifier =
+                        Modifier.weight(1f)
+                            .fillMaxSize()
+                            .border(width = 1.dp, color = Color.Black)
+                            .padding(10.dp)
+                            .traversableBackground(color = COLUMN_TRAVERSABLE_DEFAULT_COLOR) {
+                                columnBTraversableModifierNode = this
+                            },
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
+                ) {
                     Text(
                         modifier = Modifier.padding(4.dp),
                         textAlign = TextAlign.Center,
-                        text = "Traversable\nColumn B"
+                        text = "Traversable\nColumn B",
                     )
 
                     Box(
-                        modifier = Modifier
-                            .border(width = 1.dp, color = Color.Black)
-                            .background(BOX_NON_TRAVERSABLE_DEFAULT_COLOR)
+                        modifier =
+                            Modifier.border(width = 1.dp, color = Color.Black)
+                                .background(BOX_NON_TRAVERSABLE_DEFAULT_COLOR)
                     ) {
                         Text(
                             modifier = Modifier.padding(4.dp),
                             textAlign = TextAlign.Center,
-                            text = "NON-Traversable\nBox D"
+                            text = "NON-Traversable\nBox D",
                         )
                     }
 
                     Spacer(Modifier.height(10.dp))
 
                     Box(
-                        modifier = Modifier
-                            .border(width = 1.dp, color = Color.Black)
-                            .traversableBackground(color = BOX_TRAVERSABLE_DEFAULT_COLOR) {
-                                boxETraversableModifierNode = this
-                            }
+                        modifier =
+                            Modifier.border(width = 1.dp, color = Color.Black)
+                                .traversableBackground(color = BOX_TRAVERSABLE_DEFAULT_COLOR) {
+                                    boxETraversableModifierNode = this
+                                }
                     ) {
                         Text(
                             modifier = Modifier.padding(4.dp),
                             textAlign = TextAlign.Center,
-                            text = "Traversable\nBox E"
+                            text = "Traversable\nBox E",
                         )
                     }
 
                     Spacer(Modifier.height(10.dp))
 
                     Box(
-                        modifier = Modifier
-                            .border(width = 1.dp, color = Color.Black)
-                            .background(BOX_NON_TRAVERSABLE_DEFAULT_COLOR)
+                        modifier =
+                            Modifier.border(width = 1.dp, color = Color.Black)
+                                .background(BOX_NON_TRAVERSABLE_DEFAULT_COLOR)
                     ) {
                         Text(
                             modifier = Modifier.padding(4.dp),
                             textAlign = TextAlign.Center,
-                            text = "NON-Traversable\nBox F"
+                            text = "NON-Traversable\nBox F",
                         )
                     }
                 }
@@ -601,15 +608,14 @@ private const val TRAVERSAL_NODE_KEY =
     "androidx.compose.ui.demos.modifier.MY_UNIQUE_TRAVERSAL_NODE_KEY"
 
 /**
- * Step 2: Create a custom Modifier.Node class that implements TraversableNode.
- * TraversableNode is the interface that lets the system know you want to be traversed.
- * In this sample's case, we are using the Modifier.background() Modifier.Node code but making it
- * Traversable.
+ * Step 2: Create a custom Modifier.Node class that implements TraversableNode. TraversableNode is
+ * the interface that lets the system know you want to be traversed. In this sample's case, we are
+ * using the Modifier.background() Modifier.Node code but making it Traversable.
  *
  * We also pass a block as the last parameter, so we can get a reference to the Node. That enables,
- * us to make calls directly from it to search the Modifier chain from that Node. You probably
- * won't do this in practice, but instead get some triggers (like a PointerEvent or something) to
- * execute your traversable calls. To see real examples, look at the implementations of
+ * us to make calls directly from it to search the Modifier chain from that Node. You probably won't
+ * do this in practice, but instead get some triggers (like a PointerEvent or something) to execute
+ * your traversable calls. To see real examples, look at the implementations of
  * PointerHoverIconModifierNode or DragAndDropNode.
  */
 internal class TraversableBackgroundModifierNode(
@@ -619,7 +625,7 @@ internal class TraversableBackgroundModifierNode(
     var shape: Shape,
     // Only needed in this sample, so we can grab a reference to call traversable functions
     // directly, that is, you probably won't do this in your own code, it's only to demo.
-    var block: (TraversableBackgroundModifierNode.() -> Unit)?
+    var block: (TraversableBackgroundModifierNode.() -> Unit)?,
 ) : Modifier.Node(), TraversableNode, DrawModifierNode {
 
     override val traverseKey = TRAVERSAL_NODE_KEY
@@ -627,9 +633,7 @@ internal class TraversableBackgroundModifierNode(
     private val originalColor: Color
 
     init {
-        block?.let {
-            it()
-        }
+        block?.let { it() }
         originalColor = color
     }
 
@@ -707,29 +711,23 @@ internal class TraversableBackgroundModifierNode(
         if (color != Color.Unspecified) drawOutline(outline, color = color)
         brush?.let { drawOutline(outline, brush = it, alpha = alpha) }
     }
-    override fun toString() =
-        "CustomTraversableModifierNode of key: $TRAVERSAL_NODE_KEY"
+
+    override fun toString() = "CustomTraversableModifierNode of key: $TRAVERSAL_NODE_KEY"
 }
 
 /**
- * Step 3: Create a custom Modifier.Element class that uses the custom Modifier.Node.
- * If you ever need to use a custom Modifier.Node, you need to do this. You can think of this like
- * a Virtual DOM.
+ * Step 3: Create a custom Modifier.Element class that uses the custom Modifier.Node. If you ever
+ * need to use a custom Modifier.Node, you need to do this. You can think of this like a Virtual
+ * DOM.
  */
 private data class DemoCustomTraversableModifierElement(
     private val color: Color = Color.Unspecified,
     private val brush: Brush? = null,
     private val alpha: Float,
     private val shape: Shape,
-    val block: (TraversableBackgroundModifierNode.() -> Unit)?
+    val block: (TraversableBackgroundModifierNode.() -> Unit)?,
 ) : ModifierNodeElement<TraversableBackgroundModifierNode>() {
-    override fun create() = TraversableBackgroundModifierNode(
-        color,
-        brush,
-        alpha,
-        shape,
-        block
-    )
+    override fun create() = TraversableBackgroundModifierNode(color, brush, alpha, shape, block)
 
     override fun update(node: TraversableBackgroundModifierNode) {
         node.color = color
@@ -749,20 +747,19 @@ private data class DemoCustomTraversableModifierElement(
     }
 }
 
-/**
- * Step 4: Create an extension function on Modifier that uses the Modifier.Element.
- */
+/** Step 4: Create an extension function on Modifier that uses the Modifier.Element. */
 private fun Modifier.traversableBackground(
     color: Color,
     shape: Shape = RectangleShape,
-    block: (TraversableBackgroundModifierNode.() -> Unit)? = null
+    block: (TraversableBackgroundModifierNode.() -> Unit)? = null,
 ): Modifier {
     val alpha = 1.0f // for solid colors
 
-    return this then DemoCustomTraversableModifierElement(
-        color = color,
-        shape = shape,
-        alpha = alpha,
-        block = block
-    )
+    return this then
+        DemoCustomTraversableModifierElement(
+            color = color,
+            shape = shape,
+            alpha = alpha,
+            block = block,
+        )
 }

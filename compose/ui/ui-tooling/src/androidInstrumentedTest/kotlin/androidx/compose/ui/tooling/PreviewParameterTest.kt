@@ -41,8 +41,7 @@ class PreviewParameterTest {
 
     @Before
     fun setup() {
-        composeViewAdapter =
-            activityTestRule.activity.findViewById(R.id.compose_view_adapter)
+        composeViewAdapter = activityTestRule.activity.findViewById(R.id.compose_view_adapter)
     }
 
     @Test
@@ -52,7 +51,7 @@ class PreviewParameterTest {
                 "androidx.compose.ui.tooling.ParameterProviderComposableKt",
                 "OneStringParameter",
                 parameterProvider = LoremIpsum::class.java,
-                debugViewInfos = true
+                debugViewInfos = true,
             )
         }
     }
@@ -66,14 +65,13 @@ class PreviewParameterTest {
                 "androidx.compose.ui.tooling.ParameterProviderComposableKt",
                 "OneIntParameter",
                 parameterProvider = MyListProvider::class.java,
-                debugViewInfos = true
+                debugViewInfos = true,
             )
         }
     }
 
-    private class MyColorsProvider : CollectionPreviewParameterProvider<Colors>(
-        listOf(lightColors(), darkColors())
-    )
+    private class MyColorsProvider :
+        CollectionPreviewParameterProvider<Colors>(listOf(lightColors(), darkColors()))
 
     @Test
     fun checkColorsProvider() {
@@ -82,14 +80,13 @@ class PreviewParameterTest {
                 "androidx.compose.ui.tooling.ParameterProviderComposableKt",
                 "ColorsParameter",
                 parameterProvider = MyColorsProvider::class.java,
-                debugViewInfos = true
+                debugViewInfos = true,
             )
         }
     }
 
-    private class MyBooleanProvider : CollectionPreviewParameterProvider<Boolean>(
-        listOf(true, false)
-    )
+    private class MyBooleanProvider :
+        CollectionPreviewParameterProvider<Boolean>(listOf(true, false))
 
     @Test
     fun checkBooleanProvider() {
@@ -98,14 +95,15 @@ class PreviewParameterTest {
                 "androidx.compose.ui.tooling.ParameterProviderComposableKt",
                 "BooleanParameter",
                 parameterProvider = MyBooleanProvider::class.java,
-                debugViewInfos = true
+                debugViewInfos = true,
             )
         }
     }
 
-    class MyCornerRadiusProvider : CollectionPreviewParameterProvider<CornerRadius>(
-        listOf(CornerRadius.Zero, CornerRadius(5f))
-    )
+    class MyCornerRadiusProvider :
+        CollectionPreviewParameterProvider<CornerRadius>(
+            listOf(CornerRadius.Zero, CornerRadius(5f))
+        )
 
     @Test
     fun checkKotlinValueClasses() {
@@ -114,7 +112,7 @@ class PreviewParameterTest {
                 "androidx.compose.ui.tooling.ParameterProviderComposableKt",
                 "CornerRadiusParameter",
                 parameterProvider = MyCornerRadiusProvider::class.java,
-                debugViewInfos = true
+                debugViewInfos = true,
             )
         }
     }
@@ -128,7 +126,7 @@ class PreviewParameterTest {
                 "androidx.compose.ui.tooling.ParameterProviderComposableKt",
                 "OneStringParameter",
                 parameterProvider = LoremIpsum5WordsProvider::class.java,
-                debugViewInfos = true
+                debugViewInfos = true,
             )
         }
     }

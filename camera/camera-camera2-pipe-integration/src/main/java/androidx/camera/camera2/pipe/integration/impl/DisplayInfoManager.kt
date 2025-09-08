@@ -24,37 +24,95 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Size
 import android.view.Display
+import androidx.annotation.VisibleForTesting
+import androidx.camera.camera2.pipe.integration.compat.workaround.DisplaySizeCorrector
 import androidx.camera.camera2.pipe.integration.compat.workaround.MaxPreviewSize
-import javax.inject.Inject
-import javax.inject.Singleton
+import androidx.camera.core.internal.utils.SizeUtil
 
+/**
+ * A singleton class to retrieve display related information.
+ *
+ * This class uses a caching strategy to reduce calls to the system's [DisplayManager].
+ *
+ * The cached information is lazy-loaded. It is only fetched from the [DisplayManager] when first
+ * needed. A [DisplayManager.DisplayListener] invalidates the cache (by setting it to null) whenever
+ * the display configuration changes. The next call to [getDisplays] or [getPreviewSize] will then
+ * fetch the fresh data.
+ */
 @Suppress("DEPRECATION") // getRealSize
-@Singleton
-class DisplayInfoManager @Inject constructor(context: Context) {
-    private val MAX_PREVIEW_SIZE = Size(1920, 1080)
-    private val maxPreviewSize: MaxPreviewSize = MaxPreviewSize()
+public class DisplayInfoManager private constructor(context: Context) {
+    private val maxPreviewSize = MaxPreviewSize()
+    private val displaySizeCorrector = DisplaySizeCorrector()
 
-    companion object {
-        private var lazyMaxDisplay: Display? = null
-        private var lazyPreviewSize: Size? = null
+    /** A lock to ensure thread-safe access to the cached display information. */
+    private val lock = Any()
 
-        internal fun invalidateLazyFields() {
-            lazyMaxDisplay = null
-            lazyPreviewSize = null
+    /**
+     * A cache for the array of [Display] objects. It is invalidated (set to null) by the
+     * [displayListener] and re-populated on the next call to [getDisplays].
+     */
+    @Volatile private var displays: Array<Display>? = null
+
+    /**
+     * A listener to detect display changes.
+     *
+     * This listener invalidates the cached display information (by setting it to null) whenever the
+     * display configuration changes. The next call to [getDisplays] or [getPreviewSize] will then
+     * fetch the fresh data.
+     */
+    private val displayListener: DisplayListener =
+        object : DisplayListener {
+            override fun onDisplayAdded(displayId: Int) {
+                synchronized(lock) {
+                    displays = null
+                    previewSize = null
+                }
+            }
+
+            override fun onDisplayRemoved(displayId: Int) {
+                synchronized(lock) {
+                    displays = null
+                    previewSize = null
+                }
+            }
+
+            override fun onDisplayChanged(displayId: Int) {
+                synchronized(lock) {
+                    displays = null
+                    previewSize = null
+                }
+            }
         }
 
-        internal val displayListener by lazy {
-            object : DisplayListener {
-                override fun onDisplayAdded(displayId: Int) {
-                    invalidateLazyFields()
-                }
+    public companion object {
+        private val MAX_PREVIEW_SIZE = Size(1920, 1080)
+        /** This is the smallest size from a device which had issue reported to CameraX. */
+        private val ABNORMAL_DISPLAY_SIZE_THRESHOLD: Size = Size(320, 240)
+        /**
+         * The fallback display size for the case that the retrieved display size is abnormally
+         * small and no correct display size can be retrieved from DisplaySizeCorrector.
+         */
+        private val FALLBACK_DISPLAY_SIZE: Size = Size(640, 480)
 
-                override fun onDisplayRemoved(displayId: Int) {
-                    invalidateLazyFields()
-                }
+        @Volatile private var instance: DisplayInfoManager? = null
 
-                override fun onDisplayChanged(displayId: Int) {
-                    invalidateLazyFields()
+        public fun getInstance(context: Context): DisplayInfoManager {
+            return instance
+                ?: synchronized(this) {
+                    instance
+                        ?: DisplayInfoManager(context.applicationContext).also { instance = it }
+                }
+        }
+
+        /**
+         * Test purpose only. To release the instance so that the test can create a new instance.
+         */
+        @VisibleForTesting
+        public fun releaseInstance() {
+            instance?.let {
+                synchronized(this) {
+                    it.displayManager.unregisterDisplayListener(it.displayListener)
+                    instance = null
                 }
             }
         }
@@ -66,35 +124,52 @@ class DisplayInfoManager @Inject constructor(context: Context) {
         }
     }
 
-    val defaultDisplay: Display
-        get() = getMaxSizeDisplay()
+    @Volatile private var previewSize: Size? = null
 
-    private var previewSize: Size? = null
-
-    /** Update the preview size according to current display size. */
-    fun refresh() {
-        previewSize = calculatePreviewSize()
+    /** Refreshes the preview size. */
+    public fun refreshPreviewSize() {
+        synchronized(lock) { previewSize = calculatePreviewSize() }
     }
 
     /**
      * PREVIEW refers to the best size match to the device's screen resolution, or to 1080p
      * (1920x1080), whichever is smaller.
      */
-    fun getPreviewSize(): Size {
+    public fun getPreviewSize(): Size {
         // Use cached value to speed up since this would be called multiple times.
-        if (previewSize != null) {
-            return previewSize as Size
+        synchronized(lock) {
+            if (previewSize != null) {
+                return previewSize as Size
+            }
+
+            previewSize = calculatePreviewSize()
+
+            return previewSize!!
         }
-        previewSize = calculatePreviewSize()
-        return previewSize as Size
     }
 
-    private fun getMaxSizeDisplay(): Display {
-        lazyMaxDisplay?.let {
-            return it
+    /**
+     * Gets the array of displays, using a cache to avoid unnecessary calls to the system. The cache
+     * is lazily populated.
+     */
+    private fun getDisplays(): Array<Display> {
+        synchronized(lock) {
+            val cachedDisplays = displays
+            if (cachedDisplays != null) {
+                return cachedDisplays
+            }
+            val newDisplays = displayManager.displays
+            this.displays = newDisplays
+            return newDisplays
         }
+    }
 
-        val displays = displayManager.displays
+    public fun getMaxSizeDisplay(skipStateOffDisplay: Boolean = true): Display {
+        val displays = getDisplays()
+
+        if (displays.size == 1) {
+            return displays[0]
+        }
 
         var maxDisplayWhenStateNotOff: Display? = null
         var maxDisplaySizeWhenStateNotOff = -1
@@ -120,37 +195,44 @@ class DisplayInfoManager @Inject constructor(context: Context) {
             }
         }
 
-        lazyMaxDisplay = maxDisplayWhenStateNotOff ?: maxDisplay
+        val result =
+            if (skipStateOffDisplay) {
+                maxDisplayWhenStateNotOff ?: maxDisplay
+            } else {
+                maxDisplay
+            }
 
-        return checkNotNull(lazyMaxDisplay) { "No displays found from ${displayManager.displays}!" }
+        return checkNotNull(result) { "No displays found from ${displays.contentToString()}!" }
     }
 
     /** Calculates the device's screen resolution, or MAX_PREVIEW_SIZE, whichever is smaller. */
     private fun calculatePreviewSize(): Size {
-        lazyPreviewSize?.let {
-            return it
-        }
-
-        val displaySize = Point()
-        val display: Display = defaultDisplay
-        // TODO(b/230400472): Use WindowManager#getCurrentWindowMetrics(). Display#getRealSize()
-        //  is deprecated since API level 31.
-        display.getRealSize(displaySize)
-        var displayViewSize: Size
-        displayViewSize =
-            if (displaySize.x > displaySize.y) {
-                Size(displaySize.x, displaySize.y)
-            } else {
-                Size(displaySize.y, displaySize.x)
-            }
-        if (
-            displayViewSize.width * displayViewSize.height >
-                MAX_PREVIEW_SIZE.width * MAX_PREVIEW_SIZE.height
-        ) {
+        var displayViewSize = getCorrectedDisplaySize()
+        if (SizeUtil.isSmallerByArea(MAX_PREVIEW_SIZE, displayViewSize)) {
             displayViewSize = MAX_PREVIEW_SIZE
         }
-        displayViewSize = maxPreviewSize.getMaxPreviewResolution(displayViewSize)
+        return maxPreviewSize.getMaxPreviewResolution(displayViewSize)
+    }
 
-        return displayViewSize.also { lazyPreviewSize = displayViewSize }
+    private fun getCorrectedDisplaySize(): Size {
+        val displaySize = Point()
+        getMaxSizeDisplay(false).getRealSize(displaySize)
+        var displayViewSize = Size(displaySize.x, displaySize.y)
+
+        // Checks whether the display size is abnormally small.
+        if (SizeUtil.isSmallerByArea(displayViewSize, ABNORMAL_DISPLAY_SIZE_THRESHOLD)) {
+            // Gets the display size from DisplaySizeCorrector if the display size retrieved from
+            // DisplayManager is abnormally small. Falls back the display size to 640x480 if
+            // DisplaySizeCorrector doesn't contain the device's display size info.
+            displayViewSize = displaySizeCorrector.displaySize ?: FALLBACK_DISPLAY_SIZE
+        }
+
+        // Flips the size to landscape orientation
+        if (displayViewSize.height > displayViewSize.width) {
+            displayViewSize =
+                Size(/* width= */ displayViewSize.height, /* height= */ displayViewSize.width)
+        }
+
+        return displayViewSize
     }
 }

@@ -20,44 +20,40 @@ import androidx.room.compiler.processing.XType
 import androidx.room.solver.CodeGenScope
 
 /**
- * A column adapter that uses a type converter to do the conversion. The type converter may be
- * a composite one.
+ * A column adapter that uses a type converter to do the conversion. The type converter may be a
+ * composite one.
  */
 class CompositeAdapter(
     out: XType,
     val columnTypeAdapter: ColumnTypeAdapter,
     val intoStatementConverter: TypeConverter?,
-    val fromCursorConverter: TypeConverter?
+    val fromCursorConverter: TypeConverter?,
 ) : ColumnTypeAdapter(out, columnTypeAdapter.typeAffinity) {
-    override fun readFromCursor(
+    override fun readFromStatement(
         outVarName: String,
-        cursorVarName: String,
+        stmtVarName: String,
         indexVarName: String,
-        scope: CodeGenScope
+        scope: CodeGenScope,
     ) {
         if (fromCursorConverter == null) {
             return
         }
-        scope.builder.apply {
-            val tmpCursorValue = scope.getTmpVar()
-            addLocalVariable(tmpCursorValue, columnTypeAdapter.outTypeName)
-            columnTypeAdapter.readFromCursor(tmpCursorValue, cursorVarName, indexVarName, scope)
-            fromCursorConverter.convert(tmpCursorValue, outVarName, scope)
-        }
+        val tmpCursorValue = scope.getTmpVar()
+        scope.builder.addLocalVariable(tmpCursorValue, columnTypeAdapter.outTypeName)
+        columnTypeAdapter.readFromStatement(tmpCursorValue, stmtVarName, indexVarName, scope)
+        fromCursorConverter.convert(tmpCursorValue, outVarName, scope)
     }
 
     override fun bindToStmt(
         stmtName: String,
         indexVarName: String,
         valueVarName: String,
-        scope: CodeGenScope
+        scope: CodeGenScope,
     ) {
         if (intoStatementConverter == null) {
             return
         }
-        scope.builder.apply {
-            val bindVar = intoStatementConverter.convert(valueVarName, scope)
-            columnTypeAdapter.bindToStmt(stmtName, indexVarName, bindVar, scope)
-        }
+        val bindVar = intoStatementConverter.convert(valueVarName, scope)
+        columnTypeAdapter.bindToStmt(stmtName, indexVarName, bindVar, scope)
     }
 }

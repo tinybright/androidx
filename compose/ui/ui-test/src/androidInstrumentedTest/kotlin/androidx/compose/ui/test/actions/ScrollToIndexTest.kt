@@ -16,6 +16,8 @@
 
 package androidx.compose.ui.test.actions
 
+import android.os.Looper
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredHeight
@@ -26,9 +28,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.testutils.expectError
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.SemanticsNodeInteraction
-import androidx.compose.ui.test.addGlobalAssertion
+import androidx.compose.ui.semantics.scrollToIndex
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.test.hasScrollToIndexAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -36,7 +38,8 @@ import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
-import com.google.common.truth.Truth.assertThat
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,8 +47,7 @@ import org.junit.runner.RunWith
 @MediumTest
 @RunWith(AndroidJUnit4::class)
 class ScrollToIndexTest {
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     private fun tag(index: Int): String = "tag_$index"
 
@@ -107,25 +109,37 @@ class ScrollToIndexTest {
         // Verify that it doesn't support performScrollToIndex
         rule.onNode(hasScrollToIndexAction()).assertDoesNotExist()
         expectError<AssertionError>(
-            expectedMessage = "Failed to scroll to index 1, " +
-                "the node is missing \\[ScrollToIndex\\].*"
+            expectedMessage =
+                "Failed to scroll to index 1, " + "the node is missing \\[ScrollToIndex\\].*"
         ) {
             rule.onNodeWithTag("tag").performScrollToIndex(1)
         }
     }
 
     @Test
-    @ExperimentalTestApi
-    fun scrollToIndex_withGlobalAssertion() {
-        rule.setContent { LazyColumnContent() }
-        var capturedSni: SemanticsNodeInteraction? = null
-        addGlobalAssertion(/* name= */ "Capture SNI") { sni -> capturedSni = sni }
-
-        val sni = rule.onNode(hasScrollToIndexAction())
-        // ScrollToIndex 1
-        sni.performScrollToIndex(1)
-
-        assertThat(capturedSni).isEqualTo(sni)
+    fun performScrollToIndex_invokesActionOnOnUiThread() {
+        val wasActionOnUiThread = AtomicBoolean(false)
+        val tag = "TestBox"
+        rule.setContent {
+            Box(
+                modifier =
+                    Modifier.semantics {
+                        testTag = tag
+                        scrollToIndex {
+                            val isOnUiThread =
+                                Thread.currentThread() == Looper.getMainLooper().thread
+                            wasActionOnUiThread.set(isOnUiThread)
+                            true
+                        }
+                    }
+            )
+        }
+        rule.onNodeWithTag(tag).performScrollToIndex(index = 0)
+        rule.waitForIdle()
+        assertTrue(
+            wasActionOnUiThread.get(),
+            "The performScrollToIndex action was not invoked on the UI thread.",
+        )
     }
 
     @Composable

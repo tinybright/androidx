@@ -25,35 +25,37 @@ import androidx.glance.GlanceNode
 import androidx.glance.unit.Dimension
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class EmittableColumn : EmittableWithChildren() {
+public class EmittableColumn : EmittableWithChildren() {
     override var modifier: GlanceModifier = GlanceModifier
-    var verticalAlignment: Alignment.Vertical = Alignment.Top
-    var horizontalAlignment: Alignment.Horizontal = Alignment.Start
+    public var verticalAlignment: Alignment.Vertical = Alignment.Top
+    public var horizontalAlignment: Alignment.Horizontal = Alignment.Start
 
-    override fun copy(): Emittable = EmittableColumn().also {
-        it.modifier = modifier
-        it.verticalAlignment = verticalAlignment
-        it.horizontalAlignment = horizontalAlignment
-        it.children.addAll(children.map { it.copy() })
-    }
+    override fun copy(): Emittable =
+        EmittableColumn().also {
+            it.modifier = modifier
+            it.verticalAlignment = verticalAlignment
+            it.horizontalAlignment = horizontalAlignment
+            it.children.addAll(children.map { it.copy() })
+        }
 
-    override fun toString(): String = "EmittableColumn(" +
-        "modifier=$modifier, " +
-        "verticalAlignment=$verticalAlignment, " +
-        "horizontalAlignment=$horizontalAlignment, " +
-        "children=[\n${childrenToString()}\n]" +
-        ")"
+    override fun toString(): String =
+        "EmittableColumn(" +
+            "modifier=$modifier, " +
+            "verticalAlignment=$verticalAlignment, " +
+            "horizontalAlignment=$horizontalAlignment, " +
+            "children=[\n${childrenToString()}\n]" +
+            ")"
 }
 
 /** Scope defining modifiers only available on rows. */
-interface ColumnScope {
+public interface ColumnScope {
     /**
      * Size the element's height to split the available space with other weighted sibling elements
      * in the [Column]. The parent will divide the vertical space remaining after measuring
      * unweighted child elements and distribute it according to the weights, the default weight
      * being 1.
      */
-    fun GlanceModifier.defaultWeight(): GlanceModifier
+    public fun GlanceModifier.defaultWeight(): GlanceModifier
 }
 
 private object ColumnScopeImplInstance : ColumnScope {
@@ -76,15 +78,15 @@ private object ColumnScopeImplInstance : ColumnScope {
  *   consume the full height of the [Column] (i.e. whether to push the children towards the top,
  *   center or bottom of the [Column]).
  * @param horizontalAlignment The horizontal alignment to apply to children when they are smaller
- *  than the width of the [Column]
+ *   than the width of the [Column]
  * @param content The content inside the [Column]
  */
 @Composable
-fun Column(
+public fun Column(
     modifier: GlanceModifier = GlanceModifier,
     verticalAlignment: Alignment.Vertical = Alignment.Top,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     GlanceNode(
         factory = ::EmittableColumn,
@@ -93,6 +95,6 @@ fun Column(
             this.set(horizontalAlignment) { this.horizontalAlignment = it }
             this.set(verticalAlignment) { this.verticalAlignment = it }
         },
-        content = { ColumnScopeImplInstance.content() }
+        content = { ColumnScopeImplInstance.content() },
     )
 }

@@ -42,20 +42,21 @@ actual fun AlertDialog(
     titleContentColor: Color,
     textContentColor: Color,
     tonalElevation: Dp,
-    properties: DialogProperties
-): Unit = AlertDialogImpl(
-    onDismissRequest = onDismissRequest,
-    confirmButton = confirmButton,
-    modifier = modifier,
-    dismissButton = dismissButton,
-    icon = icon,
-    title = title,
-    text = text,
-    shape = shape,
-    containerColor = containerColor,
-    iconContentColor = iconContentColor,
-    titleContentColor = titleContentColor,
-    textContentColor = textContentColor,
-    tonalElevation = tonalElevation,
-    properties = properties
-)
+    properties: DialogProperties,
+): Unit =
+    AlertDialogImpl(
+        onDismissRequest = onDismissRequest,
+        confirmButton = confirmButton,
+        modifier = modifier,
+        dismissButton = dismissButton,
+        icon = icon,
+        title = title,
+        text = text,
+        shape = shape,
+        containerColor = containerColor,
+        iconContentColor = iconContentColor,
+        titleContentColor = titleContentColor,
+        textContentColor = textContentColor,
+        tonalElevation = tonalElevation,
+        properties = properties,
+    )

@@ -57,7 +57,7 @@ class ItemDecorationTest : BaseTest() {
 
     private fun test_dividers_render(
         @ViewPager2.Orientation orientation: Int,
-        adapterProvider: AdapterProviderForItems
+        adapterProvider: AdapterProviderForItems,
     ) {
         // given
         setUpTest(orientation).run {
@@ -152,13 +152,13 @@ class ItemDecorationTest : BaseTest() {
         viewPager.addItemDecoration(decoration4, -100)
         assertThat(
             viewPager.itemDecorations,
-            equalTo(initialDecorations.plus(listOf(decoration3, decoration4)))
+            equalTo(initialDecorations.plus(listOf(decoration3, decoration4))),
         )
 
         viewPager.addItemDecoration(decoration5, -50)
         assertThat(
             viewPager.itemDecorations,
-            equalTo(initialDecorations.plus(listOf(decoration3, decoration4, decoration5)))
+            equalTo(initialDecorations.plus(listOf(decoration3, decoration4, decoration5))),
         )
 
         // add: lastIx + 1 (legal)
@@ -166,15 +166,8 @@ class ItemDecorationTest : BaseTest() {
         assertThat(
             viewPager.itemDecorations,
             equalTo(
-                initialDecorations.plus(
-                    listOf(
-                        decoration3,
-                        decoration4,
-                        decoration5,
-                        decoration6
-                    )
-                )
-            )
+                initialDecorations.plus(listOf(decoration3, decoration4, decoration5, decoration6))
+            ),
         )
     }
 

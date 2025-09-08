@@ -27,8 +27,6 @@ import android.database.sqlite.SQLiteTransactionListener;
 import android.os.CancellationSignal;
 import android.util.Pair;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.arch.core.executor.ArchTaskExecutor;
 import androidx.arch.core.executor.testing.CountingTaskExecutorRule;
 import androidx.lifecycle.Lifecycle;
@@ -59,6 +57,15 @@ import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 
+import io.reactivex.Flowable;
+import io.reactivex.Maybe;
+import io.reactivex.Single;
+import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subscribers.TestSubscriber;
+
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -76,13 +83,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import io.reactivex.Flowable;
-import io.reactivex.Maybe;
-import io.reactivex.Single;
-import io.reactivex.observers.TestObserver;
-import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subscribers.TestSubscriber;
-
 @SmallTest
 @RunWith(Parameterized.class)
 @SuppressWarnings("CheckReturnValue")
@@ -95,9 +95,8 @@ public class QueryTransactionTest {
     private Entity1Dao mDao;
     private final TestLifecycleOwner mLifecycleOwner = new TestLifecycleOwner();
 
-    @NonNull
     @Parameterized.Parameters(name = "useTransaction_{0}")
-    public static Boolean[] getParams() {
+    public static Boolean @NonNull [] getParams() {
         return new Boolean[]{false, true};
     }
 
@@ -326,23 +325,20 @@ public class QueryTransactionTest {
 
     private <T> TestSubscriber<T> observe(final Flowable<T> flowable) {
         TestSubscriber<T> subscriber = new TestSubscriber<>();
-        flowable.observeOn(Schedulers.from(ArchTaskExecutor.getMainThreadExecutor()))
+        return flowable.observeOn(Schedulers.from(ArchTaskExecutor.getMainThreadExecutor()))
                 .subscribeWith(subscriber);
-        return subscriber;
     }
 
     private <T> TestObserver<T> observe(final Maybe<T> maybe) {
         TestObserver<T> observer = new TestObserver<>();
-        maybe.observeOn(Schedulers.from(ArchTaskExecutor.getMainThreadExecutor()))
+        return maybe.observeOn(Schedulers.from(ArchTaskExecutor.getMainThreadExecutor()))
                 .subscribeWith(observer);
-        return observer;
     }
 
     private <T> TestObserver<T> observe(final Single<T> single) {
         TestObserver<T> observer = new TestObserver<>();
-        single.observeOn(Schedulers.from(ArchTaskExecutor.getMainThreadExecutor()))
+        return single.observeOn(Schedulers.from(ArchTaskExecutor.getMainThreadExecutor()))
                 .subscribeWith(observer);
-        return observer;
     }
 
     private <T> void observeForever(final LiveData<T> liveData) {
@@ -524,10 +520,9 @@ public class QueryTransactionTest {
         private final SupportSQLiteOpenHelper.Factory mDelegate =
                 new FrameworkSQLiteOpenHelperFactory();
 
-        @NonNull
         @Override
-        public SupportSQLiteOpenHelper create(
-                @NonNull SupportSQLiteOpenHelper.Configuration configuration) {
+        public @NonNull SupportSQLiteOpenHelper create(
+                SupportSQLiteOpenHelper.@NonNull Configuration configuration) {
             return new TransactionSupportSQLiteOpenHelper(mDelegate.create(configuration));
         }
     }
@@ -539,9 +534,8 @@ public class QueryTransactionTest {
             this.mDelegate = delegate;
         }
 
-        @Nullable
         @Override
-        public String getDatabaseName() {
+        public @Nullable String getDatabaseName() {
             return mDelegate.getDatabaseName();
         }
 
@@ -550,15 +544,13 @@ public class QueryTransactionTest {
             mDelegate.setWriteAheadLoggingEnabled(enabled);
         }
 
-        @NonNull
         @Override
-        public SupportSQLiteDatabase getWritableDatabase() {
+        public @NonNull SupportSQLiteDatabase getWritableDatabase() {
             return new TransactionSupportSQLiteDatabase(mDelegate.getWritableDatabase());
         }
 
-        @NonNull
         @Override
-        public SupportSQLiteDatabase getReadableDatabase() {
+        public @NonNull SupportSQLiteDatabase getReadableDatabase() {
             return new TransactionSupportSQLiteDatabase(mDelegate.getReadableDatabase());
         }
 
@@ -575,9 +567,8 @@ public class QueryTransactionTest {
             this.mDelegate = delegate;
         }
 
-        @NonNull
         @Override
-        public SupportSQLiteStatement compileStatement(@NonNull String sql) {
+        public @NonNull SupportSQLiteStatement compileStatement(@NonNull String sql) {
             return mDelegate.compileStatement(sql);
         }
 
@@ -656,7 +647,7 @@ public class QueryTransactionTest {
         }
 
         @Override
-        public void execPerConnectionSQL(@NonNull String sql, @Nullable Object[] bindArgs) {
+        public void execPerConnectionSQL(@NonNull String sql, Object @Nullable [] bindArgs) {
             mDelegate.execPerConnectionSQL(sql, bindArgs);
         }
 
@@ -690,27 +681,23 @@ public class QueryTransactionTest {
             mDelegate.setPageSize(l);
         }
 
-        @NonNull
         @Override
-        public Cursor query(@NonNull String query) {
+        public @NonNull Cursor query(@NonNull String query) {
             return mDelegate.query(query);
         }
 
-        @NonNull
         @Override
-        public Cursor query(@NonNull String query, @NonNull Object[] bindArgs) {
+        public @NonNull Cursor query(@NonNull String query, Object @NonNull [] bindArgs) {
             return mDelegate.query(query, bindArgs);
         }
 
-        @NonNull
         @Override
-        public Cursor query(@NonNull SupportSQLiteQuery query) {
+        public @NonNull Cursor query(@NonNull SupportSQLiteQuery query) {
             return mDelegate.query(query);
         }
 
-        @NonNull
         @Override
-        public Cursor query(@NonNull SupportSQLiteQuery query,
+        public @NonNull Cursor query(@NonNull SupportSQLiteQuery query,
                 @Nullable CancellationSignal cancellationSignal) {
             return mDelegate.query(query, cancellationSignal);
         }
@@ -723,14 +710,14 @@ public class QueryTransactionTest {
 
         @Override
         public int delete(@NonNull String table, @Nullable String whereClause,
-                @Nullable Object[] whereArgs) {
+                Object @Nullable [] whereArgs) {
             return mDelegate.delete(table, whereClause, whereArgs);
         }
 
         @Override
         public int update(@NonNull String table, int conflictAlgorithm,
                 @NonNull ContentValues values, @Nullable String whereClause,
-                @Nullable Object[] whereArgs) {
+                Object @Nullable [] whereArgs) {
             return mDelegate.update(table, conflictAlgorithm, values, whereClause, whereArgs);
         }
 
@@ -740,7 +727,7 @@ public class QueryTransactionTest {
         }
 
         @Override
-        public void execSQL(@NonNull String sql, @NonNull Object[] bindArgs) throws SQLException {
+        public void execSQL(@NonNull String sql, Object @NonNull [] bindArgs) throws SQLException {
             mDelegate.execSQL(sql, bindArgs);
         }
 
@@ -759,9 +746,8 @@ public class QueryTransactionTest {
             return mDelegate.needUpgrade(newVersion);
         }
 
-        @Nullable
         @Override
-        public String getPath() {
+        public @Nullable String getPath() {
             return mDelegate.getPath();
         }
 
@@ -795,9 +781,8 @@ public class QueryTransactionTest {
             return mDelegate.isWriteAheadLoggingEnabled();
         }
 
-        @Nullable
         @Override
-        public List<Pair<String, String>> getAttachedDbs() {
+        public @Nullable List<Pair<String, String>> getAttachedDbs() {
             return mDelegate.getAttachedDbs();
         }
 

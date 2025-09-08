@@ -16,10 +16,9 @@
 
 package androidx.compose.foundation.text
 
-import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.GOLDEN_UI
+import androidx.compose.foundation.GOLDEN_FOUNDATION
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -55,13 +54,11 @@ import org.junit.runner.RunWith
 
 @MediumTest
 @RunWith(AndroidJUnit4::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.Q)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 class FontScalingScreenshotTest {
-    @get:Rule
-    val rule = createAndroidComposeRule<ComponentActivity>()
+    @get:Rule val rule = createAndroidComposeRule<ComponentActivity>()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_UI)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_FOUNDATION)
 
     private val containerTag = "container"
 
@@ -75,10 +72,9 @@ class FontScalingScreenshotTest {
         AndroidFontScaleHelper.setSystemFontScale(1f, rule.activityRule.scenario)
         rule.waitForIdle()
 
-        rule.setContent {
-            TestLayout(lineHeight = 28.sp)
-        }
-        rule.onNodeWithTag(containerTag)
+        rule.setContent { TestLayout(lineHeight = 28.sp) }
+        rule
+            .onNodeWithTag(containerTag)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "fontScaling1x_lineHeightDoubleSp")
     }
@@ -88,10 +84,9 @@ class FontScalingScreenshotTest {
         AndroidFontScaleHelper.setSystemFontScale(2f, rule.activityRule.scenario)
         rule.waitForIdle()
 
-        rule.setContent {
-            TestLayout(lineHeight = 28.sp)
-        }
-        rule.onNodeWithTag(containerTag)
+        rule.setContent { TestLayout(lineHeight = 28.sp) }
+        rule
+            .onNodeWithTag(containerTag)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "fontScaling2x_lineHeightDoubleSp")
     }
@@ -104,10 +99,11 @@ class FontScalingScreenshotTest {
         rule.setContent {
             TestLayout(
                 lineHeight = 28.sp,
-                lineHeightStyle = LineHeightStyle(Alignment.Bottom, Trim.Both)
+                lineHeightStyle = LineHeightStyle(Alignment.Bottom, Trim.Both),
             )
         }
-        rule.onNodeWithTag(containerTag)
+        rule
+            .onNodeWithTag(containerTag)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "fontScaling1x_lineHeightStyleDoubleSp")
     }
@@ -120,10 +116,11 @@ class FontScalingScreenshotTest {
         rule.setContent {
             TestLayout(
                 lineHeight = 28.sp,
-                lineHeightStyle = LineHeightStyle(Alignment.Bottom, Trim.Both)
+                lineHeightStyle = LineHeightStyle(Alignment.Bottom, Trim.Both),
             )
         }
-        rule.onNodeWithTag(containerTag)
+        rule
+            .onNodeWithTag(containerTag)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "fontScaling2x_lineHeightStyleDoubleSp")
     }
@@ -133,10 +130,9 @@ class FontScalingScreenshotTest {
         AndroidFontScaleHelper.setSystemFontScale(1f, rule.activityRule.scenario)
         rule.waitForIdle()
 
-        rule.setContent {
-            TestLayout(lineHeight = 2.em)
-        }
-        rule.onNodeWithTag(containerTag)
+        rule.setContent { TestLayout(lineHeight = 2.em) }
+        rule
+            .onNodeWithTag(containerTag)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "fontScaling1x_lineHeightDoubleEm")
     }
@@ -146,10 +142,9 @@ class FontScalingScreenshotTest {
         AndroidFontScaleHelper.setSystemFontScale(2f, rule.activityRule.scenario)
         rule.waitForIdle()
 
-        rule.setContent {
-            TestLayout(lineHeight = 2.em)
-        }
-        rule.onNodeWithTag(containerTag)
+        rule.setContent { TestLayout(lineHeight = 2.em) }
+        rule
+            .onNodeWithTag(containerTag)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "fontScaling2x_lineHeightDoubleEm")
     }
@@ -159,10 +154,9 @@ class FontScalingScreenshotTest {
         AndroidFontScaleHelper.setSystemFontScale(1f, rule.activityRule.scenario)
         rule.waitForIdle()
 
-        rule.setContent {
-            TestDrawTextLayout()
-        }
-        rule.onNodeWithTag(containerTag)
+        rule.setContent { TestDrawTextLayout() }
+        rule
+            .onNodeWithTag(containerTag)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "fontScaling1x_drawText")
     }
@@ -172,10 +166,9 @@ class FontScalingScreenshotTest {
         AndroidFontScaleHelper.setSystemFontScale(2f, rule.activityRule.scenario)
         rule.waitForIdle()
 
-        rule.setContent {
-            TestDrawTextLayout()
-        }
-        rule.onNodeWithTag(containerTag)
+        rule.setContent { TestDrawTextLayout() }
+        rule
+            .onNodeWithTag(containerTag)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "fontScaling2x_drawText")
     }
@@ -183,41 +176,34 @@ class FontScalingScreenshotTest {
     @Composable
     private fun TestLayout(
         lineHeight: TextUnit,
-        lineHeightStyle: LineHeightStyle = LineHeightStyle.Default
+        lineHeightStyle: LineHeightStyle = LineHeightStyle.Default,
     ) {
-        Column(
-            modifier = Modifier.testTag(containerTag),
-        ) {
+        Column(modifier = Modifier.testTag(containerTag)) {
             BasicText(
-                text = buildAnnotatedString {
-                    append("Hello ")
-                    pushStyle(SpanStyle(
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold
-                    ))
-                    append("Accessibility")
-                    pop()
-                },
-                style = TextStyle(
-                    fontSize = 36.sp,
-                    fontStyle = FontStyle.Italic,
-                    fontFamily = FontFamily.Monospace
-                )
+                text =
+                    buildAnnotatedString {
+                        append("Hello ")
+                        pushStyle(SpanStyle(fontSize = 28.sp, fontWeight = FontWeight.Bold))
+                        append("Accessibility")
+                        pop()
+                    },
+                style =
+                    TextStyle(
+                        fontSize = 36.sp,
+                        fontStyle = FontStyle.Italic,
+                        fontFamily = FontFamily.Monospace,
+                    ),
             )
-            BasicText(
-                text = "Here's a subtitle",
-                style = TextStyle(
-                    fontSize = 20.sp
-                )
-            )
+            BasicText(text = "Here's a subtitle", style = TextStyle(fontSize = 20.sp))
             BasicText(
                 text = sampleText,
-                style = TextStyle(
-                    fontSize = 14.sp,
-                    fontStyle = FontStyle.Italic,
-                    lineHeight = lineHeight,
-                    lineHeightStyle = lineHeightStyle
-                )
+                style =
+                    TextStyle(
+                        fontSize = 14.sp,
+                        fontStyle = FontStyle.Italic,
+                        lineHeight = lineHeight,
+                        lineHeightStyle = lineHeightStyle,
+                    ),
             )
         }
     }
@@ -226,24 +212,20 @@ class FontScalingScreenshotTest {
     private fun TestDrawTextLayout() {
         val textMeasurer = rememberTextMeasurer()
 
-        Column(
-            modifier = Modifier.testTag(containerTag),
-        ) {
+        Column(modifier = Modifier.testTag(containerTag)) {
             Canvas(Modifier.fillMaxSize()) {
-                 drawText(
-                     textMeasurer = textMeasurer,
-                     style = TextStyle(
-                        fontSize = 14.sp,
-                        lineHeight = 28.sp
-                     ),
-                     text = sampleText
+                drawText(
+                    textMeasurer = textMeasurer,
+                    style = TextStyle(fontSize = 14.sp, lineHeight = 28.sp),
+                    text = sampleText,
                 )
             }
         }
     }
 
     companion object {
-        private val sampleText = """
+        private val sampleText =
+            """
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
 et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
 aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
@@ -259,6 +241,7 @@ numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat vo
 ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid
 ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse
 quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?
-    """.trimIndent()
+    """
+                .trimIndent()
     }
 }

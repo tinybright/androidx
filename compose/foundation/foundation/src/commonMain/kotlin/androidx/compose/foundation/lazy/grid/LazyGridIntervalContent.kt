@@ -16,20 +16,26 @@
 
 package androidx.compose.foundation.lazy.grid
 
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.collection.IntList
+import androidx.collection.MutableIntList
+import androidx.collection.emptyIntList
+import androidx.collection.mutableIntListOf
 import androidx.compose.foundation.lazy.layout.LazyLayoutIntervalContent
 import androidx.compose.foundation.lazy.layout.MutableIntervalList
 import androidx.compose.runtime.Composable
 
-@OptIn(ExperimentalFoundationApi::class)
-internal class LazyGridIntervalContent(
-    content: LazyGridScope.() -> Unit
-) : LazyGridScope, LazyLayoutIntervalContent<LazyGridInterval>() {
+internal class LazyGridIntervalContent(content: LazyGridScope.() -> Unit) :
+    LazyGridScope, LazyLayoutIntervalContent<LazyGridInterval>() {
     internal val spanLayoutProvider: LazyGridSpanLayoutProvider = LazyGridSpanLayoutProvider(this)
 
     override val intervals = MutableIntervalList<LazyGridInterval>()
 
     internal var hasCustomSpans = false
+
+    private var _headerIndexes: MutableIntList? = null
+
+    val headerIndexes: IntList
+        get() = _headerIndexes ?: emptyIntList()
 
     init {
         apply(content)
@@ -39,7 +45,7 @@ internal class LazyGridIntervalContent(
         key: Any?,
         span: (LazyGridItemSpanScope.() -> GridItemSpan)?,
         contentType: Any?,
-        content: @Composable LazyGridItemScope.() -> Unit
+        content: @Composable LazyGridItemScope.() -> Unit,
     ) {
         intervals.addInterval(
             1,
@@ -47,8 +53,8 @@ internal class LazyGridIntervalContent(
                 key = key?.let { { key } },
                 span = span?.let { { span() } } ?: DefaultSpan,
                 type = { contentType },
-                item = { content() }
-            )
+                item = { content() },
+            ),
         )
         if (span != null) hasCustomSpans = true
     }
@@ -58,7 +64,7 @@ internal class LazyGridIntervalContent(
         key: ((index: Int) -> Any)?,
         span: (LazyGridItemSpanScope.(Int) -> GridItemSpan)?,
         contentType: (index: Int) -> Any?,
-        itemContent: @Composable LazyGridItemScope.(index: Int) -> Unit
+        itemContent: @Composable LazyGridItemScope.(index: Int) -> Unit,
     ) {
         intervals.addInterval(
             count,
@@ -66,10 +72,21 @@ internal class LazyGridIntervalContent(
                 key = key,
                 span = span ?: DefaultSpan,
                 type = contentType,
-                item = itemContent
-            )
+                item = itemContent,
+            ),
         )
         if (span != null) hasCustomSpans = true
+    }
+
+    override fun stickyHeader(
+        key: Any?,
+        contentType: Any?,
+        content: @Composable LazyGridItemScope.(Int) -> Unit,
+    ) {
+        val headersIndexes = _headerIndexes ?: mutableIntListOf().also { _headerIndexes = it }
+        val headerIndex = intervals.size
+        headersIndexes.add(headerIndex)
+        item(key, { GridItemSpan(maxLineSpan) }, contentType) { content.invoke(this, headerIndex) }
     }
 
     private companion object {
@@ -77,10 +94,9 @@ internal class LazyGridIntervalContent(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 internal class LazyGridInterval(
     override val key: ((index: Int) -> Any)?,
     val span: LazyGridItemSpanScope.(Int) -> GridItemSpan,
     override val type: ((index: Int) -> Any?),
-    val item: @Composable LazyGridItemScope.(Int) -> Unit
+    val item: @Composable LazyGridItemScope.(Int) -> Unit,
 ) : LazyLayoutIntervalContent.Interval

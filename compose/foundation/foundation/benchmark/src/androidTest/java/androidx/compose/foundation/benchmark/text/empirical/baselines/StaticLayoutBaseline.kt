@@ -31,7 +31,6 @@ import androidx.compose.foundation.benchmark.text.empirical.AllApps
 import androidx.compose.foundation.benchmark.text.empirical.ChatApps
 import androidx.compose.foundation.benchmark.text.empirical.generateCacheableStringOf
 import androidx.test.filters.LargeTest
-import androidx.test.filters.SdkSuppress
 import org.junit.Assume
 import org.junit.Rule
 import org.junit.Test
@@ -48,11 +47,9 @@ import org.junit.runners.Parameterized
  */
 @RunWith(Parameterized::class)
 @LargeTest
-@SdkSuppress(minSdkVersion = 23)
 open class StaticLayoutBaseline(private val size: Int) {
 
-    @get:Rule
-    val benchmarkRule = BenchmarkRule()
+    @get:Rule val benchmarkRule = BenchmarkRule()
 
     companion object {
         @JvmStatic
@@ -68,7 +65,7 @@ open class StaticLayoutBaseline(private val size: Int) {
         val canvas = Canvas(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888))
         var isEmpty = false
         benchmarkRule.measureRepeated {
-            val measureText = runWithTimingDisabled {
+            val measureText = runWithMeasurementDisabled {
                 isEmpty = !isEmpty
                 if (isEmpty) "" else text
             }
@@ -113,23 +110,28 @@ fun makeStaticLayout(text: String, textPaint: TextPaint): StaticLayout {
         StaticLayoutBuilderCompat_Api23.build(text, textPaint)
     } else {
         @Suppress("DEPRECATION")
-        StaticLayout(/* source = */ text, /* paint = */
-            textPaint, /* width = */
-            Int.MAX_VALUE, /* align = */
-            Layout.Alignment.ALIGN_NORMAL, /* spacingmult = */
-            1.0f, /* spacingadd = */
-            0.0f, /* includepad = */
-            true)
+        StaticLayout(
+            /* source = */ text,
+            /* paint = */ textPaint,
+            /* width = */ Int.MAX_VALUE,
+            /* align = */ Layout.Alignment.ALIGN_NORMAL,
+            /* spacingmult = */ 1.0f,
+            /* spacingadd = */ 0.0f,
+            /* includepad = */ true,
+        )
     }
 }
 
 @RequiresApi(23)
 object StaticLayoutBuilderCompat_Api23 {
     fun build(text: String, textPaint: TextPaint): StaticLayout {
-        return StaticLayout.Builder.obtain(/* source = */ text, /* start = */
-            0, /* end = */
-            text.length, /* paint = */
-            textPaint, /* width = */
-            Int.MAX_VALUE).build()
+        return StaticLayout.Builder.obtain(
+                /* source = */ text,
+                /* start = */ 0,
+                /* end = */ text.length,
+                /* paint = */ textPaint,
+                /* width = */ Int.MAX_VALUE,
+            )
+            .build()
     }
 }

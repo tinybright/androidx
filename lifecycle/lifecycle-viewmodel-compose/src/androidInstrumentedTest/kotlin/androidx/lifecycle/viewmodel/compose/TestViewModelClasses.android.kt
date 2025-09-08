@@ -21,12 +21,13 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 
-public val viewModelClasses: Array<Class<out ViewModel>> = arrayOf(
-    SimpleViewModel::class.java,
-    ApplicationViewModel::class.java,
-    SavedStateHandleViewModel::class.java,
-    SavedStateHandleAndApplicationViewModel::class.java
-)
+public val viewModelClasses: Array<Class<out ViewModel>> =
+    arrayOf(
+        SimpleViewModel::class.java,
+        ApplicationViewModel::class.java,
+        SavedStateHandleViewModel::class.java,
+        SavedStateHandleAndApplicationViewModel::class.java,
+    )
 
 public class SimpleViewModel : ViewModel()
 
@@ -38,5 +39,5 @@ public class ApplicationViewModel(application: Application) : AndroidViewModel(a
 
 public class SavedStateHandleAndApplicationViewModel(
     application: Application,
-    @Suppress("UNUSED_PARAMETER") savedStateHandle: SavedStateHandle
+    @Suppress("UNUSED_PARAMETER") savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application)

@@ -37,39 +37,39 @@ import kotlin.math.sign
 internal suspend fun AwaitPointerEventScope.awaitHorizontalPointerSlopOrCancellation(
     pointerId: PointerId,
     pointerType: PointerType,
-    onPointerSlopReached: (change: PointerInputChange, overSlop: Float) -> Unit
-) = awaitPointerSlopOrCancellation(
-    pointerId = pointerId,
-    pointerType = pointerType,
-    onPointerSlopReached = onPointerSlopReached,
-    getDragDirectionValue = { it.x }
-)
+    onPointerSlopReached: (change: PointerInputChange, overSlop: Float) -> Unit,
+) =
+    awaitPointerSlopOrCancellation(
+        pointerId = pointerId,
+        pointerType = pointerType,
+        onPointerSlopReached = onPointerSlopReached,
+        getDragDirectionValue = { it.x },
+    )
 
 /**
- * Waits for drag motion along one axis based on [getDragDirectionValue] to pass pointer slop,
- * using [pointerId] as the pointer to examine. If [pointerId] is raised, another pointer
- * from those that are down will be chosen to lead the gesture, and if none are down,
- * `null` is returned. If [pointerId] is not down when [awaitPointerSlopOrCancellation] is called,
- * then `null` is returned.
+ * Waits for drag motion along one axis based on [getDragDirectionValue] to pass pointer slop, using
+ * [pointerId] as the pointer to examine. If [pointerId] is raised, another pointer from those that
+ * are down will be chosen to lead the gesture, and if none are down, `null` is returned. If
+ * [pointerId] is not down when [awaitPointerSlopOrCancellation] is called, then `null` is returned.
  *
  * When pointer slop is detected, [onPointerSlopReached] is called with the change and the distance
  * beyond the pointer slop. [getDragDirectionValue] should return the position change in the
  * direction of the drag axis. If [onPointerSlopReached] does not consume the position change,
- * pointer slop will not have been considered detected and the detection will continue or,
- * if it is consumed, the [PointerInputChange] that was consumed will be returned.
+ * pointer slop will not have been considered detected and the detection will continue or, if it is
+ * consumed, the [PointerInputChange] that was consumed will be returned.
  *
  * This works with [awaitTouchSlopOrCancellation] for the other axis to ensure that only horizontal
  * or vertical dragging is done, but not both.
  *
  * @return The [PointerInputChange] of the event that was consumed in [onPointerSlopReached] or
- * `null` if all pointers are raised or the position change was consumed by another gesture
- * detector.
+ *   `null` if all pointers are raised or the position change was consumed by another gesture
+ *   detector.
  */
 private suspend inline fun AwaitPointerEventScope.awaitPointerSlopOrCancellation(
     pointerId: PointerId,
     pointerType: PointerType,
     onPointerSlopReached: (PointerInputChange, Float) -> Unit,
-    getDragDirectionValue: (Offset) -> Float
+    getDragDirectionValue: (Offset) -> Float,
 ): PointerInputChange? {
     if (currentEvent.isPointerUp(pointerId)) {
         return null // The pointer has already been lifted, so the gesture is canceled
@@ -94,8 +94,8 @@ private suspend inline fun AwaitPointerEventScope.awaitPointerSlopOrCancellation
         } else {
             val currentPosition = dragEvent.position
             val previousPosition = dragEvent.previousPosition
-            val positionChange = getDragDirectionValue(currentPosition) -
-                getDragDirectionValue(previousPosition)
+            val positionChange =
+                getDragDirectionValue(currentPosition) - getDragDirectionValue(previousPosition)
             totalPositionChange += positionChange
 
             val inDirection = abs(totalPositionChange)
@@ -108,7 +108,7 @@ private suspend inline fun AwaitPointerEventScope.awaitPointerSlopOrCancellation
             } else {
                 onPointerSlopReached(
                     dragEvent,
-                    totalPositionChange - (sign(totalPositionChange) * touchSlop)
+                    totalPositionChange - (sign(totalPositionChange) * touchSlop),
                 )
                 if (dragEvent.isConsumed) {
                     return dragEvent

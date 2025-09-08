@@ -51,9 +51,9 @@ fun AppCardWithIcon() {
             Icon(
                 painter = painterResource(id = R.drawable.ic_airplanemode_active_24px),
                 contentDescription = "airplane",
-                modifier = Modifier
-                    .size(CardDefaults.AppImageSize)
-                    .wrapContentSize(align = Alignment.Center),
+                modifier =
+                    Modifier.size(CardDefaults.AppImageSize)
+                        .wrapContentSize(align = Alignment.Center),
             )
         },
         title = { Text("AppCard") },
@@ -74,28 +74,21 @@ fun AppCardWithImage() {
             Icon(
                 painter = painterResource(id = R.drawable.ic_airplanemode_active_24px),
                 contentDescription = "airplane",
-                modifier = Modifier
-                    .size(CardDefaults.AppImageSize)
-                    .wrapContentSize(align = Alignment.Center),
+                modifier =
+                    Modifier.size(CardDefaults.AppImageSize)
+                        .wrapContentSize(align = Alignment.Center),
             )
         },
-        title = {
-            Text(
-                text = "Title with maximum two lines",
-                maxLines = 2,
-            )
-        },
+        title = { Text(text = "Title with maximum two lines", maxLines = 2) },
         time = { Text("now") },
     ) {
         Spacer(Modifier.height(6.dp))
         Image(
-            modifier = Modifier
-                .padding(end = 28.dp)
-                .aspectRatio(16f / 9f)
-                .clip(RoundedCornerShape(16.dp)),
+            modifier =
+                Modifier.padding(end = 28.dp).aspectRatio(16f / 9f).clip(RoundedCornerShape(16.dp)),
             painter = painterResource(R.drawable.card_background),
             contentScale = ContentScale.Crop,
-            contentDescription = null
+            contentDescription = null,
         )
     }
 }
@@ -103,11 +96,7 @@ fun AppCardWithImage() {
 @Sampled
 @Composable
 fun TitleCardStandard() {
-    TitleCard(
-        onClick = {},
-        title = { Text("TitleCard") },
-        time = { Text("now") },
-    ) {
+    TitleCard(onClick = {}, title = { Text("TitleCard") }, time = { Text("now") }) {
         Text("Some body content")
         Text("and some more body content")
     }
@@ -119,19 +108,16 @@ fun TitleCardWithImageBackground() {
     TitleCard(
         onClick = { /* Do something */ },
         title = { Text("TitleCard With an ImageBackground") },
-        backgroundPainter = CardDefaults.imageWithScrimBackgroundPainter(
-            backgroundImagePainter = painterResource(id = R.drawable.backgroundimage)
-        ),
+        backgroundPainter =
+            CardDefaults.imageWithScrimBackgroundPainter(
+                backgroundImagePainter = painterResource(id = R.drawable.backgroundimage)
+            ),
         contentColor = MaterialTheme.colors.onSurface,
         titleColor = MaterialTheme.colors.onSurface,
     ) {
         // Apply 24.dp padding in bottom for TitleCard with an ImageBackground.
         // Already 12.dp padding exists. Ref - [CardDefaults.ContentPadding]
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 12.dp),
-        ) {
+        Column(modifier = Modifier.fillMaxSize().padding(bottom = 12.dp)) {
             Text("Text coloured to stand out on the image")
         }
     }

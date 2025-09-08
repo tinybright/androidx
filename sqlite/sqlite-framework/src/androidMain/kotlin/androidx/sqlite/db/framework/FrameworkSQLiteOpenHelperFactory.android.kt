@@ -18,10 +18,9 @@ package androidx.sqlite.db.framework
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 
 /**
- * Implements [SupportSQLiteOpenHelper.Factory] using the SQLite implementation in the
- * framework.
+ * Implements [SupportSQLiteOpenHelper.Factory] using the SQLite implementation in the framework.
  */
-class FrameworkSQLiteOpenHelperFactory : SupportSQLiteOpenHelper.Factory {
+public class FrameworkSQLiteOpenHelperFactory : SupportSQLiteOpenHelper.Factory {
     override fun create(
         configuration: SupportSQLiteOpenHelper.Configuration
     ): SupportSQLiteOpenHelper {
@@ -30,7 +29,7 @@ class FrameworkSQLiteOpenHelperFactory : SupportSQLiteOpenHelper.Factory {
             configuration.name,
             configuration.callback,
             configuration.useNoBackupDirectory,
-            configuration.allowDataLossOnRecovery
+            configuration.allowDataLossOnRecovery,
         )
     }
 }

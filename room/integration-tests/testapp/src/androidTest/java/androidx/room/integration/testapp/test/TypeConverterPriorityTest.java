@@ -18,7 +18,6 @@ package androidx.room.integration.testapp.test;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import androidx.annotation.NonNull;
 import androidx.room.Dao;
 import androidx.room.Database;
 import androidx.room.Entity;
@@ -34,6 +33,8 @@ import androidx.test.filters.SdkSuppress;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.jspecify.annotations.NonNull;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,6 +56,11 @@ public class TypeConverterPriorityTest {
                 InstrumentationRegistry.getInstrumentation().getTargetContext(),
                 TestDatabase.class
         ).build();
+    }
+
+    @After
+    public void teardown() {
+        mDB.close();
     }
 
     @Test
@@ -97,8 +103,11 @@ public class TypeConverterPriorityTest {
 
     @Entity
     static final class TestEntity {
-        @NonNull
         @PrimaryKey
+        // This project is tested against a version of the room compiler that doesn't recognize
+        // JSpecify for primary keys
+        @SuppressWarnings("JSpecifyNullness")
+        @androidx.annotation.NonNull
         public String id;
         public List<String> data;
 

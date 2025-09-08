@@ -58,7 +58,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 
 class ComplexNestedListsActivity : ComponentActivity() {
 
@@ -70,7 +70,7 @@ class ComplexNestedListsActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
+                    color = MaterialTheme.colors.background,
                 ) {
                     Greeting()
                 }
@@ -82,16 +82,17 @@ class ComplexNestedListsActivity : ComponentActivity() {
 
     internal fun ComponentActivity.launchIdlenessTracking() {
         val contentView: View = findViewById(android.R.id.content)
-        val callback: Choreographer.FrameCallback = object : Choreographer.FrameCallback {
-            override fun doFrame(frameTimeNanos: Long) {
-                if (Recomposer.runningRecomposers.value.any { it.hasPendingWork }) {
-                    contentView.contentDescription = "COMPOSE-BUSY"
-                } else {
-                    contentView.contentDescription = "COMPOSE-IDLE"
+        val callback: Choreographer.FrameCallback =
+            object : Choreographer.FrameCallback {
+                override fun doFrame(frameTimeNanos: Long) {
+                    if (Recomposer.runningRecomposers.value.any { it.hasPendingWork }) {
+                        contentView.contentDescription = "COMPOSE-BUSY"
+                    } else {
+                        contentView.contentDescription = "COMPOSE-IDLE"
+                    }
+                    Choreographer.getInstance().postFrameCallback(this)
                 }
-                Choreographer.getInstance().postFrameCallback(this)
             }
-        }
         Choreographer.getInstance().postFrameCallback(callback)
     }
 }
@@ -101,21 +102,9 @@ private fun Greeting() {
     LazyColumn(Modifier.semantics { contentDescription = "IamLazy" }) {
         items(1000) {
             LazyRow {
-                items(10) {
-                    Video(
-                        modifier = Modifier
-                            .width(200.dp)
-                            .height(120.dp)
-                            .padding(16.dp)
-                    )
-                }
+                items(10) { Video(modifier = Modifier.width(200.dp).height(120.dp).padding(16.dp)) }
             }
-            Box(
-                modifier = Modifier
-                    .height(1.dp)
-                    .fillMaxWidth()
-                    .background(Color.Black)
-            )
+            Box(modifier = Modifier.height(1.dp).fillMaxWidth().background(Color.Black))
         }
     }
 }
@@ -126,76 +115,71 @@ private fun Video(
     imageRes: Int = R.drawable.simple_image,
     duration: String = "100",
     onVideoClick: () -> Unit = {},
-    shimmerModifier: Modifier = Modifier
+    shimmerModifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = null,
-            onClick = onVideoClick
-        )
+        modifier =
+            modifier.clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onVideoClick,
+            )
     ) {
         VideoImageBox(
             modifier = Modifier.then(shimmerModifier),
             imageRes = imageRes,
-            duration = duration
+            duration = duration,
         )
     }
 }
 
 @Composable
-private fun VideoImageBox(
-    modifier: Modifier,
-    imageRes: Int,
-    duration: String,
-) {
+private fun VideoImageBox(modifier: Modifier, imageRes: Int, duration: String) {
     Card(
-        modifier = modifier
-            .aspectRatio(16f / 9)
-            .shadow(
-                elevation = 12.dp,
-                spotColor = Color.Gray,
-                shape = RoundedCornerShape(size = 12.dp)
-            )
+        modifier =
+            modifier
+                .aspectRatio(16f / 9)
+                .shadow(
+                    elevation = 12.dp,
+                    spotColor = Color.Gray,
+                    shape = RoundedCornerShape(size = 12.dp),
+                )
     ) {
         ConstraintLayout(Modifier.fillMaxSize()) {
             val (image, durationBox) = createRefs()
 
             AsyncImage(
-                modifier = Modifier.constrainAs(image) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.fillToConstraints
-                    height = Dimension.fillToConstraints
-                },
+                modifier =
+                    Modifier.constrainAs(image) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        width = Dimension.fillToConstraints
+                        height = Dimension.fillToConstraints
+                    },
                 model = imageRes,
                 contentDescription = null,
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
             )
 
             Row(
-                modifier = Modifier.constrainAs(durationBox) {
-                    bottom.linkTo(parent.bottom)
-                    end.linkTo(parent.end)
-                    width = Dimension.wrapContent
-                    height = Dimension.wrapContent
-                },
-                verticalAlignment = Alignment.CenterVertically
+                modifier =
+                    Modifier.constrainAs(durationBox) {
+                        bottom.linkTo(parent.bottom)
+                        end.linkTo(parent.end)
+                        width = Dimension.wrapContent
+                        height = Dimension.wrapContent
+                    },
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = duration,
-                    color = Color.White,
-                )
+                Text(text = duration, color = Color.White)
                 Spacer(modifier = Modifier.width(2.dp))
                 Icon(
-                    modifier = Modifier
-                        .size(12.dp)
-                        .padding(2.dp),
+                    modifier = Modifier.size(12.dp).padding(2.dp),
                     imageVector = Icons.Default.AccountBox,
                     contentDescription = null,
-                    tint = Color.White
+                    tint = Color.White,
                 )
             }
         }

@@ -47,19 +47,16 @@ fun ScrollingAndroidViewsDemo() {
         var checkedItems by remember { mutableStateOf(emptySet<Int>()) }
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = 16.dp),
         ) {
             Button(
                 onClick = { checkedItems = (0 until ItemCount).toSet() },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             ) {
                 Text("Check All")
             }
 
-            Button(
-                onClick = { checkedItems = emptySet() },
-                modifier = Modifier.weight(1f)
-            ) {
+            Button(onClick = { checkedItems = emptySet() }, modifier = Modifier.weight(1f)) {
                 Text("Uncheck All")
             }
         }
@@ -68,9 +65,8 @@ fun ScrollingAndroidViewsDemo() {
             checkedItems = checkedItems,
             onChangeCheck = { item, checked ->
                 @Suppress("SuspiciousCollectionReassignment")
-                if (checked) checkedItems += item
-                else checkedItems -= item
-            }
+                if (checked) checkedItems += item else checkedItems -= item
+            },
         )
     }
 }
@@ -78,7 +74,7 @@ fun ScrollingAndroidViewsDemo() {
 @Composable
 private fun RecyclingAndroidViewLazyColumn(
     checkedItems: Set<Int>,
-    onChangeCheck: (Int, Boolean) -> Unit
+    onChangeCheck: (Int, Boolean) -> Unit,
 ) {
     var allocationCounter by remember { mutableIntStateOf(0) }
     val resetViews = remember { mutableSetOf<View>() }
@@ -99,13 +95,10 @@ private fun RecyclingAndroidViewLazyColumn(
                         }
                 },
                 update = { view ->
-                    view.findViewById<TextView>(R.id.android_view_row_label).text =
-                        "Item $index"
+                    view.findViewById<TextView>(R.id.android_view_row_label).text = "Item $index"
 
                     view.findViewById<CheckBox>(R.id.android_view_row_checkbox).apply {
-                        setOnCheckedChangeListener { _, checked ->
-                            onChangeCheck(index, checked)
-                        }
+                        setOnCheckedChangeListener { _, checked -> onChangeCheck(index, checked) }
 
                         isChecked = index in checkedItems
                         if (view in resetViews) {
@@ -116,12 +109,8 @@ private fun RecyclingAndroidViewLazyColumn(
                         }
                     }
                 },
-                onReset = { view ->
-                    resetViews += view
-                },
-                onRelease = { view ->
-                    resetViews -= view
-                }
+                onReset = { view -> resetViews += view },
+                onRelease = { view -> resetViews -= view },
             )
         }
     }

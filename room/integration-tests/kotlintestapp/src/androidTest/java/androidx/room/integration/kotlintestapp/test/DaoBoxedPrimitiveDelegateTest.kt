@@ -65,73 +65,62 @@ class DaoBoxedPrimitiveDelegateTest {
     @Dao
     interface LongFooDao : BaseDao<Long, LongFoo> {
 
-        @Query("select * from longFoo where id=:id")
-        override fun getItem(id: Long): LongFoo?
+        @Query("select * from longFoo where id=:id") override fun getItem(id: Long): LongFoo?
 
         @Query("select * from longFoo where id=:id AND description=:desc")
         override fun getItemWithDescription(id: Long, desc: String): LongFoo?
 
-        @Query("delete from longFoo where id=:id")
-        override fun delete(id: Long)
+        @Query("delete from longFoo where id=:id") override fun delete(id: Long)
 
-        @Insert
-        fun insert(item: LongFoo)
+        @Insert fun insert(item: LongFoo)
 
-        @Query("select id from longFoo limit 1")
-        override fun getFirstItemId(): Long
+        @Query("select id from longFoo limit 1") override fun getFirstItemId(): Long
     }
 
     @Dao
     interface StringFooDao : BaseDao<String, StringFoo> {
 
-        @Query("select * from stringFoo where id=:id")
-        override fun getItem(id: String): StringFoo?
+        @Query("select * from stringFoo where id=:id") override fun getItem(id: String): StringFoo?
 
         @Query("select * from stringFoo where id=:id AND description=:desc")
         override fun getItemWithDescription(id: String, desc: String): StringFoo?
 
-        @Query("delete from stringFoo where id=:id")
-        override fun delete(id: String)
+        @Query("delete from stringFoo where id=:id") override fun delete(id: String)
 
-        @Insert
-        fun insert(item: StringFoo)
+        @Insert fun insert(item: StringFoo)
 
-        @Query("select id from stringFoo limit 1")
-        override fun getFirstItemId(): String
+        @Query("select id from stringFoo limit 1") override fun getFirstItemId(): String
     }
 
     @Dao
     interface ByteArrayFooDao : ByteArrayBaseDao<ByteArray> {
 
-        @Insert
-        fun insert(item: ByteArrayFoo)
+        @Insert fun insert(item: ByteArrayFoo)
 
-        @Query("select id from byteArrayFoo limit 1")
-        override fun getByteArray(): ByteArray
+        @Query("select id from byteArrayFoo limit 1") override fun getByteArray(): ByteArray
     }
 
     @Database(
         version = 1,
-        entities = [
-            LongFoo::class,
-            StringFoo::class,
-            ByteArrayFoo::class
-        ],
-        exportSchema = false
+        entities = [LongFoo::class, StringFoo::class, ByteArrayFoo::class],
+        exportSchema = false,
     )
     abstract class TestDatabase : RoomDatabase() {
         abstract fun longFooDao(): LongFooDao
+
         abstract fun stringFooDao(): StringFooDao
+
         abstract fun byteArrayFooDao(): ByteArrayFooDao
     }
 
     @Test
     fun testLongFooDao() {
-        val db = Room.inMemoryDatabaseBuilder(
-            InstrumentationRegistry.getInstrumentation()
-                .getTargetContext(),
-            TestDatabase::class.java
-        ).build()
+        val db =
+            Room.inMemoryDatabaseBuilder(
+                    InstrumentationRegistry.getInstrumentation().getTargetContext(),
+                    TestDatabase::class.java,
+                )
+                .build()
 
         val foo = LongFoo(1, "Elif")
         db.longFooDao().insert(foo)
@@ -139,15 +128,17 @@ class DaoBoxedPrimitiveDelegateTest {
         assertThat(db.longFooDao().getItem(1)).isEqualTo(foo)
         db.longFooDao().delete(1)
         assertThat(db.longFooDao().getItem(1)).isNull()
+        db.close()
     }
 
     @Test
     fun testStringFooDao() {
-        val db = Room.inMemoryDatabaseBuilder(
-            InstrumentationRegistry.getInstrumentation()
-                .getTargetContext(),
-            TestDatabase::class.java
-        ).build()
+        val db =
+            Room.inMemoryDatabaseBuilder(
+                    InstrumentationRegistry.getInstrumentation().getTargetContext(),
+                    TestDatabase::class.java,
+                )
+                .build()
 
         val foo = StringFoo("Key", "Elif")
         db.stringFooDao().insert(foo)
@@ -155,17 +146,20 @@ class DaoBoxedPrimitiveDelegateTest {
         assertThat(db.stringFooDao().getItem("Key")).isEqualTo(foo)
         db.stringFooDao().delete("Key")
         assertThat(db.stringFooDao().getItem("Key")).isNull()
+        db.close()
     }
 
     @Test
     fun testByteArrayFooDao() {
-        val db = Room.inMemoryDatabaseBuilder(
-            InstrumentationRegistry.getInstrumentation()
-                .getTargetContext(),
-            TestDatabase::class.java
-        ).build()
+        val db =
+            Room.inMemoryDatabaseBuilder(
+                    InstrumentationRegistry.getInstrumentation().getTargetContext(),
+                    TestDatabase::class.java,
+                )
+                .build()
         val foo = ByteArrayFoo(ByteArray(16), "Elif")
         db.byteArrayFooDao().insert(foo)
         assertThat(db.byteArrayFooDao().getByteArray()).isEqualTo(ByteArray(16))
+        db.close()
     }
 }

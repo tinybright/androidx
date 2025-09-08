@@ -29,10 +29,10 @@ internal class ProtoSerializer<T : MessageLite>(
     /** The default proto of this type, obtained via {@code T.getDefaultInstance()} */
     override val defaultValue: T,
     /**
-     *  Set the extensionRegistryLite to use when deserializing T. If no extension registry is
-     *  necessary, use {@code ExtensionRegistryLite.getEmptyRegistry()}.
+     * Set the extensionRegistryLite to use when deserializing T. If no extension registry is
+     * necessary, use {@code ExtensionRegistryLite.getEmptyRegistry()}.
      */
-    private val extensionRegistryLite: ExtensionRegistryLite
+    private val extensionRegistryLite: ExtensionRegistryLite,
 ) : Serializer<T> {
 
     @Suppress("UNCHECKED_CAST")
@@ -40,9 +40,7 @@ internal class ProtoSerializer<T : MessageLite>(
         try {
             return defaultValue.parserForType.parseFrom(input, extensionRegistryLite) as T
         } catch (invalidProtocolBufferException: InvalidProtocolBufferException) {
-            throw CorruptionException(
-                "Cannot read proto.", invalidProtocolBufferException
-            )
+            throw CorruptionException("Cannot read proto.", invalidProtocolBufferException)
         }
     }
 

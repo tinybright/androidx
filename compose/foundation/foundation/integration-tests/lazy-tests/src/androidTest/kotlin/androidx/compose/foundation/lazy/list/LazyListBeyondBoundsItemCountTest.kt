@@ -22,6 +22,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -48,11 +51,7 @@ class LazyListBeyondBoundsItemCountTest(config: Config) :
         val state = LazyListState(firstVisibleItem)
 
         // Act
-        setLazyListContent(state = state) {
-            items(ItemCount) {
-                ListItem(index = it)
-            }
-        }
+        setLazyListContent(state = state) { items(ItemCount) { ListItem(index = it) } }
 
         // Assert
         assertBeforeItemsArePlaced(state)
@@ -67,22 +66,40 @@ class LazyListBeyondBoundsItemCountTest(config: Config) :
     fun verifyItemsArePlacedBeforeAndAfterVisibleItemsAfterScroll() {
         // Arrange
         val state = LazyListState()
-        setLazyListContent(state = state) {
-            items(ItemCount) {
-                ListItem(index = it)
-            }
-        }
+        setLazyListContent(state = state) { items(ItemCount) { ListItem(index = it) } }
 
         // Act
-        rule.runOnIdle {
-            runBlocking {
-                state.scrollToItem(firstVisibleItem)
-            }
-        }
+        rule.runOnIdle { runBlocking { state.scrollToItem(firstVisibleItem) } }
 
         // Assert
         assertBeforeItemsArePlaced(state)
         repeat(state.layoutInfo.visibleItemsInfo.size) {
+            rule.onNodeWithTag("${firstVisibleItem + it}").assertIsDisplayed()
+        }
+        assertAfterItemsArePlaced(state)
+    }
+
+    @Test
+    fun verifyLazyListReactsOnBeyondBoundsItemCountChanges() {
+        // Arrange
+        val state = LazyListState(firstVisibleItem)
+        var dynamicBeyondBoundsItemCount by mutableStateOf(0)
+        rule.setContent {
+            LazyColumnOrRow(
+                modifier = Modifier.size(60.dp),
+                state = state,
+                content = { items(ItemCount) { ListItem(index = it) } },
+                beyondBoundsItemCount = dynamicBeyondBoundsItemCount,
+            )
+        }
+
+        // Act
+        rule.runOnIdle { runBlocking { dynamicBeyondBoundsItemCount = beyondBoundsItemCount } }
+
+        // Assert
+        assertBeforeItemsArePlaced(state)
+        val visibleItemsNumber = state.layoutInfo.visibleItemsInfo.size
+        repeat(visibleItemsNumber) {
             rule.onNodeWithTag("${firstVisibleItem + it}").assertIsDisplayed()
         }
         assertAfterItemsArePlaced(state)
@@ -112,7 +129,7 @@ class LazyListBeyondBoundsItemCountTest(config: Config) :
 
     private fun setLazyListContent(
         state: LazyListState? = null,
-        content: LazyListScope.() -> Unit
+        content: LazyListScope.() -> Unit,
     ) {
         val lazyListState = state ?: LazyListState()
         rule.setContent {
@@ -120,18 +137,14 @@ class LazyListBeyondBoundsItemCountTest(config: Config) :
                 modifier = Modifier.size(60.dp),
                 state = lazyListState,
                 content = content,
-                beyondBoundsItemCount = beyondBoundsItemCount
+                beyondBoundsItemCount = beyondBoundsItemCount,
             )
         }
     }
 
     @Composable
     private fun ListItem(index: Int) {
-        Box(
-            modifier = Modifier
-                .size(25.dp)
-                .testTag(index.toString())
-        )
+        Box(modifier = Modifier.size(25.dp).testTag(index.toString()))
     }
 
     companion object {
@@ -150,7 +163,7 @@ class LazyListBeyondBoundsItemCountTest(config: Config) :
         class Config(
             val orientation: Orientation,
             val beyondBoundsItemCount: Int,
-            val firstVisibleItem: Int
+            val firstVisibleItem: Int,
         ) {
             override fun toString(): String {
                 return "orientation=$orientation " +

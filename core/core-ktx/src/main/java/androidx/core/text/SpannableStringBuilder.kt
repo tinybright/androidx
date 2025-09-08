@@ -47,12 +47,12 @@ public inline fun buildSpannedString(
  * Wrap appended text in [builderAction] in [spans].
  *
  * Note: the spans will only have the correct position if the [builderAction] only appends or
- * replaces text. Inserting, deleting, or clearing the text will cause the span to be placed at
- * an incorrect position.
+ * replaces text. Inserting, deleting, or clearing the text will cause the span to be placed at an
+ * incorrect position.
  */
 public inline fun SpannableStringBuilder.inSpans(
     vararg spans: Any,
-    builderAction: SpannableStringBuilder.() -> Unit
+    builderAction: SpannableStringBuilder.() -> Unit,
 ): SpannableStringBuilder {
     val start = length
     builderAction()
@@ -64,12 +64,12 @@ public inline fun SpannableStringBuilder.inSpans(
  * Wrap appended text in [builderAction] in [span].
  *
  * Note: the span will only have the correct position if the `builderAction` only appends or
- * replaces text. Inserting, deleting, or clearing the text will cause the span to be placed at
- * an incorrect position.
+ * replaces text. Inserting, deleting, or clearing the text will cause the span to be placed at an
+ * incorrect position.
  */
 public inline fun SpannableStringBuilder.inSpans(
     span: Any,
-    builderAction: SpannableStringBuilder.() -> Unit
+    builderAction: SpannableStringBuilder.() -> Unit,
 ): SpannableStringBuilder {
     val start = length
     builderAction()
@@ -111,7 +111,7 @@ public inline fun SpannableStringBuilder.underline(
  */
 public inline fun SpannableStringBuilder.color(
     @ColorInt color: Int,
-    builderAction: SpannableStringBuilder.() -> Unit
+    builderAction: SpannableStringBuilder.() -> Unit,
 ): SpannableStringBuilder = inSpans(ForegroundColorSpan(color), builderAction = builderAction)
 
 /**
@@ -121,7 +121,7 @@ public inline fun SpannableStringBuilder.color(
  */
 public inline fun SpannableStringBuilder.backgroundColor(
     @ColorInt color: Int,
-    builderAction: SpannableStringBuilder.() -> Unit
+    builderAction: SpannableStringBuilder.() -> Unit,
 ): SpannableStringBuilder = inSpans(BackgroundColorSpan(color), builderAction = builderAction)
 
 /**
@@ -140,7 +140,7 @@ public inline fun SpannableStringBuilder.strikeThrough(
  */
 public inline fun SpannableStringBuilder.scale(
     proportion: Float,
-    builderAction: SpannableStringBuilder.() -> Unit
+    builderAction: SpannableStringBuilder.() -> Unit,
 ): SpannableStringBuilder = inSpans(RelativeSizeSpan(proportion), builderAction = builderAction)
 
 /**

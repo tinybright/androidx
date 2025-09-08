@@ -20,9 +20,9 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.ParentCapturingModifierNodeElement
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.BeyondBoundsLayout
@@ -32,8 +32,6 @@ import androidx.compose.ui.layout.BeyondBoundsLayout.LayoutDirection.Companion.B
 import androidx.compose.ui.layout.BeyondBoundsLayout.LayoutDirection.Companion.Below
 import androidx.compose.ui.layout.BeyondBoundsLayout.LayoutDirection.Companion.Left
 import androidx.compose.ui.layout.BeyondBoundsLayout.LayoutDirection.Companion.Right
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -55,7 +53,6 @@ class LazyListBeyondBoundsAndExtraItemsTest(val config: Config) :
     private val placementComparator =
         PlacementComparator(beyondBoundsLayoutDirection, layoutDirection, reverseLayout)
 
-    @OptIn(ExperimentalComposeUiApi::class)
     @Test
     fun verifyItemsArePlacedBeforeBeyondBoundsItems_oneBeyondBoundItem() {
         // Arrange
@@ -69,32 +66,19 @@ class LazyListBeyondBoundsAndExtraItemsTest(val config: Config) :
                     modifier = Modifier.size(30.dp),
                     state = lazyListState,
                     beyondBoundsItemCount = 1,
-                    reverseLayout = reverseLayout
+                    reverseLayout = reverseLayout,
                 ) {
-                    items(5) { index ->
-                        Box(
-                            Modifier
-                                .size(10.dp)
-                                .trackPlaced(index)
-                        )
-                    }
+                    items(5) { index -> Box(Modifier.size(10.dp).trackPlaced(index)) }
                     item {
                         Box(
-                            Modifier
-                                .size(10.dp)
+                            Modifier.size(10.dp)
                                 .trackPlaced(5)
-                                .modifierLocalConsumer {
-                                    beyondBoundsLayout = ModifierLocalBeyondBoundsLayout.current
-                                }
+                                .then(
+                                    ParentCapturingModifierNodeElement { beyondBoundsLayout = it }
+                                )
                         )
                     }
-                    items(5) { index ->
-                        Box(
-                            Modifier
-                                .size(10.dp)
-                                .trackPlaced(index + 6)
-                        )
-                    }
+                    items(5) { index -> Box(Modifier.size(10.dp).trackPlaced(index + 6)) }
                 }
             }
         }
@@ -123,7 +107,6 @@ class LazyListBeyondBoundsAndExtraItemsTest(val config: Config) :
         }
     }
 
-    @OptIn(ExperimentalComposeUiApi::class)
     @Test
     fun verifyItemsArePlacedBeforeBeyondBoundsItems_twoBeyondBoundItem() {
         // Arrange
@@ -138,32 +121,19 @@ class LazyListBeyondBoundsAndExtraItemsTest(val config: Config) :
                     modifier = Modifier.size(30.dp),
                     state = lazyListState,
                     beyondBoundsItemCount = 1,
-                    reverseLayout = reverseLayout
+                    reverseLayout = reverseLayout,
                 ) {
-                    items(5) { index ->
-                        Box(
-                            Modifier
-                                .size(10.dp)
-                                .trackPlaced(index)
-                        )
-                    }
+                    items(5) { index -> Box(Modifier.size(10.dp).trackPlaced(index)) }
                     item {
                         Box(
-                            Modifier
-                                .size(10.dp)
+                            Modifier.size(10.dp)
                                 .trackPlaced(5)
-                                .modifierLocalConsumer {
-                                    beyondBoundsLayout = ModifierLocalBeyondBoundsLayout.current
-                                }
+                                .then(
+                                    ParentCapturingModifierNodeElement { beyondBoundsLayout = it }
+                                )
                         )
                     }
-                    items(5) { index ->
-                        Box(
-                            Modifier
-                                .size(10.dp)
-                                .trackPlaced(index + 6)
-                        )
-                    }
+                    items(5) { index -> Box(Modifier.size(10.dp).trackPlaced(index + 6)) }
                 }
             }
         }
@@ -202,14 +172,8 @@ class LazyListBeyondBoundsAndExtraItemsTest(val config: Config) :
         @Parameterized.Parameters(name = "{0}")
         fun params() = buildList {
             for (orientation in listOf(Orientation.Horizontal, Orientation.Vertical)) {
-                for (beyondBoundsLayoutDirection in listOf(
-                    Left,
-                    Right,
-                    Above,
-                    Below,
-                    Before,
-                    After
-                )) {
+                for (beyondBoundsLayoutDirection in
+                    listOf(Left, Right, Above, Below, Before, After)) {
                     for (reverseLayout in listOf(false, true)) {
                         for (layoutDirection in listOf(LayoutDirection.Ltr, LayoutDirection.Rtl)) {
                             add(
@@ -217,7 +181,7 @@ class LazyListBeyondBoundsAndExtraItemsTest(val config: Config) :
                                     orientation,
                                     beyondBoundsLayoutDirection,
                                     reverseLayout,
-                                    layoutDirection
+                                    layoutDirection,
                                 )
                             )
                         }
@@ -230,7 +194,7 @@ class LazyListBeyondBoundsAndExtraItemsTest(val config: Config) :
             val orientation: Orientation,
             val beyondBoundsLayoutDirection: BeyondBoundsLayout.LayoutDirection,
             val reverseLayout: Boolean,
-            val layoutDirection: LayoutDirection
+            val layoutDirection: LayoutDirection,
         ) {
             override fun toString(): String {
                 return "orientation=$orientation " +
@@ -244,15 +208,16 @@ class LazyListBeyondBoundsAndExtraItemsTest(val config: Config) :
     private val LazyListState.visibleItems: List<Int>
         get() = layoutInfo.visibleItemsInfo.map { it.index }
 
-    private fun expectedExtraItemsBeforeVisibleBounds() = when (beyondBoundsLayoutDirection) {
-        Right -> if (layoutDirection == LayoutDirection.Ltr) reverseLayout else !reverseLayout
-        Left -> if (layoutDirection == LayoutDirection.Ltr) !reverseLayout else reverseLayout
-        Above -> !reverseLayout
-        Below -> reverseLayout
-        After -> false
-        Before -> true
-        else -> error("Unsupported BeyondBoundsDirection")
-    }
+    private fun expectedExtraItemsBeforeVisibleBounds() =
+        when (beyondBoundsLayoutDirection) {
+            Right -> if (layoutDirection == LayoutDirection.Ltr) reverseLayout else !reverseLayout
+            Left -> if (layoutDirection == LayoutDirection.Ltr) !reverseLayout else reverseLayout
+            Above -> !reverseLayout
+            Below -> reverseLayout
+            After -> false
+            Before -> true
+            else -> error("Unsupported BeyondBoundsDirection")
+        }
 
     private fun Modifier.trackPlaced(index: Int): Modifier =
         this then TrackPlacedElement(index, placedItems)

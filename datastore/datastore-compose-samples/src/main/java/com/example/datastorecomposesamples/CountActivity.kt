@@ -41,9 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.datastorecomposesamples.data.CountRepository
 import com.example.datastorecomposesamples.data.CountState
 
-/**
- * Main activity for displaying the counts, and allowing them to be changed.
- */
+/** Main activity for displaying the counts, and allowing them to be changed. */
 class CountActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,32 +60,29 @@ class CountActivity : ComponentActivity() {
 
         setContent {
             val coroutineScope = rememberCoroutineScope()
-            val countState: CountState by repo.countStateFlow.collectAsState(
-                CountState(0),
-                coroutineScope.coroutineContext
-            )
-            val countProtoState: CountState by repo.countProtoStateFlow.collectAsState(
-                CountState(0),
-                coroutineScope.coroutineContext
-            )
+            val countState: CountState by
+                repo.countStateFlow.collectAsState(CountState(0), coroutineScope.coroutineContext)
+            val countProtoState: CountState by
+                repo.countProtoStateFlow.collectAsState(
+                    CountState(0),
+                    coroutineScope.coroutineContext,
+                )
             MaterialTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(
-                    color = MaterialTheme.colors.background
-                ) {
+                Surface(color = MaterialTheme.colors.background) {
                     Column {
                         Counters(
                             title = getString(R.string.preference_counter),
                             count = countState.count,
                             onIncrement = repo::incrementPreferenceCount,
-                            onDecrement = repo::decrementPreferenceCount
+                            onDecrement = repo::decrementPreferenceCount,
                         )
                         Divider()
                         Counters(
                             title = getString(R.string.proto_counter),
                             count = countProtoState.count,
                             onIncrement = repo::incrementProtoCount,
-                            onDecrement = repo::decrementProtoCount
+                            onDecrement = repo::decrementProtoCount,
                         )
                     }
                 }
@@ -99,19 +94,11 @@ class CountActivity : ComponentActivity() {
 @Composable
 fun Counters(title: String, count: Int, onIncrement: () -> Unit, onDecrement: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
         Text(title, fontWeight = FontWeight.Bold)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-        ) {
-            Button(onClick = onDecrement) {
-                Text(stringResource(id = R.string.count_minus))
-            }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            Button(onClick = onDecrement) { Text(stringResource(id = R.string.count_minus)) }
             Text(text = "${stringResource(R.string.count_colon)} $count")
-            Button(onClick = onIncrement) {
-                Text(stringResource(id = R.string.count_plus))
-            }
+            Button(onClick = onIncrement) { Text(stringResource(id = R.string.count_plus)) }
         }
     }
 }
@@ -119,7 +106,5 @@ fun Counters(title: String, count: Int, onIncrement: () -> Unit, onDecrement: ()
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    MaterialTheme {
-        Counters("test", 1, {}, {})
-    }
+    MaterialTheme { Counters("test", 1, {}, {}) }
 }

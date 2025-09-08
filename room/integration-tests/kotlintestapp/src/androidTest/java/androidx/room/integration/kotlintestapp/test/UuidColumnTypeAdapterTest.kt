@@ -41,26 +41,28 @@ import org.junit.runner.RunWith
 class UuidColumnTypeAdapterTest {
 
     @Test
-    fun byte_noSuppliedConverter_insertWithQuery() = runTest(NoConverterDatabase::class) { dao, _ ->
-        // database has no converters supplied
-        val uuid = UUID.randomUUID()
+    fun byte_noSuppliedConverter_insertWithQuery() =
+        runTest(NoConverterDatabase::class) { dao, _ ->
+            // database has no converters supplied
+            val uuid = UUID.randomUUID()
 
-        dao.insertWithQuery(uuid)
+            dao.insertWithQuery(uuid)
 
-        val retrieved = dao.getEntity(uuid).id
-        assertThat(retrieved).isEqualTo(uuid)
-    }
+            val retrieved = dao.getEntity(uuid).id
+            assertThat(retrieved).isEqualTo(uuid)
+        }
 
     @Test
-    fun byte_noSuppliedConverter_insertEntity() = runTest(NoConverterDatabase::class) { dao, _ ->
-        // database has no converters supplied
-        val uuid = UUID.randomUUID()
+    fun byte_noSuppliedConverter_insertEntity() =
+        runTest(NoConverterDatabase::class) { dao, _ ->
+            // database has no converters supplied
+            val uuid = UUID.randomUUID()
 
-        dao.insert(UUIDEntity(uuid))
+            dao.insert(UUIDEntity(uuid))
 
-        val retrieved = dao.getEntity(uuid).id
-        assertThat(retrieved).isEqualTo(uuid)
-    }
+            val retrieved = dao.getEntity(uuid).id
+            assertThat(retrieved).isEqualTo(uuid)
+        }
 
     @Test
     fun byte_suppliedFromByteConverter_insertWithQuery() =
@@ -173,9 +175,7 @@ class UuidColumnTypeAdapterTest {
             // converting into UUID
             val retrieved = dao.getEntity(uuid).id
 
-            val newText = text
-                .replaceFirst('8', '5')
-                .replaceFirst('6', '2')
+            val newText = text.replaceFirst('8', '5').replaceFirst('6', '2')
             val expected = UUID.fromString(newText)
 
             assertThat(retrieved).isEqualTo(expected)
@@ -194,22 +194,16 @@ class UuidColumnTypeAdapterTest {
             // converting into UUID
             val retrieved = dao.getEntity(uuid).id
 
-            val newText = text
-                .replaceFirst('8', '5')
-                .replaceFirst('6', '2')
+            val newText = text.replaceFirst('8', '5').replaceFirst('6', '2')
             val expected = UUID.fromString(newText)
 
             assertThat(retrieved).isEqualTo(expected)
         }
 
-    private fun runTest(
-        kClass: KClass<out ConverterDb>,
-        block: (ByteDao, StringDao) -> Unit,
-    ) {
-        val db = Room.inMemoryDatabaseBuilder(
-            ApplicationProvider.getApplicationContext(),
-            kClass.java,
-        ).build()
+    private fun runTest(kClass: KClass<out ConverterDb>, block: (ByteDao, StringDao) -> Unit) {
+        val db =
+            Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(), kClass.java)
+                .build()
 
         try {
             block(db.dao(), db.stringDao())
@@ -218,35 +212,25 @@ class UuidColumnTypeAdapterTest {
         }
     }
 
-    @Entity
-    data class UUIDEntity(
-        @PrimaryKey
-        val id: UUID,
-    )
+    @Entity data class UUIDEntity(@PrimaryKey val id: UUID)
 
     @Entity
     data class UUIDStringEntity(
-        @PrimaryKey
-        @ColumnInfo(typeAffinity = ColumnInfo.TEXT)
-        val id: UUID,
+        @PrimaryKey @ColumnInfo(typeAffinity = ColumnInfo.TEXT) val id: UUID
     )
 
     @Dao
     interface ByteDao {
-        @Insert
-        fun insert(byteEntity: UUIDEntity)
+        @Insert fun insert(byteEntity: UUIDEntity)
 
-        @Query("INSERT INTO UUIDEntity (id) VALUES (:uuid)")
-        fun insertWithQuery(uuid: UUID): Long
+        @Query("INSERT INTO UUIDEntity (id) VALUES (:uuid)") fun insertWithQuery(uuid: UUID): Long
 
-        @Query("SELECT * FROM UUIDEntity WHERE id = :uuid")
-        fun getEntity(uuid: UUID): UUIDEntity
+        @Query("SELECT * FROM UUIDEntity WHERE id = :uuid") fun getEntity(uuid: UUID): UUIDEntity
     }
 
     @Dao
     interface StringDao {
-        @Insert
-        fun insert(byteEntity: UUIDStringEntity)
+        @Insert fun insert(byteEntity: UUIDStringEntity)
 
         @Query("INSERT INTO UUIDStringEntity (id) VALUES (:uuid)")
         fun insertWithQuery(uuid: UUID): Long
@@ -257,6 +241,7 @@ class UuidColumnTypeAdapterTest {
 
     internal abstract class ConverterDb : RoomDatabase() {
         abstract fun dao(): ByteDao
+
         abstract fun stringDao(): StringDao
     }
 
@@ -264,7 +249,7 @@ class UuidColumnTypeAdapterTest {
     @Database(
         entities = [UUIDEntity::class, UUIDStringEntity::class],
         version = 1,
-        exportSchema = false
+        exportSchema = false,
     )
     internal abstract class NoConverterDatabase : ConverterDb()
 
@@ -272,7 +257,7 @@ class UuidColumnTypeAdapterTest {
     @Database(
         entities = [UUIDEntity::class, UUIDStringEntity::class],
         version = 1,
-        exportSchema = false
+        exportSchema = false,
     )
     @TypeConverters(FromByteConverter::class)
     internal abstract class ToUUIDConverterDatabase : ConverterDb()
@@ -281,7 +266,7 @@ class UuidColumnTypeAdapterTest {
     @Database(
         entities = [UUIDEntity::class, UUIDStringEntity::class],
         version = 1,
-        exportSchema = false
+        exportSchema = false,
     )
     @TypeConverters(TwoWayConverter::class)
     internal abstract class TwoWayConverterDatabase : ConverterDb()
@@ -290,7 +275,7 @@ class UuidColumnTypeAdapterTest {
     @Database(
         entities = [UUIDEntity::class, UUIDStringEntity::class],
         version = 1,
-        exportSchema = false
+        exportSchema = false,
     )
     @TypeConverters(TwoWayStringConverter::class)
     internal abstract class TwoWayStringConverterDatabase : ConverterDb()

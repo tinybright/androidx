@@ -16,7 +16,6 @@
 
 package androidx.compose.foundation.text.input.internal.selection.gesture
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.isPlatformMagnifierSupported
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -70,7 +69,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
-import androidx.test.filters.SdkSuppress
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.fail
 import org.junit.Rule
@@ -82,12 +80,10 @@ import org.junit.runner.RunWith
  *
  * Regression test for b/314385218.
  */
-@ExperimentalFoundationApi
 @MediumTest
 @RunWith(AndroidJUnit4::class)
 class TextFieldScrolledSelectionGestureTest : FocusedWindowTest {
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     private val fontFamily = TEST_FONT_FAMILY
     private val fontSize = 15.sp
@@ -99,17 +95,13 @@ class TextFieldScrolledSelectionGestureTest : FocusedWindowTest {
         rule.setTextFieldTestContent {
             CompositionLocalProvider(
                 LocalDensity provides density,
-                LocalViewConfiguration provides TestViewConfiguration(
-                    minimumTouchTargetSize = DpSize.Zero,
-                    touchSlop = Float.MIN_VALUE,
-                ),
+                LocalViewConfiguration provides
+                    TestViewConfiguration(
+                        minimumTouchTargetSize = DpSize.Zero,
+                        touchSlop = Float.MIN_VALUE,
+                    ),
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(32.dp)
-                        .wrapContentSize()
-                ) {
+                Box(modifier = Modifier.fillMaxSize().padding(32.dp).wrapContentSize()) {
                     content(pointerAreaTag)
                 }
             }
@@ -124,20 +116,22 @@ class TextFieldScrolledSelectionGestureTest : FocusedWindowTest {
         /** Returns the offset needed to translate the amount scrolled. */
         abstract fun TextLayoutResult.translateScroll(): Offset
 
-        fun characterBoxScrolled(offset: Int): Rect = onTextField.fetchTextLayoutResult().run {
-            getBoundingBox(offset).translate(translateScroll())
-        }
+        fun characterBoxScrolled(offset: Int): Rect =
+            onTextField.fetchTextLayoutResult().run {
+                getBoundingBox(offset).translate(translateScroll())
+            }
 
         fun positionForCharacterScrolled(offset: Int): Offset =
             characterBoxScrolled(offset).centerLeft
 
         fun HandlePressedScope.moveHandleToCharacter(characterOffset: Int) {
             val boundingBox = onTextField.fetchTextLayoutResult().getBoundingBox(characterOffset)
-            val destinationPosition = when (fetchHandleInfo().handle) {
-                Handle.SelectionStart -> boundingBox.bottomLeft
-                Handle.SelectionEnd -> boundingBox.bottomRight
-                Handle.Cursor -> fail("Unexpected handle ${Handle.Cursor}")
-            }
+            val destinationPosition =
+                when (fetchHandleInfo().handle) {
+                    Handle.SelectionStart -> boundingBox.bottomLeft
+                    Handle.SelectionEnd -> boundingBox.bottomRight
+                    Handle.Cursor -> fail("Unexpected handle ${Handle.Cursor}")
+                }
             moveHandleTo(destinationPosition)
         }
 
@@ -186,11 +180,11 @@ class TextFieldScrolledSelectionGestureTest : FocusedWindowTest {
                 state = tfs,
                 textStyle = textStyle,
                 lineLimits = TextFieldLineLimits.SingleLine,
-                modifier = Modifier
-                    .width(300.dp)
-                    .testTag(tag = tag)
-                    .onSizeChanged { sizeNullable!!.value = it }
-                    .onGloballyPositioned { textFieldLayoutCoordinates = it }
+                modifier =
+                    Modifier.width(300.dp)
+                        .testTag(tag = tag)
+                        .onSizeChanged { sizeNullable!!.value = it }
+                        .onGloballyPositioned { textFieldLayoutCoordinates = it },
             )
         }
         val onTextField = rule.onNodeWithTag(pointerAreaTag)
@@ -262,9 +256,7 @@ class TextFieldScrolledSelectionGestureTest : FocusedWindowTest {
         }
     }
 
-    /**
-     * Create a horizontally scrollable text field that is scrolled all the way to the end.
-     */
+    /** Create a horizontally scrollable text field that is scrolled all the way to the end. */
     private fun runVerticalTest(block: VerticalScope.() -> Unit) {
         val text = (0..9).joinToString(separator = "\n") { "text$it" }
         lateinit var textFieldLayoutCoordinates: LayoutCoordinates
@@ -277,11 +269,11 @@ class TextFieldScrolledSelectionGestureTest : FocusedWindowTest {
                 state = tfs,
                 textStyle = TextStyle(fontFamily = fontFamily, fontSize = fontSize),
                 lineLimits = TextFieldLineLimits.MultiLine(maxHeightInLines = 4),
-                modifier = Modifier
-                    .width(300.dp)
-                    .testTag(tag = tag)
-                    .onSizeChanged { sizeNullable!!.value = it }
-                    .onGloballyPositioned { textFieldLayoutCoordinates = it }
+                modifier =
+                    Modifier.width(300.dp)
+                        .testTag(tag = tag)
+                        .onSizeChanged { sizeNullable!!.value = it }
+                        .onGloballyPositioned { textFieldLayoutCoordinates = it },
             )
         }
         assertThat(sizeNullable).isNotNull()
@@ -322,7 +314,6 @@ class TextFieldScrolledSelectionGestureTest : FocusedWindowTest {
     // TODO(b/316940648)
     //  The TextToolbar at the top of the screen messes up the popup position calculations,
     //  so suppress SDKs that don't have the floating popup.
-    @SdkSuppress(minSdkVersion = 23)
     @Test
     fun whenVerticalScroll_handleGesture_drag() = runVerticalTest {
         // select "text8".

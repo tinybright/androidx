@@ -49,14 +49,19 @@ public class SearchResultsImplTest {
 
     @Before
     public void setUp() throws Exception {
+        AppSearchConfig config = new AppSearchConfigImpl(
+                new UnlimitedLimitConfig(),
+                new LocalStorageIcingOptionsConfig()
+        );
         mAppSearchImpl = AppSearchImpl.create(
                 mTemporaryFolder.newFolder(),
-                new AppSearchConfigImpl(
-                        new UnlimitedLimitConfig(),
-                        new LocalStorageIcingOptionsConfig()
-                ),
-                /*initStatsBuilder=*/ null, ALWAYS_OPTIMIZE,
-                /*visibilityChecker=*/null);
+                config,
+                /*initStatsBuilder=*/ null,
+                /*callStatsBuilder=*/ null,
+                /*visibilityChecker=*/ null,
+                /*revocableFileDescriptorStore=*/ null,
+                /*icingSearchEngine=*/ null,
+                ALWAYS_OPTIMIZE);
     }
 
     @After
@@ -65,6 +70,7 @@ public class SearchResultsImplTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation") // AppSearchImpl.putDocument
     public void testGetEmptyNextPage() throws Exception {
         // Insert package1 schema
         List<AppSearchSchema> schema1 =
@@ -76,7 +82,8 @@ public class SearchResultsImplTest {
                 /*visibilityDocuments=*/ Collections.emptyList(),
                 /*forceOverride=*/ false,
                 /*version=*/ 0,
-                /* setSchemaStatsBuilder= */ null);
+                /* setSchemaStatsBuilder= */ null,
+                /*callStatsBuilder=*/ null);
         assertThat(internalSetSchemaResponse.isSuccess()).isTrue();
 
         // Insert one package1 documents
@@ -87,7 +94,8 @@ public class SearchResultsImplTest {
                 "database1",
                 document1,
                 /*sendChangeNotifications=*/ false,
-                /*logger=*/ null);
+                /*logger=*/ null,
+                /*callStatsBuilder=*/ null);
 
         // Query for only 1 result per page
         SearchSpec searchSpec = new SearchSpec.Builder()
@@ -114,6 +122,7 @@ public class SearchResultsImplTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation") // AppSearchImpl.putDocument
     public void testGetEmptyNextPage_multiPages() throws Exception {
         // Insert package1 schema
         List<AppSearchSchema> schema1 =
@@ -125,7 +134,8 @@ public class SearchResultsImplTest {
                 /*visibilityDocuments=*/ Collections.emptyList(),
                 /*forceOverride=*/ false,
                 /*version=*/ 0,
-                /* setSchemaStatsBuilder= */ null);
+                /* setSchemaStatsBuilder= */ null,
+                /*callStatsBuilder=*/ null);
         assertThat(internalSetSchemaResponse.isSuccess()).isTrue();
 
         // Insert 3 package1 documents
@@ -140,19 +150,22 @@ public class SearchResultsImplTest {
                 "database1",
                 document1,
                 /*sendChangeNotifications=*/ false,
-                /*logger=*/ null);
+                /*logger=*/ null,
+                /*callStatsBuilder=*/ null);
         mAppSearchImpl.putDocument(
                 "package1",
                 "database1",
                 document2,
                 /*sendChangeNotifications=*/ false,
-                /*logger=*/ null);
+                /*logger=*/ null,
+                /*callStatsBuilder=*/ null);
         mAppSearchImpl.putDocument(
                 "package1",
                 "database1",
                 document3,
                 /*sendChangeNotifications=*/ false,
-                /*logger=*/ null);
+                /*logger=*/ null,
+                /*callStatsBuilder=*/ null);
 
         // Query for only 2 result per page
         SearchSpec searchSpec = new SearchSpec.Builder()

@@ -19,17 +19,14 @@ package androidx.room.solver.query.parameter
 import androidx.room.solver.CodeGenScope
 import androidx.room.solver.types.StatementValueBinder
 
-/**
- * Knows how to convert a query parameter into arguments
- */
-class BasicQueryParameterAdapter(
-    private val bindAdapter: StatementValueBinder
-) : QueryParameterAdapter(false) {
+/** Knows how to convert a query parameter into arguments */
+class BasicQueryParameterAdapter(private val bindAdapter: StatementValueBinder) :
+    QueryParameterAdapter(false) {
     override fun bindToStmt(
         inputVarName: String,
         stmtVarName: String,
         startIndexVarName: String,
-        scope: CodeGenScope
+        scope: CodeGenScope,
     ) {
         scope.builder.apply {
             bindAdapter.bindToStmt(stmtVarName, startIndexVarName, inputVarName, scope)

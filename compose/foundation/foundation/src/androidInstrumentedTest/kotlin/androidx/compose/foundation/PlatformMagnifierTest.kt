@@ -46,8 +46,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class PlatformMagnifierTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     @SdkSuppress(minSdkVersion = 29)
     @Test
@@ -57,13 +56,11 @@ class PlatformMagnifierTest {
             magnifier.update(
                 sourceCenter = Offset.Zero,
                 magnifierCenter = Offset.Unspecified,
-                zoom = Float.NaN
+                zoom = Float.NaN,
             )
         }
 
-        rule.runOnIdle {
-            assertThat(magnifier.magnifier.position).isEqualTo(Point(0, 0))
-        }
+        rule.runOnIdle { assertThat(magnifier.magnifier.position).isEqualTo(Point(0, 0)) }
     }
 
     @SdkSuppress(minSdkVersion = 29)
@@ -74,7 +71,7 @@ class PlatformMagnifierTest {
             magnifier.update(
                 sourceCenter = Offset.Zero,
                 magnifierCenter = Offset.Unspecified,
-                zoom = 1f
+                zoom = 1f,
             )
 
             assertThat(magnifier.magnifier.zoom).isEqualTo(1f)
@@ -82,7 +79,7 @@ class PlatformMagnifierTest {
             magnifier.update(
                 sourceCenter = Offset.Zero,
                 magnifierCenter = Offset.Unspecified,
-                zoom = 2f
+                zoom = 2f,
             )
 
             assertThat(magnifier.magnifier.zoom).isEqualTo(2f)
@@ -97,7 +94,7 @@ class PlatformMagnifierTest {
             magnifier.update(
                 sourceCenter = Offset.Zero,
                 magnifierCenter = Offset.Unspecified,
-                zoom = 1f
+                zoom = 1f,
             )
 
             assertThat(magnifier.magnifier.zoom).isEqualTo(1f)
@@ -105,7 +102,7 @@ class PlatformMagnifierTest {
             magnifier.update(
                 sourceCenter = Offset.Zero,
                 magnifierCenter = Offset.Unspecified,
-                zoom = Float.NaN
+                zoom = Float.NaN,
             )
 
             assertThat(magnifier.magnifier.zoom).isEqualTo(1f)
@@ -120,7 +117,7 @@ class PlatformMagnifierTest {
             magnifier.update(
                 sourceCenter = Offset.Zero,
                 magnifierCenter = VIEW_SIZE.center.toOffset(),
-                zoom = Float.NaN
+                zoom = Float.NaN,
             )
         }
 
@@ -147,14 +144,14 @@ class PlatformMagnifierTest {
             magnifier.update(
                 sourceCenter = VIEW_SIZE.center.toOffset(),
                 magnifierCenter = Offset.Unspecified,
-                zoom = Float.NaN
+                zoom = Float.NaN,
             )
             val initialMagnifierPosition = magnifier.magnifier.position!!.toIntOffset()
 
             magnifier.update(
                 sourceCenter = (VIEW_SIZE.center + magnifierDelta).toOffset(),
                 magnifierCenter = Offset.Unspecified,
-                zoom = Float.NaN
+                zoom = Float.NaN,
             )
 
             assertThat(magnifier.magnifier.position!!.toIntOffset())
@@ -175,9 +172,10 @@ class PlatformMagnifierTest {
     @Test
     fun androidPlatformMagnifier_usesRequestedSize() {
         val magnifierSize = IntSize(10, 11)
-        val magnifier = with(rule.density) {
-            createAndroidPlatformMagnifier(size = magnifierSize.toSize().toDpSize())
-        }
+        val magnifier =
+            with(rule.density) {
+                createAndroidPlatformMagnifier(size = magnifierSize.toSize().toDpSize())
+            }
         assertThat(magnifier.size).isEqualTo(magnifierSize)
     }
 
@@ -194,16 +192,18 @@ class PlatformMagnifierTest {
                 val density = LocalDensity.current
 
                 DisposableEffect(Unit) {
-                    magnifier = PlatformMagnifierFactory.getForCurrentPlatform().create(
-                        view = currentView,
-                        density = density,
-                        initialZoom = Float.NaN,
-                        useTextDefault = false,
-                        size = size,
-                        cornerRadius = Dp.Unspecified,
-                        elevation = Dp.Unspecified,
-                        clippingEnabled = true,
-                    ) as PlatformMagnifierFactoryApi28Impl.PlatformMagnifierImpl
+                    magnifier =
+                        PlatformMagnifierFactory.getForCurrentPlatform()
+                            .create(
+                                view = currentView,
+                                density = density,
+                                initialZoom = Float.NaN,
+                                useTextDefault = false,
+                                size = size,
+                                cornerRadius = Dp.Unspecified,
+                                elevation = Dp.Unspecified,
+                                clippingEnabled = true,
+                            ) as PlatformMagnifierFactoryApi28Impl.PlatformMagnifierImpl
                     onDispose {}
                 }
             }

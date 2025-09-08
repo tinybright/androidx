@@ -20,10 +20,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.pointer.util.VelocityTrackerStrategyUseImpulse
+import androidx.compose.ui.input.pointer.util.ExperimentalVelocityTrackerApi
 import androidx.compose.ui.test.InputDispatcher.Companion.eventPeriodMillis
 import androidx.compose.ui.test.TouchInjectionScope
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -49,17 +48,15 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 /**
- * Test for [TouchInjectionScope.swipeWithVelocity] to see if we can generate gestures that end
- * with a specific velocity. Note that the "engine" is already extensively tested in
+ * Test for [TouchInjectionScope.swipeWithVelocity] to see if we can generate gestures that end with
+ * a specific velocity. Note that the "engine" is already extensively tested in
  * [VelocityPathFinderTest], so all we need to do here is verify a few swipes.
  */
+@OptIn(ExperimentalVelocityTrackerApi::class)
 @MediumTest
 @RunWith(Parameterized::class)
 class SwipeWithVelocityTest(private val config: TestConfig) {
-    data class TestConfig(
-        val durationMillis: Long,
-        val velocity: Float
-    )
+    data class TestConfig(val durationMillis: Long, val velocity: Float)
 
     companion object {
         @JvmStatic
@@ -85,19 +82,14 @@ class SwipeWithVelocityTest(private val config: TestConfig) {
         private val end = Offset(boxEnd, boxMiddle)
     }
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     private val recorder = SinglePointerInputRecorder()
 
-    @OptIn(ExperimentalComposeUiApi::class)
     @Test
     fun swipeWithVelocity() {
         rule.setContent {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .wrapContentSize(Alignment.BottomEnd)) {
+            Box(Modifier.fillMaxSize().wrapContentSize(Alignment.BottomEnd)) {
                 ClickableTestBox(recorder, boxSize, boxSize, tag = tag)
             }
         }
@@ -124,18 +116,10 @@ class SwipeWithVelocityTest(private val config: TestConfig) {
                 assertTimestampsAreIncreasing()
                 assertThat(recordedDurationMillis).isEqualTo(config.durationMillis)
 
-                if (VelocityTrackerStrategyUseImpulse) {
-                    // Check velocity
-                    // Swipe goes from left to right, so vx = velocity (within 5%) and vy = 0
-                    assertThat(recordedVelocity.x).isWithin(0.05f * config.velocity)
-                        .of(config.velocity)
-                    assertThat(recordedVelocity.y).isWithin(.1f).of(0f)
-                } else {
-                    // Check velocity
-                    // Swipe goes from left to right, so vx = velocity and vy = 0
-                    assertThat(recordedVelocity.x).isWithin(.1f).of(config.velocity)
-                    assertThat(recordedVelocity.y).isWithin(.1f).of(0f)
-                }
+                // Check velocity
+                // Swipe goes from left to right, so vx = velocity and vy = 0
+                assertThat(recordedVelocity.x).isWithin(.1f).of(config.velocity)
+                assertThat(recordedVelocity.y).isWithin(.1f).of(0f)
             }
         }
     }

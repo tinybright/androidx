@@ -16,7 +16,6 @@
 
 package androidx.tv.material3
 
-import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -49,13 +48,11 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalTvMaterial3Api::class)
 @MediumTest
 @RunWith(AndroidJUnit4::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 class CardContainerScreenshotTest {
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(TV_GOLDEN_MATERIAL3)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(TV_GOLDEN_MATERIAL3)
 
     private val boxSizeModifier = Modifier.size(220.dp, 180.dp)
     private val standardCardContainerSizeModifier = Modifier.size(150.dp, 120.dp)
@@ -67,23 +64,16 @@ class CardContainerScreenshotTest {
             LightMaterialTheme {
                 Box(
                     modifier = boxSizeModifier.testTag(CardContainerWrapperTag),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     StandardCardContainer(
                         modifier = standardCardContainerSizeModifier,
                         imageCard = { interactionSource ->
-                            Card(
-                                onClick = { },
-                                interactionSource = interactionSource
-                            ) {
-                                SampleImage(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .height(80.dp)
-                                )
+                            Card(onClick = {}, interactionSource = interactionSource) {
+                                SampleImage(Modifier.fillMaxWidth().height(80.dp))
                             }
                         },
-                        title = { Text("Standard Card") }
+                        title = { Text("Standard Card") },
                     )
                 }
             }
@@ -98,23 +88,16 @@ class CardContainerScreenshotTest {
             DarkMaterialTheme {
                 Box(
                     modifier = boxSizeModifier.testTag(CardContainerWrapperTag),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     StandardCardContainer(
                         modifier = standardCardContainerSizeModifier,
                         imageCard = { interactionSource ->
-                            Card(
-                                onClick = { },
-                                interactionSource = interactionSource
-                            ) {
-                                SampleImage(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .height(80.dp)
-                                )
+                            Card(onClick = {}, interactionSource = interactionSource) {
+                                SampleImage(Modifier.fillMaxWidth().height(80.dp))
                             }
                         },
-                        title = { Text("Standard Card") }
+                        title = { Text("Standard Card") },
                     )
                 }
             }
@@ -127,33 +110,25 @@ class CardContainerScreenshotTest {
     fun standardCardContainer_focused() {
         rule.setContent {
             Box(
-                modifier = boxSizeModifier
-                    .testTag(CardContainerWrapperTag)
-                    .semantics(mergeDescendants = true) {},
-                contentAlignment = Alignment.Center
+                modifier =
+                    boxSizeModifier.testTag(CardContainerWrapperTag).semantics(
+                        mergeDescendants = true
+                    ) {},
+                contentAlignment = Alignment.Center,
             ) {
                 StandardCardContainer(
                     modifier = standardCardContainerSizeModifier,
                     imageCard = { interactionSource ->
-                        Card(
-                            onClick = { },
-                            interactionSource = interactionSource
-                        ) {
-                            SampleImage(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(80.dp)
-                            )
+                        Card(onClick = {}, interactionSource = interactionSource) {
+                            SampleImage(Modifier.fillMaxWidth().height(80.dp))
                         }
                     },
-                    title = { Text("Standard Card", Modifier.padding(top = 5.dp)) }
+                    title = { Text("Standard Card", Modifier.padding(top = 5.dp)) },
                 )
             }
         }
 
-        rule.onNodeWithTag(CardContainerWrapperTag)
-            .onChild()
-            .requestFocus()
+        rule.onNodeWithTag(CardContainerWrapperTag).onChild().requestFocus()
         rule.waitForIdle()
 
         assertAgainstGolden("standardCardContainer_focused")
@@ -165,20 +140,13 @@ class CardContainerScreenshotTest {
             LightMaterialTheme {
                 Box(
                     modifier = boxSizeModifier.testTag(CardContainerWrapperTag),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     WideCardContainer(
                         modifier = wideCardContainerSizeModifier,
                         imageCard = { interactionSource ->
-                            Card(
-                                onClick = { },
-                                interactionSource = interactionSource
-                            ) {
-                                SampleImage(
-                                    Modifier
-                                        .fillMaxHeight()
-                                        .width(90.dp)
-                                )
+                            Card(onClick = {}, interactionSource = interactionSource) {
+                                SampleImage(Modifier.fillMaxHeight().width(90.dp))
                             }
                         },
                         title = { Text("Wide Card", Modifier.padding(start = 8.dp)) },
@@ -196,20 +164,13 @@ class CardContainerScreenshotTest {
             DarkMaterialTheme {
                 Box(
                     modifier = boxSizeModifier.testTag(CardContainerWrapperTag),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     WideCardContainer(
                         modifier = wideCardContainerSizeModifier,
                         imageCard = { interactionSource ->
-                            Card(
-                                onClick = { },
-                                interactionSource = interactionSource
-                            ) {
-                                SampleImage(
-                                    Modifier
-                                        .fillMaxHeight()
-                                        .width(90.dp)
-                                )
+                            Card(onClick = {}, interactionSource = interactionSource) {
+                                SampleImage(Modifier.fillMaxHeight().width(90.dp))
                             }
                         },
                         title = { Text("Wide Card", Modifier.padding(start = 8.dp)) },
@@ -225,23 +186,17 @@ class CardContainerScreenshotTest {
     fun wideCardContainer_focused() {
         rule.setContent {
             Box(
-                modifier = boxSizeModifier
-                    .testTag(CardContainerWrapperTag)
-                    .semantics(mergeDescendants = true) {},
-                contentAlignment = Alignment.Center
+                modifier =
+                    boxSizeModifier.testTag(CardContainerWrapperTag).semantics(
+                        mergeDescendants = true
+                    ) {},
+                contentAlignment = Alignment.Center,
             ) {
                 WideCardContainer(
                     modifier = wideCardContainerSizeModifier,
                     imageCard = { interactionSource ->
-                        Card(
-                            onClick = { },
-                            interactionSource = interactionSource
-                        ) {
-                            SampleImage(
-                                Modifier
-                                    .fillMaxHeight()
-                                    .width(90.dp)
-                            )
+                        Card(onClick = {}, interactionSource = interactionSource) {
+                            SampleImage(Modifier.fillMaxHeight().width(90.dp))
                         }
                     },
                     title = { Text("Wide Card", Modifier.padding(start = 8.dp)) },
@@ -249,9 +204,7 @@ class CardContainerScreenshotTest {
             }
         }
 
-        rule.onNodeWithTag(CardContainerWrapperTag)
-            .onChild()
-            .requestFocus()
+        rule.onNodeWithTag(CardContainerWrapperTag).onChild().requestFocus()
         rule.waitForIdle()
 
         assertAgainstGolden("wideCardContainer_focused")
@@ -259,14 +212,12 @@ class CardContainerScreenshotTest {
 
     @Composable
     fun SampleImage(modifier: Modifier = Modifier) {
-        Box(
-            modifier = modifier
-                .background(Color.Blue)
-        )
+        Box(modifier = modifier.background(Color.Blue))
     }
 
     private fun assertAgainstGolden(goldenName: String) {
-        rule.onNodeWithTag(CardContainerWrapperTag)
+        rule
+            .onNodeWithTag(CardContainerWrapperTag)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, goldenName)
     }

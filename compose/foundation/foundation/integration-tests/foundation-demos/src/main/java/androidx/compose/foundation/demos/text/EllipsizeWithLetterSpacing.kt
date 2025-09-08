@@ -45,28 +45,16 @@ private val negativeTextIndent = TextIndent(-fontSize, -fontSize)
 @Composable
 fun EllipsizeWithLetterSpacing() {
     SelectionContainer() {
-        Column(
-            Modifier
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-
-            for (textIndent in arrayOf(
-                TextIndent.None,
-                positiveTextIndent,
-                negativeTextIndent
-            )) {
-                for (text in arrayOf(
-                    displayText,
-                    displayTextArabic,
-                    displayTextBidi
-                )) {
-                    for (textAlign in arrayOf(
-                        TextAlign.Start,
-                        TextAlign.End,
-                        TextAlign.Center,
-                        TextAlign.Justify
-                    )) {
+        Column(Modifier.padding(horizontal = 16.dp).verticalScroll(rememberScrollState())) {
+            for (textIndent in arrayOf(TextIndent.None, positiveTextIndent, negativeTextIndent)) {
+                for (text in arrayOf(displayText, displayTextArabic, displayTextBidi)) {
+                    for (textAlign in
+                        arrayOf(
+                            TextAlign.Start,
+                            TextAlign.End,
+                            TextAlign.Center,
+                            TextAlign.Justify,
+                        )) {
                         for (maxLines in arrayOf(1, 3)) {
                             SecondTagLine(
                                 "align=$textAlign, lines=$maxLines, " +
@@ -76,7 +64,7 @@ fun EllipsizeWithLetterSpacing() {
                                 text = text,
                                 maxLines = maxLines,
                                 textAlign = textAlign,
-                                textIndent = textIndent
+                                textIndent = textIndent,
                             )
                             Spacer(Modifier.padding(8.dp))
                         }
@@ -92,26 +80,28 @@ fun TextWithEllipsizeAndLetterSpacing(
     text: String,
     maxLines: Int,
     textAlign: TextAlign,
-    textIndent: TextIndent
+    textIndent: TextIndent,
 ) {
     BasicText(
         modifier = Modifier.background(Color.LightGray).requiredWidth(200.dp),
         text = text.repeat(100),
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
-        style = TextStyle(
-            fontSize = fontSize,
-            textAlign = textAlign,
-            letterSpacing = fontSize / 3,
-            textDirection = TextDirection.Content,
-            textIndent = textIndent
-        )
+        style =
+            TextStyle(
+                fontSize = fontSize,
+                textAlign = textAlign,
+                letterSpacing = fontSize / 3,
+                textDirection = TextDirection.Content,
+                textIndent = textIndent,
+            ),
     )
 }
 
-private fun TextIndent.toLabel() = when (this) {
-    TextIndent.None -> "None"
-    positiveTextIndent -> "Positive"
-    negativeTextIndent -> "Negative"
-    else -> toString()
-}
+private fun TextIndent.toLabel() =
+    when (this) {
+        TextIndent.None -> "None"
+        positiveTextIndent -> "Positive"
+        negativeTextIndent -> "Negative"
+        else -> toString()
+    }

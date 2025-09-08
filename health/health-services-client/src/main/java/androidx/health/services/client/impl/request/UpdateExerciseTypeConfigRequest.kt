@@ -22,10 +22,7 @@ import androidx.health.services.client.data.ExerciseTypeConfig
 import androidx.health.services.client.data.ProtoParcelable
 import androidx.health.services.client.proto.RequestsProto
 
-/**
- * Request for updating exercise type configuration in an [ExerciseTypeConfig].
- *
- */
+/** Request for updating exercise type configuration in an [ExerciseTypeConfig]. */
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 class UpdateExerciseTypeConfigRequest(
     val packageName: String,
@@ -43,7 +40,7 @@ class UpdateExerciseTypeConfigRequest(
             val proto = RequestsProto.UpdateExerciseTypeConfigRequest.parseFrom(bytes)
             UpdateExerciseTypeConfigRequest(
                 proto.packageName,
-                ExerciseTypeConfig.fromProto(proto.config)
+                ExerciseTypeConfig.fromProto(proto.config),
             )
         }
     }

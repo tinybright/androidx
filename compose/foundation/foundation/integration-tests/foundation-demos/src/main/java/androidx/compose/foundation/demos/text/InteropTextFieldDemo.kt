@@ -43,25 +43,21 @@ fun InteropTextFieldDemo() {
             value = firstTextField,
             onValueChange = { firstTextField = it },
             Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
         )
 
         Text("First EditText")
-        AndroidView(factory = {
-            EditText(it)
-        }, Modifier.fillMaxWidth())
+        AndroidView(factory = { EditText(it) }, Modifier.fillMaxWidth())
 
         Text("Second TextField")
         TextField(
             value = secondTextField,
             onValueChange = { secondTextField = it },
             Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
         )
 
         Text("Second EditText")
-        AndroidView(factory = {
-            EditText(it)
-        }, Modifier.fillMaxWidth())
+        AndroidView(factory = { EditText(it) }, Modifier.fillMaxWidth())
     }
 }

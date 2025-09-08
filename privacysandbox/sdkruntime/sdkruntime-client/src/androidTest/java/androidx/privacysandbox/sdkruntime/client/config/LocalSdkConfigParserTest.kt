@@ -31,7 +31,8 @@ class LocalSdkConfigParserTest {
 
     @Test
     fun parse_skipUnknownTagsAndReturnParsedResult() {
-        val xml = """
+        val xml =
+            """
             <compat-config>
                 <compat-entrypoint>compat.sdk.provider</compat-entrypoint>
                 <unknown-tag>new parameter from future library version</unknown-tag>
@@ -47,7 +48,8 @@ class LocalSdkConfigParserTest {
                     <resources-package-id>42</resources-package-id>
                 </resource-id-remapping>
             </compat-config>
-        """.trimIndent()
+        """
+                .trimIndent()
 
         val result = tryParse(xml, packageName = "com.test.sdk.package", versionMajor = 1)
 
@@ -59,22 +61,25 @@ class LocalSdkConfigParserTest {
                     dexPaths = listOf("1.dex", "2.dex"),
                     entryPoint = "compat.sdk.provider",
                     javaResourcesRoot = "javaResPath/",
-                    resourceRemapping = ResourceRemappingConfig(
-                        rPackageClassName = "com.test.sdk.RPackage",
-                        packageId = 42
-                    )
+                    resourceRemapping =
+                        ResourceRemappingConfig(
+                            rPackageClassName = "com.test.sdk.RPackage",
+                            packageId = 42,
+                        ),
                 )
             )
     }
 
     @Test
     fun parse_whenOnlyMandatoryElements_returnParsedResult() {
-        val xml = """
+        val xml =
+            """
             <compat-config>
                 <compat-entrypoint>compat.sdk.provider</compat-entrypoint>
                 <dex-path>1.dex</dex-path>
             </compat-config>
-        """.trimIndent()
+        """
+                .trimIndent()
 
         val result = tryParse(xml, packageName = "com.test.sdk.package")
 
@@ -86,7 +91,7 @@ class LocalSdkConfigParserTest {
                     dexPaths = listOf("1.dex"),
                     entryPoint = "compat.sdk.provider",
                     javaResourcesRoot = null,
-                    resourceRemapping = null
+                    resourceRemapping = null,
                 )
             )
     }
@@ -94,60 +99,69 @@ class LocalSdkConfigParserTest {
     @Test
     fun parse_whenNoEntryPoint_throwsException() {
         assertParsingFailWithReason(
-            xml = """
+            xml =
+                """
                 <compat-config>
                     <dex-path>1.dex</dex-path>
                 </compat-config>
-            """.trimIndent(),
-            reason = "No compat-entrypoint tag found"
+            """
+                    .trimIndent(),
+            reason = "No compat-entrypoint tag found",
         )
     }
 
     @Test
     fun parse_whenDuplicateEntryPoint_throwsException() {
         assertParsingFailWithReason(
-            xml = """
+            xml =
+                """
                 <compat-config>
                     <compat-entrypoint>compat.sdk.provider</compat-entrypoint>
                     <compat-entrypoint>compat.sdk.provider2</compat-entrypoint>
                     <dex-path>1.dex</dex-path>
                 </compat-config>
-            """.trimIndent(),
-            reason = "Duplicate compat-entrypoint tag found"
+            """
+                    .trimIndent(),
+            reason = "Duplicate compat-entrypoint tag found",
         )
     }
 
     @Test
     fun parse_whenNoDexPath_throwsException() {
         assertParsingFailWithReason(
-            xml = """
+            xml =
+                """
                 <compat-config>
                     <compat-entrypoint>compat.sdk.provider</compat-entrypoint>
                 </compat-config>
-            """.trimIndent(),
-            reason = "No dex-path tags found"
+            """
+                    .trimIndent(),
+            reason = "No dex-path tags found",
         )
     }
 
     @Test
     fun parse_whenDuplicateJavaResourceRoot_throwsException() {
         assertParsingFailWithReason(
-            xml = """
+            xml =
+                """
                 <compat-config>
                     <compat-entrypoint>compat.sdk.provider</compat-entrypoint>
                     <dex-path>1.dex</dex-path>
                     <java-resources-root-path>path1/</java-resources-root-path>
                     <java-resources-root-path>path2/</java-resources-root-path>
                 </compat-config>
-            """.trimIndent(),
-            reason = "Duplicate java-resources-root-path tag found"
+            """
+                    .trimIndent(),
+            reason = "Duplicate java-resources-root-path tag found",
         )
     }
 
     @Test
     fun parse_whenDuplicateResourceRemapping_throwsException() {
         assertParsingFailWithReason(
-            xml = """
+            xml =
+                """
                 <compat-config>
                     <compat-entrypoint>compat.sdk.provider</compat-entrypoint>
                     <dex-path>1.dex</dex-path>
@@ -160,15 +174,17 @@ class LocalSdkConfigParserTest {
                         <resources-package-id>42</resources-package-id>
                     </resource-id-remapping>
                 </compat-config>
-            """.trimIndent(),
-            reason = "Duplicate resource-id-remapping tag found"
+            """
+                    .trimIndent(),
+            reason = "Duplicate resource-id-remapping tag found",
         )
     }
 
     @Test
     fun parse_whenNoClassInResourceRemapping_throwsException() {
         assertParsingFailWithReason(
-            xml = """
+            xml =
+                """
                 <compat-config>
                     <compat-entrypoint>compat.sdk.provider</compat-entrypoint>
                     <dex-path>1.dex</dex-path>
@@ -176,15 +192,17 @@ class LocalSdkConfigParserTest {
                         <resources-package-id>42</resources-package-id>
                     </resource-id-remapping>
                 </compat-config>
-            """.trimIndent(),
-            reason = "No r-package-class tag found"
+            """
+                    .trimIndent(),
+            reason = "No r-package-class tag found",
         )
     }
 
     @Test
     fun parse_whenDuplicateClassInResourceRemapping_throwsException() {
         assertParsingFailWithReason(
-            xml = """
+            xml =
+                """
                 <compat-config>
                     <compat-entrypoint>compat.sdk.provider</compat-entrypoint>
                     <dex-path>1.dex</dex-path>
@@ -194,15 +212,17 @@ class LocalSdkConfigParserTest {
                         <resources-package-id>42</resources-package-id>
                     </resource-id-remapping>
                 </compat-config>
-            """.trimIndent(),
-            reason = "Duplicate r-package-class tag found"
+            """
+                    .trimIndent(),
+            reason = "Duplicate r-package-class tag found",
         )
     }
 
     @Test
     fun parse_whenNoPackageIdInResourceRemapping_throwsException() {
         assertParsingFailWithReason(
-            xml = """
+            xml =
+                """
                 <compat-config>
                     <compat-entrypoint>compat.sdk.provider</compat-entrypoint>
                     <dex-path>1.dex</dex-path>
@@ -210,15 +230,17 @@ class LocalSdkConfigParserTest {
                         <r-package-class>com.test.sdk.RPackage</r-package-class>
                     </resource-id-remapping>
                 </compat-config>
-            """.trimIndent(),
-            reason = "No resources-package-id tag found"
+            """
+                    .trimIndent(),
+            reason = "No resources-package-id tag found",
         )
     }
 
     @Test
     fun parse_whenDuplicatePackageIdInResourceRemapping_throwsException() {
         assertParsingFailWithReason(
-            xml = """
+            xml =
+                """
                 <compat-config>
                     <compat-entrypoint>compat.sdk.provider</compat-entrypoint>
                     <dex-path>1.dex</dex-path>
@@ -228,23 +250,20 @@ class LocalSdkConfigParserTest {
                         <resources-package-id>42</resources-package-id>
                     </resource-id-remapping>
                 </compat-config>
-            """.trimIndent(),
-            reason = "Duplicate resources-package-id tag found"
+            """
+                    .trimIndent(),
+            reason = "Duplicate resources-package-id tag found",
         )
     }
 
     private fun assertParsingFailWithReason(xml: String, reason: String) {
-        assertThrows<XmlPullParserException> {
-            tryParse(xml)
-        }.hasMessageThat().isEqualTo(
-            reason
-        )
+        assertThrows<XmlPullParserException> { tryParse(xml) }.hasMessageThat().isEqualTo(reason)
     }
 
     private fun tryParse(
         xml: String,
         packageName: String = "sdkPackageName",
-        versionMajor: Int? = null
+        versionMajor: Int? = null,
     ): LocalSdkConfig {
         ByteArrayInputStream(xml.toByteArray()).use { inputStream ->
             return parse(inputStream, packageName, versionMajor)

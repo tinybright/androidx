@@ -50,8 +50,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class TextFieldInteractionsTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     val testTag = "textField"
 
@@ -66,30 +65,20 @@ class TextFieldInteractionsTest {
                 modifier = Modifier.testTag(testTag),
                 value = state.value,
                 onValueChange = { state.value = it },
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
             )
         }
         val interactions = mutableListOf<Interaction>()
 
-        scope!!.launch {
-            interactionSource.interactions.collect { interactions.add(it) }
-        }
+        scope!!.launch { interactionSource.interactions.collect { interactions.add(it) } }
 
-        rule.runOnIdle {
-            assertThat(interactions).isEmpty()
-        }
-        rule.onNodeWithTag(testTag)
-            .performTouchInput {
-                down(center)
-            }
+        rule.runOnIdle { assertThat(interactions).isEmpty() }
+        rule.onNodeWithTag(testTag).performTouchInput { down(center) }
         rule.runOnIdle {
             // Not asserting total size as we have other interactions here too
             assertThat(interactions.filterIsInstance<PressInteraction.Press>()).hasSize(1)
         }
-        rule.onNodeWithTag(testTag)
-            .performTouchInput {
-                up()
-            }
+        rule.onNodeWithTag(testTag).performTouchInput { up() }
         rule.runOnIdle {
             // Not asserting total size as we have other interactions here too
             assertThat(interactions.filterIsInstance<PressInteraction.Press>()).hasSize(1)
@@ -108,30 +97,20 @@ class TextFieldInteractionsTest {
                 modifier = Modifier.testTag(testTag),
                 value = state.value,
                 onValueChange = { state.value = it },
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
             )
         }
         val interactions = mutableListOf<Interaction>()
 
-        scope!!.launch {
-            interactionSource.interactions.collect { interactions.add(it) }
-        }
+        scope!!.launch { interactionSource.interactions.collect { interactions.add(it) } }
 
-        rule.runOnIdle {
-            assertThat(interactions).isEmpty()
-        }
-        rule.onNodeWithTag(testTag)
-            .performTouchInput {
-                down(center)
-            }
+        rule.runOnIdle { assertThat(interactions).isEmpty() }
+        rule.onNodeWithTag(testTag).performTouchInput { down(center) }
         rule.runOnIdle {
             // Not asserting total size as we have other interactions here too
             assertThat(interactions.filterIsInstance<PressInteraction.Press>()).hasSize(1)
         }
-        rule.onNodeWithTag(testTag)
-            .performTouchInput {
-                cancel()
-            }
+        rule.onNodeWithTag(testTag).performTouchInput { cancel() }
         rule.runOnIdle {
             // Not asserting total size as we have other interactions here too
             assertThat(interactions.filterIsInstance<PressInteraction.Press>()).hasSize(1)
@@ -151,23 +130,16 @@ class TextFieldInteractionsTest {
                 modifier = Modifier.testTag(testTag),
                 value = state.value,
                 onValueChange = { state.value = it },
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
             )
-            Box(
-                modifier = Modifier.requiredSize(10.dp).focusRequester(focusRequester).focusable(),
-            )
+            Box(modifier = Modifier.requiredSize(10.dp).focusRequester(focusRequester).focusable())
         }
         val interactions = mutableListOf<Interaction>()
 
-        scope!!.launch {
-            interactionSource.interactions.collect { interactions.add(it) }
-        }
+        scope!!.launch { interactionSource.interactions.collect { interactions.add(it) } }
 
-        rule.runOnIdle {
-            assertThat(interactions).isEmpty()
-        }
-        rule.onNodeWithTag(testTag)
-            .performClick()
+        rule.runOnIdle { assertThat(interactions).isEmpty() }
+        rule.onNodeWithTag(testTag).performClick()
         rule.runOnIdle {
             // Not asserting total size as we have other interactions here too
             assertThat(interactions.filterIsInstance<FocusInteraction.Focus>()).hasSize(1)
@@ -195,31 +167,23 @@ class TextFieldInteractionsTest {
                 value = state.value,
                 singleLine = true,
                 onValueChange = { state.value = it },
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
             )
         }
         val interactions = mutableListOf<Interaction>()
 
-        scope!!.launch {
-            interactionSource.interactions.collect { interactions.add(it) }
-        }
+        scope!!.launch { interactionSource.interactions.collect { interactions.add(it) } }
 
-        rule.runOnIdle {
-            assertThat(interactions).isEmpty()
+        rule.runOnIdle { assertThat(interactions).isEmpty() }
+        rule.onNodeWithTag(testTag).performTouchInput {
+            down(center)
+            moveBy(Offset(x = 100f, y = 0f))
         }
-        rule.onNodeWithTag(testTag)
-            .performTouchInput {
-                down(center)
-                moveBy(Offset(x = 100f, y = 0f))
-            }
         rule.runOnIdle {
             // Not asserting total size as we have other interactions here too
             assertThat(interactions.filterIsInstance<DragInteraction.Start>()).hasSize(1)
         }
-        rule.onNodeWithTag(testTag)
-            .performTouchInput {
-                up()
-            }
+        rule.onNodeWithTag(testTag).performTouchInput { up() }
         rule.runOnIdle {
             // Not asserting total size as we have other interactions here too
             assertThat(interactions.filterIsInstance<DragInteraction.Start>()).hasSize(1)
@@ -239,31 +203,23 @@ class TextFieldInteractionsTest {
                 value = state.value,
                 singleLine = true,
                 onValueChange = { state.value = it },
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
             )
         }
         val interactions = mutableListOf<Interaction>()
 
-        scope!!.launch {
-            interactionSource.interactions.collect { interactions.add(it) }
-        }
+        scope!!.launch { interactionSource.interactions.collect { interactions.add(it) } }
 
-        rule.runOnIdle {
-            assertThat(interactions).isEmpty()
+        rule.runOnIdle { assertThat(interactions).isEmpty() }
+        rule.onNodeWithTag(testTag).performTouchInput {
+            down(center)
+            moveBy(Offset(x = 100f, y = 0f))
         }
-        rule.onNodeWithTag(testTag)
-            .performTouchInput {
-                down(center)
-                moveBy(Offset(x = 100f, y = 0f))
-            }
         rule.runOnIdle {
             // Not asserting total size as we have other interactions here too
             assertThat(interactions.filterIsInstance<DragInteraction.Start>()).hasSize(1)
         }
-        rule.onNodeWithTag(testTag)
-            .performTouchInput {
-                cancel()
-            }
+        rule.onNodeWithTag(testTag).performTouchInput { cancel() }
         rule.runOnIdle {
             // Not asserting total size as we have other interactions here too
             assertThat(interactions.filterIsInstance<DragInteraction.Start>()).hasSize(1)
@@ -283,31 +239,23 @@ class TextFieldInteractionsTest {
                 value = state.value,
                 maxLines = 3,
                 onValueChange = { state.value = it },
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
             )
         }
         val interactions = mutableListOf<Interaction>()
 
-        scope!!.launch {
-            interactionSource.interactions.collect { interactions.add(it) }
-        }
+        scope!!.launch { interactionSource.interactions.collect { interactions.add(it) } }
 
-        rule.runOnIdle {
-            assertThat(interactions).isEmpty()
+        rule.runOnIdle { assertThat(interactions).isEmpty() }
+        rule.onNodeWithTag(testTag).performTouchInput {
+            down(center)
+            moveBy(Offset(x = 0f, y = 150f))
         }
-        rule.onNodeWithTag(testTag)
-            .performTouchInput {
-                down(center)
-                moveBy(Offset(x = 0f, y = 150f))
-            }
         rule.runOnIdle {
             // Not asserting total size as we have other interactions here too
             assertThat(interactions.filterIsInstance<DragInteraction.Start>()).hasSize(1)
         }
-        rule.onNodeWithTag(testTag)
-            .performTouchInput {
-                up()
-            }
+        rule.onNodeWithTag(testTag).performTouchInput { up() }
         rule.runOnIdle {
             // Not asserting total size as we have other interactions here too
             assertThat(interactions.filterIsInstance<DragInteraction.Start>()).hasSize(1)
@@ -327,31 +275,23 @@ class TextFieldInteractionsTest {
                 value = state.value,
                 maxLines = 3,
                 onValueChange = { state.value = it },
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
             )
         }
         val interactions = mutableListOf<Interaction>()
 
-        scope!!.launch {
-            interactionSource.interactions.collect { interactions.add(it) }
-        }
+        scope!!.launch { interactionSource.interactions.collect { interactions.add(it) } }
 
-        rule.runOnIdle {
-            assertThat(interactions).isEmpty()
+        rule.runOnIdle { assertThat(interactions).isEmpty() }
+        rule.onNodeWithTag(testTag).performTouchInput {
+            down(center)
+            moveBy(Offset(x = 0f, y = 150f))
         }
-        rule.onNodeWithTag(testTag)
-            .performTouchInput {
-                down(center)
-                moveBy(Offset(x = 0f, y = 150f))
-            }
         rule.runOnIdle {
             // Not asserting total size as we have other interactions here too
             assertThat(interactions.filterIsInstance<DragInteraction.Start>()).hasSize(1)
         }
-        rule.onNodeWithTag(testTag)
-            .performTouchInput {
-                cancel()
-            }
+        rule.onNodeWithTag(testTag).performTouchInput { cancel() }
         rule.runOnIdle {
             // Not asserting total size as we have other interactions here too
             assertThat(interactions.filterIsInstance<DragInteraction.Start>()).hasSize(1)

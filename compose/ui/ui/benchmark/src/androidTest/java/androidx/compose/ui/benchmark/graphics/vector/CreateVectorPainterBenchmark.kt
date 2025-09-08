@@ -43,21 +43,22 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class CreateVectorPainterBenchmark {
 
-    @get:Rule
-    val benchmarkRule = ComposeBenchmarkRule()
+    @get:Rule val benchmarkRule = ComposeBenchmarkRule()
 
     @Test
     fun recreateContent() {
-        benchmarkRule.toggleStateBenchmarkDraw({
-            RecreateVectorPainterTestCase()
-        }, assertOneRecomposition = false)
+        benchmarkRule.toggleStateBenchmarkDraw(
+            { RecreateVectorPainterTestCase() },
+            assertOneRecomposition = false,
+        )
     }
 
     @Test
     fun renderVectorWithDifferentSizes() {
-        benchmarkRule.toggleStateBenchmarkDraw({
-            ResizeVectorPainter()
-        }, assertOneRecomposition = false)
+        benchmarkRule.toggleStateBenchmarkDraw(
+            { ResizeVectorPainter() },
+            assertOneRecomposition = false,
+        )
     }
 }
 
@@ -73,7 +74,7 @@ private class RecreateVectorPainterTestCase : ComposeTestCase, ToggleableTestCas
                     painter = painterResource(R.drawable.ic_hourglass),
                     contentDescription = null,
                     modifier = Modifier.size(200.dp),
-                    alpha = alpha
+                    alpha = alpha,
                 )
             }
         }
@@ -100,7 +101,7 @@ private class ResizeVectorPainter : ComposeTestCase, ToggleableTestCase {
                     painter = painterResource(R.drawable.ic_hourglass),
                     contentDescription = null,
                     modifier = Modifier.size(100.dp),
-                    alpha = alpha
+                    alpha = alpha,
                 )
             }
 
@@ -109,7 +110,7 @@ private class ResizeVectorPainter : ComposeTestCase, ToggleableTestCase {
                     painter = painterResource(R.drawable.ic_hourglass),
                     contentDescription = null,
                     modifier = Modifier.size(200.dp),
-                    alpha = alpha
+                    alpha = alpha,
                 )
             }
         }

@@ -22,17 +22,13 @@ import androidx.room.compiler.processing.XType
 internal abstract class KspExecutableType(
     val env: KspProcessingEnv,
     open val origin: KspExecutableElement,
-    val containing: KspType?
+    val containing: KspType?,
 ) : XExecutableType {
     override val parameterTypes: List<XType> by lazy {
         if (containing == null) {
-            origin.parameters.map {
-                it.type
-            }
+            origin.parameters.map { it.type }
         } else {
-            origin.parameters.map {
-                it.asMemberOf(containing)
-            }
+            origin.parameters.map { it.asMemberOf(containing) }
         }
     }
 

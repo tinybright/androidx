@@ -30,14 +30,15 @@ import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import java.lang.ref.WeakReference
 
-fun FragmentTransaction.setReorderingAllowed(
-    reorderingAllowed: ReorderingAllowed
-) = setReorderingAllowed(reorderingAllowed is Reordered)
+fun FragmentTransaction.setReorderingAllowed(reorderingAllowed: ReorderingAllowed) =
+    setReorderingAllowed(reorderingAllowed is Reordered)
 
 sealed class ReorderingAllowed {
     override fun toString(): String = this.javaClass.simpleName
 }
+
 object Reordered : ReorderingAllowed()
+
 object Ordered : ReorderingAllowed()
 
 @Suppress("DEPRECATION")
@@ -59,9 +60,7 @@ inline fun <reified A : FragmentActivity> ActivityScenario<A>.executePendingTran
 fun androidx.test.rule.ActivityTestRule<out FragmentActivity>.popBackStackImmediate(): Boolean {
     val instrumentation = InstrumentationRegistry.getInstrumentation()
     var ret = false
-    instrumentation.runOnMainSync {
-        ret = activity.supportFragmentManager.popBackStackImmediate()
-    }
+    instrumentation.runOnMainSync { ret = activity.supportFragmentManager.popBackStackImmediate() }
     return ret
 }
 
@@ -72,7 +71,7 @@ inline fun <reified A : FragmentActivity> ActivityScenario<A>.popBackStackImmedi
 @Suppress("DEPRECATION")
 fun androidx.test.rule.ActivityTestRule<out FragmentActivity>.popBackStackImmediate(
     id: Int,
-    flags: Int = 0
+    flags: Int = 0,
 ): Boolean {
     val instrumentation = InstrumentationRegistry.getInstrumentation()
     var ret = false
@@ -85,7 +84,7 @@ fun androidx.test.rule.ActivityTestRule<out FragmentActivity>.popBackStackImmedi
 @Suppress("DEPRECATION")
 fun androidx.test.rule.ActivityTestRule<out FragmentActivity>.popBackStackImmediate(
     name: String,
-    flags: Int = 0
+    flags: Int = 0,
 ): Boolean {
     val instrumentation = InstrumentationRegistry.getInstrumentation()
     var ret = false
@@ -153,7 +152,7 @@ val View.boundsOnScreen: Rect
 data class TransitionVerificationInfo(
     var epicenter: Rect? = null,
     val exitingViews: MutableList<View> = mutableListOf(),
-    val enteringViews: MutableList<View> = mutableListOf()
+    val enteringViews: MutableList<View> = mutableListOf(),
 )
 
 fun TargetTracking.verifyAndClearTransition(block: TransitionVerificationInfo.() -> Unit) {
@@ -186,11 +185,10 @@ fun verifyNoOtherTransitions(fragment: TransitionFragment) {
     assertThat(fragment.sharedElementReturn.enteringTargets).isEmpty()
     assertThat(fragment.sharedElementReturn.exitingTargets).isEmpty()
 }
+
 // Transition test methods end
 
-/**
- * Allocates until a garbage collection occurs.
- */
+/** Allocates until a garbage collection occurs. */
 fun forceGC() {
     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
         // The following works on O+

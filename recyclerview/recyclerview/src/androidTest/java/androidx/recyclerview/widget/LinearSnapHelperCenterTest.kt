@@ -21,8 +21,8 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 /**
- * Small integration tests that verifies that [LinearSnapHelper] works as intended in regards to
- * how "center" is defined.
+ * Small integration tests that verifies that [LinearSnapHelper] works as intended in regards to how
+ * "center" is defined.
  *
  * @see BaseSnapHelperCenterTest
  */
@@ -32,10 +32,7 @@ class LinearSnapHelperCenterTest(
     vertical: Boolean,
     startPadded: Boolean,
     endPadded: Boolean,
-    clipToPadding: Boolean
-) : BaseSnapHelperCenterTest(
-    vertical, startPadded, endPadded,
-    clipToPadding
-) {
+    clipToPadding: Boolean,
+) : BaseSnapHelperCenterTest(vertical, startPadded, endPadded, clipToPadding) {
     override val snapHelper = LinearSnapHelper()
 }

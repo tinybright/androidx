@@ -22,9 +22,7 @@ import androidx.health.platform.client.impl.data.ProtoParcelable
 import androidx.health.platform.client.proto.DataProto
 import androidx.health.platform.client.proto.RequestProto
 
-/**
- * Internal parcelable for IPC calls.
- */
+/** Internal parcelable for IPC calls. */
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 class UpsertDataRequest(val dataPoints: List<DataProto.DataPoint>) :
     ProtoParcelable<RequestProto.UpsertDataRequest>() {
@@ -44,9 +42,7 @@ class UpsertDataRequest(val dataPoints: List<DataProto.DataPoint>) :
                 fromProto(proto)
             }
 
-        internal fun fromProto(
-            proto: RequestProto.UpsertDataRequest,
-        ): UpsertDataRequest {
+        internal fun fromProto(proto: RequestProto.UpsertDataRequest): UpsertDataRequest {
             return UpsertDataRequest(proto.dataPointList)
         }
     }

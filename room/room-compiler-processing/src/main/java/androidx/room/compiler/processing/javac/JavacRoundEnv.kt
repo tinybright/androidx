@@ -22,10 +22,8 @@ import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.Element
 import kotlin.reflect.KClass
 
-internal class JavacRoundEnv(
-    private val env: JavacProcessingEnv,
-    val delegate: RoundEnvironment
-) : XRoundEnv {
+internal class JavacRoundEnv(private val env: JavacProcessingEnv, val delegate: RoundEnvironment) :
+    XRoundEnv {
     override val isProcessingOver: Boolean
         get() = delegate.processingOver()
 
@@ -46,7 +44,7 @@ internal class JavacRoundEnv(
 
     private fun wrapAnnotatedElements(
         elements: Set<Element>,
-        annotationName: String
+        annotationName: String,
     ): Set<XElement> {
         return elements.map { env.wrapAnnotatedElement(it, annotationName) }.toSet()
     }

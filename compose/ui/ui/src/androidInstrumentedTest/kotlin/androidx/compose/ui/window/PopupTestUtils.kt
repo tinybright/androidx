@@ -43,7 +43,7 @@ import org.hamcrest.TypeSafeMatcher
 // TODO(b/139861182): Remove all of this and provide helpers on rule
 internal fun ComposeTestRule.popupMatches(popupTestTag: String, viewMatcher: Matcher<in View>) {
     // Make sure that current measurement/drawing is finished
-    runOnIdle { }
+    runOnIdle {}
     Espresso.onView(CoreMatchers.instanceOf(Owner::class.java))
         .inRoot(PopupLayoutMatcher(popupTestTag))
         .check(ViewAssertions.matches(viewMatcher))
@@ -61,6 +61,7 @@ internal class PopupLayoutMatcher(val testTag: String) : TypeSafeMatcher<Root>()
     override fun matchesSafely(item: Root?): Boolean {
         val matches = item != null && isPopupLayout(item.decorView, testTag)
         if (matches) {
+            @Suppress("DEPRECATION")
             lastSeenWindowParams = item!!.windowLayoutParams.get()
         }
         return matches
@@ -73,63 +74,58 @@ internal class ActivityWithFlagSecure : TestActivity() {
 
         window.setFlags(
             WindowManager.LayoutParams.FLAG_SECURE,
-            WindowManager.LayoutParams.FLAG_SECURE
+            WindowManager.LayoutParams.FLAG_SECURE,
         )
     }
 }
 
-/**
- * A Container Box implementation used for selection children and handle layout
- */
+/** A Container Box implementation used for selection children and handle layout */
 @Composable
 internal fun SimpleContainer(
     modifier: Modifier = Modifier,
     width: Dp? = null,
     height: Dp? = null,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     Layout(content, modifier) { measurables, incomingConstraints ->
-        val containerConstraints = incomingConstraints
-            .constrain(
-                Constraints().copy(
-                    width?.roundToPx() ?: 0,
-                    width?.roundToPx() ?: Constraints.Infinity,
-                    height?.roundToPx() ?: 0,
-                    height?.roundToPx() ?: Constraints.Infinity
-                )
+        val containerConstraints =
+            incomingConstraints.constrain(
+                Constraints()
+                    .copy(
+                        width?.roundToPx() ?: 0,
+                        width?.roundToPx() ?: Constraints.Infinity,
+                        height?.roundToPx() ?: 0,
+                        height?.roundToPx() ?: Constraints.Infinity,
+                    )
             )
-        val childConstraints = containerConstraints.copy(minWidth = 0, minHeight = 0)
+        val childConstraints = containerConstraints.copyMaxDimensions()
         var placeable: Placeable? = null
-        val containerWidth = if (
-            containerConstraints.hasFixedWidth
-        ) {
-            containerConstraints.maxWidth
-        } else {
-            placeable = measurables.firstOrNull()?.measure(childConstraints)
-            max((placeable?.width ?: 0), containerConstraints.minWidth)
-        }
-        val containerHeight = if (
-            containerConstraints.hasFixedHeight
-        ) {
-            containerConstraints.maxHeight
-        } else {
-            if (placeable == null) {
+        val containerWidth =
+            if (containerConstraints.hasFixedWidth) {
+                containerConstraints.maxWidth
+            } else {
                 placeable = measurables.firstOrNull()?.measure(childConstraints)
+                max((placeable?.width ?: 0), containerConstraints.minWidth)
             }
-            max((placeable?.height ?: 0), containerConstraints.minHeight)
-        }
+        val containerHeight =
+            if (containerConstraints.hasFixedHeight) {
+                containerConstraints.maxHeight
+            } else {
+                if (placeable == null) {
+                    placeable = measurables.firstOrNull()?.measure(childConstraints)
+                }
+                max((placeable?.height ?: 0), containerConstraints.minHeight)
+            }
         layout(containerWidth, containerHeight) {
             val p = placeable ?: measurables.firstOrNull()?.measure(childConstraints)
             p?.let {
-                val position = Alignment.Center.align(
-                    IntSize(it.width, it.height),
-                    IntSize(containerWidth, containerHeight),
-                    layoutDirection
-                )
-                it.placeRelative(
-                    position.x,
-                    position.y
-                )
+                val position =
+                    Alignment.Center.align(
+                        IntSize(it.width, it.height),
+                        IntSize(containerWidth, containerHeight),
+                        layoutDirection,
+                    )
+                it.placeRelative(position.x, position.y)
             }
         }
     }

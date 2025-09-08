@@ -27,9 +27,9 @@ import java.util.Objects
  *
  * Specifying a bridging configuration at runtime overrides a bridging-related setting in the
  * Android manifest file.
- *
  */
-public class BridgingConfig internal constructor(
+public class BridgingConfig
+internal constructor(
     /** Name of the package of the current context */
     internal val packageName: String?,
     /** Whether notification bridging is enabled in the configuration. */
@@ -38,7 +38,7 @@ public class BridgingConfig internal constructor(
      * The set of excluded tags in the configuration. The bridging mode for these tags is the
      * opposite of the default mode (returned by [isBridgingEnabled]).
      */
-    public val excludedTags: MutableSet<String>?
+    public val excludedTags: MutableSet<String>?,
 ) {
     internal companion object {
         private const val TAG = "BridgingConfig"
@@ -55,7 +55,7 @@ public class BridgingConfig internal constructor(
             BridgingConfig(
                 bundle.getString(EXTRA_ORIGINAL_PACKAGE),
                 bundle.getBoolean(EXTRA_BRIDGING_ENABLED),
-                bundle.getStringArrayList(EXTRA_EXCLUDED_TAGS)?.toMutableSet()
+                bundle.getStringArrayList(EXTRA_EXCLUDED_TAGS)?.toMutableSet(),
             )
     }
 
@@ -64,15 +64,17 @@ public class BridgingConfig internal constructor(
             putString(EXTRA_ORIGINAL_PACKAGE, context.packageName)
             putBoolean(EXTRA_BRIDGING_ENABLED, isBridgingEnabled)
             putStringArrayList(
-                EXTRA_EXCLUDED_TAGS, excludedTags?.let { ArrayList(it) } ?: ArrayList()
+                EXTRA_EXCLUDED_TAGS,
+                excludedTags?.let { ArrayList(it) } ?: ArrayList(),
             )
         }
 
     override fun equals(other: Any?): Boolean {
         if (other is BridgingConfig) {
-            return other.isBridgingEnabled == isBridgingEnabled and
-                (other.excludedTags == excludedTags) and
-                (other.packageName == packageName)
+            return other.isBridgingEnabled ==
+                isBridgingEnabled and
+                    (other.excludedTags == excludedTags) and
+                    (other.packageName == packageName)
         }
 
         return false
@@ -90,7 +92,7 @@ public class BridgingConfig internal constructor(
      * Builder for BridgingConfig. The set of excluded tags is empty, unless added with
      * [addExcludedTag] or [addExcludedTags].
      *
-     * @param context   The [Context] of the application requesting a BridgingConfig change.
+     * @param context The [Context] of the application requesting a BridgingConfig change.
      * @param isBridgingEnabled Whether notification bridging is enabled in the configuration.
      */
     public class Builder(context: Context, private val isBridgingEnabled: Boolean) {
@@ -101,14 +103,12 @@ public class BridgingConfig internal constructor(
          * Adds a tag for which the bridging mode is the opposite as the default mode.
          *
          * Examples:
-         *
          * ```
          * new BridgingConfig.Builder(context, false)  // bridging disabled by default
          *   .addExcludedTag("foo")
          *   .addExcludedTag("bar")
          *   .build());
          * ```
-         *
          * ```
          * new BridgingConfig.Builder(context, true)  // bridging enabled by default
          *   .addExcludedTag("foo")
@@ -125,16 +125,15 @@ public class BridgingConfig internal constructor(
         }
 
         /**
-         * Sets a collection of tags for which the bridging mode is the opposite as the default mode.
+         * Sets a collection of tags for which the bridging mode is the opposite as the default
+         * mode.
          *
          * Examples:
-         *
          * ```
          * new BridgingConfig.Builder(context, false)  // bridging disabled by default
          *   .addExcludedTags(Arrays.asList("foo", "bar", "baz"))
          *   .build());
-         *```
-         *
+         * ```
          * ```
          * new BridgingConfig.Builder(context, true)  // bridging enabled by default
          *   .addExcludedTags(Arrays.asList("foo", "bar", "baz"))

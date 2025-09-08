@@ -31,56 +31,63 @@ class FtsTableInfoTest {
         assertOptions("CREATE VIRTUAL TABLE Book USING fts4(author)")
         assertOptions(
             "CREATE VIRTUAL TABLE Book USING FTS4(author, matchinfo=fts3)",
-            "matchinfo=fts3"
+            "matchinfo=fts3",
         )
         assertOptions(
             "CREATE VIRTUAL TABLE \"Book\" USING FTS4(\"author\", matchinfo=fts3)",
-            "matchinfo=fts3"
+            "matchinfo=fts3",
         )
         assertOptions(
             "CREATE VIRTUAL TABLE `Fun'Names` USING FTS4(matchinfo=fts3)",
-            "matchinfo=fts3"
+            "matchinfo=fts3",
         )
         assertOptions(
             "CREATE VIRTUAL TABLE `Fun'With'Names` USING FTS4(\"odd'column'\", " +
                 "`odd'column'again`, [select], 'left[col]is`weird', matchinfo=fts3)",
-            "matchinfo=fts3"
+            "matchinfo=fts3",
         )
         assertOptions(
             "CREATE VIRTUAL TABLE 'Book' USING FTS4('content', 'pages', " +
                 "'isbn', notindexed=pages, notindexed=isbn)",
-            "notindexed=pages", "notindexed=isbn"
+            "notindexed=pages",
+            "notindexed=isbn",
         )
         assertOptions(
             "CREATE VIRTUAL TABLE `Book` USING FTS4(tokenize=porter, " +
                 "`content`, `pages`, notindexed=pages)",
-            "tokenize=porter", "notindexed=pages"
+            "tokenize=porter",
+            "notindexed=pages",
         )
         assertOptions(
             "CREATE VIRTUAL TABLE `Book` USING FTS4(tokenize=porter, " +
                 "`content`, `pages`, notindexed=pages)",
-            "tokenize=porter", "notindexed=pages"
+            "tokenize=porter",
+            "notindexed=pages",
         )
         assertOptions(
             "CREATE VIRTUAL TABLE `Book` USING FTS4(tokenize=unicode61 \"tokenchars=,\")",
-            "tokenize=unicode61 \"tokenchars=,\""
+            "tokenize=unicode61 \"tokenchars=,\"",
         )
         assertOptions(
             "CREATE VIRTUAL TABLE `Book` USING FTS4(tokenize=unicode61 `tokenchars=,`)",
-            "tokenize=unicode61 `tokenchars=,`"
+            "tokenize=unicode61 `tokenchars=,`",
         )
         assertOptions(
             "CREATE VIRTUAL TABLE `Book` USING FTS4(tokenize=unicode61 " +
                 "\"tokenchars=.=\" \"separators=X\", `pages`, notindexed=pages)",
             "tokenize=unicode61 \"tokenchars=.=\" \"separators=X\"",
-            "notindexed=pages"
+            "notindexed=pages",
         )
         assertOptions(
             "CREATE VIRTUAL TABLE `Book` USING FTS4(tokenize=porter, " +
                 "`author`, languageid=`lid`, matchinfo=fts3, notindexed=`pages`, " +
                 "order=desc, prefix=`2,4`)",
-            "tokenize=porter", "languageid=`lid`", "matchinfo=fts3",
-            "notindexed=`pages`", "order=desc", "prefix=`2,4`"
+            "tokenize=porter",
+            "languageid=`lid`",
+            "matchinfo=fts3",
+            "notindexed=`pages`",
+            "order=desc",
+            "prefix=`2,4`",
         )
     }
 

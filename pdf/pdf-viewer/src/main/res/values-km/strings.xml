@@ -17,26 +17,24 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="desc_file_type" msgid="8918077960128045611">"ប្រភេទ​ឯកសារ"</string>
     <string name="title_dialog_password" msgid="2018068413709926925">"ឯកសារនេះត្រូវបានការពារ"</string>
     <string name="label_password_first" msgid="4456258714097111908">"ពាក្យសម្ងាត់"</string>
-    <string name="label_password_incorrect" msgid="8449142641187704667">"ពាក្យសម្ងាត់​មិនត្រឹមត្រូវ"</string>
+    <string name="label_password_incorrect" msgid="5291118378657145978">"ពាក្យសម្ងាត់ខុស។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="button_cancel" msgid="5855794576957267334">"បោះបង់"</string>
     <string name="button_open" msgid="5445014062438566842">"បើក"</string>
     <string name="desc_password" msgid="6636473611443746739">"កន្លែងបញ្ចូលពាក្យ​សម្ងាត់"</string>
     <string name="desc_password_incorrect" msgid="4718823067483963845">"ពាក្យសម្ងាត់​មិនត្រឹមត្រូវ"</string>
-    <string name="desc_password_incorrect_message" msgid="4849541619951023025">"ពាក្យសម្ងាត់​មិនត្រឹមត្រូវ"</string>
+    <string name="desc_password_incorrect_message" msgid="4676206571020946870">"ពាក្យសម្ងាត់ខុស។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="label_page_single" msgid="456123685879261101">"<xliff:g id="PAGE">%1$d</xliff:g> / <xliff:g id="TOTAL">%2$d</xliff:g>"</string>
     <string name="desc_page_single" msgid="8459583146661044094">"ទំព័រទី <xliff:g id="PAGE">%1$d</xliff:g> នៃ <xliff:g id="TOTAL">%2$d</xliff:g>"</string>
     <string name="desc_zoom" msgid="7318480946145947242">"ពង្រីកបង្រួម <xliff:g id="FIRST">%1$d</xliff:g> ភាគរយ"</string>
+    <string name="desc_goto" msgid="1333698934111921601">"ទៅកាន់"</string>
     <string name="desc_goto_link" msgid="2461368384824849714">"ទៅទំព័រទី <xliff:g id="PAGE_NUMBER">%1$d</xliff:g>"</string>
-    <string name="desc_page" msgid="5684226167093594168">"ទំព័រទី <xliff:g id="PAGE">%1$d</xliff:g>"</string>
-    <string name="message_select_text_to_comment" msgid="5725327644007067522">"ជ្រើសរើសអក្សរ ដើម្បីផ្ដល់មតិរបស់អ្នក"</string>
-    <string name="message_tap_to_comment" msgid="7820801719181709999">"ចុចកន្លែងណាមួយដើម្បីផ្ដល់មតិ"</string>
-    <string name="action_cancel" msgid="5494417739210197522">"បោះបង់"</string>
+    <string name="desc_page" msgid="6702471448987833953">"ទំព័រទី <xliff:g id="PAGE">%1$d</xliff:g>"</string>
+    <string name="desc_empty_page" msgid="5041794048330057239">"ទំព័រទទេ"</string>
+    <string name="desc_page_with_text" msgid="2564017005407577604">"ទំព័រទី <xliff:g id="PAGE_NUMBER">%1$d</xliff:g>៖ <xliff:g id="PAGE_TEXT">%2$s</xliff:g>"</string>
     <string name="error_file_format_pdf" msgid="7567006188638831878">"មិនអាច​បង្ហាញ PDF បានទេ (<xliff:g id="TITLE">%1$s</xliff:g> មានទម្រង់មិន​ត្រឹមត្រូវ)"</string>
     <string name="error_on_page" msgid="1592475819957182385">"មិនអាចបង្ហាញទំព័រទី <xliff:g id="PAGE">%1$d</xliff:g> បានទេ (បញ្ហាឯកសារ)"</string>
-    <string name="annotation_mode_failed_to_open" msgid="1659648756255912463">"មិនអាច​ផ្ទុក​មុខងារចំណារ​សម្រាប់​ធាតុនេះ​បាន​ទេ។"</string>
     <string name="desc_web_link_shortened_to_domain" msgid="3323639528531061592">"តំណ៖ ទំព័របណ្ដាញនៅ <xliff:g id="DESTINATION_DOMAIN">%1$s</xliff:g>"</string>
     <string name="desc_web_link" msgid="2776023299237058419">"តំណ៖ <xliff:g id="DESTINATION">%1$s</xliff:g>"</string>
     <string name="desc_email_link" msgid="7027325672358507448">"អ៊ីមែល៖ <xliff:g id="EMAIL_ADDRESS">%1$s</xliff:g>"</string>
@@ -46,4 +44,43 @@
     <string name="label_page_range" msgid="8290964180158460076">"<xliff:g id="FIRST">%1$d</xliff:g>-<xliff:g id="LAST">%2$d</xliff:g> / <xliff:g id="TOTAL">%3$d</xliff:g>"</string>
     <string name="desc_page_range" msgid="5286496438609641577">"ទំព័រទី <xliff:g id="FIRST">%1$d</xliff:g> ដល់ <xliff:g id="LAST">%2$d</xliff:g> នៃ <xliff:g id="TOTAL">%3$d</xliff:g>"</string>
     <string name="desc_image_alt_text" msgid="7700601988820586333">"រូបភាព៖ <xliff:g id="ALT_TEXT">%1$s</xliff:g>"</string>
+    <string name="hint_find" msgid="5385388836603550565">"ស្វែងរកនៅក្នុងឯកសារ"</string>
+    <string name="previous_button_description" msgid="1169511027880317546">"មុន"</string>
+    <string name="next_button_description" msgid="4702699322249103693">"បន្ទាប់"</string>
+    <string name="close_button_description" msgid="7379823906921067675">"បិទ"</string>
+    <string name="message_match_status" msgid="6288242289981639727">"<xliff:g id="POSITION">%1$d</xliff:g> / <xliff:g id="TOTAL">%2$d</xliff:g>"</string>
+    <string name="match_status_description" msgid="4996847358326345288">"<xliff:g id="POSITION">%1$d</xliff:g> នៃ <xliff:g id="TOTAL">%2$d</xliff:g>"</string>
+    <string name="message_no_match_status" msgid="5929387004361286433">"គ្មានលទ្ធផល​ត្រូវគ្នាទេ"</string>
+    <string name="action_edit" msgid="5882082700509010966">"កែ​ឯកសារ"</string>
+    <string name="action_search" msgid="1044074359976464346">"ស្វែងរកឯកសារ"</string>
+    <string name="scrollbar_description" msgid="5720892205323882483">"របារ​រមូរ"</string>
+    <string name="password_not_entered" msgid="8875370870743585303">"បញ្ចូល​ពាក្យ​សម្ងាត់ ដើម្បី​ដោះ​សោ"</string>
+    <string name="retry_button_text" msgid="3443862378337999137">"ព្យាយាមម្ដងទៀត"</string>
+    <string name="pdf_error" msgid="3287950599604474450">"មិនអាច​ដំណើរការ​ឯកសារ PDF បានទេ!"</string>
+    <string name="file_error" msgid="4003885928556884091">"មិនអាច​បើក​ឯកសារនេះ​បានទេ។ អាចមាន​បញ្ហា​នៃ​ការអនុញ្ញាតឬ?"</string>
+    <string name="page_broken" msgid="2968770793669433462">"ទំព័រ​មិនដំណើរការ​សម្រាប់​ឯកសារ PDF"</string>
+    <string name="needs_more_data" msgid="3520133467908240802">"មានទិន្នន័យ​មិនគ្រប់គ្រាន់​សម្រាប់​ដំណើរការ​ឯកសារ PDF"</string>
+    <string name="error_cannot_open_pdf" msgid="2361919778558145071">"មិនអាចបើកឯកសារ PDF បានទេ"</string>
+    <string name="cannot_edit_pdf" msgid="7677598370087228978">"មិនអាចកែ PDF នេះបានទេ"</string>
+    <string name="clipboard_label" msgid="8943155331324944981">"បានចម្លងខ្លឹមសារពី PDF"</string>
+    <string name="fast_scroller_thumb" msgid="6712048991132846541">"របាររំកិល"</string>
+    <string name="confirm_selection" msgid="7020926320719465164">"បញ្ជាក់"</string>
+    <string name="form_widget" msgid="5841730047544552656">"ធាតុ​ក្រាហ្វិកទម្រង់បែបបទ"</string>
+    <string name="form_type" msgid="1302137779809645840">"ប្រភេទ៖ <xliff:g id="WIDGET_TYPE_NAME">%1$s</xliff:g>។"</string>
+    <string name="form_title" msgid="2718582322716402117">"ចំណងជើង៖ <xliff:g id="WIDGET_ACCESSIBILITY_TITLE">%1$s</xliff:g>។"</string>
+    <string name="form_value" msgid="960532222685914495">"តម្លៃ៖ <xliff:g id="WIDGET_VALUE">%1$s</xliff:g>។"</string>
+    <string name="form_current_value" msgid="3883820498421821863">"តម្លៃបច្ចុប្បន្ន៖ <xliff:g id="WIDGET_VALUE">%1$s</xliff:g>។"</string>
+    <string name="form_read_only" msgid="4928929192592391646">"ធាតុ​ក្រាហ្វិកគឺបានតែអាន និងមិនអាចផ្លាស់ប្ដូរបានទេ។"</string>
+    <string name="form_multiselect_type" msgid="8834016845619058170">"ប្រភេទ៖ ជ្រើសរើស <xliff:g id="WIDGET_TYPE_NAME">%1$s</xliff:g> ច្រើន។"</string>
+    <string name="form_click_toggle_instruction" msgid="7171111300244445911">"ការចុចនឹងប្ដូរតម្លៃ។"</string>
+    <string name="form_click_opens_choices_menu_instruction" msgid="5648228168212004143">"ការចុចនឹងបើកម៉ឺនុយជ្រើសរើសជម្រើស។"</string>
+    <string name="form_click_enters_text_edit_mode_instruction" msgid="2305283577544618880">"ការចុចនឹងចូលមុខងារកែអក្សរ។"</string>
+    <string name="form_unknown" msgid="6371515914365431330">"មិនស្គាល់"</string>
+    <string name="form_widget_type_push_button" msgid="3595388398616291441">"ប៊ូតុងរុញ"</string>
+    <string name="form_widget_type_checkbox" msgid="5165655383070460151">"ប្រអប់​ធីក"</string>
+    <string name="form_widget_type_radio_button" msgid="879588277617060839">"ប៊ូតុង​មូល"</string>
+    <string name="form_widget_type_combo_box" msgid="1821324387398868582">"ប្រអប់បន្សំ"</string>
+    <string name="form_widget_type_list_box" msgid="8052623180309553495">"ប្រអប់បញ្ជី"</string>
+    <string name="form_widget_type_text_field" msgid="581285155951215607">"កន្លែងបញ្ចូលអក្សរ"</string>
+    <string name="form_widget_type_signature" msgid="3811511096215331673">"ហត្ថលេខា"</string>
 </resources>

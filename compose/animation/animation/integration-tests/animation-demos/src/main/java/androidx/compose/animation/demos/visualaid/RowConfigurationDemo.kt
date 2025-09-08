@@ -50,25 +50,26 @@ import kotlinx.coroutines.delay
 @Preview
 @Composable
 fun RowConfigurationDemo() {
-    val width by produceState(250.dp) {
-        // Skip the animations in tests.
-        while (coroutineContext[InfiniteAnimationPolicy] == null) {
-            animate(
-                Dp.VectorConverter, 250.dp, 520.dp,
-                animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow)
-            ) { value, _ ->
-                this.value = value
+    val width by
+        produceState(250.dp) {
+            // Skip the animations in tests.
+            while (coroutineContext[InfiniteAnimationPolicy] == null) {
+                animate(
+                    Dp.VectorConverter,
+                    250.dp,
+                    520.dp,
+                    animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow),
+                ) { value, _ ->
+                    this.value = value
+                }
+                delay(1000)
+                animate(Dp.VectorConverter, 520.dp, 250.dp, animationSpec = tween(520)) { value, _
+                    ->
+                    this.value = value
+                }
+                delay(1000)
             }
-            delay(1000)
-            animate(
-                Dp.VectorConverter, 520.dp, 250.dp,
-                animationSpec = tween(520)
-            ) { value, _ ->
-                this.value = value
-            }
-            delay(1000)
         }
-    }
     ResizableLayout(width)
 }
 
@@ -77,7 +78,7 @@ fun ResizableLayout(width: Dp) {
     Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
         Column(
             horizontalAlignment = Alignment.End,
-            modifier = Modifier.background(Color.White, RoundedCornerShape(5.dp))
+            modifier = Modifier.background(Color.White, RoundedCornerShape(5.dp)),
         ) {
             Text(text = "Equal Weight", modifier = Modifier.padding(12.dp))
             Text(text = "Space Between", modifier = Modifier.padding(12.dp))
@@ -127,15 +128,19 @@ fun ResizableLayout(width: Dp) {
     }
 }
 
-private fun Modifier.default(background: Color) = this.padding(2.dp)
-    .background(background, RoundedCornerShape(5.dp)).padding(start = 3.dp, end = 3.dp)
-    .fillMaxWidth()
+private fun Modifier.default(background: Color) =
+    this.padding(2.dp)
+        .background(background, RoundedCornerShape(5.dp))
+        .padding(start = 3.dp, end = 3.dp)
+        .fillMaxWidth()
 
 @Composable
 fun RowScope.RowItem(text: String, fixedSize: Boolean = true) {
     val modifier = if (fixedSize) Modifier.width(80.dp) else Modifier.weight(1f)
     Box(
-        modifier.padding(5.dp).shadow(10.dp)
+        modifier
+            .padding(5.dp)
+            .shadow(10.dp)
             .background(Color.White, shape = RoundedCornerShape(5.dp))
             .padding(top = 5.dp, bottom = 5.dp)
     ) {

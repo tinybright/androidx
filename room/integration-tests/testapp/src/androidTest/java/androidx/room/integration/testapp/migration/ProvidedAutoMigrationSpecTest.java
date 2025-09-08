@@ -20,7 +20,6 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import androidx.annotation.NonNull;
 import androidx.room.AutoMigration;
 import androidx.room.ColumnInfo;
 import androidx.room.Database;
@@ -36,6 +35,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.jspecify.annotations.NonNull;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -146,12 +146,13 @@ public class ProvidedAutoMigrationSpecTest {
     @Test
     public void testOnPostMigrate() throws IOException {
         createFirstVersion();
-        helperWithSpec.runMigrationsAndValidate(
+        SupportSQLiteDatabase db = helperWithSpec.runMigrationsAndValidate(
                 TEST_DB,
                 2,
                 true
         );
         assertThat(mProvidedSpec.mOnPostMigrateCalled, is(true));
+        db.close();
     }
 
     /**

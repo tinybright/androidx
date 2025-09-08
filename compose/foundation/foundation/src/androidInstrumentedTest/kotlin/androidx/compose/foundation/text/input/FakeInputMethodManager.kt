@@ -21,12 +21,13 @@ import android.view.inputmethod.CursorAnchorInfo
 import android.view.inputmethod.ExtractedText
 import androidx.compose.foundation.text.input.internal.ComposeInputMethodManager
 import com.google.common.truth.Truth.assertThat
+import kotlin.collections.removeFirst as removeFirstKt
 
 internal open class FakeInputMethodManager : ComposeInputMethodManager {
     private val calls = mutableListOf<String>()
 
     fun expectCall(description: String) {
-        assertThat(calls.removeFirst()).isEqualTo(description)
+        assertThat(calls.removeFirstKt()).isEqualTo(description)
     }
 
     fun expectNoMoreCalls() {
@@ -57,10 +58,11 @@ internal open class FakeInputMethodManager : ComposeInputMethodManager {
         selectionStart: Int,
         selectionEnd: Int,
         compositionStart: Int,
-        compositionEnd: Int
+        compositionEnd: Int,
     ) {
-        calls += "updateSelection($selectionStart, $selectionEnd, " +
-            "$compositionStart, $compositionEnd)"
+        calls +=
+            "updateSelection($selectionStart, $selectionEnd, " +
+                "$compositionStart, $compositionEnd)"
     }
 
     override fun updateCursorAnchorInfo(info: CursorAnchorInfo) {

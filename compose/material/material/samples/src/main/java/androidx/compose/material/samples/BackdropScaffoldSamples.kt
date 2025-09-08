@@ -51,9 +51,7 @@ fun BackdropScaffoldSample() {
     val scope = rememberCoroutineScope()
     val selection = remember { mutableStateOf(1) }
     val scaffoldState = rememberBackdropScaffoldState(BackdropValue.Concealed)
-    LaunchedEffect(scaffoldState) {
-        scaffoldState.reveal()
-    }
+    LaunchedEffect(scaffoldState) { scaffoldState.reveal() }
     BackdropScaffold(
         scaffoldState = scaffoldState,
         appBar = {
@@ -76,8 +74,9 @@ fun BackdropScaffoldSample() {
                         onClick = {
                             // show snackbar as a suspend function
                             scope.launch {
-                                scaffoldState.snackbarHostState
-                                    .showSnackbar("Snackbar #${++clickCount}")
+                                scaffoldState.snackbarHostState.showSnackbar(
+                                    "Snackbar #${++clickCount}"
+                                )
                             }
                         }
                     ) {
@@ -85,7 +84,7 @@ fun BackdropScaffoldSample() {
                     }
                 },
                 elevation = 0.dp,
-                backgroundColor = Color.Transparent
+                backgroundColor = Color.Transparent,
             )
         },
         backLayerContent = {
@@ -96,7 +95,7 @@ fun BackdropScaffoldSample() {
                             selection.value = it
                             scope.launch { scaffoldState.conceal() }
                         },
-                        text = { Text("Select $it") }
+                        text = { Text("Select $it") },
                     )
                 }
             }
@@ -110,12 +109,12 @@ fun BackdropScaffoldSample() {
                         icon = {
                             Icon(
                                 Icons.Default.Favorite,
-                                contentDescription = "Localized description"
+                                contentDescription = "Localized description",
                             )
-                        }
+                        },
                     )
                 }
             }
-        }
+        },
     )
 }

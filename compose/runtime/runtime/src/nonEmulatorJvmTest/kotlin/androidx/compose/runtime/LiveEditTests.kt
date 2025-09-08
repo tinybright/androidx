@@ -16,15 +16,17 @@
 
 package androidx.compose.runtime
 
+import androidx.collection.mutableIntSetOf
 import androidx.compose.runtime.mock.Text
 import androidx.compose.runtime.mock.View
 import androidx.compose.runtime.mock.ViewApplier
 import androidx.compose.runtime.mock.compositionTest
+import androidx.compose.runtime.snapshots.fastForEach
+import androidx.compose.runtime.tooling.Linear
+import kotlin.test.Test
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Ignore
-import org.junit.Test
 
 class LiveEditTests {
 
@@ -40,22 +42,18 @@ class LiveEditTests {
     }
 
     @Test
-    fun testRestartableFunctionPreservesParentAndSiblingState() = liveEditTest(
-        collectSourceInformation = SourceInfo.Collect
-    ) {
-        EnsureStatePreservedAndNotRecomposed("a")
-        RestartGroup {
-            Text("Hello World")
-            EnsureStatePreservedButRecomposed("b")
-            Target("c")
+    fun testRestartableFunctionPreservesParentAndSiblingState() =
+        liveEditTest(collectSourceInformation = SourceInfo.Collect) {
+            EnsureStatePreservedAndNotRecomposed("a")
+            RestartGroup {
+                Text("Hello World")
+                EnsureStatePreservedButRecomposed("b")
+                Target("c")
+            }
         }
-    }
 
-    // TODO: This should pass but doesn't. Need to investigate why.
-    @Ignore
-    fun testNonRestartableTargetAtRootScope() = liveEditTest {
-        Target("b", restartable = false)
-    }
+    @Test
+    fun testNonRestartableTargetAtRootScope() = liveEditTest { Target("b", restartable = false) }
 
     @Test
     fun testTargetSiblings() = liveEditTest {
@@ -64,81 +62,74 @@ class LiveEditTests {
     }
 
     @Test
-    fun testMultipleFunctionPreservesParentAndSiblingState() = liveEditTest(
-        collectSourceInformation = SourceInfo.Collect
-    ) {
-        EnsureStatePreservedButRecomposed("a")
-        Target("b")
-        RestartGroup {
-            Text("Hello World")
-            EnsureStatePreservedButRecomposed("c")
-            Target("d")
-            Target("e")
-        }
-        Target("f")
-    }
-
-    @Test
-    fun testChildGroupStateIsDestroyed() = liveEditTest(
-        collectSourceInformation = SourceInfo.Collect
-    ) {
-        EnsureStatePreservedAndNotRecomposed("a")
-        RestartGroup {
-            Text("Hello World")
-            EnsureStatePreservedButRecomposed("b")
-            Target("c") {
-                Text("Hello World")
-                EnsureStateLost("d")
-            }
-        }
-    }
-
-    @Test
-    fun testTargetWithinTarget() = liveEditTest(
-        collectSourceInformation = SourceInfo.Collect
-    ) {
-        EnsureStatePreservedAndNotRecomposed("a")
-        RestartGroup {
-            Text("Hello World")
-            EnsureStatePreservedButRecomposed("b")
-            Target("c") {
-                Text("Hello World")
-                EnsureStateLost("d")
-                RestartGroup {
-                    MarkAsTarget()
-                }
-            }
-        }
-    }
-
-    @Test
-    fun testNonRestartableFunctionPreservesParentAndSiblingState() = liveEditTest(
-        collectSourceInformation = SourceInfo.None
-    ) {
-        EnsureStatePreservedAndNotRecomposed("a")
-        RestartGroup {
-            Text("Hello World")
-            EnsureStatePreservedButRecomposed("b")
-            Target("c", restartable = false)
-        }
-    }
-
-    @Test
-    fun testMultipleNonRestartableFunctionPreservesParentAndSiblingState() = liveEditTest(
-        collectSourceInformation = SourceInfo.None
-    ) {
-        RestartGroup {
+    fun testMultipleFunctionPreservesParentAndSiblingState() =
+        liveEditTest(collectSourceInformation = SourceInfo.Collect) {
             EnsureStatePreservedButRecomposed("a")
-            Target("b", restartable = false)
+            Target("b")
             RestartGroup {
                 Text("Hello World")
                 EnsureStatePreservedButRecomposed("c")
-                Target("d", restartable = false)
-                Target("e", restartable = false)
+                Target("d")
+                Target("e")
             }
-            Target("f", restartable = false)
+            Target("f")
         }
-    }
+
+    @Test
+    fun testChildGroupStateIsDestroyed() =
+        liveEditTest(collectSourceInformation = SourceInfo.Collect) {
+            EnsureStatePreservedAndNotRecomposed("a")
+            RestartGroup {
+                Text("Hello World")
+                EnsureStatePreservedButRecomposed("b")
+                Target("c") {
+                    Text("Hello World")
+                    EnsureStateLost("d")
+                }
+            }
+        }
+
+    @Test
+    fun testTargetWithinTarget() =
+        liveEditTest(collectSourceInformation = SourceInfo.Collect) {
+            EnsureStatePreservedAndNotRecomposed("a")
+            RestartGroup {
+                Text("Hello World")
+                EnsureStatePreservedButRecomposed("b")
+                Target("c") {
+                    Text("Hello World")
+                    EnsureStateLost("d")
+                    RestartGroup { MarkAsTarget() }
+                }
+            }
+        }
+
+    @Test
+    fun testNonRestartableFunctionPreservesParentAndSiblingState() =
+        liveEditTest(collectSourceInformation = SourceInfo.None) {
+            EnsureStatePreservedAndNotRecomposed("a")
+            RestartGroup {
+                Text("Hello World")
+                EnsureStatePreservedButRecomposed("b")
+                Target("c", restartable = false)
+            }
+        }
+
+    @Test
+    fun testMultipleNonRestartableFunctionPreservesParentAndSiblingState() =
+        liveEditTest(collectSourceInformation = SourceInfo.None) {
+            RestartGroup {
+                EnsureStatePreservedButRecomposed("a")
+                Target("b", restartable = false)
+                RestartGroup {
+                    Text("Hello World")
+                    EnsureStatePreservedButRecomposed("c")
+                    Target("d", restartable = false)
+                    Target("e", restartable = false)
+                }
+                Target("f", restartable = false)
+            }
+        }
 
     @Test
     fun testLambda() = liveEditTest {
@@ -150,15 +141,14 @@ class LiveEditTests {
     }
 
     @Test
-    fun testInlineComposableLambda() = liveEditTest(
-        collectSourceInformation = SourceInfo.None
-    ) {
-        RestartGroup {
-            InlineTarget("a")
-            EnsureStatePreservedButRecomposed("b")
-            Text("Hello World")
+    fun testInlineComposableLambda() =
+        liveEditTest(collectSourceInformation = SourceInfo.None) {
+            RestartGroup {
+                InlineTarget("a")
+                EnsureStatePreservedButRecomposed("b")
+                Text("Hello World")
+            }
         }
-    }
 
     @Test
     fun testThrowing_initialComposition() = liveEditTest {
@@ -167,41 +157,26 @@ class LiveEditTests {
             // Fail once per each reload
             expectError("throwInCompose", 2)
             // Composed once - failed once
-            Expect(
-                "throw",
-                compose = 2,
-                onRememberd = 0,
-                onForgotten = 0,
-                onAbandoned = 2
-            )
-            error("throwInCompose")
+            Expect("throw", compose = 2, onRememberd = 0, onForgotten = 0, onAbandoned = 2)
+            testError("throwInCompose")
         }
     }
 
     @Test
     fun testThrowing_recomposition() {
         var recomposeCount = 0
-        liveEditTest(
-            reloadCount = 2,
-            collectSourceInformation = SourceInfo.None,
-        ) {
+        liveEditTest(reloadCount = 2, collectSourceInformation = SourceInfo.None) {
             RestartGroup {
                 MarkAsTarget()
 
                 // only failed on 2nd recomposition
                 expectError("throwInCompose", 1)
                 // Composed 3 times, failed once
-                Expect(
-                    "throw",
-                    compose = 3,
-                    onRememberd = 2,
-                    onForgotten = 1,
-                    onAbandoned = 1
-                )
+                Expect("throw", compose = 3, onRememberd = 2, onForgotten = 1, onAbandoned = 1)
 
                 recomposeCount++
                 if (recomposeCount == 2) {
-                    error("throwInCompose")
+                    testError("throwInCompose")
                 }
             }
         }
@@ -217,17 +192,9 @@ class LiveEditTests {
                 expectError("throwInEffect", 1)
 
                 // Composition happens as usual
-                Expect(
-                    "a",
-                    compose = 1,
-                    onRememberd = 1,
-                    onForgotten = 0,
-                    onAbandoned = 0,
-                )
+                Expect("a", compose = 1, onRememberd = 1, onForgotten = 0, onAbandoned = 0)
 
-                SideEffect {
-                    error("throwInEffect")
-                }
+                SideEffect { testError("throwInEffect") }
             }
         }
     }
@@ -235,9 +202,7 @@ class LiveEditTests {
     @Test
     fun testThrowing_recomposition_sideEffect() {
         var recomposeCount = 0
-        liveEditTest(
-            collectSourceInformation = SourceInfo.None
-        ) {
+        liveEditTest(collectSourceInformation = SourceInfo.None) {
             RestartGroup {
                 MarkAsTarget()
 
@@ -245,19 +210,13 @@ class LiveEditTests {
                 expectError("throwInEffect", 1)
 
                 // Composition happens as usual
-                Expect(
-                    "a",
-                    compose = 2,
-                    onRememberd = 2,
-                    onForgotten = 1,
-                    onAbandoned = 0,
-                )
+                Expect("a", compose = 2, onRememberd = 2, onForgotten = 1, onAbandoned = 0)
 
                 recomposeCount++
 
                 SideEffect {
                     if (recomposeCount == 2) {
-                        error("throwInEffect")
+                        testError("throwInEffect")
                     }
                 }
             }
@@ -274,32 +233,22 @@ class LiveEditTests {
                 expectError("throwOnRemember", 1)
 
                 // remembers as usual
-                Expect(
-                    "a",
-                    compose = 1,
-                    onRememberd = 1,
-                    onForgotten = 0,
-                    onAbandoned = 0,
-                )
+                Expect("a", compose = 1, onRememberd = 1, onForgotten = 0, onAbandoned = 0)
 
                 remember {
                     object : RememberObserver {
                         override fun onRemembered() {
-                            error("throwOnRemember")
+                            testError("throwOnRemember")
                         }
+
                         override fun onForgotten() {}
+
                         override fun onAbandoned() {}
                     }
                 }
 
                 // The rest of remembers fail
-                Expect(
-                    "b",
-                    compose = 1,
-                    onRememberd = 0,
-                    onForgotten = 0,
-                    onAbandoned = 1,
-                )
+                Expect("b", compose = 1, onRememberd = 0, onForgotten = 0, onAbandoned = 1)
             }
         }
     }
@@ -307,9 +256,7 @@ class LiveEditTests {
     @Test
     fun testThrowing_recomposition_remembered() {
         var recomposeCount = 0
-        liveEditTest(
-            collectSourceInformation = SourceInfo.None,
-        ) {
+        liveEditTest(collectSourceInformation = SourceInfo.None) {
             RestartGroup {
                 MarkAsTarget()
 
@@ -319,22 +266,18 @@ class LiveEditTests {
                 recomposeCount++
 
                 // remembers as usual
-                Expect(
-                    "a",
-                    compose = 2,
-                    onRememberd = 2,
-                    onForgotten = 1,
-                    onAbandoned = 0,
-                )
+                Expect("a", compose = 2, onRememberd = 2, onForgotten = 1, onAbandoned = 0)
 
                 remember {
                     object : RememberObserver {
                         override fun onRemembered() {
                             if (recomposeCount == 2) {
-                                error("throwOnRemember")
+                                testError("throwOnRemember")
                             }
                         }
+
                         override fun onForgotten() {}
+
                         override fun onAbandoned() {}
                     }
                 }
@@ -356,10 +299,7 @@ class LiveEditTests {
     fun testThrowing_invalidationsCarriedAfterCrash() {
         var recomposeCount = 0
         val state = mutableStateOf(0)
-        liveEditTest(
-            reloadCount = 2,
-            collectSourceInformation = SourceInfo.None,
-        ) {
+        liveEditTest(reloadCount = 2, collectSourceInformation = SourceInfo.None) {
             RestartGroup {
                 RestartGroup {
                     MarkAsTarget()
@@ -374,7 +314,7 @@ class LiveEditTests {
 
                     if (recomposeCount++ == 1) {
                         // crash after first reload
-                        error("throwInComposition")
+                        testError("throwInComposition")
                     }
                 }
             }
@@ -384,13 +324,7 @@ class LiveEditTests {
                 state.value
 
                 // composed initially + invalidated by crashed composition
-                Expect(
-                    "state",
-                    compose = 2,
-                    onRememberd = 1,
-                    onForgotten = 0,
-                    onAbandoned = 0
-                )
+                Expect("state", compose = 2, onRememberd = 1, onForgotten = 0, onAbandoned = 0)
             }
         }
     }
@@ -403,41 +337,37 @@ class LiveEditTests {
 
                 expectError("throwInMovableContent", 2)
 
-                val content = remember {
-                    movableContentOf {
-                        error("throwInMovableContent")
-                    }
-                }
+                val content = remember { movableContentOf { testError("throwInMovableContent") } }
 
                 content()
             }
         }
     }
 
+    @OptIn(ExperimentalComposeApi::class)
     @Test
     fun testThrowing_movableContent_recomposition() {
         var recomposeCount = 0
-        liveEditTest(
-            reloadCount = 2,
-            collectSourceInformation = SourceInfo.None,
-        ) {
+        // When the error is thrown is different when we are tracking movable content usage
+        val trackingMovableContent = ComposeRuntimeFlags.isMovableContentUsageTrackingEnabled
+        liveEditTest(reloadCount = 2, collectSourceInformation = SourceInfo.None) {
             RestartGroup {
                 MarkAsTarget()
 
-                expectError("throwInMovableContent", 1)
+                expectError("throwInMovableContent", if (trackingMovableContent) 2 else 1)
 
                 val content = remember {
                     movableContentOf {
                         Expect(
                             "movable",
                             compose = 3,
-                            onRememberd = 2,
-                            onForgotten = 1,
-                            onAbandoned = 1
+                            onRememberd = if (trackingMovableContent) 1 else 2,
+                            onForgotten = if (trackingMovableContent) 0 else 1,
+                            onAbandoned = if (trackingMovableContent) 2 else 1,
                         )
 
                         if (recomposeCount == 1) {
-                            error("throwInMovableContent")
+                            testError("throwInMovableContent")
                         }
                     }
                 }
@@ -452,10 +382,7 @@ class LiveEditTests {
     @Test
     fun testThrowing_movableContent_throwAfterMove() {
         var recomposeCount = 0
-        liveEditTest(
-            reloadCount = 2,
-            collectSourceInformation = SourceInfo.None,
-        ) {
+        liveEditTest(reloadCount = 2, collectSourceInformation = SourceInfo.None) {
             expectError("throwInMovableContent", 1)
 
             val content = remember {
@@ -466,11 +393,11 @@ class LiveEditTests {
                         compose = 2,
                         onRememberd = 1,
                         onForgotten = 0,
-                        onAbandoned = 1
+                        onAbandoned = 1,
                     )
 
                     if (recomposeCount == 1) {
-                        error("throwInMovableContent")
+                        testError("throwInMovableContent")
                     }
                 }
             }
@@ -505,22 +432,21 @@ class LiveEditTests {
          */
 
         var recomposeCount = 0
-        val content: @Composable LiveEditTestScope.() -> Unit = @Composable {
-            MarkAsTarget()
-            remember { Any() }
-        }
-        val crashyContent: @Composable LiveEditTestScope.() -> Unit = @Composable {
-            MarkAsTarget()
-            remember { Any() }
-            if (recomposeCount == 2) {
-                throw IllegalArgumentException("throwInSubcompose")
+        val content: @Composable LiveEditTestScope.() -> Unit =
+            @Composable {
+                MarkAsTarget()
+                remember { Any() }
             }
-        }
+        val crashyContent: @Composable LiveEditTestScope.() -> Unit =
+            @Composable {
+                MarkAsTarget()
+                remember { Any() }
+                if (recomposeCount == 2) {
+                    testError("throwInSubcompose")
+                }
+            }
 
-        liveEditTest(
-            reloadCount = 2,
-            collectSourceInformation = SourceInfo.None
-        ) {
+        liveEditTest(reloadCount = 2, collectSourceInformation = SourceInfo.None) {
             expectError("throwInSubcompose", 1)
 
             RestartGroup {
@@ -528,11 +454,28 @@ class LiveEditTests {
                 recomposeCount++
             }
 
-            Subcompose {
-                content()
-            }
-            Subcompose {
-                crashyContent()
+            subcompose { content() }
+            subcompose { crashyContent() }
+        }
+    }
+
+    @Test
+    fun testThrowing_removeNode() {
+        var recomposeCount = 0
+        liveEditTest(reloadCount = 2, collectSourceInformation = SourceInfo.None) {
+            expectError("test error", 1)
+
+            Linear {
+                RestartGroup {
+                    MarkAsTarget()
+                    recomposeCount++
+
+                    if (recomposeCount == 2) {
+                        testError("test error")
+                    }
+
+                    Text("test")
+                }
             }
         }
     }
@@ -541,37 +484,19 @@ class LiveEditTests {
 @Composable
 @NonRestartableComposable
 fun LiveEditTestScope.EnsureStatePreservedButRecomposed(ref: String) {
-    Expect(
-        ref,
-        compose = 2,
-        onRememberd = 1,
-        onForgotten = 0,
-        onAbandoned = 0,
-    )
+    Expect(ref, compose = 2, onRememberd = 1, onForgotten = 0, onAbandoned = 0)
 }
 
 @Composable
 @NonRestartableComposable
 fun LiveEditTestScope.EnsureStatePreservedAndNotRecomposed(ref: String) {
-    Expect(
-        ref,
-        compose = 1,
-        onRememberd = 1,
-        onForgotten = 0,
-        onAbandoned = 0,
-    )
+    Expect(ref, compose = 1, onRememberd = 1, onForgotten = 0, onAbandoned = 0)
 }
 
 @Composable
 @NonRestartableComposable
 fun LiveEditTestScope.EnsureStateLost(ref: String) {
-    Expect(
-        ref,
-        compose = 2,
-        onRememberd = 2,
-        onForgotten = 1,
-        onAbandoned = 0,
-    )
+    Expect(ref, compose = 2, onRememberd = 2, onForgotten = 1, onAbandoned = 0)
 }
 
 @Composable
@@ -605,47 +530,30 @@ fun LiveEditTestScope.Expect(
     expectLogCount(ref, "onAbandoned", onAbandoned)
 }
 
-@Composable fun LiveEditTestScope.Target(
+@Composable
+fun LiveEditTestScope.Target(
     ref: String,
     restartable: Boolean = true,
-    content: @Composable () -> Unit = {}
+    content: @Composable () -> Unit = {},
 ) {
     if (restartable) currentRecomposeScope
     MarkAsTarget()
-    Expect(
-        ref,
-        compose = 2,
-        onRememberd = 2,
-        onForgotten = 1,
-        onAbandoned = 0,
-    )
-    content()
-}
-
-@Composable fun LiveEditTestScope.InlineTarget(
-    ref: String,
-    content: @Composable () -> Unit = {}
-) {
-    MarkAsTarget()
-    Expect(
-        ref,
-        compose = 2,
-        onRememberd = 2,
-        onForgotten = 1,
-        onAbandoned = 0,
-    )
+    Expect(ref, compose = 2, onRememberd = 2, onForgotten = 1, onAbandoned = 0)
     content()
 }
 
 @Composable
-fun LiveEditTestScope.Subcompose(
-    content: @Composable () -> Unit
-): Composition {
+fun LiveEditTestScope.InlineTarget(ref: String, content: @Composable () -> Unit = {}) {
+    MarkAsTarget()
+    Expect(ref, compose = 2, onRememberd = 2, onForgotten = 1, onAbandoned = 0)
+    content()
+}
+
+@Composable
+fun LiveEditTestScope.subcompose(content: @Composable () -> Unit): Composition {
     val context = rememberCompositionContext()
     return remember(context) {
-        Composition(ViewApplier(View()), context).apply {
-            setContent(content)
-        }
+        Composition(ViewApplier(View()), context).apply { setContent(content) }
     }
 }
 
@@ -669,13 +577,11 @@ fun liveEditTest(
 ) {
     if (
         collectSourceInformation == SourceInfo.Both ||
-        collectSourceInformation == SourceInfo.Collect
+            collectSourceInformation == SourceInfo.Collect
     ) {
         compositionTest {
             with(LiveEditTestScope()) {
-                addCheck {
-                    (composition as? ControlledComposition)?.verifyConsistent()
-                }
+                addCheck { (composition as? ControlledComposition)?.verifyConsistent() }
 
                 recordErrors {
                     compose {
@@ -686,9 +592,7 @@ fun liveEditTest(
 
                 repeat(reloadCount) {
                     invalidateTargets()
-                    recordErrors {
-                        advance()
-                    }
+                    recordErrors { advance() }
                 }
 
                 runChecks()
@@ -697,24 +601,17 @@ fun liveEditTest(
     }
 
     if (
-        collectSourceInformation == SourceInfo.Both ||
-        collectSourceInformation == SourceInfo.None
+        collectSourceInformation == SourceInfo.Both || collectSourceInformation == SourceInfo.None
     ) {
         compositionTest {
             with(LiveEditTestScope()) {
-                addCheck {
-                    (composition as? ControlledComposition)?.verifyConsistent()
-                }
+                addCheck { (composition as? ControlledComposition)?.verifyConsistent() }
 
-                recordErrors {
-                    compose { fn(this) }
-                }
+                recordErrors { compose { fn(this) } }
 
                 repeat(reloadCount) {
                     invalidateTargets()
-                    recordErrors {
-                        advance()
-                    }
+                    recordErrors { advance() }
                 }
 
                 runChecks()
@@ -724,38 +621,34 @@ fun liveEditTest(
 }
 
 @OptIn(InternalComposeApi::class)
-private inline fun LiveEditTestScope.recordErrors(
-    block: () -> Unit
-) {
+private inline fun LiveEditTestScope.recordErrors(block: () -> Unit) {
     try {
         block()
-    } catch (e: ComposeRuntimeError) {
-        throw e
-    } catch (e: Exception) {
+    } catch (e: TestException) {
         addError(e)
     }
-    currentCompositionErrors().forEach {
-        addError(it.first)
-    }
+    getCurrentCompositionErrors().forEach { addError(it.first) }
 }
+
+fun testError(message: String) {
+    throw TestException(message)
+}
+
+class TestException(message: String) : RuntimeException(message)
 
 @Stable
 class LiveEditTestScope {
-    private val targetKeys = mutableSetOf<Int>()
+    private val targetKeys = mutableIntSetOf()
     private val checks = mutableListOf<() -> Unit>()
-    private val errors = mutableSetOf<Exception>()
+    private val errors = mutableSetOf<Throwable>()
     private val logs = mutableListOf<Pair<String, String>>()
 
     fun invalidateTargets() {
-        for (key in targetKeys) {
-            invalidateGroupsWithKey(key)
-        }
+        targetKeys.forEach { key -> invalidateGroupsWithKey(key) }
     }
 
     fun runChecks() {
-        for (check in checks) {
-            check()
-        }
+        checks.fastForEach { check -> check() }
     }
 
     fun addTargetKey(key: Int) {
@@ -766,7 +659,7 @@ class LiveEditTestScope {
         logs.add(ref to msg)
     }
 
-    fun addError(e: Exception) {
+    fun addError(e: Throwable) {
         errors.add(e)
     }
 
@@ -778,22 +671,14 @@ class LiveEditTestScope {
         addCheck {
             val logs = logs.filter { it.first == ref }.map { it.second }.toList()
             val actual = logs.count { m -> m == msg }
-            Assert.assertEquals(
-                "Ref '$ref' had an unexpected # of '$msg' logs",
-                expected,
-                actual
-            )
+            Assert.assertEquals("Ref '$ref' had an unexpected # of '$msg' logs", expected, actual)
         }
     }
 
     fun expectError(message: String, count: Int) {
         addCheck {
             val errors = errors.filter { it.message == message }
-            Assert.assertEquals(
-                "Got ${errors.size} errors with $message",
-                count,
-                errors.size
-            )
+            Assert.assertEquals("Got ${errors.size} errors with $message", count, errors.size)
         }
     }
 }

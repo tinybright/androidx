@@ -29,9 +29,10 @@ class PeriodicEnqueueIssueDetectorTest {
 
     @Test
     fun warnWhenEnqueueingPeriodicWork() {
-        val snippet = kotlin(
-            "com/example/Snippet.kt",
-            """
+        val snippet =
+            kotlin(
+                    "com/example/Snippet.kt",
+                    """
             package com.example
 
             import androidx.work.PeriodicWorkRequest
@@ -44,18 +45,21 @@ class PeriodicEnqueueIssueDetectorTest {
                     workManager.enqueue(request)
                 }
             }
-            """
-        ).indented().within("src")
+            """,
+                )
+                .indented()
+                .within("src")
 
-        /* ktlint-disable max-line-length */
-        lint().files(
-            WORK_MANAGER,
-            WORK_REQUEST,
-            ONE_TIME_WORK_REQUEST,
-            PERIODIC_WORK_REQUEST,
-            LISTENABLE_WORKER,
-            snippet
-        ).issues(PeriodicEnqueueIssueDetector.ISSUE)
+        lint()
+            .files(
+                WORK_MANAGER,
+                WORK_REQUEST,
+                ONE_TIME_WORK_REQUEST,
+                PERIODIC_WORK_REQUEST,
+                LISTENABLE_WORKER,
+                snippet,
+            )
+            .issues(PeriodicEnqueueIssueDetector.ISSUE)
             .run()
             .expect(
                 """
@@ -63,16 +67,17 @@ class PeriodicEnqueueIssueDetectorTest {
                    fun enqueue(request: WorkRequest)
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 0 errors, 1 warnings
-                """.trimIndent()
+                """
+                    .trimIndent()
             )
-        /* ktlint-enable max-line-length */
     }
 
     @Test
     fun warnWhenEnqueuingListOfPeriodicWork() {
-        val snippet = kotlin(
-            "com/example/Snippet.kt",
-            """
+        val snippet =
+            kotlin(
+                    "com/example/Snippet.kt",
+                    """
             package com.example
 
             import androidx.work.PeriodicWorkRequest
@@ -85,18 +90,21 @@ class PeriodicEnqueueIssueDetectorTest {
                     workManager.enqueue(requests)
                 }
             }
-            """
-        ).indented().within("src")
+            """,
+                )
+                .indented()
+                .within("src")
 
-        /* ktlint-disable max-line-length */
-        lint().files(
-            WORK_MANAGER,
-            WORK_REQUEST,
-            ONE_TIME_WORK_REQUEST,
-            PERIODIC_WORK_REQUEST,
-            LISTENABLE_WORKER,
-            snippet
-        ).issues(PeriodicEnqueueIssueDetector.ISSUE)
+        lint()
+            .files(
+                WORK_MANAGER,
+                WORK_REQUEST,
+                ONE_TIME_WORK_REQUEST,
+                PERIODIC_WORK_REQUEST,
+                LISTENABLE_WORKER,
+                snippet,
+            )
+            .issues(PeriodicEnqueueIssueDetector.ISSUE)
             .run()
             .expect(
                 """
@@ -104,16 +112,17 @@ class PeriodicEnqueueIssueDetectorTest {
                    fun enqueue(requests: List<WorkRequest>)
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 0 errors, 1 warnings
-                """.trimIndent()
+                """
+                    .trimIndent()
             )
-        /* ktlint-enable max-line-length */
     }
 
     @Test
     fun warnWhenEnqueuingListOfPeriodicWorkAndOneTimeWork() {
-        val snippet = kotlin(
-            "com/example/Snippet.kt",
-            """
+        val snippet =
+            kotlin(
+                    "com/example/Snippet.kt",
+                    """
             package com.example
 
             import androidx.work.WorkRequest
@@ -128,18 +137,21 @@ class PeriodicEnqueueIssueDetectorTest {
                     workManager.enqueue(requests)
                 }
             }
-            """
-        ).indented().within("src")
+            """,
+                )
+                .indented()
+                .within("src")
 
-        /* ktlint-disable max-line-length */
-        lint().files(
-            WORK_MANAGER,
-            WORK_REQUEST,
-            ONE_TIME_WORK_REQUEST,
-            PERIODIC_WORK_REQUEST,
-            LISTENABLE_WORKER,
-            snippet
-        ).issues(PeriodicEnqueueIssueDetector.ISSUE)
+        lint()
+            .files(
+                WORK_MANAGER,
+                WORK_REQUEST,
+                ONE_TIME_WORK_REQUEST,
+                PERIODIC_WORK_REQUEST,
+                LISTENABLE_WORKER,
+                snippet,
+            )
+            .issues(PeriodicEnqueueIssueDetector.ISSUE)
             .run()
             .expect(
                 """
@@ -147,16 +159,17 @@ class PeriodicEnqueueIssueDetectorTest {
                    fun enqueue(requests: List<WorkRequest>)
                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 0 errors, 1 warnings
-                """.trimIndent()
+                """
+                    .trimIndent()
             )
-        /* ktlint-enable max-line-length */
     }
 
     @Test
     fun noWarningsWhenUsingOneTimeWorkRequest() {
-        val snippet = kotlin(
-            "com/example/Snippet.kt",
-            """
+        val snippet =
+            kotlin(
+                    "com/example/Snippet.kt",
+                    """
             package com.example
 
             import androidx.work.OneTimeWorkRequest
@@ -170,26 +183,31 @@ class PeriodicEnqueueIssueDetectorTest {
                     workManager.enqueue(request)
                 }
             }
-            """
-        ).indented().within("src")
+            """,
+                )
+                .indented()
+                .within("src")
 
-        lint().files(
-            WORK_MANAGER,
-            WORK_REQUEST,
-            ONE_TIME_WORK_REQUEST,
-            PERIODIC_WORK_REQUEST,
-            LISTENABLE_WORKER,
-            snippet
-        ).issues(PeriodicEnqueueIssueDetector.ISSUE)
+        lint()
+            .files(
+                WORK_MANAGER,
+                WORK_REQUEST,
+                ONE_TIME_WORK_REQUEST,
+                PERIODIC_WORK_REQUEST,
+                LISTENABLE_WORKER,
+                snippet,
+            )
+            .issues(PeriodicEnqueueIssueDetector.ISSUE)
             .run()
             .expectClean()
     }
 
     @Test
     fun noWarningsWhenEnqueuingListOfOneTimeWorkRequests() {
-        val snippet = kotlin(
-            "com/example/Snippet.kt",
-            """
+        val snippet =
+            kotlin(
+                    "com/example/Snippet.kt",
+                    """
             package com.example
 
             import androidx.work.OneTimeWorkRequest
@@ -203,17 +221,21 @@ class PeriodicEnqueueIssueDetectorTest {
                     workManager.enqueue(requests)
                 }
             }
-            """
-        ).indented().within("src")
+            """,
+                )
+                .indented()
+                .within("src")
 
-        lint().files(
-            WORK_MANAGER,
-            WORK_REQUEST,
-            ONE_TIME_WORK_REQUEST,
-            PERIODIC_WORK_REQUEST,
-            LISTENABLE_WORKER,
-            snippet
-        ).issues(PeriodicEnqueueIssueDetector.ISSUE)
+        lint()
+            .files(
+                WORK_MANAGER,
+                WORK_REQUEST,
+                ONE_TIME_WORK_REQUEST,
+                PERIODIC_WORK_REQUEST,
+                LISTENABLE_WORKER,
+                snippet,
+            )
+            .issues(PeriodicEnqueueIssueDetector.ISSUE)
             .run()
             .expectClean()
     }

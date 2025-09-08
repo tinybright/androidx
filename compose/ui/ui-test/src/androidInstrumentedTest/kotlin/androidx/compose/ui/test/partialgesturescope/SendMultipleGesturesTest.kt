@@ -32,25 +32,19 @@ import org.junit.runner.RunWith
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 class SendMultipleGesturesTest {
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     private val recorder = SinglePointerInputRecorder()
 
     @Before
     fun setUp() {
         // Given some content
-        rule.setContent {
-            ClickableTestBox(recorder)
-        }
+        rule.setContent { ClickableTestBox(recorder) }
     }
 
     @Test
     fun test_noTimeInBetween() {
-        testWithTwoGestures(
-            expectedDifference = 0,
-            betweenGesturesBlock = {}
-        )
+        testWithTwoGestures(expectedDifference = 0, betweenGesturesBlock = {})
     }
 
     @Test
@@ -59,19 +53,14 @@ class SendMultipleGesturesTest {
             expectedDifference = 1273,
             betweenGesturesBlock = {
                 rule.mainClock.advanceTimeBy(1273, ignoreFrameDuration = true)
-            }
+            },
         )
     }
 
-    private fun testWithTwoGestures(
-        expectedDifference: Long,
-        betweenGesturesBlock: () -> Unit
-    ) {
-        @Suppress("DEPRECATION")
-        rule.partialGesture { click() }
+    private fun testWithTwoGestures(expectedDifference: Long, betweenGesturesBlock: () -> Unit) {
+        @Suppress("DEPRECATION") rule.partialGesture { click() }
         betweenGesturesBlock.invoke()
-        @Suppress("DEPRECATION")
-        rule.partialGesture { click() }
+        @Suppress("DEPRECATION") rule.partialGesture { click() }
 
         rule.runOnIdle {
             recorder.run {

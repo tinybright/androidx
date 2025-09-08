@@ -31,14 +31,13 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 /**
- * Benchmark for experimenting with synthetic frame patterns/durations and how
- * they show up in metrics
+ * Benchmark for experimenting with synthetic frame patterns/durations and how they show up in
+ * metrics
  */
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 class FrameExperimentBenchmark {
-    @get:Rule
-    val benchmarkRule = MacrobenchmarkRule()
+    @get:Rule val benchmarkRule = MacrobenchmarkRule()
 
     // NOTE: Keep in sync with FrameExperimentActivity!!
     private enum class FrameMode(val id: Int) {
@@ -48,14 +47,13 @@ class FrameExperimentBenchmark {
         PrefetchSomeFrames(3),
     }
 
-    @Test
-    fun fast() = benchmark(FrameMode.Fast)
-    @Test
-    fun prefetchEveryFrame() = benchmark(FrameMode.PrefetchEveryFrame)
-    @Test
-    fun workDuringEveryFrame() = benchmark(FrameMode.WorkDuringEveryFrame)
-    @Test
-    fun prefetchSomeFrames() = benchmark(FrameMode.PrefetchSomeFrames)
+    @Test fun fast() = benchmark(FrameMode.Fast)
+
+    @Test fun prefetchEveryFrame() = benchmark(FrameMode.PrefetchEveryFrame)
+
+    @Test fun workDuringEveryFrame() = benchmark(FrameMode.WorkDuringEveryFrame)
+
+    @Test fun prefetchSomeFrames() = benchmark(FrameMode.PrefetchSomeFrames)
 
     @OptIn(ExperimentalMetricApi::class)
     private fun benchmark(mode: FrameMode) {
@@ -69,7 +67,7 @@ class FrameExperimentBenchmark {
                 intent.action = ACTION
                 intent.putExtra("FRAME_MODE", mode.id)
                 startActivityAndWait(intent)
-            }
+            },
         ) {
             device.click(device.displayWidth / 2, device.displayHeight / 2)
             Thread.sleep(4_000) // empirically enough to produce expected frames

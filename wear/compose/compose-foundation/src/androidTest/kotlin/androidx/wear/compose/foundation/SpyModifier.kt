@@ -23,17 +23,16 @@ import androidx.compose.ui.layout.Placeable
 import org.junit.Assert
 
 /**
- * Class used to capture information regarding measure/layout.
- * This is used through CurvedModifier.spy, and captures information on that point in the modifier
- * chain.
- * This is also the single point of access to the internals of CurvedLayout, so tests are easier to
- * refactor if we change something there.
+ * Class used to capture information regarding measure/layout. This is used through
+ * CurvedModifier.spy, and captures information on that point in the modifier chain. This is also
+ * the single point of access to the internals of CurvedLayout, so tests are easier to refactor if
+ * we change something there.
  */
 internal data class CapturedInfo(
     // Counters
     var measuresCount: Int = 0,
     var layoutsCount: Int = 0,
-    var drawCount: Int = 0
+    var drawCount: Int = 0,
 ) {
     // Captured information
     var lastLayoutInfo: CurvedLayoutInfo? = null
@@ -58,32 +57,26 @@ internal const val FINE_FLOAT_TOLERANCE = 0.001f
 
 internal fun CapturedInfo.checkDimensions(
     expectedAngleDegrees: Float? = null,
-    expectedThicknessPx: Float? = null
+    expectedThicknessPx: Float? = null,
 ) {
     if (expectedAngleDegrees != null) {
         Assert.assertEquals(
             expectedAngleDegrees,
             lastLayoutInfo!!.sweepRadians.toDegrees(),
-            FINE_FLOAT_TOLERANCE
+            FINE_FLOAT_TOLERANCE,
         )
     }
     if (expectedThicknessPx != null) {
-        Assert.assertEquals(
-            expectedThicknessPx,
-            lastLayoutInfo!!.thickness,
-            FINE_FLOAT_TOLERANCE
-        )
+        Assert.assertEquals(expectedThicknessPx, lastLayoutInfo!!.thickness, FINE_FLOAT_TOLERANCE)
     }
 }
 
-internal fun CapturedInfo.checkAngularDimensionsInPx(
-    expectedAngularSizeInPx: Float? = null,
-) {
+internal fun CapturedInfo.checkAngularDimensionsInPx(expectedAngularSizeInPx: Float? = null) {
     if (expectedAngularSizeInPx != null) {
         Assert.assertEquals(
             expectedAngularSizeInPx / lastLayoutInfo!!.measureRadius,
             lastLayoutInfo!!.sweepRadians,
-            FINE_FLOAT_TOLERANCE
+            FINE_FLOAT_TOLERANCE,
         )
     }
 }
@@ -96,60 +89,54 @@ internal fun CapturedInfo.checkParentDimensions(
         Assert.assertEquals(
             expectedAngleDegrees,
             parentSweepRadians.toDegrees(),
-            FINE_FLOAT_TOLERANCE
+            FINE_FLOAT_TOLERANCE,
         )
     }
     if (expectedThicknessPx != null) {
-        Assert.assertEquals(
-            expectedThicknessPx,
-            parentThickness,
-            FINE_FLOAT_TOLERANCE
-        )
+        Assert.assertEquals(expectedThicknessPx, parentThickness, FINE_FLOAT_TOLERANCE)
     }
 }
 
-internal fun CapturedInfo.checkParentAngularDimensionsInPx(
-    expectedAngularSizeInPx: Float? = null,
-) {
+internal fun CapturedInfo.checkParentAngularDimensionsInPx(expectedAngularSizeInPx: Float? = null) {
     if (expectedAngularSizeInPx != null) {
         Assert.assertEquals(
             expectedAngularSizeInPx / (parentOuterRadius),
             parentSweepRadians,
-            FINE_FLOAT_TOLERANCE
+            FINE_FLOAT_TOLERANCE,
         )
     }
 }
 
 internal fun CapturedInfo.checkPositionOnParent(
     expectedAngularPositionDegrees: Float,
-    expectedRadialPositionPx: Float
+    expectedRadialPositionPx: Float,
 ) {
     Assert.assertEquals(
         expectedAngularPositionDegrees,
         (lastLayoutInfo!!.startAngleRadians - parentStartAngleRadians).toDegrees(),
-        FINE_FLOAT_TOLERANCE
+        FINE_FLOAT_TOLERANCE,
     )
     Assert.assertEquals(
         expectedRadialPositionPx,
         parentOuterRadius - lastLayoutInfo!!.outerRadius,
-        FINE_FLOAT_TOLERANCE
+        FINE_FLOAT_TOLERANCE,
     )
 }
 
 internal fun CapturedInfo.checkPositionRelativeTo(
     target: CapturedInfo,
     expectedAngularPositionDegrees: Float,
-    expectedRadialPositionPx: Float
+    expectedRadialPositionPx: Float,
 ) {
     Assert.assertEquals(
         expectedAngularPositionDegrees,
         lastLayoutInfo!!.startAngleRadians - target.lastLayoutInfo!!.startAngleRadians,
-        FINE_FLOAT_TOLERANCE
+        FINE_FLOAT_TOLERANCE,
     )
     Assert.assertEquals(
         expectedRadialPositionPx,
         target.lastLayoutInfo!!.outerRadius - lastLayoutInfo!!.outerRadius,
-        FINE_FLOAT_TOLERANCE
+        FINE_FLOAT_TOLERANCE,
     )
 }
 
@@ -171,35 +158,30 @@ internal class SpyCurvedChildWrapper(private val capturedInfo: CapturedInfo, wra
     ): PartialLayoutInfo {
         capturedInfo.parentOuterRadius = parentOuterRadius
         capturedInfo.parentThickness = parentThickness
-        return wrapped.radialPosition(
-            parentOuterRadius,
-            parentThickness,
-        )
+        return wrapped.radialPosition(parentOuterRadius, parentThickness)
     }
 
     override fun doAngularPosition(
         parentStartAngleRadians: Float,
         parentSweepRadians: Float,
-        centerOffset: Offset
+        centerOffset: Offset,
     ): Float {
         capturedInfo.parentStartAngleRadians = parentStartAngleRadians
         capturedInfo.parentSweepRadians = parentSweepRadians
-        return wrapped.angularPosition(
-            parentStartAngleRadians,
-            parentSweepRadians,
-            centerOffset
-        )
+        return wrapped.angularPosition(parentStartAngleRadians, parentSweepRadians, centerOffset)
     }
 
-    override fun (Placeable.PlacementScope).placeIfNeeded() = with(wrapped) {
-        capturedInfo.lastLayoutInfo = layoutInfo
-        capturedInfo.layoutsCount++
-        placeIfNeeded()
-    }
+    override fun (Placeable.PlacementScope).placeIfNeeded() =
+        with(wrapped) {
+            capturedInfo.lastLayoutInfo = layoutInfo
+            capturedInfo.layoutsCount++
+            placeIfNeeded()
+        }
 
-    override fun DrawScope.draw() = with(wrapped) {
-        capturedInfo.lastLayoutInfo = layoutInfo
-        capturedInfo.drawCount++
-        draw()
-    }
+    override fun DrawScope.draw() =
+        with(wrapped) {
+            capturedInfo.lastLayoutInfo = layoutInfo
+            capturedInfo.drawCount++
+            draw()
+        }
 }

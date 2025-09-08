@@ -42,14 +42,14 @@ class TextViewCompoundDrawablesApiDetectorTest {
                     textView.setCompoundDrawableTintList(csl)
                 }
             }
-            """
+            """,
                 )
                 .indented()
                 .within("src")
 
         // We expect the call to TextView.setCompoundDrawableTintList to be flagged to use
         // TextViewCompat loading
-        /* ktlint-disable max-line-length */
+
         lint()
             .files(Stubs.APPCOMPAT_ACTIVITY, customActivity)
             .issues(TextViewCompoundDrawablesApiDetector.NOT_USING_COMPAT_TEXT_VIEW_DRAWABLE_APIS)
@@ -63,7 +63,6 @@ src/com/example/CustomActivity.kt:11: Warning: Use TextViewCompat.setCompoundDra
                 """
                     .trimIndent()
             )
-        /* ktlint-enable max-line-length */
     }
 
     @Test
@@ -85,14 +84,14 @@ src/com/example/CustomActivity.kt:11: Warning: Use TextViewCompat.setCompoundDra
                     textView.setCompoundDrawableTintMode(PorterDuff.Mode.DST)
                 }
             }
-            """
+            """,
                 )
                 .indented()
                 .within("src")
 
         // We expect the call to TextView.setCompoundDrawableTintMode to be flagged to use
         // TextViewCompat loading
-        /* ktlint-disable max-line-length */
+
         lint()
             .files(Stubs.APPCOMPAT_ACTIVITY, customActivity)
             .issues(TextViewCompoundDrawablesApiDetector.NOT_USING_COMPAT_TEXT_VIEW_DRAWABLE_APIS)
@@ -106,6 +105,5 @@ src/com/example/CustomActivity.kt:11: Warning: Use TextViewCompat.setCompoundDra
                 """
                     .trimIndent()
             )
-        /* ktlint-enable max-line-length */
     }
 }

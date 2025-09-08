@@ -16,7 +16,6 @@
 
 package androidx.compose.material3
 
-import android.os.Build
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.testutils.assertAgainstGolden
@@ -40,15 +39,12 @@ import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
 @LargeTest
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
-@OptIn(ExperimentalMaterial3Api::class)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 class DateInputScreenshotTest(private val scheme: ColorSchemeWrapper) {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL3)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL3)
 
     private val wrap = Modifier.wrapContentSize(Alignment.Center)
     private val wrapperTestTag = "dateInputWrapper"
@@ -59,7 +55,7 @@ class DateInputScreenshotTest(private val scheme: ColorSchemeWrapper) {
             Box(wrap.testTag(wrapperTestTag)) {
                 DatePicker(
                     state = rememberDatePickerState(initialDisplayMode = DisplayMode.Input),
-                    showModeToggle = false
+                    showModeToggle = false,
                 )
             }
         }
@@ -70,9 +66,7 @@ class DateInputScreenshotTest(private val scheme: ColorSchemeWrapper) {
     fun dateInput_withModeToggle() {
         rule.setMaterialContent(scheme.colorScheme) {
             Box(wrap.testTag(wrapperTestTag)) {
-                DatePicker(
-                    state = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
-                )
+                DatePicker(state = rememberDatePickerState(initialDisplayMode = DisplayMode.Input))
             }
         }
         assertAgainstGolden("dateInput_withModeToggle_${scheme.name}")
@@ -84,11 +78,12 @@ class DateInputScreenshotTest(private val scheme: ColorSchemeWrapper) {
             Box(wrap.testTag(wrapperTestTag)) {
                 val dayMillis = dayInUtcMilliseconds(year = 2021, month = 3, dayOfMonth = 6)
                 DatePicker(
-                    state = rememberDatePickerState(
-                        initialSelectedDateMillis = dayMillis,
-                        initialDisplayMode = DisplayMode.Input
-                    ),
-                    showModeToggle = false
+                    state =
+                        rememberDatePickerState(
+                            initialSelectedDateMillis = dayMillis,
+                            initialDisplayMode = DisplayMode.Input,
+                        ),
+                    showModeToggle = false,
                 )
             }
         }
@@ -101,15 +96,18 @@ class DateInputScreenshotTest(private val scheme: ColorSchemeWrapper) {
             Box(wrap.testTag(wrapperTestTag)) {
                 val monthInUtcMillis = dayInUtcMilliseconds(year = 2000, month = 6, dayOfMonth = 1)
                 DatePicker(
-                    state = rememberDatePickerState(
-                        initialDisplayedMonthMillis = monthInUtcMillis,
-                        initialDisplayMode = DisplayMode.Input,
-                        selectableDates = object : SelectableDates {
-                            // All dates are invalid for the sake of this test.
-                            override fun isSelectableDate(utcTimeMillis: Long): Boolean = false
-                        }
-                    ),
-                    showModeToggle = false
+                    state =
+                        rememberDatePickerState(
+                            initialDisplayedMonthMillis = monthInUtcMillis,
+                            initialDisplayMode = DisplayMode.Input,
+                            selectableDates =
+                                object : SelectableDates {
+                                    // All dates are invalid for the sake of this test.
+                                    override fun isSelectableDate(utcTimeMillis: Long): Boolean =
+                                        false
+                                },
+                        ),
+                    showModeToggle = false,
                 )
             }
         }
@@ -121,24 +119,26 @@ class DateInputScreenshotTest(private val scheme: ColorSchemeWrapper) {
         rule.setMaterialContent(scheme.colorScheme) {
             val selectedDayMillis = dayInUtcMilliseconds(year = 2021, month = 3, dayOfMonth = 6)
             DatePickerDialog(
-                onDismissRequest = { },
+                onDismissRequest = {},
                 confirmButton = { TextButton(onClick = {}) { Text("OK") } },
-                dismissButton = { TextButton(onClick = {}) { Text("Cancel") } }
+                dismissButton = { TextButton(onClick = {}) { Text("Cancel") } },
             ) {
                 DatePicker(
-                    state = rememberDatePickerState(
-                        initialSelectedDateMillis = selectedDayMillis,
-                        initialDisplayMode = DisplayMode.Input
-                    ),
-                    showModeToggle = false
+                    state =
+                        rememberDatePickerState(
+                            initialSelectedDateMillis = selectedDayMillis,
+                            initialDisplayMode = DisplayMode.Input,
+                        ),
+                    showModeToggle = false,
                 )
             }
         }
-        rule.onNode(isDialog())
+        rule
+            .onNode(isDialog())
             .captureToImage()
             .assertAgainstGolden(
                 rule = screenshotRule,
-                goldenIdentifier = "dateInput_inDialog_${scheme.name}"
+                goldenIdentifier = "dateInput_inDialog_${scheme.name}",
             )
     }
 
@@ -152,7 +152,8 @@ class DateInputScreenshotTest(private val scheme: ColorSchemeWrapper) {
             .toEpochMilli()
 
     private fun assertAgainstGolden(goldenName: String) {
-        rule.onNodeWithTag(wrapperTestTag)
+        rule
+            .onNodeWithTag(wrapperTestTag)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, goldenName)
     }
@@ -163,10 +164,11 @@ class DateInputScreenshotTest(private val scheme: ColorSchemeWrapper) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun parameters() = arrayOf(
-            ColorSchemeWrapper("lightTheme", lightColorScheme()),
-            ColorSchemeWrapper("darkTheme", darkColorScheme()),
-        )
+        fun parameters() =
+            arrayOf(
+                ColorSchemeWrapper("lightTheme", lightColorScheme()),
+                ColorSchemeWrapper("darkTheme", darkColorScheme()),
+            )
     }
 
     class ColorSchemeWrapper(val name: String, val colorScheme: ColorScheme) {

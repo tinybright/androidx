@@ -21,12 +21,14 @@ import androidx.annotation.RestrictTo
 import androidx.health.platform.client.impl.data.ProtoParcelable
 import androidx.health.platform.client.proto.DataProto
 
-/**
- * Internal parcelable wrapper over proto object.
- */
+/** Internal parcelable wrapper over proto object. */
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 class ExerciseRoute(override val proto: DataProto.DataPoint.SubTypeDataList) :
     ProtoParcelable<DataProto.DataPoint.SubTypeDataList>() {
+
+    // ExerciseRoute is passed as an Intent extra, where shared memory isn't supported. See
+    // b/442348082
+    override fun shouldStoreInPlace() = true
 
     companion object {
         @JvmField

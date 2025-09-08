@@ -21,12 +21,12 @@ package androidx.compose.runtime.snapshots
 import androidx.compose.runtime.InternalComposeApi
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.Snapshot.Companion.openSnapshotCount
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -43,7 +43,10 @@ class DerivedSnapshotStateTests {
     fun theCalculationIsCached() {
         var runs = 0
         var i = 0
-        val a = derivedStateOf { runs++; i }
+        val a = derivedStateOf {
+            runs++
+            i
+        }
         assertEquals(0, runs, "The calculation is run only when the value is first requested")
         i++
         assertEquals(1, a.value, "The calculation is run only when the value is first requested")
@@ -131,27 +134,26 @@ class DerivedSnapshotStateTests {
     }
 
     @Test
-    @Ignore // "b/169406779: Flaky test"
     fun multipleSnapshotsAreIsolatedAndCanBeApplied() {
         val count = 2
-        val state = MutableList(count) { mutableStateOf(0) }
-        val derived = state.map { derivedStateOf { it.value } }
+        val state = MutableList(count) { mutableIntStateOf(0) }
+        val derived = state.map { derivedStateOf { it.intValue } }
 
         // Create count snapshots
         val snapshots = MutableList(count) { Snapshot.takeMutableSnapshot() }
         try {
             repeat(count) {
-                assertEquals(0, state[it].value)
+                assertEquals(0, state[it].intValue)
                 assertEquals(0, derived[it].value)
             }
 
             snapshots.forEachIndexed { index, snapshot ->
-                snapshot.enter { state[index].value = index }
+                snapshot.enter { state[index].intValue = index }
             }
 
             // Ensure the modifications in snapshots are not visible to global
             repeat(count) {
-                assertEquals(0, state[it].value)
+                assertEquals(0, state[it].intValue)
                 assertEquals(0, derived[it].value)
             }
 
@@ -159,8 +161,8 @@ class DerivedSnapshotStateTests {
             repeat(count) { index ->
                 snapshots[index].enter {
                     repeat(count) {
-                        if (it != index) assertEquals(0, state[it].value)
-                        else assertEquals(it, state[it].value)
+                        if (it != index) assertEquals(0, state[it].intValue)
+                        else assertEquals(it, state[it].intValue)
                         if (it != index) assertEquals(0, derived[it].value)
                         else assertEquals(it, derived[it].value)
                     }
@@ -168,13 +170,11 @@ class DerivedSnapshotStateTests {
             }
 
             // Apply all the snapshots
-            repeat(count) {
-                snapshots[it].apply().check()
-            }
+            repeat(count) { snapshots[it].apply().check() }
 
             // Global should now be able to see all changes
             repeat(count) {
-                assertEquals(it, state[it].value)
+                assertEquals(it, state[it].intValue)
                 assertEquals(it, derived[it].value)
             }
         } finally {
@@ -190,10 +190,11 @@ class DerivedSnapshotStateTests {
 
         var readCount = 0
         val readStates = mutableSetOf<Any>()
-        val snapshot = Snapshot.takeSnapshot {
-            readCount++
-            readStates.add(it)
-        }
+        val snapshot =
+            Snapshot.takeSnapshot {
+                readCount++
+                readStates.add(it)
+            }
         try {
 
             val result = snapshot.enter { derived.value }
@@ -217,9 +218,7 @@ class DerivedSnapshotStateTests {
         assertEquals(0, derived.value)
 
         val readStates = mutableListOf<Any>()
-        val snapshot = Snapshot.takeSnapshot {
-            readStates.add(it)
-        }
+        val snapshot = Snapshot.takeSnapshot { readStates.add(it) }
         try {
 
             val result = snapshot.enter { derived.value }
@@ -237,7 +236,10 @@ class DerivedSnapshotStateTests {
     @Test
     fun nullResultIsCached() {
         var runs = 0
-        val a = derivedStateOf { runs++; null }
+        val a = derivedStateOf {
+            runs++
+            null
+        }
         assertNull(a.value)
         assertEquals(1, runs)
         assertNull(a.value)
@@ -252,34 +254,40 @@ class DerivedSnapshotStateTests {
             runs++
             dependency.value
         }
-        val b = derivedStateOf {
-            a.value
-        }
+        val b = derivedStateOf { a.value }
 
         Snapshot.takeMutableSnapshot().apply {
-            enter {
-                b.value
-            }
+            enter { b.value }
             apply()
         }
 
         dependency.value++
 
         Snapshot.takeMutableSnapshot().apply {
-            enter {
-                b.value
-            }
+            enter { b.value }
             apply()
         }
 
         Snapshot.takeMutableSnapshot().apply {
-            enter {
-                b.value
-            }
+            enter { b.value }
             apply()
         }
 
         assertEquals(2, runs)
+    }
+
+    @Test // b/382564799
+    fun nestedDerivedStatesProduceAResult() {
+        val n = 3
+        val mutableState = mutableStateOf(1)
+        val derivedStates1 = List(n) { derivedStateOf { mutableState.value } }
+        val derivedStates2 = List(n) { derivedStateOf { derivedStates1.sumOf { it.value } } }
+        val derivedState3 = derivedStateOf { derivedStates2.sumOf { it.value } }
+
+        assertEquals(n * n, derivedState3.value)
+
+        mutableState.value = 2
+        assertEquals(n * n * 2, derivedState3.value)
     }
 
     private var count = 0

@@ -24,6 +24,7 @@ import com.google.android.gms.nearby.uwb.UwbClient
 internal class UwbControleeSessionScopeImpl(
     uwbClient: UwbClient,
     override val rangingCapabilities: RangingCapabilities,
-    override val localAddress: UwbAddress
-) : UwbClientSessionScopeImpl(uwbClient, rangingCapabilities, localAddress),
+    override val localAddress: UwbAddress,
+) :
+    UwbClientSessionScopeImpl(uwbClient, rangingCapabilities, localAddress),
     UwbControleeSessionScope

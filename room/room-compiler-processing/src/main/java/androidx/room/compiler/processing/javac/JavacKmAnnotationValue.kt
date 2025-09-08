@@ -24,10 +24,8 @@ import androidx.room.compiler.processing.javac.kotlin.KmAnnotationArgumentContai
 internal class JavacKmAnnotationValue(
     private val method: XMethodElement,
     override val valueType: XType = method.returnType,
-    private val kmAnnotationArgumentContainer: KmAnnotationArgumentContainer
+    private val kmAnnotationArgumentContainer: KmAnnotationArgumentContainer,
 ) : InternalXAnnotationValue() {
     override val name: String = method.jvmName
-    override val value: Any? by lazy {
-        kmAnnotationArgumentContainer.getValue(method)
-    }
+    override val value: Any? by lazy { kmAnnotationArgumentContainer.getValue(method) }
 }

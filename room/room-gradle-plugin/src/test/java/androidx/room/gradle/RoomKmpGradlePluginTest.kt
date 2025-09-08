@@ -24,31 +24,26 @@ import org.junit.Rule
 import org.junit.Test
 
 class RoomKmpGradlePluginTest {
-    @get:Rule
-    val projectSetup = ProjectSetupRule()
+    @get:Rule val projectSetup = ProjectSetupRule()
 
     private val roomVersion by lazy {
         projectSetup.getLibraryLatestVersionInLocalRepo("androidx/room/room-compiler")
     }
 
-    private fun setup(
-        projectRoot: File = projectSetup.rootDir,
-        generateKotlin: String = "true"
-    ) {
+    private fun setup(projectRoot: File = projectSetup.rootDir, generateKotlin: String = "true") {
         // copy test project
         File("src/test/test-data/multiplatform-project").copyRecursively(projectRoot)
 
         val repositoriesBlock = buildString {
             appendLine("repositories {")
-            projectSetup.allRepositoryPaths.forEach {
-                appendLine("""maven { url "$it" }""")
-            }
+            projectSetup.allRepositoryPaths.forEach { appendLine("""maven { url "$it" }""") }
             appendLine("}")
         }
 
         // set up build file
-        File(projectRoot, "build.gradle").writeText(
-            """
+        File(projectRoot, "build.gradle")
+            .writeText(
+                """
             |plugins {
             |    id('com.android.application')
             |    id('kotlin-multiplatform')
@@ -60,12 +55,9 @@ class RoomKmpGradlePluginTest {
             |
             |${projectSetup.androidProject}
             |
-            |// Disabled due to https://youtrack.jetbrains.com/issue/KT-65761
-            |ext["kotlin.native.disableCompilerDaemon"] = 'true'
-            |
             |kotlin {
             |  androidTarget()
-            |  linuxX64("native")
+            |  linuxX64()
             |  jvm()
             |  sourceSets {
             |    commonMain {
@@ -74,12 +66,16 @@ class RoomKmpGradlePluginTest {
             |      }
             |    }
             |  }
+            |
+            |  compilerOptions {
+            |    languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1
+            |  }
             |}
             |
             |dependencies {
             |    add("kspCommonMainMetadata", "androidx.room:room-compiler:$roomVersion")
             |    add("kspAndroid", "androidx.room:room-compiler:$roomVersion")
-            |    add("kspNative", "androidx.room:room-compiler:$roomVersion")
+            |    add("kspLinuxX64", "androidx.room:room-compiler:$roomVersion")
             |    add("kspJvm", "androidx.room:room-compiler:$roomVersion")
             |}
             |
@@ -97,13 +93,18 @@ class RoomKmpGradlePluginTest {
             |room {
             |  schemaDirectory("metadata", "${'$'}projectDir/schemas/common")
             |  schemaDirectory("android", "${'$'}projectDir/schemas/android")
-            |  schemaDirectory("native", "${'$'}projectDir/schemas/native")
+            |  schemaDirectory("linuxX64", "${'$'}projectDir/schemas/native")
             |  schemaDirectory("jvm", "${'$'}projectDir/schemas/jvm")
             |  generateKotlin = $generateKotlin
             |}
             |
-            """.trimMargin()
-        )
+            |ksp {
+            |  useKsp2 = true
+            |}
+            |
+            """
+                    .trimMargin()
+            )
     }
 
     @Test
@@ -112,14 +113,17 @@ class RoomKmpGradlePluginTest {
 
         // First build, all tasks run
         runGradle(
-            CLEAN_TASK, ANDROID_COMPILE_TASK, NATIVE_COMPILE_TASK,
-            projectDir = projectSetup.rootDir
-        ).let { result ->
-            result.assertTaskOutcome(ANDROID_COMPILE_TASK, TaskOutcome.SUCCESS)
-            result.assertTaskOutcome(NATIVE_COMPILE_TASK, TaskOutcome.SUCCESS)
-            result.assertTaskOutcome(ANDROID_COPY_TASK, TaskOutcome.SUCCESS)
-            result.assertTaskOutcome(NATIVE_COPY_TASK, TaskOutcome.SUCCESS)
-        }
+                CLEAN_TASK,
+                ANDROID_COMPILE_TASK,
+                NATIVE_COMPILE_TASK,
+                projectSetup = projectSetup,
+            )
+            .let { result ->
+                result.assertTaskOutcome(ANDROID_COMPILE_TASK, TaskOutcome.SUCCESS)
+                result.assertTaskOutcome(NATIVE_COMPILE_TASK, TaskOutcome.SUCCESS)
+                result.assertTaskOutcome(ANDROID_COPY_TASK, TaskOutcome.SUCCESS)
+                result.assertTaskOutcome(NATIVE_COPY_TASK, TaskOutcome.SUCCESS)
+            }
 
         // Check created schema files
         val androidSchema =
@@ -137,44 +141,32 @@ class RoomKmpGradlePluginTest {
         setup(generateKotlin = "false")
 
         // Common should fail with Kotlin codegen off as there are JVM and Native targets from it
-        runGradle(
-            COMMON_KSP_TASK,
-            projectDir = projectSetup.rootDir,
-            expectFailure = true
-        ).let { result ->
+        runGradle(COMMON_KSP_TASK, projectSetup = projectSetup, expectFailure = true).let { result
+            ->
             assertThat(result.output)
                 .contains("Cannot generate Java targeting a non-Android platform")
             result.assertTaskOutcome(COMMON_KSP_TASK, TaskOutcome.FAILED)
         }
 
         // Native should fail with Kotlin codegen off
-        runGradle(
-            NATIVE_COMPILE_TASK,
-            projectDir = projectSetup.rootDir,
-            expectFailure = true
-        ).let { result ->
+        runGradle(NATIVE_COMPILE_TASK, projectSetup = projectSetup, expectFailure = true).let {
+            result ->
             assertThat(result.output)
                 .contains("Cannot generate Java targeting a non-Android platform")
             result.assertTaskOutcome(NATIVE_KSP_TASK, TaskOutcome.FAILED)
         }
 
         // JVM should fail with Kotlin codegen off
-        runGradle(
-            JVM_COMPILE_TASK,
-            projectDir = projectSetup.rootDir,
-            expectFailure = true
-        ).let { result ->
+        runGradle(JVM_COMPILE_TASK, projectSetup = projectSetup, expectFailure = true).let { result
+            ->
             assertThat(result.output)
                 .contains("Cannot generate Java targeting a non-Android platform")
             result.assertTaskOutcome(JVM_KSP_TASK, TaskOutcome.FAILED)
         }
 
         // Android is OK when Kotlin codegen is off
-        runGradle(
-            ANDROID_COMPILE_TASK,
-            projectDir = projectSetup.rootDir,
-            expectFailure = false
-        ).assertTaskOutcome(ANDROID_KSP_TASK, TaskOutcome.SUCCESS)
+        runGradle(ANDROID_COMPILE_TASK, projectSetup = projectSetup, expectFailure = false)
+            .assertTaskOutcome(ANDROID_KSP_TASK, TaskOutcome.SUCCESS)
     }
 
     @Test
@@ -184,20 +176,20 @@ class RoomKmpGradlePluginTest {
         searchAndReplace(
             file = projectSetup.rootDir.resolve("src/nativeMain/kotlin/room/testapp/MyDatabase.kt"),
             search = "// Insert-change",
-            replace = """
+            replace =
+                """
                 @Query("SELECT * FROM NativeEntity")
                 fun blockingQuery(): NativeEntity
-            """.trimIndent()
+            """
+                    .trimIndent(),
         )
 
-        runGradle(
-            NATIVE_COMPILE_TASK,
-            projectDir = projectSetup.rootDir,
-            expectFailure = true
-        ).let { result ->
+        runGradle(NATIVE_COMPILE_TASK, projectSetup = projectSetup, expectFailure = true).let {
+            result ->
             result.assertTaskOutcome(NATIVE_KSP_TASK, TaskOutcome.FAILED)
-            result.output.contains("Only suspend functions are allowed in DAOs" +
-                " declared in non-Android platforms.")
+            result.output.contains(
+                "Only suspend functions are allowed in DAOs" + " declared in non-Android platforms."
+            )
         }
     }
 
@@ -208,20 +200,20 @@ class RoomKmpGradlePluginTest {
         searchAndReplace(
             file = projectSetup.rootDir.resolve("src/nativeMain/kotlin/room/testapp/MyDatabase.kt"),
             search = "// Insert-change",
-            replace = """
+            replace =
+                """
                 @Insert
                 fun blockingInsert(entity: NativeEntity)
-            """.trimIndent()
+            """
+                    .trimIndent(),
         )
 
-        runGradle(
-            NATIVE_COMPILE_TASK,
-            projectDir = projectSetup.rootDir,
-            expectFailure = true
-        ).let { result ->
+        runGradle(NATIVE_COMPILE_TASK, projectSetup = projectSetup, expectFailure = true).let {
+            result ->
             result.assertTaskOutcome(NATIVE_KSP_TASK, TaskOutcome.FAILED)
-            result.output.contains("Only suspend functions are allowed in DAOs" +
-                " declared in non-Android platforms.")
+            result.output.contains(
+                "Only suspend functions are allowed in DAOs" + " declared in non-Android platforms."
+            )
         }
     }
 
@@ -232,20 +224,20 @@ class RoomKmpGradlePluginTest {
         searchAndReplace(
             file = projectSetup.rootDir.resolve("src/nativeMain/kotlin/room/testapp/MyDatabase.kt"),
             search = "// Insert-change",
-            replace = """
+            replace =
+                """
                 @Transaction
                 fun blockingTransaction() { }
-            """.trimIndent()
+            """
+                    .trimIndent(),
         )
 
-        runGradle(
-            NATIVE_COMPILE_TASK,
-            projectDir = projectSetup.rootDir,
-            expectFailure = true
-        ).let { result ->
+        runGradle(NATIVE_COMPILE_TASK, projectSetup = projectSetup, expectFailure = true).let {
+            result ->
             result.assertTaskOutcome(NATIVE_KSP_TASK, TaskOutcome.FAILED)
-            result.output.contains("Only suspend functions are allowed in DAOs" +
-                " declared in non-Android platforms.")
+            result.output.contains(
+                "Only suspend functions are allowed in DAOs" + " declared in non-Android platforms."
+            )
         }
     }
 
@@ -254,11 +246,11 @@ class RoomKmpGradlePluginTest {
         private const val COMMON_KSP_TASK = ":kspCommonMainKotlinMetadata"
         private const val ANDROID_COMPILE_TASK = ":compileDebugKotlinAndroid"
         private const val ANDROID_KSP_TASK = ":kspDebugKotlinAndroid"
-        private const val NATIVE_COMPILE_TASK = ":compileKotlinNative"
-        private const val NATIVE_KSP_TASK = ":kspKotlinNative"
+        private const val NATIVE_COMPILE_TASK = ":compileKotlinLinuxX64"
+        private const val NATIVE_KSP_TASK = ":kspKotlinLinuxX64"
         private const val JVM_COMPILE_TASK = ":compileKotlinJvm"
         private const val JVM_KSP_TASK = ":kspKotlinJvm"
         private const val ANDROID_COPY_TASK = ":copyRoomSchemasAndroid"
-        private const val NATIVE_COPY_TASK = ":copyRoomSchemasNative"
+        private const val NATIVE_COPY_TASK = ":copyRoomSchemasLinuxX64"
     }
 }

@@ -20,41 +20,32 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.internal.JvmDefaultWithCompatibility
+import androidx.compose.ui.internal.throwUnsupportedOperationException
 import androidx.compose.ui.node.NodeCoordinator
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastMaxOf
 import androidx.compose.ui.util.fastMinOf
 
-/**
- * A holder of the measured bounds for the [Layout].
- */
+/** A holder of the measured bounds for the [Layout]. */
 @JvmDefaultWithCompatibility
 interface LayoutCoordinates {
-    /**
-     * The size of this layout in the local coordinates space.
-     */
+    /** The size of this layout in the local coordinates space. */
     val size: IntSize
 
-    /**
-     * The alignment lines provided for this layout, not including inherited lines.
-     */
+    /** The alignment lines provided for this layout, not including inherited lines. */
     val providedAlignmentLines: Set<AlignmentLine>
 
-    /**
-     * The coordinates of the parent layout. Null if there is no parent.
-     */
+    /** The coordinates of the parent layout. Null if there is no parent. */
     val parentLayoutCoordinates: LayoutCoordinates?
 
     /**
-     * The coordinates of the parent layout modifier or parent layout if there is no
-     * parent layout modifier, or `null` if there is no parent.
+     * The coordinates of the parent layout modifier or parent layout if there is no parent layout
+     * modifier, or `null` if there is no parent.
      */
     val parentCoordinates: LayoutCoordinates?
 
-    /**
-     * Returns false if the corresponding layout was detached from the hierarchy.
-     */
+    /** Returns false if the corresponding layout was detached from the hierarchy. */
     val isAttached: Boolean
 
     /**
@@ -78,7 +69,8 @@ interface LayoutCoordinates {
      * @see localPositionOf
      */
     @Suppress("GetterSetterNames") // Preferred name
-    val introducesMotionFrameOfReference: Boolean get() = false
+    val introducesMotionFrameOfReference: Boolean
+        get() = false
 
     /**
      * Converts [relativeToScreen] relative to the device's screen's origin into an [Offset]
@@ -93,8 +85,8 @@ interface LayoutCoordinates {
     fun localToScreen(relativeToLocal: Offset): Offset = Offset.Unspecified
 
     /**
-     * Converts [relativeToWindow] relative to the window's origin into an [Offset] relative to
-     * this layout.
+     * Converts [relativeToWindow] relative to the window's origin into an [Offset] relative to this
+     * layout.
      */
     fun windowToLocal(relativeToWindow: Offset): Offset
 
@@ -104,29 +96,24 @@ interface LayoutCoordinates {
      */
     fun localToWindow(relativeToLocal: Offset): Offset
 
-    /**
-     * Converts a local position within this layout into an offset from the root composable.
-     */
+    /** Converts a local position within this layout into an offset from the root composable. */
     fun localToRoot(relativeToLocal: Offset): Offset
 
     /**
      * Converts an [relativeToSource] in [sourceCoordinates] space into local coordinates.
-     * [sourceCoordinates] may be any [LayoutCoordinates] that belong to the same
-     * compose layout hierarchy.
+     * [sourceCoordinates] may be any [LayoutCoordinates] that belong to the same compose layout
+     * hierarchy.
      *
      * By default, includes the [Offset] when [introducesMotionFrameOfReference] is `true`. But you
      * may exclude it from the calculation by using the overload that takes
      * `includeMotionFrameOfReference` and passing it as `false`.
      */
-    fun localPositionOf(
-        sourceCoordinates: LayoutCoordinates,
-        relativeToSource: Offset
-    ): Offset
+    fun localPositionOf(sourceCoordinates: LayoutCoordinates, relativeToSource: Offset): Offset
 
     /**
      * Converts an [relativeToSource] in [sourceCoordinates] space into local coordinates.
-     * [sourceCoordinates] may be any [LayoutCoordinates] that belong to the same
-     * compose layout hierarchy.
+     * [sourceCoordinates] may be any [LayoutCoordinates] that belong to the same compose layout
+     * hierarchy.
      *
      * Use [includeMotionFrameOfReference] to decide whether to include the [Offset] of any
      * `LayoutCoordinate` that returns `true` in the [includeMotionFrameOfReference] flag.
@@ -138,7 +125,7 @@ interface LayoutCoordinates {
     fun localPositionOf(
         sourceCoordinates: LayoutCoordinates,
         relativeToSource: Offset = Offset.Zero,
-        includeMotionFrameOfReference: Boolean = true
+        includeMotionFrameOfReference: Boolean = true,
     ): Offset {
         throw UnsupportedOperationException(
             "localPositionOf is not implemented on this LayoutCoordinates"
@@ -146,27 +133,25 @@ interface LayoutCoordinates {
     }
 
     /**
-     * Returns the bounding box of [sourceCoordinates] in the local coordinates.
-     * If [clipBounds] is `true`, any clipping that occurs between [sourceCoordinates] and
-     * this layout will affect the returned bounds, and can even result in an empty rectangle
-     * if clipped regions do not overlap. If [clipBounds] is false, the bounding box of
-     * [sourceCoordinates] will be converted to local coordinates irrespective of any clipping
-     * applied between the layouts.
+     * Returns the bounding box of [sourceCoordinates] in the local coordinates. If [clipBounds] is
+     * `true`, any clipping that occurs between [sourceCoordinates] and this layout will affect the
+     * returned bounds, and can even result in an empty rectangle if clipped regions do not overlap.
+     * If [clipBounds] is false, the bounding box of [sourceCoordinates] will be converted to local
+     * coordinates irrespective of any clipping applied between the layouts.
      *
-     * When rotation or scaling is applied, the bounding box of the rotated or scaled value
-     * will be computed in the local coordinates. For example, if a 40 pixels x 20 pixel layout
-     * is rotated 90 degrees, the bounding box will be 20 pixels x 40 pixels in its parent's
-     * coordinates.
+     * When rotation or scaling is applied, the bounding box of the rotated or scaled value will be
+     * computed in the local coordinates. For example, if a 40 pixels x 20 pixel layout is rotated
+     * 90 degrees, the bounding box will be 20 pixels x 40 pixels in its parent's coordinates.
      */
     fun localBoundingBoxOf(sourceCoordinates: LayoutCoordinates, clipBounds: Boolean = true): Rect
 
     /**
-     * Modifies [matrix] to be a transform to convert a coordinate in [sourceCoordinates]
-     * to a coordinate in `this` [LayoutCoordinates].
+     * Modifies [matrix] to be a transform to convert a coordinate in [sourceCoordinates] to a
+     * coordinate in `this` [LayoutCoordinates].
      */
     @Suppress("DocumentExceptions")
     fun transformFrom(sourceCoordinates: LayoutCoordinates, matrix: Matrix) {
-        throw UnsupportedOperationException(
+        throwUnsupportedOperationException(
             "transformFrom is not implemented on this LayoutCoordinates"
         )
     }
@@ -183,47 +168,54 @@ interface LayoutCoordinates {
     }
 
     /**
-     * Returns the position in pixels of an [alignment line][AlignmentLine],
-     * or [AlignmentLine.Unspecified] if the line is not provided.
+     * Returns the position in pixels of an [alignment line][AlignmentLine], or
+     * [AlignmentLine.Unspecified] if the line is not provided.
      */
     operator fun get(alignmentLine: AlignmentLine): Int
 }
 
-/**
- * The position of this layout inside the root composable.
- */
+/** The position of this layout inside the root composable. */
 fun LayoutCoordinates.positionInRoot(): Offset = localToRoot(Offset.Zero)
 
-/**
- * The position of this layout relative to the window.
- */
+/** The position of this layout relative to the window. */
 fun LayoutCoordinates.positionInWindow(): Offset = localToWindow(Offset.Zero)
 
 /**
- * The position of this layout on the device's screen.
- * Returns [Offset.Unspecified] if the conversion cannot be performed.
+ * The position of this layout on the device's screen. Returns [Offset.Unspecified] if the
+ * conversion cannot be performed.
  */
 fun LayoutCoordinates.positionOnScreen(): Offset = localToScreen(Offset.Zero)
 
-/**
- * The boundaries of this layout inside the root composable.
- */
-fun LayoutCoordinates.boundsInRoot(): Rect =
-    findRootCoordinates().localBoundingBoxOf(this)
+/** The boundaries of this layout inside the root composable. */
+fun LayoutCoordinates.boundsInRoot(): Rect = findRootCoordinates().localBoundingBoxOf(this)
+
+@Deprecated(
+    message = "Deprecated in favor of boundsInWindow with clipBounds parameter",
+    level = DeprecationLevel.HIDDEN,
+)
+fun LayoutCoordinates.boundsInWindow(): Rect = boundsInWindow(clipBounds = true)
 
 /**
  * The boundaries of this layout relative to the window's origin.
+ *
+ * @param clipBounds Whether to clip the bounds of the layout to the window's boundaries. If `true`,
+ *   any clipping that occurs between this layout and the window will affect the returned bounds,
+ *   and can even result in an empty rectangle if clipped regions do not overlap. If `false`, the
+ *   bounding box of this layout will be converted to window coordinates irrespective of any
+ *   clipping applied. Defaults to `true`.
+ * @return A [Rect] representing the bounding box of this [LayoutCoordinates] in the window's
+ *   coordinate space. If the bounds are completely clipped, returns [Rect.Zero].
  */
-fun LayoutCoordinates.boundsInWindow(): Rect {
+fun LayoutCoordinates.boundsInWindow(clipBounds: Boolean = true): Rect {
     val root = findRootCoordinates()
     val rootWidth = root.size.width.toFloat()
     val rootHeight = root.size.height.toFloat()
 
-    val bounds = boundsInRoot()
-    val boundsLeft = bounds.left.fastCoerceIn(0f, rootWidth)
-    val boundsTop = bounds.top.fastCoerceIn(0f, rootHeight)
-    val boundsRight = bounds.right.fastCoerceIn(0f, rootWidth)
-    val boundsBottom = bounds.bottom.fastCoerceIn(0f, rootHeight)
+    val bounds = root.localBoundingBoxOf(this, clipBounds)
+    val boundsLeft = if (clipBounds) bounds.left.fastCoerceIn(0f, rootWidth) else bounds.left
+    val boundsTop = if (clipBounds) bounds.top.fastCoerceIn(0f, rootHeight) else bounds.top
+    val boundsRight = if (clipBounds) bounds.right.fastCoerceIn(0f, rootWidth) else bounds.right
+    val boundsBottom = if (clipBounds) bounds.bottom.fastCoerceIn(0f, rootHeight) else bounds.bottom
 
     if (boundsLeft == boundsRight || boundsTop == boundsBottom) {
         return Rect.Zero
@@ -253,17 +245,14 @@ fun LayoutCoordinates.boundsInWindow(): Rect {
     return Rect(left, top, right, bottom)
 }
 
-/**
- * Returns the position of the top-left in the parent's content area or (0, 0)
- * for the root.
- */
+/** Returns the position of the top-left in the parent's content area or (0, 0) for the root. */
 fun LayoutCoordinates.positionInParent(): Offset =
     parentLayoutCoordinates?.localPositionOf(this, Offset.Zero) ?: Offset.Zero
 
 /**
- * Returns the bounding box of the child in the parent's content area, including any clipping
- * done with respect to the parent. For the root, the bounds is positioned at (0, 0) and sized
- * to the size of the root.
+ * Returns the bounding box of the child in the parent's content area, including any clipping done
+ * with respect to the parent. For the root, the bounds is positioned at (0, 0) and sized to the
+ * size of the root.
  */
 fun LayoutCoordinates.boundsInParent(): Rect =
     parentLayoutCoordinates?.localBoundingBoxOf(this)

@@ -16,7 +16,6 @@
 
 package androidx.wear.compose.material
 
-import android.os.Build
 import androidx.compose.testutils.assertAgainstGolden
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,17 +35,14 @@ import org.junit.runner.RunWith
 
 @MediumTest
 @RunWith(AndroidJUnit4::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 class ProgressIndicatorScreenshotTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(SCREENSHOT_GOLDEN_PATH)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(SCREENSHOT_GOLDEN_PATH)
 
-    @get:Rule
-    val testName = TestName()
+    @get:Rule val testName = TestName()
 
     @Test
     fun indeterminate_progress_indicator() {
@@ -55,14 +51,15 @@ class ProgressIndicatorScreenshotTest {
             CircularProgressIndicator(
                 modifier = Modifier.testTag(TEST_TAG),
                 indicatorColor = Color.Green,
-                trackColor = Color.LightGray
+                trackColor = Color.LightGray,
             )
         }
 
         rule.waitForIdle()
         rule.mainClock.advanceTimeBy(300)
 
-        rule.onNodeWithTag(TEST_TAG)
+        rule
+            .onNodeWithTag(TEST_TAG)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, testName.methodName)
     }
@@ -76,13 +73,14 @@ class ProgressIndicatorScreenshotTest {
                 modifier = Modifier.testTag(TEST_TAG),
                 indicatorColor = Color.Green,
                 trackColor = Color.LightGray,
-                strokeWidth = 10.dp
+                strokeWidth = 10.dp,
             )
         }
         rule.waitForIdle()
         rule.mainClock.advanceTimeBy(300)
 
-        rule.onNodeWithTag(TEST_TAG)
+        rule
+            .onNodeWithTag(TEST_TAG)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, testName.methodName)
     }
@@ -94,11 +92,12 @@ class ProgressIndicatorScreenshotTest {
                 modifier = Modifier.testTag(TEST_TAG),
                 progress = 0.4f,
                 indicatorColor = Color.Green,
-                trackColor = Color.LightGray
+                trackColor = Color.LightGray,
             )
         }
 
-        rule.onNodeWithTag(TEST_TAG)
+        rule
+            .onNodeWithTag(TEST_TAG)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, testName.methodName)
     }
@@ -112,11 +111,12 @@ class ProgressIndicatorScreenshotTest {
                 startAngle = -45f,
                 endAngle = 225f,
                 indicatorColor = Color.Green,
-                trackColor = Color.LightGray
+                trackColor = Color.LightGray,
             )
         }
 
-        rule.onNodeWithTag(TEST_TAG)
+        rule
+            .onNodeWithTag(TEST_TAG)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, testName.methodName)
     }
@@ -129,11 +129,12 @@ class ProgressIndicatorScreenshotTest {
                 progress = 0.4f,
                 indicatorColor = Color.Green,
                 trackColor = Color.Yellow,
-                strokeWidth = 10.dp
+                strokeWidth = 10.dp,
             )
         }
 
-        rule.onNodeWithTag(TEST_TAG)
+        rule
+            .onNodeWithTag(TEST_TAG)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, testName.methodName)
     }

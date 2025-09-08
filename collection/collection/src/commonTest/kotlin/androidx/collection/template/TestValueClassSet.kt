@@ -22,13 +22,10 @@
     "ConstPropertyName",
     "PrivatePropertyName",
     "NOTHING_TO_INLINE",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package androidx.collection.template
-
-/* ktlint-disable max-line-length */
-/* ktlint-disable import-ordering */
 
 import androidx.collection.LongSet
 import androidx.collection.MutableLongSet
@@ -39,7 +36,6 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 import kotlin.jvm.JvmInline
 
-/* ktlint-disable max-line-length */
 // To use this template, you must substitute several strings. You can copy this and search/replace
 // or use a sed command. These properties must be changed:
 // * androidx.collection.template - target package (e.g. androidx.compose.ui.ui.collection)
@@ -73,14 +69,9 @@ internal inline fun testValueClassSetOf(element1: TestValueClass): TestValueClas
 @Suppress("UNCHECKED_CAST")
 internal fun testValueClassSetOf(
     element1: TestValueClass,
-    element2: TestValueClass
+    element2: TestValueClass,
 ): TestValueClassSet =
-    TestValueClassSet(
-        mutableLongSetOf(
-            element1.value.toLong(),
-            element2.value.toLong(),
-        )
-    )
+    TestValueClassSet(mutableLongSetOf(element1.value.toLong(), element2.value.toLong()))
 
 /**
  * Returns a new read-only [TestValueClassSet] with only [element1], [element2], and [element3] in
@@ -90,14 +81,10 @@ internal fun testValueClassSetOf(
 internal fun testValueClassSetOf(
     element1: TestValueClass,
     element2: TestValueClass,
-    element3: TestValueClass
+    element3: TestValueClass,
 ): TestValueClassSet =
     TestValueClassSet(
-        mutableLongSetOf(
-            element1.value.toLong(),
-            element2.value.toLong(),
-            element3.value.toLong(),
-        )
+        mutableLongSetOf(element1.value.toLong(), element2.value.toLong(), element3.value.toLong())
     )
 
 /** Returns a new [MutableTestValueClassSet]. */
@@ -111,14 +98,9 @@ internal fun mutableTestValueClassSetOf(element1: TestValueClass): MutableTestVa
 /** Returns a new [MutableTestValueClassSet] with only [element1] and [element2] in it. */
 internal fun mutableTestValueClassSetOf(
     element1: TestValueClass,
-    element2: TestValueClass
+    element2: TestValueClass,
 ): MutableTestValueClassSet =
-    MutableTestValueClassSet(
-        mutableLongSetOf(
-            element1.value.toLong(),
-            element2.value.toLong(),
-        )
-    )
+    MutableTestValueClassSet(mutableLongSetOf(element1.value.toLong(), element2.value.toLong()))
 
 /**
  * Returns a new [MutableTestValueClassSet] with only [element1], [element2], and [element3] in it.
@@ -126,14 +108,10 @@ internal fun mutableTestValueClassSetOf(
 internal fun mutableTestValueClassSetOf(
     element1: TestValueClass,
     element2: TestValueClass,
-    element3: TestValueClass
+    element3: TestValueClass,
 ): MutableTestValueClassSet =
     MutableTestValueClassSet(
-        mutableLongSetOf(
-            element1.value.toLong(),
-            element2.value.toLong(),
-            element3.value.toLong(),
-        )
+        mutableLongSetOf(element1.value.toLong(), element2.value.toLong(), element3.value.toLong())
     )
 
 /**

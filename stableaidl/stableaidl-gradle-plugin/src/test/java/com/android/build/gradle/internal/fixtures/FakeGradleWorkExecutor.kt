@@ -38,14 +38,14 @@ import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 
 /**
- * Fake implementation of [WorkerExecutor]. [ObjectFactory] is used to instantiate parameters,
- * while [File] is used to output generated decorated classes.
+ * Fake implementation of [WorkerExecutor]. [ObjectFactory] is used to instantiate parameters, while
+ * [File] is used to output generated decorated classes.
  */
 open class FakeGradleWorkExecutor(
     objectFactory: ObjectFactory,
     tmpDir: File,
     injectableService: List<FakeInjectableService> = emptyList(),
-    private val executionMode: ExecutionMode = ExecutionMode.RUNNING
+    private val executionMode: ExecutionMode = ExecutionMode.RUNNING,
 ) : WorkerExecutor {
 
     private val workQueue =
@@ -53,7 +53,7 @@ open class FakeGradleWorkExecutor(
             executionMode,
             objectFactory,
             tmpDir.resolve("generatedClasses"),
-            injectableService
+            injectableService,
         )
 
     val capturedParameters: List<WorkParameters>
@@ -78,16 +78,16 @@ open class FakeGradleWorkExecutor(
         return workQueue
     }
 
-    override fun noIsolation(action: Action<in WorkerSpec?>): WorkQueue {
+    override fun noIsolation(action: Action<in WorkerSpec>): WorkQueue {
         throw NotImplementedError()
     }
 
-    override fun classLoaderIsolation(action: Action<in ClassLoaderWorkerSpec?>): WorkQueue {
+    override fun classLoaderIsolation(action: Action<in ClassLoaderWorkerSpec>): WorkQueue {
         check(executionMode == ExecutionMode.CAPTURING)
         return workQueue
     }
 
-    override fun processIsolation(action: Action<in ProcessWorkerSpec?>): WorkQueue {
+    override fun processIsolation(action: Action<in ProcessWorkerSpec>): WorkQueue {
         check(executionMode == ExecutionMode.CAPTURING)
         return workQueue
     }
@@ -97,10 +97,7 @@ open class FakeGradleWorkExecutor(
     }
 }
 
-class FakeInjectableService(
-    val methodReference: Method,
-    val implementation: Any
-)
+class FakeInjectableService(val methodReference: Method, val implementation: Any)
 
 enum class ExecutionMode {
     // Run work actions
@@ -115,27 +112,29 @@ private class FakeGradleWorkQueue(
     private val executionMode: ExecutionMode,
     private val objectFactory: ObjectFactory,
     private val generatedClassesOutput: File,
-    private val injectableService: List<FakeInjectableService>
+    private val injectableService: List<FakeInjectableService>,
 ) : WorkQueue {
 
     val capturedParameters = mutableListOf<WorkParameters>()
 
     override fun <T : WorkParameters> submit(
         aClass: Class<out WorkAction<T>>,
-        action: Action<in T>
+        action: Action<in T>,
     ) {
         val parameterTypeName =
             (aClass.genericSuperclass as? ParameterizedType
-                ?: aClass.genericInterfaces.single() as ParameterizedType)
-                .actualTypeArguments[0].typeName
+                    ?: aClass.genericInterfaces.single() as ParameterizedType)
+                .actualTypeArguments[0]
+                .typeName
         if (aClass.constructors.single().parameterCount != 0) {
             // we should just instantiate it and pass in all params + services
             runWorkAction(parameterTypeName, action, aClass)
         } else {
             val workerActionName = aClass.name.replace(".", "/")
             val bytes =
-                aClass.classLoader.getResourceAsStream("$workerActionName.class")
-                    .use { it!!.readBytes() }
+                aClass.classLoader.getResourceAsStream("$workerActionName.class").use {
+                    it!!.readBytes()
+                }
 
             val reader = ClassReader(bytes)
             val cw = ClassWriter(0)
@@ -145,13 +144,11 @@ private class FakeGradleWorkQueue(
                 it.parentFile.mkdirs()
                 it.writeBytes(cw.toByteArray())
             }
-            URLClassLoader(
-                arrayOf(generatedClassesOutput.toURI().toURL()),
-                aClass.classLoader
-            ).use { classloader ->
-                val actualClass = classloader.loadClass(aClass.name + CLASS_SUFFIX)
-                runWorkAction(parameterTypeName, action, actualClass)
-            }
+            URLClassLoader(arrayOf(generatedClassesOutput.toURI().toURL()), aClass.classLoader)
+                .use { classloader ->
+                    val actualClass = classloader.loadClass(aClass.name + CLASS_SUFFIX)
+                    runWorkAction(parameterTypeName, action, actualClass)
+                }
         }
     }
 
@@ -159,13 +156,12 @@ private class FakeGradleWorkQueue(
     private fun <T : WorkParameters> runWorkAction(
         parameterTypeName: String?,
         action: Action<in T>,
-        actualClass: Class<out Any>
+        actualClass: Class<out Any>,
     ) {
         // initialize and configure parameters
         val parametersInstance =
-            objectFactory.newInstance(
-                this::class.java.classLoader.loadClass(parameterTypeName)
-            ) as T
+            objectFactory.newInstance(this::class.java.classLoader.loadClass(parameterTypeName))
+                as T
         action.execute(parametersInstance)
 
         when (executionMode) {
@@ -195,9 +191,8 @@ private class FakeGradleWorkQueue(
 class WorkerActionDecorator(
     classWriter: ClassWriter,
     paramsType: String,
-    private val injectableService: List<FakeInjectableService>
-) :
-    ClassVisitor(Opcodes.ASM7, classWriter) {
+    private val injectableService: List<FakeInjectableService>,
+) : ClassVisitor(Opcodes.ASM7, classWriter) {
 
     private val parameterDescriptor = binaryToDescriptor(paramsType)
 
@@ -209,7 +204,7 @@ class WorkerActionDecorator(
         name: String?,
         signature: String?,
         superName: String?,
-        interfaces: Array<out String>?
+        interfaces: Array<out String>?,
     ) {
         generatedClassName = name + CLASS_SUFFIX
 
@@ -221,7 +216,7 @@ class WorkerActionDecorator(
             fieldAndDescriptors.add(
                 synthesizeFieldAndMethod(
                     it.methodReference.name,
-                    it.methodReference.returnType.name
+                    it.methodReference.returnType.name,
                 )
             )
         }
@@ -229,13 +224,7 @@ class WorkerActionDecorator(
         val constructorArgs = fieldAndDescriptors.joinToString(separator = "") { it.second }
 
         // add new constructor for parameters and all injectable services
-        super.visitMethod(
-            Opcodes.ACC_PUBLIC,
-            "<init>",
-            "($constructorArgs)V",
-            null,
-            null
-        ).apply {
+        super.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "($constructorArgs)V", null, null).apply {
             visitAnnotation("Ljavax/inject/Inject;", true)
             visitCode()
             visitVarInsn(Opcodes.ALOAD, 0)
@@ -248,7 +237,7 @@ class WorkerActionDecorator(
                     Opcodes.PUTFIELD,
                     generatedClassName,
                     fieldAndDescriptor.first,
-                    fieldAndDescriptor.second
+                    fieldAndDescriptor.second,
                 )
             }
             visitInsn(Opcodes.RETURN)
@@ -256,38 +245,20 @@ class WorkerActionDecorator(
             visitEnd()
         }
 
-        super.visit(
-            version,
-            access,
-            generatedClassName,
-            signature,
-            name,
-            interfaces
-        )
+        super.visit(version, access, generatedClassName, signature, name, interfaces)
     }
 
     private fun synthesizeFieldAndMethod(
         methodName: String,
-        returnValueType: String
+        returnValueType: String,
     ): Pair<String, String> {
         val descriptor = binaryToDescriptor(returnValueType)
         val fieldName = methodName + "_field"
         super.visitField(Opcodes.ACC_PRIVATE, fieldName, descriptor, null, null)
 
-        super.visitMethod(
-            Opcodes.ACC_PUBLIC,
-            methodName,
-            "()$descriptor",
-            null,
-            null
-        ).apply {
+        super.visitMethod(Opcodes.ACC_PUBLIC, methodName, "()$descriptor", null, null).apply {
             visitVarInsn(Opcodes.ALOAD, 0)
-            visitFieldInsn(
-                Opcodes.GETFIELD,
-                generatedClassName,
-                fieldName,
-                descriptor
-            )
+            visitFieldInsn(Opcodes.GETFIELD, generatedClassName, fieldName, descriptor)
             visitInsn(Opcodes.ARETURN)
             visitMaxs(1, 1)
             visitEnd()
@@ -303,7 +274,7 @@ class WorkerActionDecorator(
         name: String?,
         descriptor: String?,
         signature: String?,
-        value: Any?
+        value: Any?,
     ): FieldVisitor? {
         // do not add any other fields
         return null
@@ -314,7 +285,7 @@ class WorkerActionDecorator(
         name: String?,
         descriptor: String?,
         signature: String?,
-        exceptions: Array<out String>?
+        exceptions: Array<out String>?,
     ): MethodVisitor? {
         // do not add any other methods to the generated class
         return null

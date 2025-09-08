@@ -31,7 +31,7 @@ import kotlinx.coroutines.withContext
 @OptIn(ExperimentalPagingApi::class)
 internal class V3RemoteMediator(
     private val database: SampleDatabase,
-    private val networkSourceFactory: () -> NetworkCustomerPagingSource
+    private val networkSourceFactory: () -> NetworkCustomerPagingSource,
 ) : RemoteMediator<Int, Customer>() {
 
     private var networkSource: NetworkCustomerPagingSource
@@ -44,7 +44,7 @@ internal class V3RemoteMediator(
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, Customer>
+        state: PagingState<Int, Customer>,
     ): MediatorResult {
         if (loadType == LoadType.PREPEND) {
             return MediatorResult.Success(endOfPaginationReached = true)
@@ -53,25 +53,29 @@ internal class V3RemoteMediator(
         // Fetch latest remote key from db. We cannot rely on PagingState because the
         // invalidate + load loop in paging may race with the actual load + insert happening in
         // RemoteMediator.
-        val remoteKey = withContext(Dispatchers.IO) {
-            database.remoteKeyDao.queryRemoteKey() ?: RemoteKey(-1, 0)
-        }
+        val remoteKey =
+            withContext(Dispatchers.IO) {
+                database.remoteKeyDao.queryRemoteKey() ?: RemoteKey(-1, 0)
+            }
 
         // TODO: Move this to be a more fully featured sample which demonstrated key translation
         //  between two types of PagingSources where the keys do not map 1:1.
-        val loadParams = when (loadType) {
-            LoadType.REFRESH -> PagingSource.LoadParams.Refresh(
-                key = 0,
-                loadSize = 10,
-                placeholdersEnabled = false
-            )
-            LoadType.PREPEND -> throw IllegalStateException()
-            LoadType.APPEND -> PagingSource.LoadParams.Append(
-                key = remoteKey.nextKey,
-                loadSize = 10,
-                placeholdersEnabled = false
-            )
-        }
+        val loadParams =
+            when (loadType) {
+                LoadType.REFRESH ->
+                    PagingSource.LoadParams.Refresh(
+                        key = 0,
+                        loadSize = 10,
+                        placeholdersEnabled = false,
+                    )
+                LoadType.PREPEND -> throw IllegalStateException()
+                LoadType.APPEND ->
+                    PagingSource.LoadParams.Append(
+                        key = remoteKey.nextKey,
+                        loadSize = 10,
+                        placeholdersEnabled = false,
+                    )
+            }
 
         return when (val result = networkSource.load(loadParams)) {
             is PagingSource.LoadResult.Page -> {

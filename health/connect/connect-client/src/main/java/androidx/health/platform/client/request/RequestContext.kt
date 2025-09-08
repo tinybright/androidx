@@ -21,15 +21,13 @@ import androidx.annotation.RestrictTo
 import androidx.health.platform.client.impl.data.ProtoParcelable
 import androidx.health.platform.client.proto.RequestProto
 
-/**
- * Data object holding context data for IPC calls.
- */
+/** Data object holding context data for IPC calls. */
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 class RequestContext(
     val callingPackage: String,
     val sdkVersion: Int,
     val permissionToken: String?,
-    val isInForeground: Boolean
+    val isInForeground: Boolean,
 ) : ProtoParcelable<RequestProto.RequestContext>() {
 
     @Suppress("CheckResult")

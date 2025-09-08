@@ -84,7 +84,7 @@ class RootNodeLayoutTest {
                     Modifier.onGloballyPositioned {
                         coordinates = it
                         latch.countDown()
-                    }
+                    },
                 ) { _, _ ->
                     layout(10, 10) {}
                 }
@@ -95,7 +95,7 @@ class RootNodeLayoutTest {
         assertNotNull(coordinates)
         assertEquals(
             Rect(left = 0f, top = 0f, right = 10f, bottom = 10f),
-            coordinates!!.boundsInRoot()
+            coordinates!!.boundsInRoot(),
         )
     }
 
@@ -109,17 +109,12 @@ class RootNodeLayoutTest {
                 child,
                 FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                ),
             )
             activity.setContentView(parent)
             child.setContent {
-                Layout(
-                    {},
-                    Modifier.onGloballyPositioned {
-                        latch.countDown()
-                    }
-                ) { _, _ ->
+                Layout({}, Modifier.onGloballyPositioned { latch.countDown() }) { _, _ ->
                     layout(10, 15) {}
                 }
             }
@@ -140,17 +135,13 @@ class RootNodeLayoutTest {
                 child,
                 FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                ),
             )
             activity.setContentView(parent)
             child.setContent {
-                Layout(
-                    {},
-                    Modifier.fillMaxSize().onGloballyPositioned {
-                        latch.countDown()
-                    }
-                ) { _, _ ->
+                Layout({}, Modifier.fillMaxSize().onGloballyPositioned { latch.countDown() }) { _, _
+                    ->
                     layout(10, 15) {}
                 }
             }

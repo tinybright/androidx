@@ -35,7 +35,7 @@ fun DpSample() {
             10.dp, // Int
             10f.dp, // Float
             20.0.dp, // Double
-            10.dp
+            10.dp,
         )
     )
 }
@@ -46,8 +46,6 @@ fun ToPxSample() {
     val lineThickness = 6.dp
     Canvas(Modifier.fillMaxSize()) {
         val lineThicknessPx = lineThickness.toPx()
-        inset(lineThicknessPx / 2) {
-            drawRect(Color.Red, style = Stroke(lineThicknessPx))
-        }
+        inset(lineThicknessPx / 2) { drawRect(Color.Red, style = Stroke(lineThicknessPx)) }
     }
 }

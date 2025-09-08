@@ -64,16 +64,16 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class HeightInLinesModifierTest {
 
-    private val longText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do " +
-        "eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam," +
-        " quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. " +
-        "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu " +
-        "fugiat nulla pariatur."
+    private val longText =
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do " +
+            "eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam," +
+            " quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. " +
+            "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu " +
+            "fugiat nulla pariatur."
 
     private val context = InstrumentationRegistry.getInstrumentation().context
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     @Test
     fun minLines_shortInputText() {
@@ -89,11 +89,9 @@ class HeightInLinesModifierTest {
                     subjectHeight = it
                     positionedLatch.countDown()
                 },
-                onTextLayoutResult = {
-                    subjectLayout = it
-                },
+                onTextLayoutResult = { subjectLayout = it },
                 text = "abc",
-                lineLimits = MultiLine(minHeightInLines = 2)
+                lineLimits = MultiLine(minHeightInLines = 2),
             )
             HeightObservingText(
                 onGlobalHeightPositioned = {
@@ -102,7 +100,7 @@ class HeightInLinesModifierTest {
                 },
                 onTextLayoutResult = {},
                 text = "1\n2",
-                lineLimits = MultiLine(minHeightInLines = 2)
+                lineLimits = MultiLine(minHeightInLines = 2),
             )
         }
         assertThat(positionedLatch.await(1, TimeUnit.SECONDS)).isTrue()
@@ -117,10 +115,8 @@ class HeightInLinesModifierTest {
 
     @Test
     fun maxLines_shortInputText() {
-        val (textLayoutResult, height) = setTextFieldWithMaxLines(
-            text = "abc",
-            lines = MultiLine(maxHeightInLines = 5)
-        )
+        val (textLayoutResult, height) =
+            setTextFieldWithMaxLines(text = "abc", lines = MultiLine(maxHeightInLines = 5))
 
         rule.runOnIdle {
             assertThat(textLayoutResult).isNotNull()
@@ -143,18 +139,14 @@ class HeightInLinesModifierTest {
     @Test(expected = IllegalArgumentException::class)
     fun minLines_invalidValue() {
         rule.setContent {
-            Box(
-                modifier = Modifier.heightInLines(textStyle = TextStyle.Default, minLines = 0)
-            )
+            Box(modifier = Modifier.heightInLines(textStyle = TextStyle.Default, minLines = 0))
         }
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun maxLines_invalidValue() {
         rule.setContent {
-            Box(
-                modifier = Modifier.heightInLines(textStyle = TextStyle.Default, maxLines = 0)
-            )
+            Box(modifier = Modifier.heightInLines(textStyle = TextStyle.Default, maxLines = 0))
         }
     }
 
@@ -162,21 +154,20 @@ class HeightInLinesModifierTest {
     fun minLines_greaterThan_maxLines_invalidValue() {
         rule.setContent {
             Box(
-                modifier = Modifier.heightInLines(
-                    textStyle = TextStyle.Default,
-                    minLines = 2,
-                    maxLines = 1
-                )
+                modifier =
+                    Modifier.heightInLines(
+                        textStyle = TextStyle.Default,
+                        minLines = 2,
+                        maxLines = 1,
+                    )
             )
         }
     }
 
     @Test
     fun minLines_longInputText() {
-        val (textLayoutResult, height) = setTextFieldWithMaxLines(
-            text = longText,
-            MultiLine(minHeightInLines = 2)
-        )
+        val (textLayoutResult, height) =
+            setTextFieldWithMaxLines(text = longText, MultiLine(minHeightInLines = 2))
 
         rule.runOnIdle {
             assertThat(textLayoutResult).isNotNull()
@@ -200,11 +191,9 @@ class HeightInLinesModifierTest {
                     subjectHeight = it
                     positionedLatch.countDown()
                 },
-                onTextLayoutResult = {
-                    subjectLayout = it
-                },
+                onTextLayoutResult = { subjectLayout = it },
                 text = longText,
-                lineLimits = MultiLine(maxHeightInLines = 2)
+                lineLimits = MultiLine(maxHeightInLines = 2),
             )
             HeightObservingText(
                 onGlobalHeightPositioned = {
@@ -213,7 +202,7 @@ class HeightInLinesModifierTest {
                 },
                 onTextLayoutResult = {},
                 text = "1\n2",
-                lineLimits = MultiLine(maxHeightInLines = 2)
+                lineLimits = MultiLine(maxHeightInLines = 2),
             )
         }
         assertThat(positionedLatch.await(1, TimeUnit.SECONDS)).isTrue()
@@ -234,40 +223,38 @@ class HeightInLinesModifierTest {
         val resolver = createFontFamilyResolver(context, testDispatcher)
 
         val typefaceDeferred = CompletableDeferred<Typeface>()
-        val asyncLoader = object : AndroidFont.TypefaceLoader {
-            override fun loadBlocking(context: Context, font: AndroidFont): Typeface =
-                TODO("Not yet implemented")
+        val asyncLoader =
+            object : AndroidFont.TypefaceLoader {
+                override fun loadBlocking(context: Context, font: AndroidFont): Typeface =
+                    TODO("Not yet implemented")
 
-            override suspend fun awaitLoad(context: Context, font: AndroidFont): Typeface {
-                return typefaceDeferred.await()
+                override suspend fun awaitLoad(context: Context, font: AndroidFont): Typeface {
+                    return typefaceDeferred.await()
+                }
             }
-        }
-        val fontFamily = FontFamily(
-            object : AndroidFont(FontLoadingStrategy.Async, asyncLoader, FontVariation.Settings()) {
-                override val weight: FontWeight = FontWeight.Normal
-                override val style: FontStyle = FontStyle.Normal
-            },
-            TEST_FONT
-        )
+        val fontFamily =
+            FontFamily(
+                object :
+                    AndroidFont(FontLoadingStrategy.Async, asyncLoader, FontVariation.Settings()) {
+                    override val weight: FontWeight = FontWeight.Normal
+                    override val style: FontStyle = FontStyle.Normal
+                },
+                TEST_FONT,
+            )
 
         val heights = mutableListOf<Int>()
 
         rule.setContent {
             CompositionLocalProvider(
                 LocalFontFamilyResolver provides resolver,
-                LocalDensity provides Density(1.0f, 1f)
+                LocalDensity provides Density(1.0f, 1f),
             ) {
                 HeightObservingText(
-                    onGlobalHeightPositioned = {
-                        heights.add(it)
-                    },
+                    onGlobalHeightPositioned = { heights.add(it) },
                     onTextLayoutResult = {},
                     text = longText,
                     lineLimits = MultiLine(maxHeightInLines = 10),
-                    textStyle = TextStyle.Default.copy(
-                        fontFamily = fontFamily,
-                        fontSize = 80.sp
-                    )
+                    textStyle = TextStyle.Default.copy(fontFamily = fontFamily, fontSize = 80.sp),
                 )
             }
         }
@@ -285,24 +272,23 @@ class HeightInLinesModifierTest {
     fun testInspectableValue() {
         isDebugInspectorInfoEnabled = true
 
-        val modifier = Modifier.heightInLines(
-            textStyle = TextStyle.Default,
-            minLines = 5,
-            maxLines = 10
-        ) as InspectableValue
+        val modifier =
+            Modifier.heightInLines(textStyle = TextStyle.Default, minLines = 5, maxLines = 10)
+                as InspectableValue
         assertThat(modifier.nameFallback).isEqualTo("heightInLines")
-        assertThat(modifier.inspectableElements.asIterable()).containsExactly(
-            ValueElement("minLines", 5),
-            ValueElement("maxLines", 10),
-            ValueElement("textStyle", TextStyle.Default)
-        )
+        assertThat(modifier.inspectableElements.asIterable())
+            .containsExactly(
+                ValueElement("minLines", 5),
+                ValueElement("maxLines", 10),
+                ValueElement("textStyle", TextStyle.Default),
+            )
 
         isDebugInspectorInfoEnabled = false
     }
 
     private fun setTextFieldWithMaxLines(
         text: String,
-        lines: MultiLine
+        lines: MultiLine,
     ): Pair<(() -> TextLayoutResult?)?, Int?> {
         var textLayoutResult: (() -> TextLayoutResult?)? = null
         var height: Int? = null
@@ -314,11 +300,9 @@ class HeightInLinesModifierTest {
                     height = it
                     positionedLatch.countDown()
                 },
-                onTextLayoutResult = {
-                    textLayoutResult = it
-                },
+                onTextLayoutResult = { textLayoutResult = it },
                 text = text,
-                lineLimits = lines
+                lineLimits = lines,
             )
         }
         assertThat(positionedLatch.await(1, TimeUnit.SECONDS)).isTrue()
@@ -332,19 +316,15 @@ class HeightInLinesModifierTest {
         onTextLayoutResult: Density.(getResult: () -> TextLayoutResult?) -> Unit,
         text: String,
         lineLimits: MultiLine,
-        textStyle: TextStyle = TextStyle.Default
+        textStyle: TextStyle = TextStyle.Default,
     ) {
-        Box(
-            Modifier.onGloballyPositioned {
-                onGlobalHeightPositioned(it.size.height)
-            }
-        ) {
+        Box(Modifier.onGloballyPositioned { onGlobalHeightPositioned(it.size.height) }) {
             BasicTextField(
                 state = remember { TextFieldState(text) },
                 textStyle = textStyle,
                 lineLimits = lineLimits,
                 modifier = Modifier.requiredWidth(100.dp),
-                onTextLayout = onTextLayoutResult
+                onTextLayout = onTextLayoutResult,
             )
         }
     }

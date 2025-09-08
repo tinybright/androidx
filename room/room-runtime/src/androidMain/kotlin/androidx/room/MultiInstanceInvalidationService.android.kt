@@ -24,26 +24,22 @@ import android.util.Log
 import androidx.room.Room.LOG_TAG
 
 /**
- * A [Service] for remote invalidation among multiple [InvalidationTracker] instances.
- * This service runs in the main app process. All the instances of [InvalidationTracker]
- * (potentially in other processes) has to connect to this service.
+ * A [Service] for remote invalidation among multiple [InvalidationTracker] instances. This service
+ * runs in the main app process. All the instances of [InvalidationTracker] (potentially in other
+ * processes) has to connect to this service.
  *
  * The intent to launch it can be specified by
- * [RoomDatabase.Builder.setMultiInstanceInvalidationServiceIntent], although the service is
- * defined in the manifest by default so there should be no need to override it in a normal
- * situation.
+ * [RoomDatabase.Builder.setMultiInstanceInvalidationServiceIntent], although the service is defined
+ * in the manifest by default so there should be no need to override it in a normal situation.
  */
 @ExperimentalRoomApi
-class MultiInstanceInvalidationService : Service() {
+public class MultiInstanceInvalidationService : Service() {
     internal var maxClientId = 0
     internal val clientNames = mutableMapOf<Int, String>()
 
     internal val callbackList: RemoteCallbackList<IMultiInstanceInvalidationCallback> =
         object : RemoteCallbackList<IMultiInstanceInvalidationCallback>() {
-            override fun onCallbackDied(
-                callback: IMultiInstanceInvalidationCallback,
-                cookie: Any
-            ) {
+            override fun onCallbackDied(callback: IMultiInstanceInvalidationCallback, cookie: Any) {
                 clientNames.remove(cookie as Int)
             }
         }
@@ -53,7 +49,7 @@ class MultiInstanceInvalidationService : Service() {
             // Assigns a client ID to the client.
             override fun registerCallback(
                 callback: IMultiInstanceInvalidationCallback,
-                name: String?
+                name: String?,
             ): Int {
                 if (name == null) {
                     return 0
@@ -76,7 +72,7 @@ class MultiInstanceInvalidationService : Service() {
             // .onCallbackDied() can take care of removal.
             override fun unregisterCallback(
                 callback: IMultiInstanceInvalidationCallback,
-                clientId: Int
+                clientId: Int,
             ) {
                 synchronized(callbackList) {
                     callbackList.unregister(callback)

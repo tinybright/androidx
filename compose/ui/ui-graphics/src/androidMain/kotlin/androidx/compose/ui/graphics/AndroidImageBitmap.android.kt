@@ -17,38 +17,36 @@
 package androidx.compose.ui.graphics
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.util.DisplayMetrics
-import androidx.annotation.DoNotInline
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.colorspace.ColorSpace
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
 
 /**
- * Create an [ImageBitmap] from the given [Bitmap]. Note this does
- * not create a copy of the original [Bitmap] and changes to it
- * will modify the returned [ImageBitmap]
+ * Create an [ImageBitmap] from the given [Bitmap]. Note this does not create a copy of the original
+ * [Bitmap] and changes to it will modify the returned [ImageBitmap]
  */
 fun Bitmap.asImageBitmap(): ImageBitmap = AndroidImageBitmap(this)
+
+internal actual fun createImageBitmap(bytes: ByteArray): ImageBitmap {
+    return BitmapFactory.decodeByteArray(bytes, 0, bytes.size).asImageBitmap()
+}
 
 internal actual fun ActualImageBitmap(
     width: Int,
     height: Int,
     config: ImageBitmapConfig,
     hasAlpha: Boolean,
-    colorSpace: ColorSpace
+    colorSpace: ColorSpace,
 ): ImageBitmap {
     val bitmapConfig = config.toBitmapConfig()
     val bitmap: Bitmap
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         bitmap = Api26Bitmap.createBitmap(width, height, config, hasAlpha, colorSpace)
     } else {
-        bitmap = Bitmap.createBitmap(
-            null as DisplayMetrics?,
-            width,
-            height,
-            bitmapConfig
-        )
+        bitmap = Bitmap.createBitmap(null as DisplayMetrics?, width, height, bitmapConfig)
         bitmap.setHasAlpha(hasAlpha)
     }
     return AndroidImageBitmap(bitmap)
@@ -56,7 +54,7 @@ internal actual fun ActualImageBitmap(
 
 /**
  * @Throws UnsupportedOperationException if this [ImageBitmap] is not backed by an
- * android.graphics.Bitmap
+ *   android.graphics.Bitmap
  */
 fun ImageBitmap.asAndroidBitmap(): Bitmap =
     when (this) {
@@ -73,16 +71,15 @@ internal class AndroidImageBitmap(internal val bitmap: Bitmap) : ImageBitmap {
         get() = bitmap.height
 
     override val config: ImageBitmapConfig
-        get() = bitmap.config.toImageConfig()
+        get() = bitmap.config!!.toImageConfig()
 
     override val colorSpace: ColorSpace
-        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            with(Api26Bitmap) {
-                bitmap.composeColorSpace()
+        get() =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                with(Api26Bitmap) { bitmap.composeColorSpace() }
+            } else {
+                ColorSpaces.Srgb
             }
-        } else {
-            ColorSpaces.Srgb
-        }
 
     override fun readPixels(
         buffer: IntArray,
@@ -91,15 +88,16 @@ internal class AndroidImageBitmap(internal val bitmap: Bitmap) : ImageBitmap {
         width: Int,
         height: Int,
         bufferOffset: Int,
-        stride: Int
+        stride: Int,
     ) {
         // Internal Android implementation that copies the pixels from the underlying
         // android.graphics.Bitmap if the configuration supports it
         val androidBitmap = asAndroidBitmap()
         var recycleTarget = false
         val targetBitmap =
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
-                androidBitmap.config != Bitmap.Config.HARDWARE
+            if (
+                Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
+                    androidBitmap.config != Bitmap.Config.HARDWARE
             ) {
                 androidBitmap
             } else {
@@ -114,15 +112,7 @@ internal class AndroidImageBitmap(internal val bitmap: Bitmap) : ImageBitmap {
                 androidBitmap.copy(Bitmap.Config.ARGB_8888, false)
             }
 
-        targetBitmap.getPixels(
-            buffer,
-            bufferOffset,
-            stride,
-            startX,
-            startY,
-            width,
-            height
-        )
+        targetBitmap.getPixels(buffer, bufferOffset, stride, startX, startY, width, height)
         // Recycle the target if we are done with it
         if (recycleTarget) {
             targetBitmap.recycle()
@@ -179,20 +169,18 @@ internal fun Bitmap.Config.toImageConfig(): ImageBitmapConfig {
 }
 
 /**
- * Make Lint happy
- * Separate class to contain all API calls that require API level 26 to assist in dead code
- * elimination during compilation time
+ * Make Lint happy Separate class to contain all API calls that require API level 26 to assist in
+ * dead code elimination during compilation time
  */
 @RequiresApi(Build.VERSION_CODES.O)
 internal object Api26Bitmap {
-    @DoNotInline
     @JvmStatic
     internal fun createBitmap(
         width: Int,
         height: Int,
         bitmapConfig: ImageBitmapConfig,
         hasAlpha: Boolean,
-        colorSpace: ColorSpace
+        colorSpace: ColorSpace,
     ): Bitmap {
         // Note intentionally ignoring density in all cases
         return Bitmap.createBitmap(
@@ -201,12 +189,10 @@ internal object Api26Bitmap {
             height,
             bitmapConfig.toBitmapConfig(),
             hasAlpha,
-            colorSpace.toAndroidColorSpace()
+            colorSpace.toAndroidColorSpace(),
         )
     }
 
-    @DoNotInline
     @JvmStatic
-    internal fun Bitmap.composeColorSpace() =
-        colorSpace?.toComposeColorSpace() ?: ColorSpaces.Srgb
+    internal fun Bitmap.composeColorSpace() = colorSpace?.toComposeColorSpace() ?: ColorSpaces.Srgb
 }

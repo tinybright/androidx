@@ -19,6 +19,8 @@ package androidx.compose.foundation.pager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.snapping.MinFlingVelocityDp
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
@@ -34,9 +36,7 @@ import org.junit.runners.Parameterized
 @OptIn(ExperimentalFoundationApi::class)
 @LargeTest
 @RunWith(Parameterized::class)
-class PagerSwipeEdgeTest(
-    val config: ParamConfig
-) : BasePagerTest(config) {
+class PagerSwipeEdgeTest(val config: ParamConfig) : BasePagerTest(config) {
 
     @Test
     fun swipePageTowardsEdge_shouldNotMove() {
@@ -48,7 +48,7 @@ class PagerSwipeEdgeTest(
         rule.onNodeWithTag("0").performTouchInput {
             swipeWithVelocityAcrossMainAxis(
                 with(rule.density) { 1.5f * MinFlingVelocityDp.toPx() },
-                delta * -1.0f
+                delta * -1.0f,
             )
         }
         rule.waitForIdle()
@@ -61,7 +61,7 @@ class PagerSwipeEdgeTest(
         onPager().performTouchInput {
             swipeWithVelocityAcrossMainAxis(
                 with(rule.density) { 1.5f * MinFlingVelocityDp.toPx() },
-                delta
+                delta,
             )
         }
         rule.waitForIdle()
@@ -73,11 +73,40 @@ class PagerSwipeEdgeTest(
 
     @Test
     fun scrollForwardAtTheLastPage_withSpacing_shouldNotMovePage() {
+        val collectedFractions = mutableListOf<Float>()
+        createPager(
+            modifier = Modifier.fillMaxSize(),
+            initialPage = DefaultPageCount - 1,
+            pageSpacing = 8.dp,
+            additionalContent = {
+                LaunchedEffect(pagerState) {
+                    snapshotFlow { pagerState.currentPageOffsetFraction }
+                        .collect { collectedFractions.add(it) }
+                }
+            },
+        )
+
+        val delta = pageSize * 0.4f * scrollForwardSign
+        val offsetDelta = if (vertical) Offset(0f, delta) else Offset(delta, 0f)
+
+        onPager().performTouchInput {
+            down(center)
+            moveBy(offsetDelta)
+        }
+
+        rule.runOnIdle {
+            assertTrue { collectedFractions.size == 1 }
+            assertTrue { collectedFractions[0] == 0.0f }
+        }
+    }
+
+    @Test
+    fun scrollForwardAtTheLastPage_withSpacing_pageSettlesCorrectly() {
 
         createPager(
             modifier = Modifier.fillMaxSize(),
             initialPage = DefaultPageCount - 1,
-            pageSpacing = 40.dp // use a large spacing
+            pageSpacing = 40.dp, // use a large spacing
         )
 
         val delta = pageSize * 0.4f * scrollForwardSign
@@ -94,20 +123,21 @@ class PagerSwipeEdgeTest(
     companion object {
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
-        fun params() = mutableListOf<ParamConfig>().apply {
-            for (orientation in TestOrientation) {
-                for (reverseLayout in TestReverseLayout) {
-                    for (layoutDirection in TestLayoutDirection) {
-                        add(
-                            ParamConfig(
-                                orientation = orientation,
-                                reverseLayout = reverseLayout,
-                                layoutDirection = layoutDirection
+        fun params() =
+            mutableListOf<ParamConfig>().apply {
+                for (orientation in TestOrientation) {
+                    for (reverseLayout in TestReverseLayout) {
+                        for (layoutDirection in TestLayoutDirection) {
+                            add(
+                                ParamConfig(
+                                    orientation = orientation,
+                                    reverseLayout = reverseLayout,
+                                    layoutDirection = layoutDirection,
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
-        }
     }
 }

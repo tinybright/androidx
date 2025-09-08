@@ -20,16 +20,10 @@ import android.content.Context
 import androidx.glance.GlanceId
 import androidx.glance.action.Action
 
-internal class RunCallbackAction(
-    public val callbackClass: Class<out ActionCallback>
-) : Action {
+internal class RunCallbackAction(public val callbackClass: Class<out ActionCallback>) : Action {
     companion object {
 
-        public suspend fun run(
-            context: Context,
-            className: String,
-            glanceId: GlanceId
-        ) {
+        public suspend fun run(context: Context, className: String, glanceId: GlanceId) {
             val workClass = Class.forName(className)
 
             if (!ActionCallback::class.java.isAssignableFrom(workClass)) {
@@ -44,9 +38,10 @@ internal class RunCallbackAction(
 
 /**
  * A callback executed in response to the user action, before the content is updated. The
- * implementing class must have a public zero argument constructor, this is used to instantiate
- * the class at runtime.
+ * implementing class must have a public zero argument constructor, this is used to instantiate the
+ * class at runtime.
  */
+@Deprecated("glance-wear-tiles is deprecated and will be removed")
 public interface ActionCallback {
     /**
      * Performs the work associated with this action. Called when the action is triggered.
@@ -54,7 +49,7 @@ public interface ActionCallback {
      * @param context the calling context
      * @param glanceId the [GlanceId] that triggered this action
      */
-    suspend fun onAction(context: Context, glanceId: GlanceId)
+    public suspend fun onAction(context: Context, glanceId: GlanceId)
 }
 
 /**
@@ -62,13 +57,12 @@ public interface ActionCallback {
  *
  * @param callbackClass the class that implements [ActionCallback]
  */
-public fun <T : ActionCallback> actionRunCallback(
-    callbackClass: Class<T>
-): Action = RunCallbackAction(callbackClass)
+@Deprecated("glance-wear-tiles is deprecated and will be removed")
+public fun <T : ActionCallback> actionRunCallback(callbackClass: Class<T>): Action =
+    RunCallbackAction(callbackClass)
 
-/**
- * Creates an [Action] that executes a given [ActionCallback] implementation
- */
+/** Creates an [Action] that executes a given [ActionCallback] implementation */
 @Suppress("MissingNullability") // Shouldn't need to specify @NonNull. b/199284086
+@Deprecated("glance-wear-tiles is deprecated and will be removed")
 public inline fun <reified T : ActionCallback> actionRunCallback(): Action =
     actionRunCallback(T::class.java)

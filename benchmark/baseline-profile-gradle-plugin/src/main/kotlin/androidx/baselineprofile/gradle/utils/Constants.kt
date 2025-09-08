@@ -20,7 +20,7 @@ import com.android.build.api.AndroidPluginVersion
 
 // Minimum AGP version required
 internal val MIN_AGP_VERSION_REQUIRED_INCLUSIVE = AndroidPluginVersion(8, 0, 0)
-internal val MAX_AGP_VERSION_RECOMMENDED_EXCLUSIVE = AndroidPluginVersion(9, 0, 0).alpha(1)
+internal val MAX_AGP_VERSION_RECOMMENDED_EXCLUSIVE = AndroidPluginVersion(10, 0, 0).alpha(1)
 
 // Prefix for the build type baseline profile
 internal const val BUILD_TYPE_BASELINE_PROFILE_PREFIX = "nonMinified"
@@ -53,6 +53,7 @@ internal const val KOTLIN_MULTIPLATFORM_PLUGIN_ID = "org.jetbrains.kotlin.multip
 
 // Instrumentation runner arguments
 internal const val INSTRUMENTATION_ARG_ENABLED_RULES = "androidx.benchmark.enabledRules"
+internal const val INSTRUMENTATION_ARG_SKIP_ON_EMULATOR = "androidx.benchmark.skipOnEmulator"
 internal const val INSTRUMENTATION_ARG_ENABLED_RULES_BASELINE_PROFILE = "baselineprofile"
 internal const val INSTRUMENTATION_ARG_ENABLED_RULES_BENCHMARK = "macrobenchmark"
 

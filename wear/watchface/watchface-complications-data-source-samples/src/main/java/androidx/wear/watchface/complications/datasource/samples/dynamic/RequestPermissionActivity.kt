@@ -40,7 +40,7 @@ class RequestPermissionActivity : Activity() {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         if (grantResults contentEquals intArrayOf(PERMISSION_GRANTED)) {
             setResult(RESULT_OK)
@@ -53,10 +53,10 @@ class RequestPermissionActivity : Activity() {
     companion object {
         private val ACTION_TO_PERMISSION: Map<String, String> =
             mapOf(
-                "androidx.wear.watchface.complications.datasource.samples.dynamic.REQUEST_ACTIVITY_RECOGNITION_PERMISSION" to // ktlint-disable max-line-length
-                permission.ACTIVITY_RECOGNITION,
-                "androidx.wear.watchface.complications.datasource.samples.dynamic.REQUEST_BODY_SENSORS_PERMISSION" to // ktlint-disable max-line-length
-                permission.BODY_SENSORS,
+                "androidx.wear.watchface.complications.datasource.samples.dynamic.REQUEST_ACTIVITY_RECOGNITION_PERMISSION" to
+                    permission.ACTIVITY_RECOGNITION,
+                "androidx.wear.watchface.complications.datasource.samples.dynamic.REQUEST_BODY_SENSORS_PERMISSION" to
+                    permission.BODY_SENSORS,
             )
     }
 }

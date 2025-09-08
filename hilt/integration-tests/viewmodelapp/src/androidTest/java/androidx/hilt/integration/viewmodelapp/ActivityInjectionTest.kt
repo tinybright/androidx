@@ -16,13 +16,11 @@
 
 package androidx.hilt.integration.viewmodelapp
 
-import android.os.Build
 import androidx.activity.viewModels
 import androidx.fragment.app.FragmentActivity
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
-import androidx.test.filters.SdkSuppress
 import com.google.common.truth.Truth.assertThat
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.withCreationCallback
@@ -36,11 +34,9 @@ import org.junit.runner.RunWith
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 // TODO: Find out why random ClassNotFoundException is thrown in APIs lower than 21.
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.LOLLIPOP)
 class ActivityInjectionTest {
 
-    @get:Rule
-    val rule = HiltAndroidRule(this)
+    @get:Rule val rule = HiltAndroidRule(this)
 
     @Test
     fun verifyInjection() {
@@ -62,13 +58,15 @@ class ActivityInjectionTest {
         val myViewModel by viewModels<MyViewModel>()
         val myInjectedViewModel by viewModels<MyInjectedViewModel>()
         val myNestedInjectedViewModel by viewModels<TopClass.MyNestedInjectedViewModel>()
-        val myAssistedInjectedViewModel by viewModels<MyAssistedInjectedViewModel>(
-            extrasProducer = {
-                defaultViewModelCreationExtras.withCreationCallback<
-                        MyAssistedInjectedViewModel.Factory> { factory ->
-                    factory.create(42)
+        val myAssistedInjectedViewModel by
+            viewModels<MyAssistedInjectedViewModel>(
+                extrasProducer = {
+                    defaultViewModelCreationExtras.withCreationCallback<
+                        MyAssistedInjectedViewModel.Factory
+                    > { factory ->
+                        factory.create(42)
+                    }
                 }
-            }
-        )
+            )
     }
 }

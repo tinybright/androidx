@@ -33,9 +33,7 @@ class IndexTest {
         val index = Index("foo", false, listOf(mockField("bar"), mockField("baz")), emptyList())
         MatcherAssert.assertThat(
             index.createQuery("my_table"),
-            CoreMatchers.`is`(
-                "CREATE INDEX IF NOT EXISTS `foo` ON `my_table` (`bar`, `baz`)"
-            )
+            CoreMatchers.`is`("CREATE INDEX IF NOT EXISTS `foo` ON `my_table` (`bar`, `baz`)"),
         )
     }
 
@@ -46,34 +44,35 @@ class IndexTest {
             index.createQuery("my_table"),
             CoreMatchers.`is`(
                 "CREATE UNIQUE INDEX IF NOT EXISTS `foo` ON `my_table` (`bar`, `baz`)"
-            )
+            ),
         )
     }
 
     @Test
     fun createWithSortOrder() {
-        val index = Index(
-            name = "foo",
-            unique = false,
-            fields = listOf(mockField("bar"), mockField("baz")),
-            orders = listOf(IndexOrder.ASC, IndexOrder.DESC)
-        )
+        val index =
+            Index(
+                name = "foo",
+                unique = false,
+                fields = listOf(mockField("bar"), mockField("baz")),
+                orders = listOf(IndexOrder.ASC, IndexOrder.DESC),
+            )
         MatcherAssert.assertThat(
             index.createQuery("my_table"),
             CoreMatchers.`is`(
                 "CREATE INDEX IF NOT EXISTS `foo` ON `my_table` (`bar` ASC, `baz` DESC)"
-            )
+            ),
         )
     }
 
-    private fun mockField(columnName: String): Field {
+    private fun mockField(columnName: String): Property {
         val (element, type) = mockElementAndType()
-        return Field(
+        return Property(
             element = element,
             name = columnName + "_field",
             affinity = SQLTypeAffinity.TEXT,
             type = type,
-            columnName = columnName
+            columnName = columnName,
         )
     }
 }

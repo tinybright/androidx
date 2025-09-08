@@ -71,23 +71,23 @@ class ImageAppWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = ImageAppWidget()
 }
 
-/**
- * Sample AppWidget that showcase the [ContentScale] options for [Image]
- */
+/** Sample AppWidget that showcase the [ContentScale] options for [Image] */
 class ImageAppWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Exact
 
-    override suspend fun provideGlance(
-        context: Context,
-        id: GlanceId
-    ) {
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
         val imageUri: Uri = getShareableImageUri(context)
 
         provideContent {
-            Scaffold(
-                titleBar = { Header() },
-                content = { BodyContent(imageUri = imageUri) }
-            )
+            Scaffold(titleBar = { Header() }, content = { BodyContent(imageUri = imageUri) })
+        }
+    }
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        val imageUri: Uri = getShareableImageUri(context)
+
+        provideContent {
+            Scaffold(titleBar = { Header() }, content = { BodyContent(imageUri = imageUri) })
         }
     }
 }
@@ -100,22 +100,19 @@ private fun Header() {
     Row(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = GlanceModifier.fillMaxWidth().background(Color.White)
+        modifier = GlanceModifier.fillMaxWidth().background(Color.White),
     ) {
         // Demonstrates toggling application of color filter on an image
         Image(
             provider = ImageProvider(R.drawable.ic_android),
             contentDescription = null,
-            colorFilter = if (shouldTintHeaderIcon) {
-                ColorFilter.tint(
-                    ColorProvider(day = Color.Green, night = Color.Blue)
-                )
-            } else {
-                null
-            },
-            modifier = GlanceModifier.clickable {
-                shouldTintHeaderIcon = !shouldTintHeaderIcon
-            }
+            colorFilter =
+                if (shouldTintHeaderIcon) {
+                    ColorFilter.tint(ColorProvider(day = Color.Green, night = Color.Blue))
+                } else {
+                    null
+                },
+            modifier = GlanceModifier.clickable { shouldTintHeaderIcon = !shouldTintHeaderIcon },
         )
         Text(
             text = context.getString(R.string.image_widget_name),
@@ -133,12 +130,13 @@ private fun BodyContent(imageUri: Uri) {
             text = "Content Scale: ${type.asString()}",
             modifier = GlanceModifier.fillMaxWidth(),
             onClick = {
-                type = when (type) {
-                    ContentScale.Crop -> ContentScale.FillBounds
-                    ContentScale.FillBounds -> ContentScale.Fit
-                    else -> ContentScale.Crop
-                }
-            }
+                type =
+                    when (type) {
+                        ContentScale.Crop -> ContentScale.FillBounds
+                        ContentScale.FillBounds -> ContentScale.Fit
+                        else -> ContentScale.Crop
+                    }
+            },
         )
         Spacer(GlanceModifier.size(4.dp))
 
@@ -188,33 +186,33 @@ private fun ResourceImage(contentScale: ContentScale, modifier: GlanceModifier =
         provider = ImageProvider(R.drawable.compose),
         contentDescription = "Content Scale image sample (value: ${contentScale.asString()})",
         contentScale = contentScale,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
 /**
- * Demonstrates using the Uri image provider in `androidx.glance.appwidget`. This image will be
- * sent to the RemoteViews as a uri. In the AppWidgetHost, the uri will be resolved by querying
- * back to this app's [ContentProvider], see [ImageAppWidgetImageContentProvider]. There are several
+ * Demonstrates using the Uri image provider in `androidx.glance.appwidget`. This image will be sent
+ * to the RemoteViews as a uri. In the AppWidgetHost, the uri will be resolved by querying back to
+ * this app's [ContentProvider], see [ImageAppWidgetImageContentProvider]. There are several
  * drawbacks to this approach. Consider them before going this route.
- * - Images that are within the app's private directories can only be exposed via ContentProvider;
- *   a direct reference via file:// uri will not work.
+ * - Images that are within the app's private directories can only be exposed via ContentProvider; a
+ *   direct reference via file:// uri will not work.
  * - The ContentProvider approach will not work across user/work profiles.
- * - Any time the image is loaded, the AppWidget's process will be started, consuming battery
- *   and memory.
+ * - Any time the image is loaded, the AppWidget's process will be started, consuming battery and
+ *   memory.
  * - FileProvider cannot be used due to a permissions issue.
  */
 @Composable
 private fun UriImage(
     contentScale: ContentScale,
     modifier: GlanceModifier = GlanceModifier,
-    uri: Uri
+    uri: Uri,
 ) {
     Image(
         provider = ImageProvider(uri),
         contentDescription = "Content Scale image sample (value: ${contentScale.asString()})",
         contentScale = contentScale,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -244,13 +242,13 @@ private fun BitmapImage(contentScale: ContentScale, modifier: GlanceModifier = G
         provider = ImageProvider(makeBitmap()),
         contentDescription = "An image with an in-memory bitmap provider",
         contentScale = contentScale,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
 /**
- * For displaying [Image]s backed by [android.graphics.drawable.Icon]s. Despite the name, an
- * [Icon] does not need to represent a literal icon.
+ * For displaying [Image]s backed by [android.graphics.drawable.Icon]s. Despite the name, an [Icon]
+ * does not need to represent a literal icon.
  */
 @Composable
 private fun IconImage(contentScale: ContentScale, modifier: GlanceModifier) {
@@ -266,17 +264,13 @@ private fun IconImage(contentScale: ContentScale, modifier: GlanceModifier) {
             provider = ImageProvider(bitmap),
             contentDescription = "An image with an in-memory bitmap provider",
             contentScale = contentScale,
-            modifier = modifier
+            modifier = modifier,
         )
     }
 }
 
 private fun canvasBitmap(outputCanvasSize: Int, circleColor: Color): Bitmap {
-    val bitmap = Bitmap.createBitmap(
-        outputCanvasSize,
-        outputCanvasSize,
-        Bitmap.Config.ARGB_8888
-    )
+    val bitmap = Bitmap.createBitmap(outputCanvasSize, outputCanvasSize, Bitmap.Config.ARGB_8888)
     val padding = outputCanvasSize * .05f
     val canvas = Canvas(bitmap)
 
@@ -324,25 +318,22 @@ private object ShareableImageUtils {
     }
 
     val Context.uriImageFile: File
-        get() = File(
-            this.filesDir, "$fileProviderDirectory/$fileName"
-        )
+        get() = File(this.filesDir, "$fileProviderDirectory/$fileName")
 
-    /**
-     * Create a Uri to share and ensure the file we want to return exists.
-     */
+    /** Create a Uri to share and ensure the file we want to return exists. */
     fun getShareableImageUri(context: Context): Uri {
 
         val file: File = context.uriImageFile
         file.parentFile?.mkdir()
-        val success = if (file.exists()) {
-            true
-        } else {
-            val bitmap = canvasBitmap(300, circleColor = Color.Green)
-            file.outputStream().use { out ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+        val success =
+            if (file.exists()) {
+                true
+            } else {
+                val bitmap = canvasBitmap(300, circleColor = Color.Green)
+                file.outputStream().use { out ->
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                }
             }
-        }
 
         if (success) {
             return uri(context, file.name)
@@ -352,17 +343,15 @@ private object ShareableImageUtils {
     }
 }
 
-/**
- * Expose an image file via content:// uri.
- */
+/** Expose an image file via content:// uri. */
 class ImageAppWidgetImageContentProvider : ContentProvider() {
     override fun onCreate(): Boolean {
         return true
     }
 
     /**
-     * A simplified version of [openFile] for example only. This version does not validate the
-     * uri and always returns the same file.
+     * A simplified version of [openFile] for example only. This version does not validate the uri
+     * and always returns the same file.
      */
     override fun openFile(uri: Uri, mode: String): ParcelFileDescriptor? {
         val context = context ?: return null
@@ -375,7 +364,7 @@ class ImageAppWidgetImageContentProvider : ContentProvider() {
         projection: Array<out String>?,
         selection: String?,
         selectionArgs: Array<out String>?,
-        sortOrder: String?
+        sortOrder: String?,
     ): Cursor? {
         return null // unused
     }
@@ -396,7 +385,7 @@ class ImageAppWidgetImageContentProvider : ContentProvider() {
         uri: Uri,
         values: ContentValues?,
         selection: String?,
-        selectionArgs: Array<out String>?
+        selectionArgs: Array<out String>?,
     ): Int {
         return 0 // unused
     }

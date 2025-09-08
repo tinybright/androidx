@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 #
 # Copyright (C) 2020 The Android Open Source Project
 #
@@ -204,10 +204,10 @@ class TestDocsTipOfTree(unittest.TestCase):
         self.assertEqual("    docs(project(\":foo:bar:bar-qux\"))\n", line)
 
         line = get_new_docs_tip_of_tree_build_grade_line("androidx.foo", "foo-samples")
-        self.assertEqual("    samples(project(\":foo:foo-samples\"))\n", line)
+        self.assertIsNone(line)
 
         line = get_new_docs_tip_of_tree_build_grade_line("androidx.foo.bar", "bar-qux-samples")
-        self.assertEqual("    samples(project(\":foo:bar:bar-qux-samples\"))\n", line)
+        self.assertIsNone(line)
 
 class TestReplacements(unittest.TestCase):
 

@@ -22,6 +22,7 @@ import androidx.window.area.WindowAreaCapability.Operation.Companion.OPERATION_T
 import androidx.window.area.WindowAreaCapability.Status.Companion.WINDOW_AREA_STATUS_ACTIVE
 import androidx.window.area.WindowAreaCapability.Status.Companion.WINDOW_AREA_STATUS_UNSUPPORTED
 import androidx.window.core.ExperimentalWindowApi
+import androidx.window.core.ExtensionsUtil
 import androidx.window.extensions.area.WindowAreaComponent
 import androidx.window.layout.WindowMetrics
 
@@ -31,25 +32,21 @@ import androidx.window.layout.WindowMetrics
  * determine when features can be enabled.
  */
 @ExperimentalWindowApi
-class WindowAreaInfo internal constructor(
+public class WindowAreaInfo
+internal constructor(
 
     /**
      * The [WindowMetrics] that represent the size of the area. Used to determine if the behavior
      * desired fits the size of the window area available.
      */
-    var metrics: WindowMetrics,
+    public var metrics: WindowMetrics,
 
-    /**
-     * The [Type] of this window area
-     */
-    val type: Type,
+    /** The [Type] of this window area */
+    public val type: Type,
 
-    /**
-     * [Binder] token to identify the specific WindowArea
-     */
-    val token: Binder,
-
-    private val windowAreaComponent: WindowAreaComponent
+    /** [Binder] token to identify the specific WindowArea */
+    public val token: Binder,
+    private val windowAreaComponent: WindowAreaComponent,
 ) {
 
     internal val capabilityMap = HashMap<WindowAreaCapability.Operation, WindowAreaCapability>()
@@ -59,11 +56,9 @@ class WindowAreaInfo internal constructor(
      * [WindowAreaCapability] does not exist for this [WindowAreaInfo], a [WindowAreaCapability]
      * with a [WINDOW_AREA_STATUS_UNSUPPORTED] value is returned.
      */
-    fun getCapability(operation: WindowAreaCapability.Operation): WindowAreaCapability {
-        return capabilityMap[operation] ?: WindowAreaCapability(
-            operation,
-            WINDOW_AREA_STATUS_UNSUPPORTED
-        )
+    public fun getCapability(operation: WindowAreaCapability.Operation): WindowAreaCapability {
+        return capabilityMap[operation]
+            ?: WindowAreaCapability(operation, WINDOW_AREA_STATUS_UNSUPPORTED)
     }
 
     /**
@@ -72,7 +67,7 @@ class WindowAreaInfo internal constructor(
      *
      * @throws IllegalStateException if there is no active session for the provided [operation]
      */
-    fun getActiveSession(operation: WindowAreaCapability.Operation): WindowAreaSession? {
+    public fun getActiveSession(operation: WindowAreaCapability.Operation): WindowAreaSession? {
         if (getCapability(operation).status != WINDOW_AREA_STATUS_ACTIVE) {
             throw IllegalStateException("No session is currently active")
         }
@@ -92,7 +87,8 @@ class WindowAreaInfo internal constructor(
             OPERATION_PRESENT_ON_AREA ->
                 RearDisplayPresentationSessionPresenterImpl(
                     windowAreaComponent,
-                    windowAreaComponent.rearDisplayPresentation!!
+                    windowAreaComponent.rearDisplayPresentation!!,
+                    ExtensionsUtil.safeVendorApiLevel,
                 )
             else -> {
                 throw IllegalArgumentException("Invalid operation provided")
@@ -100,22 +96,19 @@ class WindowAreaInfo internal constructor(
         }
     }
 
-    /**
-     * Represents a type of [WindowAreaInfo]
-     */
+    /** Represents a type of [WindowAreaInfo] */
     @ExperimentalWindowApi
-    class Type private constructor(private val description: String) {
+    public class Type private constructor(private val description: String) {
         override fun toString(): String {
             return description
         }
 
-        companion object {
+        public companion object {
             /**
              * Type of window area that is facing the same direction as the rear camera(s) on the
              * device.
              */
-            @JvmField
-            val TYPE_REAR_FACING = Type("REAR FACING")
+            @JvmField public val TYPE_REAR_FACING: Type = Type("REAR FACING")
         }
     }
 

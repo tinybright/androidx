@@ -18,27 +18,25 @@ package androidx.kruth
 
 import androidx.kruth.Fact.Companion.makeMessage
 
-/**
- * An [AssertionError] composed of structured [Fact] instances and other string messages.
- */
+/** An [AssertionError] composed of structured [Fact] instances and other string messages. */
 // TODO(dustinlam): Split into platform-specific implementations so we can add a
 //  "createWithNoStack" constructor on JVM.
 internal class AssertionErrorWithFacts(
     messagesToPrepend: List<String>,
     val facts: List<Fact> = emptyList(),
     // TODO: change to AssertionError that takes in a cause when upgraded to 1.9.20
-    override val cause: Throwable? = null
-) : AssertionError(
-    makeMessage(messagesToPrepend, facts),
-    // TODO: change to AssertionError that takes in a cause when upgraded to 1.9.20
-    // cause
-) {
+    override val cause: Throwable? = null,
+) :
+    AssertionError(
+        makeMessage(messagesToPrepend, facts)
+        // TODO: change to AssertionError that takes in a cause when upgraded to 1.9.20
+        // cause
+    ) {
 
-    constructor(message: String? = null, cause: Throwable? = null) : this(
-        messagesToPrepend = listOfNotNull(message),
-        facts = emptyList(),
-        cause = cause,
-    )
+    constructor(
+        message: String? = null,
+        cause: Throwable? = null,
+    ) : this(messagesToPrepend = listOfNotNull(message), facts = emptyList(), cause = cause)
 
     override fun toString(): String {
         // We intentionally hide the class name.
@@ -48,7 +46,7 @@ internal class AssertionErrorWithFacts(
     internal companion object {
         internal fun createWithNoStack(
             message: String,
-            cause: Throwable? = null
+            cause: Throwable? = null,
         ): AssertionErrorWithFacts {
             return AssertionErrorWithFacts(message, cause)
                 .also(AssertionErrorWithFacts::clearStackTrace)

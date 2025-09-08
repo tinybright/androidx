@@ -27,14 +27,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.nativeKeyCode
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performKeyPress
 import androidx.compose.ui.unit.dp
 import androidx.test.filters.MediumTest
-import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -46,19 +49,15 @@ private const val Tag: String = "tag"
 @MediumTest
 @RunWith(Parameterized::class)
 class FocusSearchInteropTest(private val keyEvent: AndroidKeyEvent) {
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     @Test
     fun singleFocusableComposable() {
         // Arrange.
-        rule.setContent {
-            Box(Modifier.testTag(Tag).size(10.dp).focusable())
-        }
+        rule.setContent { Box(Modifier.testTag(Tag).size(10.dp).focusable()) }
 
         // Act.
-        rule.waitForIdle()
-        InstrumentationRegistry.getInstrumentation().sendKeySync(keyEvent)
+        rule.onRoot().performKeyPress(keyEvent)
 
         // Assert.
         rule.onNodeWithTag(Tag).assertIsFocused()
@@ -68,20 +67,13 @@ class FocusSearchInteropTest(private val keyEvent: AndroidKeyEvent) {
     fun singleFocusableView() {
         // Arrange.
         lateinit var embeddedView: View
-        rule.setContent {
-            AndroidView({
-                FocusableView(it).apply { embeddedView = this }
-            })
-        }
+        rule.setContent { AndroidView({ FocusableView(it).apply { embeddedView = this } }) }
 
         // Act.
-        rule.waitForIdle()
-        InstrumentationRegistry.getInstrumentation().sendKeySync(keyEvent)
+        rule.onRoot().performKeyPress(keyEvent)
 
         // Assert.
-        rule.runOnIdle {
-            assertThat(embeddedView.isFocused).isTrue()
-        }
+        rule.runOnIdle { assertThat(embeddedView.isFocused).isTrue() }
     }
 
     private fun FocusableView(context: Context): View {
@@ -95,13 +87,18 @@ class FocusSearchInteropTest(private val keyEvent: AndroidKeyEvent) {
     companion object {
         @JvmStatic
         @Parameterized.Parameters(name = "key = {0}")
-        fun initParameters() = listOf(
-            AndroidKeyEvent(ACTION_DOWN, Key.DirectionUp.nativeKeyCode),
-            AndroidKeyEvent(ACTION_DOWN, Key.DirectionDown.nativeKeyCode),
-            AndroidKeyEvent(ACTION_DOWN, Key.DirectionLeft.nativeKeyCode),
-            AndroidKeyEvent(ACTION_DOWN, Key.DirectionRight.nativeKeyCode),
-            AndroidKeyEvent(ACTION_DOWN, Key.Tab.nativeKeyCode),
-            AndroidKeyEvent(0L, 0L, ACTION_DOWN, Key.Tab.nativeKeyCode, META_SHIFT_ON),
-        )
+        fun initParameters() =
+            listOf(
+                AndroidKeyEvent(ACTION_DOWN, Key.DirectionUp.nativeKeyCode),
+                AndroidKeyEvent(ACTION_DOWN, Key.DirectionDown.nativeKeyCode),
+                AndroidKeyEvent(ACTION_DOWN, Key.DirectionLeft.nativeKeyCode),
+                AndroidKeyEvent(ACTION_DOWN, Key.DirectionRight.nativeKeyCode),
+                AndroidKeyEvent(ACTION_DOWN, Key.Tab.nativeKeyCode),
+                AndroidKeyEvent(0L, 0L, ACTION_DOWN, Key.Tab.nativeKeyCode, META_SHIFT_ON),
+            )
     }
+}
+
+private fun SemanticsNodeInteraction.performKeyPress(keyEvent: AndroidKeyEvent) {
+    performKeyPress(KeyEvent(keyEvent))
 }

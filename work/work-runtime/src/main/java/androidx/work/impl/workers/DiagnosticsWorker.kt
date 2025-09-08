@@ -16,7 +16,6 @@
 package androidx.work.impl.workers
 
 import android.content.Context
-import android.os.Build
 import androidx.work.Logger
 import androidx.work.Worker
 import androidx.work.WorkerParameters
@@ -42,14 +41,12 @@ internal class DiagnosticsWorker(context: Context, parameters: WorkerParameters)
             workManager.configuration.clock.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)
         val completed = workSpecDao.getRecentlyCompletedWork(startAt)
         val running = workSpecDao.getRunningWork()
-        val enqueued = workSpecDao.getAllEligibleWorkSpecsForScheduling(
-            Scheduler.MAX_GREEDY_SCHEDULER_LIMIT
-        )
+        val enqueued =
+            workSpecDao.getAllEligibleWorkSpecsForScheduling(Scheduler.MAX_GREEDY_SCHEDULER_LIMIT)
         if (completed.isNotEmpty()) {
             Logger.get().info(TAG, "Recently completed work:\n\n")
-            Logger.get().info(
-                TAG, workSpecRows(workNameDao, workTagDao, systemIdInfoDao, completed)
-            )
+            Logger.get()
+                .info(TAG, workSpecRows(workNameDao, workTagDao, systemIdInfoDao, completed))
         }
         if (running.isNotEmpty()) {
             Logger.get().info(TAG, "Running work:\n\n")
@@ -69,9 +66,9 @@ private fun workSpecRows(
     workNameDao: WorkNameDao,
     workTagDao: WorkTagDao,
     systemIdInfoDao: SystemIdInfoDao,
-    workSpecs: List<WorkSpec>
+    workSpecs: List<WorkSpec>,
 ) = buildString {
-    val systemIdHeader = if (Build.VERSION.SDK_INT >= 23) "Job Id" else "Alarm Id"
+    val systemIdHeader = "Job Id"
     val header = "\n Id \t Class Name\t ${systemIdHeader}\t State\t Unique Name\t Tags\t"
     append(header)
     workSpecs.forEach { workSpec ->

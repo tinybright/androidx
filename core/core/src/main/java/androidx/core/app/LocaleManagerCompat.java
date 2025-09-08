@@ -24,13 +24,11 @@ import android.os.Build;
 import android.os.LocaleList;
 
 import androidx.annotation.AnyThread;
-import androidx.annotation.DoNotInline;
-import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.os.LocaleListCompat;
 
-import java.util.Locale;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Helper for accessing features in {@link android.app.LocaleManager} in a backwards compatible
@@ -48,9 +46,8 @@ public final class LocaleManagerCompat {
      * is set, this method helps cater to rare use-cases which might require specifically knowing
      * the system locale.
      */
-    @NonNull
     @AnyThread
-    public static LocaleListCompat getSystemLocales(@NonNull Context context) {
+    public static @NonNull LocaleListCompat getSystemLocales(@NonNull Context context) {
         LocaleListCompat systemLocales = LocaleListCompat.getEmptyLocaleList();
         // TODO: modify the check to Build.Version.SDK_INT >= 33.
         if (Build.VERSION.SDK_INT >= 33) {
@@ -75,8 +72,7 @@ public final class LocaleManagerCompat {
      * set.
      */
     @AnyThread
-    @NonNull
-    public static LocaleListCompat getApplicationLocales(@NonNull Context context) {
+    public static @NonNull LocaleListCompat getApplicationLocales(@NonNull Context context) {
         if (Build.VERSION.SDK_INT >= 33) {
             // If the API version is 33 or above we want to redirect the call to the framework API.
             Object localeManager = getLocaleManagerForApplication(context);
@@ -103,22 +99,8 @@ public final class LocaleManagerCompat {
     static LocaleListCompat getConfigurationLocales(Configuration conf) {
         if (Build.VERSION.SDK_INT >= 24) {
             return Api24Impl.getLocales(conf);
-        } else if (Build.VERSION.SDK_INT >= 21) {
-            return LocaleListCompat.forLanguageTags(Api21Impl.toLanguageTag(conf.locale));
         } else {
-            // Create LocaleListCompat using the configuration locale directly since
-            // Locale.toLanguageTag() was added for API level 21 and above.
-            return LocaleListCompat.create(conf.locale);
-        }
-    }
-
-    @RequiresApi(21)
-    static class Api21Impl {
-        private Api21Impl() {}
-
-        @DoNotInline
-        static String toLanguageTag(Locale locale) {
-            return locale.toLanguageTag();
+            return LocaleListCompat.forLanguageTags(conf.locale.toLanguageTag());
         }
     }
 
@@ -126,7 +108,6 @@ public final class LocaleManagerCompat {
     static class Api24Impl {
         private Api24Impl() {}
 
-        @DoNotInline
         static LocaleListCompat getLocales(Configuration configuration) {
             return LocaleListCompat.forLanguageTags(configuration.getLocales().toLanguageTags());
         }
@@ -136,13 +117,11 @@ public final class LocaleManagerCompat {
     static class Api33Impl {
         private Api33Impl() {}
 
-        @DoNotInline
         static LocaleList localeManagerGetSystemLocales(Object localeManager) {
             LocaleManager mLocaleManager = (LocaleManager) localeManager;
             return mLocaleManager.getSystemLocales();
         }
 
-        @DoNotInline
         static LocaleList localeManagerGetApplicationLocales(Object localeManager) {
             LocaleManager mLocaleManager = (LocaleManager) localeManager;
             return mLocaleManager.getApplicationLocales();

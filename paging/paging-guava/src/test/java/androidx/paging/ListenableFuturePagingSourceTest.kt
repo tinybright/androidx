@@ -36,31 +36,35 @@ class ListenableFuturePagingSourceTest {
         return Page(
             List(params.loadSize) { it + key },
             prevKey = key - params.loadSize,
-            nextKey = key + params.loadSize
+            nextKey = key + params.loadSize,
         )
     }
 
-    private val pagingSource = object : PagingSource<Int, Int>() {
-        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Int> {
-            return loadInternal(params)
-        }
-
-        override fun getRefreshKey(state: PagingState<Int, Int>): Int? = null
-    }
-
-    private val listenableFuturePagingSource = object : ListenableFuturePagingSource<Int, Int>() {
-        override fun loadFuture(params: LoadParams<Int>): ListenableFuture<LoadResult<Int, Int>> {
-            val future = SettableFuture.create<LoadResult<Int, Int>>()
-            try {
-                future.set(loadInternal(params))
-            } catch (e: IllegalArgumentException) {
-                future.setException(e)
+    private val pagingSource =
+        object : PagingSource<Int, Int>() {
+            override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Int> {
+                return loadInternal(params)
             }
-            return future
+
+            override fun getRefreshKey(state: PagingState<Int, Int>): Int? = null
         }
 
-        override fun getRefreshKey(state: PagingState<Int, Int>): Int? = null
-    }
+    private val listenableFuturePagingSource =
+        object : ListenableFuturePagingSource<Int, Int>() {
+            override fun loadFuture(
+                params: LoadParams<Int>
+            ): ListenableFuture<LoadResult<Int, Int>> {
+                val future = SettableFuture.create<LoadResult<Int, Int>>()
+                try {
+                    future.set(loadInternal(params))
+                } catch (e: IllegalArgumentException) {
+                    future.setException(e)
+                }
+                return future
+            }
+
+            override fun getRefreshKey(state: PagingState<Int, Int>): Int? = null
+        }
 
     @Test
     fun basic() = runBlocking {

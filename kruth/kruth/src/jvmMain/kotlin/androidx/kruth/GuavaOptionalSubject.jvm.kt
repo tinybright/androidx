@@ -20,13 +20,10 @@ import androidx.kruth.Fact.Companion.fact
 import androidx.kruth.Fact.Companion.simpleFact
 import com.google.common.base.Optional
 
-/**
- * Propositions for Guava [Optional] subjects.
- */
-class GuavaOptionalSubject<T : Any> internal constructor(
-    actual: Optional<out T>?,
-    metadata: FailureMetadata = FailureMetadata(),
-) : Subject<Optional<out T>>(actual, metadata = metadata, typeDescriptionOverride = "optional") {
+/** Propositions for Guava [Optional] subjects. */
+class GuavaOptionalSubject<T : Any>
+internal constructor(actual: Optional<out T>?, metadata: FailureMetadata = FailureMetadata()) :
+    Subject<Optional<out T>>(actual, metadata = metadata, typeDescriptionOverride = "optional") {
 
     /** Fails if the [Optional]`<T>` is absent or the subject is null. */
     fun isPresent() {
@@ -53,7 +50,6 @@ class GuavaOptionalSubject<T : Any> internal constructor(
      * Fails if the [Optional]`<T>` does not have the given value or the subject is null.
      *
      * To make more complex assertions on the optional's value split your assertion in two:
-     *
      * ```
      * assertThat(myOptional).isPresent()
      * assertThat(myOptional.get()).contains("foo")
@@ -67,7 +63,7 @@ class GuavaOptionalSubject<T : Any> internal constructor(
         } else if (!actual.isPresent) {
             failWithoutActual(
                 fact("expected to have value", expected),
-                simpleFact("but was absent")
+                simpleFact("but was absent"),
             )
         } else {
             checkNoNeedToDisplayBothValues("get()").that(actual.get()).isEqualTo(expected)

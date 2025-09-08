@@ -24,7 +24,7 @@ package androidx.compose.ui.text
  * This is only available on Android.
  */
 @kotlin.jvm.JvmInline
-value class EmojiSupportMatch private constructor(private val value: Int) {
+value class EmojiSupportMatch internal constructor(internal val value: Int) {
 
     override fun toString(): String {
         return when (value) {
@@ -37,19 +37,13 @@ value class EmojiSupportMatch private constructor(private val value: Int) {
 
     companion object {
 
-        /**
-         * Default support strategy defers to EmojiCompat.get()
-         */
+        /** Default support strategy defers to EmojiCompat.get() */
         val Default = EmojiSupportMatch(0)
 
-        /**
-         * Do not use support emoji for this paragraph.
-         */
+        /** Do not use support emoji for this paragraph. */
         val None = EmojiSupportMatch(1)
 
-        /**
-         * Attempt to replace all emoji, even if they're available on this device's fonts.
-         */
+        /** Attempt to replace all emoji, even if they're available on this device's fonts. */
         val All = EmojiSupportMatch(2)
     }
 }

@@ -35,8 +35,7 @@ import org.junit.runner.RunWith
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 class FragmentTest {
-    @get:Rule
-    val testRule = createAndroidComposeRule<TestActivity>()
+    @get:Rule val testRule = createAndroidComposeRule<TestActivity>()
 
     @Test
     fun showContent() {
@@ -57,8 +56,6 @@ class MyFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ) = content {
-        Text("MyFragment")
-    }
+        savedInstanceState: Bundle?,
+    ) = content { Text("MyFragment") }
 }

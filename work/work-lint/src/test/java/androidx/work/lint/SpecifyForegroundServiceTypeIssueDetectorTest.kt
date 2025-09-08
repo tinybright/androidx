@@ -26,9 +26,10 @@ import org.junit.Test
 class SpecifyForegroundServiceTypeIssueDetectorTest {
     @Test
     fun failWhenServiceTypeIsNotSpecified() {
-        val application = kotlin(
-            "com/example/App.kt",
-            """
+        val application =
+            kotlin(
+                    "com/example/App.kt",
+                    """
             package com.example
 
             import android.app.Notification
@@ -40,32 +41,36 @@ class SpecifyForegroundServiceTypeIssueDetectorTest {
                     val info = ForegroundInfo(0, notification, 1)
                 }
             }
-            """
-        ).indented().within("src")
+            """,
+                )
+                .indented()
+                .within("src")
 
-        lint().files(
-            // Source files
-            NOTIFICATION,
-            FOREGROUND_INFO,
-            application
-        ).issues(SpecifyForegroundServiceTypeIssueDetector.ISSUE)
+        lint()
+            .files(
+                // Source files
+                NOTIFICATION,
+                FOREGROUND_INFO,
+                application,
+            )
+            .issues(SpecifyForegroundServiceTypeIssueDetector.ISSUE)
             .run()
-            /* ktlint-disable max-line-length */
             .expect(
                 """
                 src/com/example/App.kt:9: Error: Missing dataSync foregroundServiceType in the AndroidManifest.xml [SpecifyForegroundServiceType]
                         val info = ForegroundInfo(0, notification, 1)
                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 1 errors, 0 warnings
-                """.trimIndent()
+                """
+                    .trimIndent()
             )
-        /* ktlint-enable max-line-length */
     }
 
     @Test
     fun failWhenSpecifiedServiceTypeIsInSufficient() {
-        val manifest = manifest(
-            """
+        val manifest =
+            manifest(
+                    """
                <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:tools="http://schemas.android.com/tools"
                   package="com.example">
@@ -80,11 +85,13 @@ class SpecifyForegroundServiceTypeIssueDetectorTest {
                   </application>
                 </manifest>
         """
-        ).indented()
+                )
+                .indented()
 
-        val application = kotlin(
-            "com/example/App.kt",
-            """
+        val application =
+            kotlin(
+                    "com/example/App.kt",
+                    """
             package com.example
 
             import android.app.Notification
@@ -96,34 +103,38 @@ class SpecifyForegroundServiceTypeIssueDetectorTest {
                     val info = ForegroundInfo(0, notification, 9)
                 }
             }
-            """
-        ).indented().within("src")
+            """,
+                )
+                .indented()
+                .within("src")
 
-        lint().files(
-            // Manifest
-            manifest,
-            // Sources
-            NOTIFICATION,
-            FOREGROUND_INFO,
-            application
-        ).issues(SpecifyForegroundServiceTypeIssueDetector.ISSUE)
+        lint()
+            .files(
+                // Manifest
+                manifest,
+                // Sources
+                NOTIFICATION,
+                FOREGROUND_INFO,
+                application,
+            )
+            .issues(SpecifyForegroundServiceTypeIssueDetector.ISSUE)
             .run()
-            /* ktlint-disable max-line-length */
             .expect(
                 """
                 src/com/example/App.kt:9: Error: Missing dataSync foregroundServiceType in the AndroidManifest.xml [SpecifyForegroundServiceType]
                         val info = ForegroundInfo(0, notification, 9)
                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 1 errors, 0 warnings
-                """.trimIndent()
+                """
+                    .trimIndent()
             )
-        /* ktlint-enable max-line-length */
     }
 
     @Test
     fun passWhenCorrectForegroundServiceTypeSpecified() {
-        val manifest = manifest(
-            """
+        val manifest =
+            manifest(
+                    """
                <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:tools="http://schemas.android.com/tools"
                   package="com.example">
@@ -138,11 +149,13 @@ class SpecifyForegroundServiceTypeIssueDetectorTest {
                   </application>
                 </manifest>
         """
-        ).indented()
+                )
+                .indented()
 
-        val application = kotlin(
-            "com/example/App.kt",
-            """
+        val application =
+            kotlin(
+                    "com/example/App.kt",
+                    """
             package com.example
 
             import android.app.Notification
@@ -154,25 +167,30 @@ class SpecifyForegroundServiceTypeIssueDetectorTest {
                     val info = ForegroundInfo(0, notification, 8)
                 }
             }
-            """
-        ).indented().within("src")
+            """,
+                )
+                .indented()
+                .within("src")
 
-        lint().files(
-            // Manifest
-            manifest,
-            // Sources
-            NOTIFICATION,
-            FOREGROUND_INFO,
-            application
-        ).issues(SpecifyForegroundServiceTypeIssueDetector.ISSUE)
+        lint()
+            .files(
+                // Manifest
+                manifest,
+                // Sources
+                NOTIFICATION,
+                FOREGROUND_INFO,
+                application,
+            )
+            .issues(SpecifyForegroundServiceTypeIssueDetector.ISSUE)
             .run()
             .expectClean()
     }
 
     @Test
     fun passWhenMultipleForegroundServiceTypeSpecified() {
-        val manifest = manifest(
-            """
+        val manifest =
+            manifest(
+                    """
                <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:tools="http://schemas.android.com/tools"
                   package="com.example">
@@ -187,11 +205,13 @@ class SpecifyForegroundServiceTypeIssueDetectorTest {
                   </application>
                 </manifest>
         """
-        ).indented()
+                )
+                .indented()
 
-        val application = kotlin(
-            "com/example/App.kt",
-            """
+        val application =
+            kotlin(
+                    "com/example/App.kt",
+                    """
             package com.example
 
             import android.app.Notification
@@ -203,17 +223,21 @@ class SpecifyForegroundServiceTypeIssueDetectorTest {
                     val info = ForegroundInfo(0, notification, 9)
                 }
             }
-            """
-        ).indented().within("src")
+            """,
+                )
+                .indented()
+                .within("src")
 
-        lint().files(
-            // Manifest
-            manifest,
-            // Sources
-            NOTIFICATION,
-            FOREGROUND_INFO,
-            application
-        ).issues(SpecifyForegroundServiceTypeIssueDetector.ISSUE)
+        lint()
+            .files(
+                // Manifest
+                manifest,
+                // Sources
+                NOTIFICATION,
+                FOREGROUND_INFO,
+                application,
+            )
+            .issues(SpecifyForegroundServiceTypeIssueDetector.ISSUE)
             .run()
             .expectClean()
     }

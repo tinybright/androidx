@@ -16,8 +16,7 @@
 
 package androidx.camera.testing.impl.fakes;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.annotation.MainThread;
 import androidx.annotation.RestrictTo;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.UseCase;
@@ -31,7 +30,11 @@ import androidx.camera.core.impl.UseCaseConfigFactory;
 import androidx.camera.core.impl.UseCaseConfigFactory.CaptureType;
 import androidx.core.util.Supplier;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -49,6 +52,7 @@ public class FakeUseCase extends UseCase {
     private int mPipelineCreationCount = 0;
     private Supplier<SessionConfig> mSessionConfigSupplier;
     private Set<Integer> mEffectTargets = Collections.emptySet();
+    private RuntimeException mMergedConfigException = null;
 
     /**
      * Creates a new instance of a {@link FakeUseCase} with a given configuration and capture type.
@@ -79,10 +83,9 @@ public class FakeUseCase extends UseCase {
      * {@inheritDoc}
      *
      */
-    @NonNull
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Override
-    public UseCaseConfig.Builder<?, ?, ?> getUseCaseConfigBuilder(@NonNull Config config) {
+    public UseCaseConfig.@NonNull Builder<?, ?, ?> getUseCaseConfigBuilder(@NonNull Config config) {
         return new FakeUseCaseConfig.Builder(config)
                 .setCaptureType(mCaptureType)
                 .setSessionOptionUnpacker((resolution, useCaseConfig, sessionConfigBuilder) -> {
@@ -93,10 +96,9 @@ public class FakeUseCase extends UseCase {
      * {@inheritDoc}
      *
      */
-    @Nullable
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Override
-    public UseCaseConfig<?> getDefaultConfig(boolean applyDefaultConfig,
+    public @Nullable UseCaseConfig<?> getDefaultConfig(boolean applyDefaultConfig,
             @NonNull UseCaseConfigFactory factory) {
         Config config = factory.getConfig(
                 mCaptureType,
@@ -104,11 +106,13 @@ public class FakeUseCase extends UseCase {
         return config == null ? null : getUseCaseConfigBuilder(config).getUseCaseConfig();
     }
 
-    @NonNull
     @Override
-    protected UseCaseConfig<?> onMergeConfig(@NonNull CameraInfoInternal cameraInfo,
-            @NonNull UseCaseConfig.Builder<?, ?, ?> builder) {
+    protected @NonNull UseCaseConfig<?> onMergeConfig(@NonNull CameraInfoInternal cameraInfo,
+            UseCaseConfig.@NonNull Builder<?, ?, ?> builder) {
         mMergedConfigRetrieved = true;
+        if (mMergedConfigException != null) {
+            throw mMergedConfigException;
+        }
         return builder.getUseCaseConfig();
     }
 
@@ -119,29 +123,31 @@ public class FakeUseCase extends UseCase {
     }
 
     @Override
-    public void onStateAttached() {
-        super.onStateAttached();
+    @MainThread
+    public void onSessionStart() {
+        super.onSessionStart();
         mStateAttachedCount.incrementAndGet();
     }
 
     @Override
-    public void onStateDetached() {
-        super.onStateDetached();
+    @MainThread
+    public void onSessionStop() {
+        super.onSessionStop();
         mStateAttachedCount.decrementAndGet();
     }
 
     @Override
-    @NonNull
-    protected StreamSpec onSuggestedStreamSpecUpdated(@NonNull StreamSpec suggestedStreamSpec) {
+    protected @NonNull StreamSpec onSuggestedStreamSpecUpdated(
+            @NonNull StreamSpec primaryStreamSpec,
+            @Nullable StreamSpec secondaryStreamSpec) {
         SessionConfig sessionConfig = createPipeline();
         if (sessionConfig != null) {
-            updateSessionConfig(sessionConfig);
+            updateSessionConfig(List.of(sessionConfig));
         }
-        return suggestedStreamSpec;
+        return primaryStreamSpec;
     }
 
-    @Nullable
-    SessionConfig createPipeline() {
+    @Nullable SessionConfig createPipeline() {
         mPipelineCreationCount++;
         if (mSessionConfigSupplier != null) {
             return mSessionConfigSupplier.get();
@@ -160,9 +166,8 @@ public class FakeUseCase extends UseCase {
     /**
      * @inheritDoc
      */
-    @NonNull
     @Override
-    public Set<Integer> getSupportedEffectTargets() {
+    public @NonNull Set<Integer> getSupportedEffectTargets() {
         return mEffectTargets;
     }
 
@@ -175,7 +180,7 @@ public class FakeUseCase extends UseCase {
     }
 
     /**
-     * Returns true if {@link #onStateAttached()} has been called previously.
+     * Returns true if {@link #onSessionStart()} has been called previously.
      */
     public int getStateAttachedCount() {
         return mStateAttachedCount.get();
@@ -206,7 +211,7 @@ public class FakeUseCase extends UseCase {
      * Calls the protected method {@link UseCase#updateSessionConfig}.
      */
     public void updateSessionConfigForTesting(@NonNull SessionConfig sessionConfig) {
-        updateSessionConfig(sessionConfig);
+        updateSessionConfig(List.of(sessionConfig));
     }
 
     /**
@@ -235,5 +240,9 @@ public class FakeUseCase extends UseCase {
      */
     public void notifyResetForTesting() {
         notifyReset();
+    }
+
+    public void setMergedConfigException(@Nullable RuntimeException exception) {
+        mMergedConfigException = exception;
     }
 }

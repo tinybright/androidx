@@ -48,11 +48,9 @@ import org.junit.runner.RunWith
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 internal class BasicTextFieldHandwritingTest {
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
-    @get:Rule
-    val immRule = ComposeInputMethodManagerTestRule()
+    @get:Rule val immRule = ComposeInputMethodManagerTestRule()
 
     private val inputMethodInterceptor = InputMethodInterceptor(rule)
 
@@ -70,9 +68,7 @@ internal class BasicTextFieldHandwritingTest {
 
     @Test
     fun textField_startStylusHandwriting_unfocused() {
-        testStylusHandwriting(stylusHandwritingStarted = true) {
-            performStylusHandwriting()
-        }
+        testStylusHandwriting(stylusHandwritingStarted = true) { performStylusHandwriting() }
     }
 
     @Test
@@ -85,23 +81,17 @@ internal class BasicTextFieldHandwritingTest {
 
     @Test
     fun textField_click_notStartStylusHandwriting() {
-        testStylusHandwriting(stylusHandwritingStarted = false) {
-            performStylusClick()
-        }
+        testStylusHandwriting(stylusHandwritingStarted = false) { performStylusClick() }
     }
 
     @Test
     fun textField_longClick_notStartStylusHandwriting() {
-        testStylusHandwriting(stylusHandwritingStarted = false) {
-            performStylusLongClick()
-        }
+        testStylusHandwriting(stylusHandwritingStarted = false) { performStylusLongClick() }
     }
 
     @Test
     fun textField_longPressAndDrag_notStartStylusHandwriting() {
-        testStylusHandwriting(stylusHandwritingStarted = false) {
-            performStylusLongPressAndDrag()
-        }
+        testStylusHandwriting(stylusHandwritingStarted = false) { performStylusLongPressAndDrag() }
     }
 
     @Test
@@ -112,15 +102,13 @@ internal class BasicTextFieldHandwritingTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.fillMaxSize().testTag(Tag),
-                enabled = false
+                enabled = false,
             )
         }
 
         rule.onNodeWithTag(Tag).performStylusHandwriting()
 
-        rule.runOnIdle {
-            imm.expectNoMoreCalls()
-        }
+        rule.runOnIdle { imm.expectNoMoreCalls() }
     }
 
     @Test
@@ -131,15 +119,13 @@ internal class BasicTextFieldHandwritingTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.fillMaxSize().testTag(Tag),
-                readOnly = true
+                readOnly = true,
             )
         }
 
         rule.onNodeWithTag(Tag).performStylusHandwriting()
 
-        rule.runOnIdle {
-            imm.expectNoMoreCalls()
-        }
+        rule.runOnIdle { imm.expectNoMoreCalls() }
     }
 
     @Test
@@ -151,7 +137,7 @@ internal class BasicTextFieldHandwritingTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.fillMaxSize().testTag(Tag),
-                enabled = enabled
+                enabled = enabled,
             )
         }
 
@@ -177,7 +163,7 @@ internal class BasicTextFieldHandwritingTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.fillMaxSize().testTag(Tag),
-                readOnly = readOnly
+                readOnly = readOnly,
             )
         }
 
@@ -202,7 +188,7 @@ internal class BasicTextFieldHandwritingTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.fillMaxSize().testTag(Tag),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             )
         }
 
@@ -217,7 +203,7 @@ internal class BasicTextFieldHandwritingTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.fillMaxSize().testTag(Tag),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
             )
         }
 
@@ -232,7 +218,7 @@ internal class BasicTextFieldHandwritingTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.fillMaxSize().testTag(Tag),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             )
         }
 
@@ -249,7 +235,7 @@ internal class BasicTextFieldHandwritingTest {
             BasicTextField(
                 state = state,
                 modifier = Modifier.fillMaxSize().testTag(Tag),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
             )
         }
 
@@ -260,15 +246,12 @@ internal class BasicTextFieldHandwritingTest {
 
     private fun testStylusHandwriting(
         stylusHandwritingStarted: Boolean,
-        interaction: SemanticsNodeInteraction.() -> Unit
+        interaction: SemanticsNodeInteraction.() -> Unit,
     ) {
         immRule.setFactory { imm }
         inputMethodInterceptor.setTextFieldTestContent {
             val state = remember { TextFieldState() }
-            BasicTextField(
-                state = state,
-                modifier = Modifier.fillMaxSize().testTag(Tag)
-            )
+            BasicTextField(state = state, modifier = Modifier.fillMaxSize().testTag(Tag))
         }
 
         interaction.invoke(rule.onNodeWithTag(Tag))

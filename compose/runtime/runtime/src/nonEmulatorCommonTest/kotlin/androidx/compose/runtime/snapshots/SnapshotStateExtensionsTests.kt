@@ -26,12 +26,12 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
@@ -39,7 +39,6 @@ import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import org.junit.Test
 
 class SnapshotStateExtensionsTests {
 
@@ -53,30 +52,33 @@ class SnapshotStateExtensionsTests {
         advanceGlobalSnapshotAndSettle()
 
         assertEquals(
-            message = "asIntState() returned a State that dispatched unexpected values when its " +
-                "corresponding state had been initialized and not modified.",
+            message =
+                "asIntState() returned a State that dispatched unexpected values when its " +
+                    "corresponding state had been initialized and not modified.",
             expected = listOf(512),
-            actual = intSnapshotHistory.value
+            actual = intSnapshotHistory.value,
         )
 
         state.intValue = 1024
         advanceGlobalSnapshotAndSettle()
 
         assertEquals(
-            message = "asIntState() returned a State that dispatched unexpected values when its " +
-                "corresponding state was reassigned and changed.",
+            message =
+                "asIntState() returned a State that dispatched unexpected values when its " +
+                    "corresponding state was reassigned and changed.",
             expected = listOf(512, 1024),
-            actual = intSnapshotHistory.value
+            actual = intSnapshotHistory.value,
         )
 
         state.intValue = 2048
         advanceGlobalSnapshotAndSettle()
 
         assertEquals(
-            message = "asIntState() returned a State that dispatched unexpected values when its " +
-                "corresponding state was reassigned and changed.",
+            message =
+                "asIntState() returned a State that dispatched unexpected values when its " +
+                    "corresponding state was reassigned and changed.",
             expected = listOf(512, 1024, 2048),
-            actual = intSnapshotHistory.value
+            actual = intSnapshotHistory.value,
         )
         snapshotObservationJob.cancel()
     }
@@ -91,30 +93,33 @@ class SnapshotStateExtensionsTests {
         advanceGlobalSnapshotAndSettle()
 
         assertEquals(
-            message = "asLongState() returned a State that dispatched unexpected values when its " +
-                "corresponding state had been initialized and not modified.",
+            message =
+                "asLongState() returned a State that dispatched unexpected values when its " +
+                    "corresponding state had been initialized and not modified.",
             expected = listOf(1000L),
-            actual = longSnapshotHistory.value
+            actual = longSnapshotHistory.value,
         )
 
         state.longValue = 2000L
         advanceGlobalSnapshotAndSettle()
 
         assertEquals(
-            message = "asLongState() returned a State that dispatched unexpected values when its " +
-                "corresponding state was reassigned and changed.",
+            message =
+                "asLongState() returned a State that dispatched unexpected values when its " +
+                    "corresponding state was reassigned and changed.",
             expected = listOf(1000L, 2000L),
-            actual = longSnapshotHistory.value
+            actual = longSnapshotHistory.value,
         )
 
         state.longValue = 3000L
         advanceGlobalSnapshotAndSettle()
 
         assertEquals(
-            message = "asLongState() returned a State that dispatched unexpected values when its " +
-                "corresponding state was reassigned and changed.",
+            message =
+                "asLongState() returned a State that dispatched unexpected values when its " +
+                    "corresponding state was reassigned and changed.",
             expected = listOf(1000L, 2000L, 3000L),
-            actual = longSnapshotHistory.value
+            actual = longSnapshotHistory.value,
         )
         snapshotObservationJob.cancel()
     }
@@ -125,36 +130,38 @@ class SnapshotStateExtensionsTests {
         val snapshotObservationJob = Job()
         val state = mutableFloatStateOf(0.0f)
         val floatState = state.asFloatState()
-        val floatSnapshotHistory = getSnapshotHistory(snapshotObservationJob) {
-            floatState.floatValue
-        }
+        val floatSnapshotHistory =
+            getSnapshotHistory(snapshotObservationJob) { floatState.floatValue }
         advanceGlobalSnapshotAndSettle()
 
         assertEquals(
-            message = "asFloatState() returned a State that dispatched unexpected values when " +
-                "its corresponding state had been initialized and not modified.",
+            message =
+                "asFloatState() returned a State that dispatched unexpected values when " +
+                    "its corresponding state had been initialized and not modified.",
             expected = listOf(0f),
-            actual = floatSnapshotHistory.value
+            actual = floatSnapshotHistory.value,
         )
 
         state.floatValue = 1f
         advanceGlobalSnapshotAndSettle()
 
         assertEquals(
-            message = "asFloatState() returned a State that dispatched unexpected values when " +
-                "its corresponding state was reassigned and changed.",
+            message =
+                "asFloatState() returned a State that dispatched unexpected values when " +
+                    "its corresponding state was reassigned and changed.",
             expected = listOf(0f, 1f),
-            actual = floatSnapshotHistory.value
+            actual = floatSnapshotHistory.value,
         )
 
         state.floatValue = 2f
         advanceGlobalSnapshotAndSettle()
 
         assertEquals(
-            message = "asFloatState() returned a State that dispatched unexpected values when " +
-                "its corresponding state was reassigned and changed.",
+            message =
+                "asFloatState() returned a State that dispatched unexpected values when " +
+                    "its corresponding state was reassigned and changed.",
             expected = listOf(0f, 1f, 2f),
-            actual = floatSnapshotHistory.value
+            actual = floatSnapshotHistory.value,
         )
         snapshotObservationJob.cancel()
     }
@@ -165,36 +172,38 @@ class SnapshotStateExtensionsTests {
         val snapshotObservationJob = Job()
         val state = mutableDoubleStateOf(1.0)
         val doubleState = state.asDoubleState()
-        val doubleSnapshotHistory = getSnapshotHistory(snapshotObservationJob) {
-            doubleState.doubleValue
-        }
+        val doubleSnapshotHistory =
+            getSnapshotHistory(snapshotObservationJob) { doubleState.doubleValue }
         advanceGlobalSnapshotAndSettle()
 
         assertEquals(
-            message = "asDoubleState() returned a State that dispatched unexpected values when " +
-                "its corresponding state had been initialized and not modified.",
+            message =
+                "asDoubleState() returned a State that dispatched unexpected values when " +
+                    "its corresponding state had been initialized and not modified.",
             expected = listOf(1.0),
-            actual = doubleSnapshotHistory.value
+            actual = doubleSnapshotHistory.value,
         )
 
         state.doubleValue = 2.5
         advanceGlobalSnapshotAndSettle()
 
         assertEquals(
-            message = "asDoubleState() returned a State that dispatched unexpected values when " +
-                "its corresponding state was reassigned and changed.",
+            message =
+                "asDoubleState() returned a State that dispatched unexpected values when " +
+                    "its corresponding state was reassigned and changed.",
             expected = listOf(1.0, 2.5),
-            actual = doubleSnapshotHistory.value
+            actual = doubleSnapshotHistory.value,
         )
 
         state.doubleValue = 5.0
         advanceGlobalSnapshotAndSettle()
 
         assertEquals(
-            message = "asDoubleState() returned a State that dispatched unexpected values when " +
-                "its corresponding state was reassigned and changed.",
+            message =
+                "asDoubleState() returned a State that dispatched unexpected values when " +
+                    "its corresponding state was reassigned and changed.",
             expected = listOf(1.0, 2.5, 5.0),
-            actual = doubleSnapshotHistory.value
+            actual = doubleSnapshotHistory.value,
         )
         snapshotObservationJob.cancel()
     }
@@ -207,35 +216,37 @@ class SnapshotStateExtensionsTests {
 
     private suspend fun <T> getSnapshotHistory(
         coroutineContext: CoroutineContext = EmptyCoroutineContext,
-        block: () -> T
+        block: () -> T,
     ): StateFlow<List<T>> {
         // Build manually rather than use `snapshotFlow {}`, because snapshotFlow implicitly
         // has the behavior of `distinctUntilChanged()`, which hides behavior we want to test.
-        val snapshotFlow = callbackFlow<T> {
-            val readSet = mutableSetOf<Any>()
-            val readObserver: (Any) -> Unit = { readSet.add(it) }
+        val snapshotFlow =
+            callbackFlow<T> {
+                val readSet = mutableSetOf<Any>()
+                val readObserver: (Any) -> Unit = { readSet.add(it) }
 
-            fun emitLatestValue() = channel.trySendBlocking(
-                with(Snapshot.takeSnapshot(readObserver)) {
-                    try {
-                        enter { block() }
-                    } finally {
-                        dispose()
-                    }
+                fun emitLatestValue() {
+                    val value =
+                        with(Snapshot.takeSnapshot(readObserver)) {
+                            try {
+                                enter { block() }
+                            } finally {
+                                dispose()
+                            }
+                        }
+                    trySend(value)
                 }
-            )
 
-            emitLatestValue()
-            val handle = Snapshot.registerApplyObserver { changed, _ ->
-                for (changedObjects in changed) {
-                    if (readSet.any { it in changed }) {
-                        emitLatestValue()
+                emitLatestValue()
+                val handle =
+                    Snapshot.registerApplyObserver { changed, _ ->
+                        if (changed.any { it in readSet }) {
+                            emitLatestValue()
+                        }
                     }
-                }
+
+                awaitClose { handle.dispose() }
             }
-
-            awaitClose { handle.dispose() }
-        }
 
         return snapshotFlow
             .runningFold(emptyList<T>()) { acc, value -> acc + value }

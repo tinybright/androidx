@@ -49,7 +49,7 @@ class PageTransformerTest(private val config: TestConfig) : BaseTest() {
         val title: String,
         @ViewPager2.Orientation val orientation: Int,
         val scrollMethod: ScrollMethod,
-        val pageList: List<Int>
+        val pageList: List<Int>,
     )
 
     companion object {
@@ -160,7 +160,7 @@ class PageTransformerTest(private val config: TestConfig) : BaseTest() {
     private fun Context.scrollToPage(
         scrollMethod: ScrollMethod,
         currentPage: Int,
-        targetPage: Int
+        targetPage: Int,
     ) {
         when (scrollMethod) {
             ScrollMethod.PROGRAMMATIC_SCROLL -> programmaticScrollToPage(targetPage)
@@ -187,38 +187,44 @@ class PageTransformerTest(private val config: TestConfig) : BaseTest() {
     }
 
     private sealed class Event {
-        data class TransformPageEvent(
-            val page: Int,
-            val offset: Float
-        ) : Event()
+        data class TransformPageEvent(val page: Int, val offset: Float) : Event()
 
         data class OnPageScrolledEvent(
             val position: Int,
             val positionOffset: Float,
-            val positionOffsetPixels: Int
+            val positionOffsetPixels: Int,
         ) : Event()
     }
 
-    private val Pair<Int, TransformPageEvent>.index get() = first
-    private val Pair<Int, TransformPageEvent>.event get() = second
+    private val Pair<Int, TransformPageEvent>.index
+        get() = first
+
+    private val Pair<Int, TransformPageEvent>.event
+        get() = second
 
     private class RecordingCallback(val layoutManager: LinearLayoutManager) :
         PageTransformer, OnPageChangeCallback() {
         val events = mutableListOf<Event>()
 
-        val transformEvents get() = events.mapNotNull { it as? TransformPageEvent }
-        val frames get() =
-            // Drop the first TransformPageEvents, they were triggered
-            // by setting the PageTransformer and not by the scroll
-            events.dropWhile { it is TransformPageEvent }
-                .fold(mutableListOf<MutableList<TransformPageEvent>>()) { groups, e ->
-                    when (e) {
-                        is OnPageScrolledEvent -> groups.add(mutableListOf())
-                        is TransformPageEvent -> groups.last().add(e)
+        val transformEvents
+            get() = events.mapNotNull { it as? TransformPageEvent }
+
+        val frames
+            get() =
+                // Drop the first TransformPageEvents, they were triggered
+                // by setting the PageTransformer and not by the scroll
+                events
+                    .dropWhile { it is TransformPageEvent }
+                    .fold(mutableListOf<MutableList<TransformPageEvent>>()) { groups, e ->
+                        when (e) {
+                            is OnPageScrolledEvent -> groups.add(mutableListOf())
+                            is TransformPageEvent -> groups.last().add(e)
+                        }
+                        groups
                     }
-                    groups
-                }
-        val pageIndices get() = events.mapNotNull { (it as? TransformPageEvent)?.page }.distinct()
+
+        val pageIndices
+            get() = events.mapNotNull { (it as? TransformPageEvent)?.page }.distinct()
 
         fun indexedEventsOf(page: Int): List<Pair<Int, TransformPageEvent>> {
             return frames.mapIndexedNotNull { ix, frame ->
@@ -239,16 +245,14 @@ class PageTransformerTest(private val config: TestConfig) : BaseTest() {
         override fun onPageScrolled(
             position: Int,
             positionOffset: Float,
-            positionOffsetPixels: Int
+            positionOffsetPixels: Int,
         ) {
             events.add(OnPageScrolledEvent(position, positionOffset, positionOffsetPixels))
         }
 
-        override fun onPageSelected(position: Int) {
-        }
+        override fun onPageSelected(position: Int) {}
 
-        override fun onPageScrollStateChanged(state: Int) {
-        }
+        override fun onPageScrollStateChanged(state: Int) {}
     }
 
     /* assertions */
@@ -262,44 +266,41 @@ class PageTransformerTest(private val config: TestConfig) : BaseTest() {
     }
 
     private fun List<Event>.assertSnappedRelativeToPage(snappedPage: Int) {
-        map { it as TransformPageEvent }.forEach {
-            assertThat(
-                "transformPage() call must be snapped at page $snappedPage",
-                // event.page - event.offset resolves to the currently visible page index
-                it.page - it.offset.toDouble(), equalTo(snappedPage.toDouble())
-            )
-        }
+        map { it as TransformPageEvent }
+            .forEach {
+                assertThat(
+                    "transformPage() call must be snapped at page $snappedPage",
+                    // event.page - event.offset resolves to the currently visible page index
+                    it.page - it.offset.toDouble(),
+                    equalTo(snappedPage.toDouble()),
+                )
+            }
     }
 
     private fun RecordingCallback.assertTransformEventsPerScrollEventAreForUniquePages() {
-        frames.forEach {
-            it.map { it.page }.apply {
-                assertThat(size, equalTo(distinct().size))
-            }
-        }
+        frames.forEach { it.map { it.page }.apply { assertThat(size, equalTo(distinct().size)) } }
     }
 
     private fun RecordingCallback.assertTransformEventsPerPageAreContiguous() {
         pageIndices.forEach { page ->
             val containsPage: (List<TransformPageEvent>) -> Boolean = { it.any { it.page == page } }
-            assertFalse(
-                frames.map(containsPage).dropWhile { !it }.dropWhile { it }.any { it }
-            )
+            assertFalse(frames.map(containsPage).dropWhile { !it }.dropWhile { it }.any { it })
         }
     }
 
     private fun RecordingCallback.assertTransformOffsetsPerPageAreOrdered(sortOrder: SortOrder) {
-        transformEvents.groupBy { it.page }.forEach { (_, events) ->
-            events.assertSorted { it.offset * -sortOrder.sign }
-        }
+        transformEvents
+            .groupBy { it.page }
+            .forEach { (_, events) -> events.assertSorted { it.offset * -sortOrder.sign } }
     }
 
     private fun RecordingCallback.assertTransformOffsetsPerScrollEventDifferByOne() {
         val epsilon = 0.000001f
         frames.forEach {
-            it.sortedBy { it.offset }.zipWithNext { a, b ->
-                assertThat(b.offset - a.offset, isBetweenInIn(1f - epsilon, 1f + epsilon))
-            }
+            it.sortedBy { it.offset }
+                .zipWithNext { a, b ->
+                    assertThat(b.offset - a.offset, isBetweenInIn(1f - epsilon, 1f + epsilon))
+                }
         }
     }
 
@@ -323,25 +324,28 @@ class PageTransformerTest(private val config: TestConfig) : BaseTest() {
             val pageBEvents = indexedEventsOf(pageB)
             pageIndices.forEach { pageA ->
                 if (pageA != pageB) {
-                    indexedEventsOf(pageA).filter { pageAEvent ->
-                        // First, remove all frames that do not occur in the other list
-                        pageBEvents.any { pageBEvent -> pageBEvent.index == pageAEvent.index }
-                    }.map { pageAEvent ->
-                        // Then, zip the events of the two lists together by frame
-                        Pair(
-                            pageBEvents.find { it.index == pageAEvent.index }!!.event,
-                            pageAEvent.event
-                        )
-                    }.fold(0) { prevRelation, pair ->
-                        // Then, check that all pairs have the same equivalence relation
-                        val currRelation = pair.first.offset.compareTo(pair.second.offset)
-                        when {
-                            prevRelation == 0 -> assertThat(currRelation, not(0))
-                            prevRelation < 0 -> assertThat(currRelation, lessThan(0))
-                            prevRelation > 0 -> assertThat(currRelation, greaterThan(0))
+                    indexedEventsOf(pageA)
+                        .filter { pageAEvent ->
+                            // First, remove all frames that do not occur in the other list
+                            pageBEvents.any { pageBEvent -> pageBEvent.index == pageAEvent.index }
                         }
-                        currRelation
-                    }
+                        .map { pageAEvent ->
+                            // Then, zip the events of the two lists together by frame
+                            Pair(
+                                pageBEvents.find { it.index == pageAEvent.index }!!.event,
+                                pageAEvent.event,
+                            )
+                        }
+                        .fold(0) { prevRelation, pair ->
+                            // Then, check that all pairs have the same equivalence relation
+                            val currRelation = pair.first.offset.compareTo(pair.second.offset)
+                            when {
+                                prevRelation == 0 -> assertThat(currRelation, not(0))
+                                prevRelation < 0 -> assertThat(currRelation, lessThan(0))
+                                prevRelation > 0 -> assertThat(currRelation, greaterThan(0))
+                            }
+                            currRelation
+                        }
                 }
             }
         }
@@ -357,14 +361,14 @@ private fun createTestSet(): List<TestConfig> {
                 title = "swiping",
                 orientation = orientation,
                 scrollMethod = ScrollMethod.SWIPE,
-                pageList = listOf(1, 2, 1, 2, 3, 2, 1, 0, 1, 0)
+                pageList = listOf(1, 2, 1, 2, 3, 2, 1, 0, 1, 0),
             ),
             TestConfig(
                 title = "programmatic_scroll",
                 orientation = orientation,
                 scrollMethod = ScrollMethod.PROGRAMMATIC_SCROLL,
-                pageList = listOf(1, 3, 6, 10, 15, 99, 0)
-            )
+                pageList = listOf(1, 3, 6, 10, 15, 99, 0),
+            ),
         )
     }
 }

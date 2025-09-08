@@ -17,7 +17,6 @@
 package androidx.camera.video
 
 import android.net.Uri
-import android.os.Build
 import androidx.camera.video.VideoRecordEvent.Finalize.ERROR_NONE
 import androidx.camera.video.VideoRecordEvent.Finalize.ERROR_UNKNOWN
 import com.google.common.truth.Truth.assertThat
@@ -26,18 +25,16 @@ import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import org.robolectric.annotation.internal.DoNotInstrument
 
 private const val INVALID_FILE_PATH = "/invalid/file/path"
 private val TEST_OUTPUT_OPTION = FileOutputOptions.Builder(File(INVALID_FILE_PATH)).build()
 private val TEST_RECORDING_STATE =
-    RecordingStats.of(0, 0, AudioStats.of(AudioStats.AUDIO_STATE_ACTIVE, null, 0.0))
+    RecordingStats.of(0, 0, AudioStats.of(AudioStats.AUDIO_STATE_ACTIVE, null, 0.0, 0L))
 private val TEST_OUTPUT_RESULT = OutputResults.of(Uri.EMPTY)
 
 @RunWith(RobolectricTestRunner::class)
 @DoNotInstrument
-@Config(minSdk = Build.VERSION_CODES.LOLLIPOP)
 class VideoRecordEventTest {
 
     @Test
@@ -73,7 +70,7 @@ class VideoRecordEventTest {
                 TEST_RECORDING_STATE,
                 TEST_OUTPUT_RESULT,
                 error,
-                cause
+                cause,
             )
 
         assertThat(event).isInstanceOf(VideoRecordEvent.Finalize::class.java)
@@ -93,7 +90,7 @@ class VideoRecordEventTest {
                 TEST_RECORDING_STATE,
                 TEST_OUTPUT_RESULT,
                 ERROR_NONE,
-                RuntimeException()
+                RuntimeException(),
             )
         }
     }

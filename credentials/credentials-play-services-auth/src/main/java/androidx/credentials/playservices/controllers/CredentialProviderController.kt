@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 The Android Open Source Project
+ * Copyright 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,20 +32,24 @@ import java.util.concurrent.Executor
 
 /**
  * Extensible abstract class for credential controllers. Please implement this class per every
- * request/response credential type. Unique logic is left to the use case of the implementation.
- * If you are building your own version as an OEM, the below can be mimicked to your own
- * credential provider equivalent and whatever internal service you invoke.
+ * request/response credential type. Unique logic is left to the use case of the implementation. If
+ * you are building your own version as an OEM, the below can be mimicked to your own credential
+ * provider equivalent and whatever internal service you invoke.
  *
  * @param T1 the credential request type from credential manager
  * @param T2 the credential request type converted to play services
  * @param R2 the credential response type from play services
  * @param R1 the credential response type converted back to that used by credential manager
  * @param E1 the credential error type to throw
- *
  */
 @Suppress("deprecation")
-internal abstract class CredentialProviderController<T1 : Any, T2 : Any, R2 : Any, R1 : Any,
-    E1 : Any>(private val context: Context) : CredentialProviderBaseController(context) {
+internal abstract class CredentialProviderController<
+    T1 : Any,
+    T2 : Any,
+    R2 : Any,
+    R1 : Any,
+    E1 : Any,
+>(private val context: Context) : CredentialProviderBaseController(context) {
 
     companion object {
 
@@ -61,21 +65,15 @@ internal abstract class CredentialProviderController<T1 : Any, T2 : Any, R2 : An
         @JvmStatic
         protected fun maybeReportErrorResultCodeCreate(
             resultCode: Int,
-            cancelOnError: (
-                CancellationSignal?,
-                    () -> Unit
-            ) -> Unit,
+            cancelOnError: (CancellationSignal?, () -> Unit) -> Unit,
             onError: (CreateCredentialException) -> Unit,
-            cancellationSignal: CancellationSignal?
+            cancellationSignal: CancellationSignal?,
         ): Boolean {
             if (resultCode != Activity.RESULT_OK) {
-                var exception: CreateCredentialException = CreateCredentialUnknownException(
-                    generateErrorStringUnknown(resultCode)
-                )
+                var exception: CreateCredentialException =
+                    CreateCredentialUnknownException(generateErrorStringUnknown(resultCode))
                 if (resultCode == Activity.RESULT_CANCELED) {
-                    exception = CreateCredentialCancellationException(
-                        generateErrorStringCanceled()
-                    )
+                    exception = CreateCredentialCancellationException(generateErrorStringCanceled())
                 }
                 cancelOnError(cancellationSignal) { onError(exception) }
                 return true
@@ -97,23 +95,17 @@ internal abstract class CredentialProviderController<T1 : Any, T2 : Any, R2 : An
          * @return a boolean indicating if the get flow had an error
          */
         @JvmStatic
-        protected fun maybeReportErrorResultCodeGet(
+        internal fun maybeReportErrorResultCodeGet(
             resultCode: Int,
-            cancelOnError: (
-                CancellationSignal?,
-                    () -> Unit
-            ) -> Unit,
+            cancelOnError: (CancellationSignal?, () -> Unit) -> Unit,
             onError: (GetCredentialException) -> Unit,
-            cancellationSignal: CancellationSignal?
+            cancellationSignal: CancellationSignal?,
         ): Boolean {
             if (resultCode != Activity.RESULT_OK) {
-                var exception: GetCredentialException = GetCredentialUnknownException(
-                    generateErrorStringUnknown(resultCode)
-                )
+                var exception: GetCredentialException =
+                    GetCredentialUnknownException(generateErrorStringUnknown(resultCode))
                 if (resultCode == Activity.RESULT_CANCELED) {
-                    exception = GetCredentialCancellationException(
-                        generateErrorStringCanceled()
-                    )
+                    exception = GetCredentialCancellationException(generateErrorStringCanceled())
                 }
                 cancelOnError(cancellationSignal) { onError(exception) }
                 return true
@@ -126,9 +118,9 @@ internal abstract class CredentialProviderController<T1 : Any, T2 : Any, R2 : An
          * exception.
          */
         @JvmStatic
-        protected fun cancelOrCallbackExceptionOrResult(
+        internal fun cancelOrCallbackExceptionOrResult(
             cancellationSignal: CancellationSignal?,
-            onResultOrException: () -> Unit
+            onResultOrException: () -> Unit,
         ) {
             if (CredentialProviderPlayServicesImpl.cancellationReviewer(cancellationSignal)) {
                 return
@@ -138,8 +130,8 @@ internal abstract class CredentialProviderController<T1 : Any, T2 : Any, R2 : An
     }
 
     /**
-     * To avoid redundant logic across all controllers for exceptions parceled back from the
-     * hidden activity, this can be generally implemented.
+     * To avoid redundant logic across all controllers for exceptions parceled back from the hidden
+     * activity, this can be generally implemented.
      *
      * @return a boolean indicating if an error was reported or not by the result receiver
      */
@@ -148,7 +140,7 @@ internal abstract class CredentialProviderController<T1 : Any, T2 : Any, R2 : An
         conversionFn: (String?, String?) -> E1,
         executor: Executor,
         callback: CredentialManagerCallback<R1, E1>,
-        cancellationSignal: CancellationSignal?
+        cancellationSignal: CancellationSignal?,
     ): Boolean {
         val isError = resultData.getBoolean(FAILURE_RESPONSE_TAG)
         if (!isError) {
@@ -157,16 +149,16 @@ internal abstract class CredentialProviderController<T1 : Any, T2 : Any, R2 : An
         val errType = resultData.getString(EXCEPTION_TYPE_TAG)
         val errMsg = resultData.getString(EXCEPTION_MESSAGE_TAG)
         val exception = conversionFn(errType, errMsg)
-        cancelOrCallbackExceptionOrResult(cancellationSignal = cancellationSignal,
-            onResultOrException = {
-            executor.execute { callback.onError(exception) }
-        })
+        cancelOrCallbackExceptionOrResult(
+            cancellationSignal = cancellationSignal,
+            onResultOrException = { executor.execute { callback.onError(exception) } },
+        )
         return true
     }
 
     /**
-     * Invokes the flow that starts retrieving credential data. In this use case, we invoke
-     * play service modules.
+     * Invokes the flow that starts retrieving credential data. In this use case, we invoke play
+     * service modules.
      *
      * @param request a credential provider request
      * @param callback a credential manager callback with a credential provider response
@@ -176,7 +168,7 @@ internal abstract class CredentialProviderController<T1 : Any, T2 : Any, R2 : An
         request: T1,
         callback: CredentialManagerCallback<R1, E1>,
         executor: Executor,
-        cancellationSignal: CancellationSignal?
+        cancellationSignal: CancellationSignal? = null,
     )
 
     /**

@@ -26,13 +26,10 @@ import org.jetbrains.kotlin.cli.common.messages.MessageCollector
  * Custom message collector for Kotlin compilation that collects messages into
  * [RawDiagnosticMessage] objects.
  *
- * Neither KAPT nor KSP report location in the `location` parameter of the callback, instead,
- * they embed location into the messages. This collector parses these messages to recover the
- * location.
+ * Neither KAPT nor KSP report location in the `location` parameter of the callback, instead, they
+ * embed location into the messages. This collector parses these messages to recover the location.
  */
-internal class DiagnosticsMessageCollector(
-    private val stepName: String
-) : MessageCollector {
+internal class DiagnosticsMessageCollector(private val stepName: String) : MessageCollector {
     private val diagnostics = mutableListOf<RawDiagnosticMessage>()
 
     fun getDiagnostics(): List<RawDiagnosticMessage> = diagnostics
@@ -41,23 +38,20 @@ internal class DiagnosticsMessageCollector(
         diagnostics.clear()
     }
 
-    /**
-     * Returns `true` if this collector has any warning messages.
-     */
-    fun hasWarnings() = diagnostics.any {
-        it.kind == Diagnostic.Kind.WARNING || it.kind == Diagnostic.Kind.MANDATORY_WARNING
-    }
+    /** Returns `true` if this collector has any warning messages. */
+    fun hasWarnings() =
+        diagnostics.any {
+            it.kind == Diagnostic.Kind.WARNING || it.kind == Diagnostic.Kind.MANDATORY_WARNING
+        }
 
     override fun hasErrors(): Boolean {
-        return diagnostics.any {
-            it.kind == Diagnostic.Kind.ERROR
-        }
+        return diagnostics.any { it.kind == Diagnostic.Kind.ERROR }
     }
 
     override fun report(
         severity: CompilerMessageSeverity,
         message: String,
-        location: CompilerMessageSourceLocation?
+        location: CompilerMessageSourceLocation?,
     ) {
         val diagnosticKind =
             if (stepName == "kapt" && getJavaVersion() >= 17) {
@@ -72,7 +66,7 @@ internal class DiagnosticsMessageCollector(
     private fun doReport(
         diagnosticKind: Diagnostic.Kind,
         message: String,
-        location: CompilerMessageSourceLocation?
+        location: CompilerMessageSourceLocation?,
     ) {
         if (message == KSP_ADDITIONAL_ERROR_MESSAGE) {
             // ignore this as it will impact error counts.
@@ -80,16 +74,17 @@ internal class DiagnosticsMessageCollector(
         }
         // Both KSP and KAPT reports null location but instead put the location into the message.
         // We parse it back here to recover the location.
-        val (strippedMessage, rawLocation) = if (location == null) {
-            message.parseLocation() ?: (message.stripPrefixes() to null)
-        } else {
-            message.stripPrefixes() to location.toRawLocation()
-        }
+        val (strippedMessage, rawLocation) =
+            if (location == null) {
+                message.parseLocation() ?: (message.stripPrefixes() to null)
+            } else {
+                message.stripPrefixes() to location.toRawLocation()
+            }
         diagnostics.add(
             RawDiagnosticMessage(
                 kind = diagnosticKind,
                 message = strippedMessage,
-                location = rawLocation
+                location = rawLocation,
             )
         )
     }
@@ -105,35 +100,31 @@ internal class DiagnosticsMessageCollector(
      */
     private fun String.parseLocation(): Pair<String, RawDiagnosticMessage.Location>? {
         val firstLine = lineSequence().firstOrNull() ?: return null
-        val match = KSP_LOCATION_REGEX.find(firstLine)
-            ?: KAPT_LOCATION_AND_KIND_REGEX.find(firstLine)
-            ?: return null
+        val match =
+            KSP_LOCATION_REGEX.find(firstLine)
+                ?: KAPT_LOCATION_AND_KIND_REGEX.find(firstLine)
+                ?: return null
         if (match.groups.size < 4) return null
-        return substring(match.range.last + 1) to RawDiagnosticMessage.Location(
-            path = match.groupValues[1],
-            line = match.groupValues[3].toInt(),
-        )
+        return substring(match.range.last + 1) to
+            RawDiagnosticMessage.Location(
+                path = match.groupValues[1],
+                line = match.groupValues[3].toInt(),
+            )
     }
 
-    /**
-     * Removes prefixes added by kapt / ksp from the message
-     */
+    /** Removes prefixes added by kapt / ksp from the message */
     private fun String.stripPrefixes(): String {
         return stripKind().stripKspPrefix()
     }
 
-    /**
-     * KAPT prepends the message kind to the message, we'll remove it here.
-     */
+    /** KAPT prepends the message kind to the message, we'll remove it here. */
     private fun String.stripKind(): String {
         val firstLine = lineSequence().firstOrNull() ?: return this
         val match = KIND_REGEX.find(firstLine) ?: return this
         return substring(match.range.last + 1)
     }
 
-    /**
-     * KSP prepends ksp to each message, we'll strip it here.
-     */
+    /** KSP prepends ksp to each message, we'll strip it here. */
     private fun String.stripKspPrefix(): String {
         val firstLine = lineSequence().firstOrNull() ?: return this
         val match = KSP_PREFIX_REGEX.find(firstLine) ?: return this
@@ -141,22 +132,20 @@ internal class DiagnosticsMessageCollector(
     }
 
     private fun CompilerMessageSourceLocation.toRawLocation(): RawDiagnosticMessage.Location {
-        return RawDiagnosticMessage.Location(
-            line = this.line,
-            path = this.path
-        )
+        return RawDiagnosticMessage.Location(line = this.line, path = this.path)
     }
 
     private val CompilerMessageSeverity.kind
-        get() = when (this) {
-            CompilerMessageSeverity.ERROR,
-            CompilerMessageSeverity.EXCEPTION -> Diagnostic.Kind.ERROR
-            CompilerMessageSeverity.INFO,
-            CompilerMessageSeverity.LOGGING -> Diagnostic.Kind.NOTE
-            CompilerMessageSeverity.WARNING,
-            CompilerMessageSeverity.STRONG_WARNING -> Diagnostic.Kind.WARNING
-            else -> Diagnostic.Kind.OTHER
-        }
+        get() =
+            when (this) {
+                CompilerMessageSeverity.ERROR,
+                CompilerMessageSeverity.EXCEPTION -> Diagnostic.Kind.ERROR
+                CompilerMessageSeverity.INFO,
+                CompilerMessageSeverity.LOGGING -> Diagnostic.Kind.NOTE
+                CompilerMessageSeverity.WARNING,
+                CompilerMessageSeverity.STRONG_WARNING -> Diagnostic.Kind.WARNING
+                else -> Diagnostic.Kind.OTHER
+            }
 
     private fun String.getSeverityFromPrefix(): Diagnostic.Kind? {
         val kindMatch =

@@ -44,29 +44,28 @@ fun MultiButtonsWithLoggingUsingOnClick() {
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = {
-                Toast.makeText(context, "Button 1 Clicked", Toast.LENGTH_SHORT).show()
-                val newString = "Button 1 Clicked\n$output"
-                output = newString
-            }) {
+            Button(
+                onClick = {
+                    Toast.makeText(context, "Button 1 Clicked", Toast.LENGTH_SHORT).show()
+                    val newString = "Button 1 Clicked\n$output"
+                    output = newString
+                }
+            ) {
                 Text("Button 1")
             }
-            Button(onClick = {
-                Toast.makeText(context, "Button 2 Clicked", Toast.LENGTH_SHORT).show()
-                val newString = "Button 2 Clicked\n$output"
-                output = newString
-            }) {
+            Button(
+                onClick = {
+                    Toast.makeText(context, "Button 2 Clicked", Toast.LENGTH_SHORT).show()
+                    val newString = "Button 2 Clicked\n$output"
+                    output = newString
+                }
+            ) {
                 Text("Button 2")
             }
-            Button(onClick = { output = "" }) {
-                Text("Clear Output")
-            }
+            Button(onClick = { output = "" }) { Text("Clear Output") }
         }
 
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = output
-        )
+        Text(modifier = Modifier.fillMaxWidth(), text = output)
     }
 }
 
@@ -77,10 +76,8 @@ fun MultiButtonsWithLoggingUsingPointerInput() {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .background(Color.Red)
-                    .pointerInput(Unit) {
+                modifier =
+                    Modifier.padding(10.dp).background(Color.Red).pointerInput(Unit) {
                         awaitPointerEventScope {
                             while (true) {
                                 val pointerEvent = awaitPointerEvent()
@@ -89,14 +86,12 @@ fun MultiButtonsWithLoggingUsingPointerInput() {
                             }
                         }
                     },
-                text = "Button 1"
+                text = "Button 1",
             )
 
             Text(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .background(Color.Red)
-                    .pointerInput(Unit) {
+                modifier =
+                    Modifier.padding(10.dp).background(Color.Red).pointerInput(Unit) {
                         awaitPointerEventScope {
                             while (true) {
                                 val pointerEvent = awaitPointerEvent()
@@ -105,30 +100,23 @@ fun MultiButtonsWithLoggingUsingPointerInput() {
                             }
                         }
                     },
-                text = "Button 2"
+                text = "Button 2",
             )
 
             Text(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .background(Color.Red)
-                    .pointerInput(Unit) {
+                modifier =
+                    Modifier.padding(10.dp).background(Color.Red).pointerInput(Unit) {
                         awaitPointerEventScope {
-
                             while (true) {
                                 awaitPointerEvent()
                                 output = ""
                             }
                         }
                     },
-
-                text = "Clear output"
+                text = "Clear output",
             )
         }
 
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = output
-        )
+        Text(modifier = Modifier.fillMaxWidth(), text = output)
     }
 }

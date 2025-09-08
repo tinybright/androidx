@@ -45,7 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 private enum class LikedStates {
     Initial,
     Liked,
-    Disappeared
+    Disappeared,
 }
 
 @Preview
@@ -82,53 +82,50 @@ fun DoubleTapToLikeDemo() {
         }
 
         val transition = rememberTransition(transitionState)
-        val alpha by transition.animateFloat(
-            transitionSpec = {
-                when {
-                    LikedStates.Initial isTransitioningTo LikedStates.Liked ->
-                        keyframes {
-                            durationMillis = 500
-                            0f at 0 // optional
-                            0.5f at 100
-                            1f at 225 // optional
-                        }
-                    LikedStates.Liked isTransitioningTo LikedStates.Disappeared ->
-                        tween(durationMillis = 200)
-                    else -> snap()
+        val alpha by
+            transition.animateFloat(
+                transitionSpec = {
+                    when {
+                        LikedStates.Initial isTransitioningTo LikedStates.Liked ->
+                            keyframes {
+                                durationMillis = 500
+                                0f at 0 // optional
+                                0.5f at 100
+                                1f at 225 // optional
+                            }
+                        LikedStates.Liked isTransitioningTo LikedStates.Disappeared ->
+                            tween(durationMillis = 200)
+                        else -> snap()
+                    }
                 }
+            ) {
+                if (it == LikedStates.Liked) 1f else 0f
             }
-        ) {
-            if (it == LikedStates.Liked) 1f else 0f
-        }
 
-        val scale by transition.animateFloat(
-            transitionSpec = {
-                when {
-                    LikedStates.Initial isTransitioningTo LikedStates.Liked ->
-                        spring(dampingRatio = Spring.DampingRatioHighBouncy)
-                    LikedStates.Liked isTransitioningTo LikedStates.Disappeared ->
-                        tween(200)
-                    else -> snap()
+        val scale by
+            transition.animateFloat(
+                transitionSpec = {
+                    when {
+                        LikedStates.Initial isTransitioningTo LikedStates.Liked ->
+                            spring(dampingRatio = Spring.DampingRatioHighBouncy)
+                        LikedStates.Liked isTransitioningTo LikedStates.Disappeared -> tween(200)
+                        else -> snap()
+                    }
+                }
+            ) {
+                when (it) {
+                    LikedStates.Initial -> 0f
+                    LikedStates.Liked -> 4f
+                    LikedStates.Disappeared -> 2f
                 }
             }
-        ) {
-            when (it) {
-                LikedStates.Initial -> 0f
-                LikedStates.Liked -> 4f
-                LikedStates.Disappeared -> 2f
-            }
-        }
 
         Icon(
             Icons.Filled.Favorite,
             "Like",
             Modifier.align(Alignment.Center)
-                .graphicsLayer(
-                    alpha = alpha,
-                    scaleX = scale,
-                    scaleY = scale
-                ),
-            tint = Color.Red
+                .graphicsLayer(alpha = alpha, scaleX = scale, scaleY = scale),
+            tint = Color.Red,
         )
     }
 }

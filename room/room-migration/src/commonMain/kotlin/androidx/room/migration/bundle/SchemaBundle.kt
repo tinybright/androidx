@@ -27,21 +27,19 @@ import kotlinx.serialization.json.JsonContentPolymorphicSerializer
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.serializer
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-expect class SchemaBundle(
-    formatVersion: Int,
-    database: DatabaseBundle
-) : SchemaEquality<SchemaBundle> {
+public expect class SchemaBundle(formatVersion: Int, database: DatabaseBundle) :
+    SchemaEquality<SchemaBundle> {
 
-    val formatVersion: Int
-    val database: DatabaseBundle
+    public val formatVersion: Int
+    public val database: DatabaseBundle
 
     override fun isSchemaEqual(other: SchemaBundle): Boolean
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val SCHEMA_LATEST_FORMAT_VERSION = 1
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) public const val SCHEMA_LATEST_FORMAT_VERSION: Int = 1
 
 @OptIn(ExperimentalSerializationApi::class) // due to prettyPrintIndex
 internal val json = Json {
@@ -58,13 +56,13 @@ internal val json = Json {
     }
 }
 
-private object EntitySerializer : JsonContentPolymorphicSerializer<BaseEntityBundle>(
-    baseClass = BaseEntityBundle::class
-) {
+private object EntitySerializer :
+    JsonContentPolymorphicSerializer<BaseEntityBundle>(baseClass = BaseEntityBundle::class) {
     override fun selectDeserializer(
         element: JsonElement
-    ): DeserializationStrategy<BaseEntityBundle> = when {
-        "ftsVersion" in element.jsonObject -> FtsEntityBundle.serializer()
-        else -> EntityBundle.serializer()
-    }
+    ): DeserializationStrategy<BaseEntityBundle> =
+        when {
+            "ftsVersion" in element.jsonObject -> serializer<FtsEntityBundle>()
+            else -> serializer<EntityBundle>()
+        }
 }

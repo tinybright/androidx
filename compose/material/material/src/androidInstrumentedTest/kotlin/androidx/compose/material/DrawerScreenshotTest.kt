@@ -16,7 +16,6 @@
 
 package androidx.compose.material
 
-import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,15 +40,12 @@ import org.junit.runner.RunWith
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalMaterialApi::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 class DrawerScreenshotTest {
 
-    @Suppress("DEPRECATION")
-    @get:Rule
-    val rule = createComposeRule()
+    @Suppress("DEPRECATION") @get:Rule val rule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL)
 
     private fun ComposeContentTestRule.setBottomDrawer(drawerValue: BottomDrawerValue) {
         setMaterialContent {
@@ -57,7 +53,7 @@ class DrawerScreenshotTest {
                 BottomDrawer(
                     drawerState = rememberBottomDrawerState(drawerValue),
                     drawerContent = { Box(Modifier.fillMaxSize().background(Color.Red)) },
-                    content = { Box(Modifier.fillMaxSize().background(Color.Yellow)) }
+                    content = { Box(Modifier.fillMaxSize().background(Color.Yellow)) },
                 )
             }
         }
@@ -69,7 +65,7 @@ class DrawerScreenshotTest {
                 ModalDrawer(
                     drawerState = rememberDrawerState(drawerValue),
                     drawerContent = { Box(Modifier.fillMaxSize().background(Color.Red)) },
-                    content = { Box(Modifier.fillMaxSize().background(Color.Yellow)) }
+                    content = { Box(Modifier.fillMaxSize().background(Color.Yellow)) },
                 )
             }
         }
@@ -100,7 +96,8 @@ class DrawerScreenshotTest {
     }
 
     private fun assertScreenshotAgainstGolden(goldenName: String) {
-        rule.onNodeWithTag("container")
+        rule
+            .onNodeWithTag("container")
             .captureToImage()
             .assertAgainstGolden(screenshotRule, goldenName)
     }

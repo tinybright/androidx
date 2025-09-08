@@ -37,16 +37,16 @@ import androidx.core.graphics.component4
  * @param width Width of the desired bitmap. Defaults to [Drawable.getIntrinsicWidth].
  * @param height Height of the desired bitmap. Defaults to [Drawable.getIntrinsicHeight].
  * @param config Bitmap config of the desired bitmap. Null attempts to use the native config, if
- * any. Defaults to [Config.ARGB_8888] otherwise.
+ *   any. Defaults to [Config.ARGB_8888] otherwise.
  * @throws IllegalArgumentException if the underlying drawable is a [BitmapDrawable] where
- * [BitmapDrawable.getBitmap] returns `null` or the drawable cannot otherwise be represented as a
- * bitmap
+ *   [BitmapDrawable.getBitmap] returns `null` or the drawable cannot otherwise be represented as a
+ *   bitmap
  * @see toBitmapOrNull
  */
 public fun Drawable.toBitmap(
     @Px width: Int = intrinsicWidth,
     @Px height: Int = intrinsicHeight,
-    config: Config? = null
+    config: Config? = null,
 ): Bitmap {
     if (this is BitmapDrawable) {
         if (bitmap == null) {
@@ -87,13 +87,13 @@ public fun Drawable.toBitmap(
  * @param width Width of the desired bitmap. Defaults to [Drawable.getIntrinsicWidth].
  * @param height Height of the desired bitmap. Defaults to [Drawable.getIntrinsicHeight].
  * @param config Bitmap config of the desired bitmap. Null attempts to use the native config, if
- * any. Defaults to [Config.ARGB_8888] otherwise.
+ *   any. Defaults to [Config.ARGB_8888] otherwise.
  * @see toBitmap
  */
 public fun Drawable.toBitmapOrNull(
     @Px width: Int = intrinsicWidth,
     @Px height: Int = intrinsicHeight,
-    config: Config? = null
+    config: Config? = null,
 ): Bitmap? {
     if (this is BitmapDrawable && bitmap == null) {
         return null
@@ -102,8 +102,8 @@ public fun Drawable.toBitmapOrNull(
 }
 
 /**
- * Updates this drawable's bounds. This version of the method allows using named parameters
- * to just set one or more axes.
+ * Updates this drawable's bounds. This version of the method allows using named parameters to just
+ * set one or more axes.
  *
  * @see Drawable.setBounds
  */
@@ -111,7 +111,7 @@ public fun Drawable.updateBounds(
     @Px left: Int = bounds.left,
     @Px top: Int = bounds.top,
     @Px right: Int = bounds.right,
-    @Px bottom: Int = bounds.bottom
+    @Px bottom: Int = bounds.bottom,
 ) {
     setBounds(left, top, right, bottom)
 }

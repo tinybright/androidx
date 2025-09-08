@@ -16,6 +16,8 @@
 
 package androidx.compose.ui.text.style
 
+import kotlin.jvm.JvmInline
+
 /**
  * Automatic hyphenation configuration.
  *
@@ -25,33 +27,26 @@ package androidx.compose.ui.text.style
  * Automatic hyphenation is added between syllables at appropriate hyphenation points, following
  * language rules.
  *
- * However, user can override automatic break point selection, suggesting line break
- * opportunities (see Suggesting line break opportunities below).
+ * However, user can override automatic break point selection, suggesting line break opportunities
+ * (see Suggesting line break opportunities below).
  *
  * Suggesting line break opportunities:
- *
- * - <code>\u2010</code> ("hard" hyphen)
- * Indicates a visible line break opportunity. Even if the line is not actually broken at that
- * point, the hyphen is still rendered.
- *
- * - <code>\u00AD</code> ("soft" hyphen)
- * This character is not rendered visibly; instead, it marks a place where the word can be broken if
- * hyphenation is necessary.
+ * - <code>\u2010</code> ("hard" hyphen) Indicates a visible line break opportunity. Even if the
+ *   line is not actually broken at that point, the hyphen is still rendered.
+ * - <code>\u00AD</code> ("soft" hyphen) This character is not rendered visibly; instead, it marks a
+ *   place where the word can be broken if hyphenation is necessary.
  *
  * The default configuration for [Hyphens] = [Hyphens.None]
- *
  */
 @JvmInline
-value class Hyphens private constructor(internal val value: Int) {
+value class Hyphens internal constructor(val value: Int) {
     companion object {
         /**
-         *  Lines will break with no hyphenation.
+         * Lines will break with no hyphenation.
          *
-         *  "Hard" hyphens will
-         *  still be respected. However, no automatic hyphenation will be
-         *  attempted. If a word must be broken due to being longer than a line, it will break at
-         *  any character and will not attempt to break at a syllable boundary.
-         *
+         * "Hard" hyphens will still be respected. However, no automatic hyphenation will be
+         * attempted. If a word must be broken due to being longer than a line, it will break at any
+         * character and will not attempt to break at a syllable boundary.
          * <pre>
          * +---------+
          * | Experim |
@@ -66,7 +61,6 @@ value class Hyphens private constructor(internal val value: Int) {
          *
          * However, suggested line break opportunities (see Suggesting line break opportunities
          * above) will override automatic break point selection when present.
-         *
          * <pre>
          * +---------+
          * | Experi- |
@@ -77,16 +71,36 @@ value class Hyphens private constructor(internal val value: Int) {
         val Auto = Hyphens(2)
 
         /**
-         * This represents an unset value, a usual replacement for "null" when a primitive value
-         * is desired.
+         * This represents an unset value, a usual replacement for "null" when a primitive value is
+         * desired.
          */
-        val Unspecified = Hyphens(Int.MIN_VALUE)
+        val Unspecified = Hyphens(0)
+
+        /**
+         * Creates a Hyphens from the given integer value. This can be useful if you need to
+         * serialize/deserialize Hyphens values.
+         *
+         * @param value The integer representation of the Hyphens.
+         * @see [Hyphens.value]
+         */
+        fun valueOf(value: Int): Hyphens {
+            return Hyphens(value)
+        }
     }
 
-    override fun toString() = when (this) {
-        None -> "Hyphens.None"
-        Auto -> "Hyphens.Auto"
-        Unspecified -> "Hyphens.Unspecified"
-        else -> "Invalid"
-    }
+    /**
+     * Returns `true` if it is not [Hyphens.Unspecified].
+     *
+     * @see Hyphens.Unspecified
+     */
+    val isSpecified: Boolean
+        get() = value != 0
+
+    override fun toString() =
+        when (this) {
+            None -> "Hyphens.None"
+            Auto -> "Hyphens.Auto"
+            Unspecified -> "Hyphens.Unspecified"
+            else -> "Invalid"
+        }
 }

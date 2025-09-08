@@ -53,10 +53,14 @@ import androidx.wear.compose.material.TimeText
 import androidx.wear.compose.material.scrollAway
 
 @Composable
-fun ScrollAwayColumnDemo() { ColumnCardDemo(0.dp) }
+fun ScrollAwayColumnDemo() {
+    ColumnCardDemo(0.dp)
+}
 
 @Composable
-fun ScrollAwayColumnDelayDemo() { ColumnCardDemo(offset = 20.dp) }
+fun ScrollAwayColumnDelayDemo() {
+    ColumnCardDemo(offset = 20.dp)
+}
 
 @Composable
 fun ScrollAwayLazyColumnDemo() {
@@ -65,11 +69,7 @@ fun ScrollAwayLazyColumnDemo() {
 
 @Composable
 fun ScrollAwayLazyColumnDemo2() {
-    LazyColumnCardDemo(
-        offset = -100.dp,
-        itemIndex = 1,
-        initialVisibleItemIndex = 2
-    )
+    LazyColumnCardDemo(offset = -100.dp, itemIndex = 1, initialVisibleItemIndex = 2)
 }
 
 @Composable
@@ -79,56 +79,32 @@ fun ScrollAwayLazyColumnDelayDemo() {
 
 @Composable
 fun ScrollAwayScalingLazyColumnCardDemo() {
-    ScalingLazyColumnCardDemo(
-        itemIndex = 1,
-        offset = 0.dp,
-        initialCenterItemIndex = 1,
-    )
+    ScalingLazyColumnCardDemo(itemIndex = 1, offset = 0.dp, initialCenterItemIndex = 1)
 }
 
 @Composable
 fun ScrollAwayScalingLazyColumnCardDemo2() {
-    ScalingLazyColumnCardDemo(
-        itemIndex = 2,
-        offset = -95.dp,
-        initialCenterItemIndex = 2,
-    )
+    ScalingLazyColumnCardDemo(itemIndex = 2, offset = -95.dp, initialCenterItemIndex = 2)
 }
 
 @Composable
 fun ScrollAwayScalingLazyColumnCardDemoMismatch() {
-    ScalingLazyColumnCardDemo(
-        itemIndex = 0,
-        offset = 75.dp,
-        initialCenterItemIndex = 1,
-    )
+    ScalingLazyColumnCardDemo(itemIndex = 0, offset = 75.dp, initialCenterItemIndex = 1)
 }
 
 @Composable
 fun ScrollAwayScalingLazyColumnCardDemoOutOfRange() {
-    ScalingLazyColumnCardDemo(
-        itemIndex = 100,
-        offset = 75.dp,
-        initialCenterItemIndex = 1,
-    )
+    ScalingLazyColumnCardDemo(itemIndex = 100, offset = 75.dp, initialCenterItemIndex = 1)
 }
 
 @Composable
 fun ScrollAwayScalingLazyColumnChipDemo() {
-    ScalingLazyColumnChipDemo(
-        itemIndex = 1,
-        offset = 10.dp,
-        initialCenterItemIndex = 1,
-    )
+    ScalingLazyColumnChipDemo(itemIndex = 1, offset = 10.dp, initialCenterItemIndex = 1)
 }
 
 @Composable
 fun ScrollAwayScalingLazyColumnChipDemo2() {
-    ScalingLazyColumnChipDemo(
-        itemIndex = 2,
-        offset = -50.dp,
-        initialCenterItemIndex = 2,
-    )
+    ScalingLazyColumnChipDemo(itemIndex = 2, offset = -50.dp, initialCenterItemIndex = 2)
 }
 
 @Suppress("DEPRECATION")
@@ -141,32 +117,23 @@ private fun ColumnCardDemo(offset: Dp) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         timeText = {
-            TimeText(
-                modifier = Modifier.scrollAway(
-                    scrollState = scrollState,
-                    offset = offset,
-                )
-            )
+            TimeText(modifier = Modifier.scrollAway(scrollState = scrollState, offset = offset))
         },
-        positionIndicator = {
-            PositionIndicator(scrollState = scrollState)
-        }
+        positionIndicator = { PositionIndicator(scrollState = scrollState) },
     ) {
         Column(
-            modifier = Modifier
-                .verticalScroll(scrollState)
-                .rotaryScrollable(
-                    RotaryScrollableDefaults.behavior(
-                        scrollableState = scrollState,
-                        flingBehavior = ScrollableDefaults.flingBehavior()
-                    ),
-                    focusRequester = focusRequester
-                )
+            modifier =
+                Modifier.verticalScroll(scrollState)
+                    .rotaryScrollable(
+                        RotaryScrollableDefaults.behavior(
+                            scrollableState = scrollState,
+                            flingBehavior = ScrollableDefaults.flingBehavior(),
+                        ),
+                        focusRequester = focusRequester,
+                    )
         ) {
             val modifier = Modifier.height(LocalConfiguration.current.screenHeightDp.dp / 2)
-            repeat(10) { i ->
-                ExampleCard(modifier, i)
-            }
+            repeat(10) { i -> ExampleCard(modifier, i) }
         }
     }
 }
@@ -181,25 +148,27 @@ private fun LazyColumnCardDemo(offset: Dp, itemIndex: Int, initialVisibleItemInd
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         timeText = {
-            TimeText(modifier = Modifier.scrollAway(
-                scrollState = scrollState,
-                offset = offset,
-                itemIndex = itemIndex
-            ))
+            TimeText(
+                modifier =
+                    Modifier.scrollAway(
+                        scrollState = scrollState,
+                        offset = offset,
+                        itemIndex = itemIndex,
+                    )
+            )
         },
-        positionIndicator = {
-            PositionIndicator(lazyListState = scrollState)
-        }
+        positionIndicator = { PositionIndicator(lazyListState = scrollState) },
     ) {
         LazyColumn(
             state = scrollState,
-            modifier = Modifier.rotaryScrollable(
-                RotaryScrollableDefaults.behavior(
-                    scrollableState = scrollState,
-                    flingBehavior = ScrollableDefaults.flingBehavior()
+            modifier =
+                Modifier.rotaryScrollable(
+                    RotaryScrollableDefaults.behavior(
+                        scrollableState = scrollState,
+                        flingBehavior = ScrollableDefaults.flingBehavior(),
+                    ),
+                    focusRequester = focusRequester,
                 ),
-                focusRequester = focusRequester
-            )
         ) {
             items(10) { i ->
                 val modifier = Modifier.fillParentMaxHeight(0.5f)
@@ -210,99 +179,75 @@ private fun LazyColumnCardDemo(offset: Dp, itemIndex: Int, initialVisibleItemInd
 }
 
 @Composable
-private fun ScalingLazyColumnCardDemo(
-    offset: Dp,
-    itemIndex: Int,
-    initialCenterItemIndex: Int,
-) {
+private fun ScalingLazyColumnCardDemo(offset: Dp, itemIndex: Int, initialCenterItemIndex: Int) {
     val scrollState =
         rememberScalingLazyListState(
             initialCenterItemIndex = initialCenterItemIndex,
-            initialCenterItemScrollOffset = 0
+            initialCenterItemScrollOffset = 0,
         )
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         timeText = {
-            TimeText(modifier =
-            Modifier.scrollAway(
-                scrollState = scrollState,
-                itemIndex = itemIndex,
-                offset = offset,
-            ))
+            TimeText(
+                modifier =
+                    Modifier.scrollAway(
+                        scrollState = scrollState,
+                        itemIndex = itemIndex,
+                        offset = offset,
+                    )
+            )
         },
-        positionIndicator = {
-            PositionIndicator(scalingLazyListState = scrollState)
-        }
+        positionIndicator = { PositionIndicator(scalingLazyListState = scrollState) },
     ) {
         ScalingLazyColumn(
             contentPadding = PaddingValues(10.dp),
             state = scrollState,
-            autoCentering = AutoCenteringParams(itemIndex = 1, itemOffset = 0)
+            autoCentering = AutoCenteringParams(itemIndex = 1, itemOffset = 0),
         ) {
-            item {
-                ListHeader { Text("Cards") }
-            }
+            item { ListHeader { Text("Cards") } }
 
-            items(10) { i ->
-                ExampleCard(Modifier.fillParentMaxHeight(0.5f), i)
-            }
+            items(10) { i -> ExampleCard(Modifier.fillParentMaxHeight(0.5f), i) }
         }
     }
 }
 
 @Composable
-private fun ScalingLazyColumnChipDemo(
-    offset: Dp,
-    itemIndex: Int,
-    initialCenterItemIndex: Int,
-) {
+private fun ScalingLazyColumnChipDemo(offset: Dp, itemIndex: Int, initialCenterItemIndex: Int) {
     val scrollState =
         rememberScalingLazyListState(
             initialCenterItemIndex = initialCenterItemIndex,
-            initialCenterItemScrollOffset = 0
+            initialCenterItemScrollOffset = 0,
         )
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         timeText = {
-            TimeText(modifier =
-            Modifier.scrollAway(
-                scrollState = scrollState,
-                itemIndex = itemIndex,
-                offset = offset,
-            ))
+            TimeText(
+                modifier =
+                    Modifier.scrollAway(
+                        scrollState = scrollState,
+                        itemIndex = itemIndex,
+                        offset = offset,
+                    )
+            )
         },
-        positionIndicator = {
-            PositionIndicator(scalingLazyListState = scrollState)
-        }
+        positionIndicator = { PositionIndicator(scalingLazyListState = scrollState) },
     ) {
-        ScalingLazyColumn(
-            contentPadding = PaddingValues(10.dp),
-            state = scrollState,
-        ) {
-            item {
-                ListHeader { Text("Chips") }
-            }
+        ScalingLazyColumn(contentPadding = PaddingValues(10.dp), state = scrollState) {
+            item { ListHeader { Text("Chips") } }
 
-            items(10) { i ->
-                ExampleChip(Modifier.fillMaxWidth(), i)
-            }
+            items(10) { i -> ExampleChip(Modifier.fillMaxWidth(), i) }
         }
     }
 }
 
 @Composable
 private fun ExampleCard(modifier: Modifier, i: Int) {
-    Card(
-        modifier = modifier,
-        onClick = { }
-    ) {
+    Card(modifier = modifier, onClick = {}) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colors.surface),
-            contentAlignment = Alignment.Center
+            modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.surface),
+            contentAlignment = Alignment.Center,
         ) {
             Text(text = "Card $i")
         }
@@ -313,9 +258,9 @@ private fun ExampleCard(modifier: Modifier, i: Int) {
 private fun ExampleChip(modifier: Modifier, i: Int) {
     Chip(
         modifier = modifier,
-        onClick = { },
+        onClick = {},
         colors = ChipDefaults.primaryChipColors(),
-        border = ChipDefaults.chipBorder()
+        border = ChipDefaults.chipBorder(),
     ) {
         Text(text = "Chip $i")
     }

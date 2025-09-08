@@ -27,10 +27,12 @@ import dagger.assisted.AssistedInject
 import javax.inject.Inject
 
 @HiltWorker
-class SimpleWorker @AssistedInject constructor(
+class SimpleWorker
+@AssistedInject
+constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
-    private val logger: MyLogger
+    private val logger: MyLogger,
 ) : Worker(context, params) {
     override fun doWork(): Result {
         logger.log("Hi")
@@ -39,10 +41,12 @@ class SimpleWorker @AssistedInject constructor(
 }
 
 @HiltWorker
-class SimpleCoroutineWorker @AssistedInject constructor(
+class SimpleCoroutineWorker
+@AssistedInject
+constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
-    private val logger: MyLogger
+    private val logger: MyLogger,
 ) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
         logger.log("Hi from Coroutines World!")
@@ -52,10 +56,12 @@ class SimpleCoroutineWorker @AssistedInject constructor(
 
 object TopClass {
     @HiltWorker
-    class NestedWorker @AssistedInject constructor(
+    class NestedWorker
+    @AssistedInject
+    constructor(
         @Assisted context: Context,
         @Assisted params: WorkerParameters,
-        private val logger: MyLogger
+        private val logger: MyLogger,
     ) : Worker(context, params) {
         override fun doWork() = Result.success()
     }

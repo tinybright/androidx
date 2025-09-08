@@ -26,34 +26,31 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
 /**
- * Test to make sure we can generate proper code when developer uses internals hence
- * jvm names might be different than what developer sees
+ * Test to make sure we can generate proper code when developer uses internals hence jvm names might
+ * be different than what developer sees
  */
 @SmallTest
 class InternalsTest {
-    @Database(
-        version = 1,
-        entities = [InternalEntity::class],
-        exportSchema = false
-    )
+    @Database(version = 1, entities = [InternalEntity::class], exportSchema = false)
     internal abstract class InternalDb : RoomDatabase() {
         abstract fun getDao(): InternalDao
     }
 
     @Entity
     internal class InternalEntity(
-        @PrimaryKey
-        internal val id: Long,
+        @PrimaryKey internal val id: Long,
         internal val internalField: String,
-        val publicField: String
+        val publicField: String,
     ) {
         // these are added to have setters
         internal var internalFieldProp: String = ""
         var publicFieldProp: String = ""
+
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other !is InternalEntity) return false
@@ -77,8 +74,7 @@ class InternalsTest {
 
     @Dao
     internal abstract class InternalDao {
-        @Insert
-        abstract fun insert(entity: InternalEntity)
+        @Insert abstract fun insert(entity: InternalEntity)
 
         @Query("SELECT * FROM InternalEntity WHERE publicField LIKE :field")
         abstract fun byPublicField(field: String): List<InternalEntity>
@@ -97,34 +93,30 @@ class InternalsTest {
 
     @Before
     fun init() {
-        db = Room.inMemoryDatabaseBuilder(
-            InstrumentationRegistry.getInstrumentation().targetContext,
-            InternalDb::class.java
-        ).build()
+        db =
+            Room.inMemoryDatabaseBuilder(
+                    InstrumentationRegistry.getInstrumentation().targetContext,
+                    InternalDb::class.java,
+                )
+                .build()
+    }
+
+    @After
+    fun teardown() {
+        db.close()
     }
 
     @Test
     fun test() {
-        val entity = InternalEntity(
-            id = 1,
-            internalField = "if",
-            publicField = "pf"
-        ).also {
-            it.internalFieldProp = "ifp"
-            it.publicFieldProp = "pfp"
-        }
+        val entity =
+            InternalEntity(id = 1, internalField = "if", publicField = "pf").also {
+                it.internalFieldProp = "ifp"
+                it.publicFieldProp = "pfp"
+            }
         db.getDao().insert(entity)
-        assertThat(
-            db.getDao().byInternalField(field = "if")
-        ).containsExactly(entity)
-        assertThat(
-            db.getDao().byPublicField(field = "pf")
-        ).containsExactly(entity)
-        assertThat(
-            db.getDao().byInternalFieldProp(field = "ifp")
-        ).containsExactly(entity)
-        assertThat(
-            db.getDao().byPublicFieldProp(field = "pfp")
-        ).containsExactly(entity)
+        assertThat(db.getDao().byInternalField(field = "if")).containsExactly(entity)
+        assertThat(db.getDao().byPublicField(field = "pf")).containsExactly(entity)
+        assertThat(db.getDao().byInternalFieldProp(field = "ifp")).containsExactly(entity)
+        assertThat(db.getDao().byPublicFieldProp(field = "pfp")).containsExactly(entity)
     }
 }

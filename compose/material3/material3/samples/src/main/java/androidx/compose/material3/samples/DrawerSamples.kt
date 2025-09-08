@@ -58,11 +58,14 @@ import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -73,27 +76,29 @@ import kotlinx.coroutines.launch
 fun ModalNavigationDrawerSample() {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val focusRequester = FocusRequester()
     // icons to mimic drawer destinations
-    val items = listOf(
-        Icons.Default.AccountCircle,
-        Icons.Default.Bookmarks,
-        Icons.Default.CalendarMonth,
-        Icons.Default.Dashboard,
-        Icons.Default.Email,
-        Icons.Default.Favorite,
-        Icons.Default.Group,
-        Icons.Default.Headphones,
-        Icons.Default.Image,
-        Icons.Default.JoinFull,
-        Icons.Default.Keyboard,
-        Icons.Default.Laptop,
-        Icons.Default.Map,
-        Icons.Default.Navigation,
-        Icons.Default.Outbox,
-        Icons.Default.PushPin,
-        Icons.Default.QrCode,
-        Icons.Default.Radio,
-    )
+    val items =
+        listOf(
+            Icons.Default.AccountCircle,
+            Icons.Default.Bookmarks,
+            Icons.Default.CalendarMonth,
+            Icons.Default.Dashboard,
+            Icons.Default.Email,
+            Icons.Default.Favorite,
+            Icons.Default.Group,
+            Icons.Default.Headphones,
+            Icons.Default.Image,
+            Icons.Default.JoinFull,
+            Icons.Default.Keyboard,
+            Icons.Default.Laptop,
+            Icons.Default.Map,
+            Icons.Default.Navigation,
+            Icons.Default.Outbox,
+            Icons.Default.PushPin,
+            Icons.Default.QrCode,
+            Icons.Default.Radio,
+        )
     val selectedItem = remember { mutableStateOf(items[0]) }
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -110,7 +115,7 @@ fun ModalNavigationDrawerSample() {
                                 scope.launch { drawerState.close() }
                                 selectedItem.value = item
                             },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                         )
                     }
                 }
@@ -118,19 +123,27 @@ fun ModalNavigationDrawerSample() {
         },
         content = {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(text = if (drawerState.isClosed) ">>> Swipe >>>" else "<<< Swipe <<<")
                 Spacer(Modifier.height(20.dp))
-                Button(onClick = { scope.launch { drawerState.open() } }) {
+                Button(
+                    modifier = Modifier.focusRequester(focusRequester),
+                    onClick = { scope.launch { drawerState.open() } },
+                ) {
                     Text("Click to open")
                 }
             }
-        }
+        },
     )
+
+    LaunchedEffect(drawerState.isClosed) {
+        if (drawerState.isClosed) {
+            // Keyboard focus should go back to button once drawer closes.
+            focusRequester.requestFocus()
+        }
+    }
 }
 
 @Preview
@@ -138,26 +151,27 @@ fun ModalNavigationDrawerSample() {
 @Composable
 fun PermanentNavigationDrawerSample() {
     // icons to mimic drawer destinations
-    val items = listOf(
-        Icons.Default.AccountCircle,
-        Icons.Default.Bookmarks,
-        Icons.Default.CalendarMonth,
-        Icons.Default.Dashboard,
-        Icons.Default.Email,
-        Icons.Default.Favorite,
-        Icons.Default.Group,
-        Icons.Default.Headphones,
-        Icons.Default.Image,
-        Icons.Default.JoinFull,
-        Icons.Default.Keyboard,
-        Icons.Default.Laptop,
-        Icons.Default.Map,
-        Icons.Default.Navigation,
-        Icons.Default.Outbox,
-        Icons.Default.PushPin,
-        Icons.Default.QrCode,
-        Icons.Default.Radio,
-    )
+    val items =
+        listOf(
+            Icons.Default.AccountCircle,
+            Icons.Default.Bookmarks,
+            Icons.Default.CalendarMonth,
+            Icons.Default.Dashboard,
+            Icons.Default.Email,
+            Icons.Default.Favorite,
+            Icons.Default.Group,
+            Icons.Default.Headphones,
+            Icons.Default.Image,
+            Icons.Default.JoinFull,
+            Icons.Default.Keyboard,
+            Icons.Default.Laptop,
+            Icons.Default.Map,
+            Icons.Default.Navigation,
+            Icons.Default.Outbox,
+            Icons.Default.PushPin,
+            Icons.Default.QrCode,
+            Icons.Default.Radio,
+        )
     val selectedItem = remember { mutableStateOf(items[0]) }
     PermanentNavigationDrawer(
         drawerContent = {
@@ -169,10 +183,8 @@ fun PermanentNavigationDrawerSample() {
                             icon = { Icon(item, contentDescription = null) },
                             label = { Text(item.name.substringAfterLast(".")) },
                             selected = item == selectedItem.value,
-                            onClick = {
-                                selectedItem.value = item
-                            },
-                            modifier = Modifier.padding(horizontal = 12.dp)
+                            onClick = { selectedItem.value = item },
+                            modifier = Modifier.padding(horizontal = 12.dp),
                         )
                     }
                 }
@@ -180,14 +192,12 @@ fun PermanentNavigationDrawerSample() {
         },
         content = {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(text = "Application content")
             }
-        }
+        },
     )
 }
 
@@ -197,27 +207,29 @@ fun PermanentNavigationDrawerSample() {
 fun DismissibleNavigationDrawerSample() {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val focusRequester = FocusRequester()
     // icons to mimic drawer destinations
-    val items = listOf(
-        Icons.Default.AccountCircle,
-        Icons.Default.Bookmarks,
-        Icons.Default.CalendarMonth,
-        Icons.Default.Dashboard,
-        Icons.Default.Email,
-        Icons.Default.Favorite,
-        Icons.Default.Group,
-        Icons.Default.Headphones,
-        Icons.Default.Image,
-        Icons.Default.JoinFull,
-        Icons.Default.Keyboard,
-        Icons.Default.Laptop,
-        Icons.Default.Map,
-        Icons.Default.Navigation,
-        Icons.Default.Outbox,
-        Icons.Default.PushPin,
-        Icons.Default.QrCode,
-        Icons.Default.Radio,
-    )
+    val items =
+        listOf(
+            Icons.Default.AccountCircle,
+            Icons.Default.Bookmarks,
+            Icons.Default.CalendarMonth,
+            Icons.Default.Dashboard,
+            Icons.Default.Email,
+            Icons.Default.Favorite,
+            Icons.Default.Group,
+            Icons.Default.Headphones,
+            Icons.Default.Image,
+            Icons.Default.JoinFull,
+            Icons.Default.Keyboard,
+            Icons.Default.Laptop,
+            Icons.Default.Map,
+            Icons.Default.Navigation,
+            Icons.Default.Outbox,
+            Icons.Default.PushPin,
+            Icons.Default.QrCode,
+            Icons.Default.Radio,
+        )
     val selectedItem = remember { mutableStateOf(items[0]) }
 
     DismissibleNavigationDrawer(
@@ -235,7 +247,7 @@ fun DismissibleNavigationDrawerSample() {
                                 scope.launch { drawerState.close() }
                                 selectedItem.value = item
                             },
-                            modifier = Modifier.padding(horizontal = 12.dp)
+                            modifier = Modifier.padding(horizontal = 12.dp),
                         )
                     }
                 }
@@ -243,17 +255,25 @@ fun DismissibleNavigationDrawerSample() {
         },
         content = {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(text = if (drawerState.isClosed) ">>> Swipe >>>" else "<<< Swipe <<<")
                 Spacer(Modifier.height(20.dp))
-                Button(onClick = { scope.launch { drawerState.open() } }) {
+                Button(
+                    modifier = Modifier.focusRequester(focusRequester),
+                    onClick = { scope.launch { drawerState.open() } },
+                ) {
                     Text("Click to open")
                 }
             }
-        }
+        },
     )
+
+    LaunchedEffect(drawerState.isClosed) {
+        if (drawerState.isClosed) {
+            // Keyboard focus should go back to button once drawer closes.
+            focusRequester.requestFocus()
+        }
+    }
 }

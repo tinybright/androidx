@@ -36,15 +36,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
-/**
- * Tests what happens when a smooth scroll is interrupted by a drag
- */
+/** Tests what happens when a smooth scroll is interrupted by a drag */
 @RunWith(Parameterized::class)
 @LargeTest
 class DisableUserInputTest(private val config: TestConfig) : BaseTest() {
     data class TestConfig(
         @ViewPager2.Orientation val orientation: Int,
-        val childViewConsumesTouches: Boolean
+        val childViewConsumesTouches: Boolean,
     )
 
     companion object {
@@ -77,11 +75,12 @@ class DisableUserInputTest(private val config: TestConfig) : BaseTest() {
     override fun setUp() {
         super.setUp()
         adapterProvider = touchConsumingViewAdapter.provider(stringSequence(pageCount))
-        test = setUpTest(config.orientation).also {
-            it.viewPager.isUserInputEnabled = false
-            it.setAdapterSync(adapterProvider)
-            it.assertBasicState(firstPage)
-        }
+        test =
+            setUpTest(config.orientation).also {
+                it.viewPager.isUserInputEnabled = false
+                it.setAdapterSync(adapterProvider)
+                it.assertBasicState(firstPage)
+            }
     }
 
     @Test
@@ -163,24 +162,30 @@ class DisableUserInputTest(private val config: TestConfig) : BaseTest() {
         data class OnPageScrolledEvent(
             val position: Int,
             val positionOffset: Float,
-            val positionOffsetPixels: Int
+            val positionOffsetPixels: Int,
         ) : Event()
 
         data class OnPageSelectedEvent(val position: Int) : Event()
+
         data class OnPageScrollStateChangedEvent(val state: Int) : Event()
     }
 
     private class RecordingCallback : ViewPager2.OnPageChangeCallback() {
         private val events = mutableListOf<Event>()
 
-        val eventCount get() = events.size
-        val scrollEvents get() = events.mapNotNull { it as? OnPageScrolledEvent }
-        val selectEvents get() = events.mapNotNull { it as? OnPageSelectedEvent }
+        val eventCount
+            get() = events.size
+
+        val scrollEvents
+            get() = events.mapNotNull { it as? OnPageScrolledEvent }
+
+        val selectEvents
+            get() = events.mapNotNull { it as? OnPageSelectedEvent }
 
         override fun onPageScrolled(
             position: Int,
             positionOffset: Float,
-            positionOffsetPixels: Int
+            positionOffsetPixels: Int,
         ) {
             synchronized(events) {
                 events.add(OnPageScrolledEvent(position, positionOffset, positionOffsetPixels))
@@ -188,22 +193,18 @@ class DisableUserInputTest(private val config: TestConfig) : BaseTest() {
         }
 
         override fun onPageSelected(position: Int) {
-            synchronized(events) {
-                events.add(OnPageSelectedEvent(position))
-            }
+            synchronized(events) { events.add(OnPageSelectedEvent(position)) }
         }
 
         override fun onPageScrollStateChanged(state: Int) {
-            synchronized(events) {
-                events.add(OnPageScrollStateChangedEvent(state))
-            }
+            synchronized(events) { events.add(OnPageScrollStateChangedEvent(state)) }
         }
     }
 
     private fun List<OnPageScrolledEvent>.assertValueCorrectness(
         initialPage: Int,
         otherPage: Int,
-        pageSize: Int
+        pageSize: Int,
     ) = forEach {
         assertThat(it.position, isBetweenInInMinMax(initialPage, otherPage))
         assertThat(it.positionOffset, isBetweenInEx(0f, 1f))
@@ -226,12 +227,7 @@ class DisableUserInputTest(private val config: TestConfig) : BaseTest() {
 
 private fun createTestSet(): List<TestConfig> {
     return listOf(ORIENTATION_HORIZONTAL, ORIENTATION_VERTICAL).flatMap { orientation ->
-        listOf(true, false).map { consumeTouches ->
-            TestConfig(
-                orientation,
-                consumeTouches
-            )
-        }
+        listOf(true, false).map { consumeTouches -> TestConfig(orientation, consumeTouches) }
     }
 }
 

@@ -16,42 +16,43 @@
 
 package androidx.compose.ui.node
 
+import androidx.collection.MutableObjectIntMap
+import androidx.collection.mutableObjectIntMapOf
 import androidx.compose.ui.internal.checkPrecondition
 
+private val DepthComparator: Comparator<LayoutNode> =
+    object : Comparator<LayoutNode> {
+        override fun compare(a: LayoutNode, b: LayoutNode): Int {
+            val depthDiff = a.depth.compareTo(b.depth)
+            if (depthDiff != 0) {
+                return depthDiff
+            }
+            return a.hashCode().compareTo(b.hashCode())
+        }
+    }
+
 /**
- * The set of [LayoutNode]s which orders items by their [LayoutNode.depth] and
- * allows modifications(additions and removals) while we iterate through it via [popEach].
- * While [LayoutNode] is added to the set it should always be:
+ * The set of [LayoutNode]s which orders items by their [LayoutNode.depth] and allows
+ * modifications(additions and removals) while we iterate through it via [popEach]. While
+ * [LayoutNode] is added to the set it should always be:
  * 1) attached [LayoutNode.isAttached] == true
- * 2) maintaining the same [LayoutNode.depth]
- * as any of this modifications can break the comparator's contract which can cause
- * to not find the item in the tree set, which we previously added.
+ * 2) maintaining the same [LayoutNode.depth] as any of this modifications can break the
+ *    comparator's contract which can cause to not find the item in the tree set, which we
+ *    previously added.
  */
-internal class DepthSortedSet(
-    private val extraAssertions: Boolean
-) {
+internal class DepthSortedSet(private val extraAssertions: Boolean) {
     // stores the depth used when the node was added into the set so we can assert it wasn't
     // changed since then. we need to enforce this as changing the depth can break the contract
     // used in comparator for building the tree in TreeSet.
     // Created and used only when extraAssertions == true
-    private val mapOfOriginalDepth by lazy(LazyThreadSafetyMode.NONE) {
-        mutableMapOf<LayoutNode, Int>()
-    }
-    private val DepthComparator: Comparator<LayoutNode> = object : Comparator<LayoutNode> {
-        override fun compare(l1: LayoutNode, l2: LayoutNode): Int {
-            val depthDiff = l1.depth.compareTo(l2.depth)
-            if (depthDiff != 0) {
-                return depthDiff
-            }
-            return l1.hashCode().compareTo(l2.hashCode())
-        }
-    }
-    private val set = TreeSet(DepthComparator)
+    private var mapOfOriginalDepth: MutableObjectIntMap<LayoutNode>? = null
+
+    private val set = SortedSet(DepthComparator)
 
     fun contains(node: LayoutNode): Boolean {
         val contains = set.contains(node)
         if (extraAssertions) {
-            checkPrecondition(contains == mapOfOriginalDepth.containsKey(node)) {
+            checkPrecondition(contains == safeMapOfOriginalDepth().containsKey(node)) {
                 "inconsistency in TreeSet"
             }
         }
@@ -61,9 +62,10 @@ internal class DepthSortedSet(
     fun add(node: LayoutNode) {
         checkPrecondition(node.isAttached) { "DepthSortedSet.add called on an unattached node" }
         if (extraAssertions) {
-            val usedDepth = mapOfOriginalDepth[node]
-            if (usedDepth == null) {
-                mapOfOriginalDepth[node] = node.depth
+            val map = safeMapOfOriginalDepth()
+            val usedDepth = map.getOrDefault(node, Int.MAX_VALUE)
+            if (usedDepth == Int.MAX_VALUE) {
+                map[node] = node.depth
             } else {
                 checkPrecondition(usedDepth == node.depth) { "invalid node depth" }
             }
@@ -75,9 +77,13 @@ internal class DepthSortedSet(
         checkPrecondition(node.isAttached) { "DepthSortedSet.remove called on an unattached node" }
         val contains = set.remove(node)
         if (extraAssertions) {
-            val usedDepth = mapOfOriginalDepth.remove(node)
-            checkPrecondition(usedDepth == if (contains) node.depth else null) {
-                "invalid node depth"
+            val map = safeMapOfOriginalDepth()
+            if (map.contains(node)) {
+                val usedDepth = map[node]
+                map.remove(node)
+                checkPrecondition(usedDepth == if (contains) node.depth else Int.MAX_VALUE) {
+                    "invalid node depth"
+                }
             }
         }
         return contains
@@ -98,8 +104,14 @@ internal class DepthSortedSet(
 
     fun isEmpty(): Boolean = set.isEmpty()
 
-    @Suppress("NOTHING_TO_INLINE")
-    inline fun isNotEmpty(): Boolean = !isEmpty()
+    @Suppress("NOTHING_TO_INLINE") inline fun isNotEmpty(): Boolean = !isEmpty()
+
+    private fun safeMapOfOriginalDepth(): MutableObjectIntMap<LayoutNode> {
+        if (mapOfOriginalDepth == null) {
+            mapOfOriginalDepth = mutableObjectIntMapOf()
+        }
+        return mapOfOriginalDepth!!
+    }
 
     override fun toString(): String {
         return set.toString()
@@ -107,26 +119,51 @@ internal class DepthSortedSet(
 }
 
 internal class DepthSortedSetsForDifferentPasses(extraAssertions: Boolean) {
-    private val lookaheadSet = DepthSortedSet(extraAssertions)
-    private val set = DepthSortedSet(extraAssertions)
+    /**
+     * [lookaheadAndAncestorMeasureSet] contains nodes that are in lookaheadScope as well as nodes
+     * that are ancestors of LookaheadScope or simply outside lookahead scope.
+     *
+     * // TODO: Check how this works with measure in parent placement The invalidation order is
+     * always: [lookaheadAndAncestorMeasureSet] then [lookaheadAndAncestorPlaceSet] before
+     * [approachSet].
+     *
+     * When no LookaheadScope is present in the tree, [approachSet] will be empty.
+     */
+    private val lookaheadAndAncestorMeasureSet = DepthSortedSet(extraAssertions)
+
+    /**
+     * [lookaheadAndAncestorPlaceSet] contains nodes that require lookahead placement invalidation
+     * or nodes outside lookaheadScope that could affect the placement of lookahead scope.
+     */
+    private val lookaheadAndAncestorPlaceSet = DepthSortedSet(extraAssertions)
+
+    /**
+     * [approachSet] contains nodes that only requires approach invalidations. Only nodes in a
+     * LookaheadScope can ever be put in this set.
+     */
+    private val approachSet = DepthSortedSet(extraAssertions)
 
     /**
      * Checks if the given node exists in the corresponding set based on the provided
      * [affectsLookahead].
      */
     fun contains(node: LayoutNode, affectsLookahead: Boolean): Boolean {
-        val constainsInLookahead = lookaheadSet.contains(node)
+        val isAncestor = node.lookaheadRoot == null
+        val containedInLookaheadAndAncestors =
+            lookaheadAndAncestorMeasureSet.contains(node) ||
+                lookaheadAndAncestorPlaceSet.contains(node)
         return if (affectsLookahead) {
-            constainsInLookahead
+            !isAncestor && containedInLookaheadAndAncestors
         } else {
-            constainsInLookahead || set.contains(node)
+            (isAncestor && containedInLookaheadAndAncestors) || approachSet.contains(node)
         }
     }
 
-    /**
-     * Checks if the node exists in either set.
-     */
-    fun contains(node: LayoutNode): Boolean = lookaheadSet.contains(node) || set.contains(node)
+    /** Checks if the node exists in either set. */
+    fun contains(node: LayoutNode): Boolean =
+        lookaheadAndAncestorMeasureSet.contains(node) ||
+            lookaheadAndAncestorPlaceSet.contains(node) ||
+            approachSet.contains(node)
 
     /**
      * Adds the given node to the corresponding set based on whether its lookahead
@@ -136,55 +173,92 @@ internal class DepthSortedSetsForDifferentPasses(extraAssertions: Boolean) {
      * triggered as needed (i.e. if the FooPending flag is dirty). Otherwise, lookahead
      * remeasurement/relayout will be skipped.
      */
-    fun add(node: LayoutNode, affectsLookahead: Boolean) {
-        if (affectsLookahead) {
-            lookaheadSet.add(node)
-            set.add(node)
-        } else {
-            if (!lookaheadSet.contains(node)) {
-                // Only add the node to set if it's not already in the lookahead set. Nodes in
-                // lookaheadSet will get a remeasure/relayout call after lookahead.
-                set.add(node)
+    fun add(node: LayoutNode, invalidation: Invalidation) {
+        when (invalidation) {
+            Invalidation.LookaheadMeasurement -> {
+                lookaheadAndAncestorMeasureSet.add(node)
+                approachSet.add(node)
+            }
+            Invalidation.LookaheadPlacement -> {
+                lookaheadAndAncestorPlaceSet.add(node)
+                approachSet.add(node)
+            }
+            Invalidation.Measurement -> {
+                if (node.lookaheadRoot != null) {
+                    approachSet.add(node)
+                } else {
+                    lookaheadAndAncestorMeasureSet.add(node)
+                }
+            }
+            Invalidation.Placement -> {
+                if (node.lookaheadRoot != null) {
+                    approachSet.add(node)
+                } else {
+                    lookaheadAndAncestorPlaceSet.add(node)
+                }
             }
         }
     }
 
-    fun remove(node: LayoutNode, affectsLookahead: Boolean): Boolean {
-        val contains = if (affectsLookahead) {
-            lookaheadSet.remove(node)
-        } else {
-            set.remove(node)
-        }
-        return contains
-    }
-
+    /** Remove the [node] from all the sets. */
     fun remove(node: LayoutNode): Boolean {
-        val containsInLookahead = lookaheadSet.remove(node)
-        return set.remove(node) || containsInLookahead
-    }
-
-    fun pop(): LayoutNode {
-        if (lookaheadSet.isNotEmpty()) {
-            return lookaheadSet.pop()
-        }
-        return set.pop()
+        val removedFromLookaheadMeasureSet = lookaheadAndAncestorMeasureSet.remove(node)
+        val removedFromLookaheadPlaceSet = lookaheadAndAncestorPlaceSet.remove(node)
+        return approachSet.remove(node) ||
+            removedFromLookaheadMeasureSet ||
+            removedFromLookaheadPlaceSet
     }
 
     /**
-     * Pops nodes that require lookahead remeasurement/replacement first until the lookaheadSet
-     * is empty, before handling nodes that only require invalidation for the main pass.
+     * Pops nodes that require lookahead remeasurement/replacement first until the lookaheadSet is
+     * empty, before handling nodes that only require invalidation for the main pass.
      */
-    inline fun popEach(crossinline block: (node: LayoutNode, affectsLookahead: Boolean) -> Unit) {
-        while (isNotEmpty()) {
-            val affectsLookahead = lookaheadSet.isNotEmpty()
-            val node = if (affectsLookahead) lookaheadSet.pop() else set.pop()
-            block(node, affectsLookahead)
+    inline fun popEach(
+        crossinline block:
+            (node: LayoutNode, affectsLookahead: Boolean, relayoutNeeded: Boolean) -> Unit
+    ) {
+        // Sequence for invalidation: lookaheadAndAncestorMeasureSet, lookaheadAndAncestorPlaceSet,
+        // approachSet
+        while (true) {
+            val affectsLookahead: Boolean
+            val relayoutNeeded: Boolean
+            val node: LayoutNode
+            if (lookaheadAndAncestorMeasureSet.isNotEmpty()) {
+                relayoutNeeded = false
+                node = lookaheadAndAncestorMeasureSet.pop()
+                affectsLookahead = node.lookaheadRoot != null
+            } else {
+                if (lookaheadAndAncestorPlaceSet.isNotEmpty()) {
+                    relayoutNeeded = true
+                    node = lookaheadAndAncestorPlaceSet.pop()
+                    affectsLookahead = node.lookaheadRoot != null
+                } else if (approachSet.isNotEmpty()) {
+                    affectsLookahead = false
+                    node = approachSet.pop()
+                    relayoutNeeded = true
+                } else {
+                    break
+                }
+            }
+            block(node, affectsLookahead, relayoutNeeded)
         }
     }
 
-    fun isEmpty(): Boolean = set.isEmpty() && lookaheadSet.isEmpty()
-    fun isEmpty(affectsLookahead: Boolean): Boolean =
-        if (affectsLookahead) lookaheadSet.isEmpty() else set.isEmpty()
+    fun isEmpty(): Boolean =
+        lookaheadAndAncestorMeasureSet.isEmpty() &&
+            approachSet.isEmpty() &&
+            lookaheadAndAncestorPlaceSet.isEmpty()
+
+    val affectsLookaheadMeasure: Boolean
+        get() =
+            // If lookahead measurement has been requested, approach set will add
+            // corresponding nodes as well. Therefore if approachSet is empty, no
+            // lookahead measurement has been requested.
+            approachSet.isNotEmpty() &&
+                // If approachSet is not empty, it may be an approach animation,
+                // check lookaheadAndAncestorMeasureSet to determine if any lookahead
+                // invalidation is needed.
+                lookaheadAndAncestorMeasureSet.isNotEmpty()
 
     fun isNotEmpty(): Boolean = !isEmpty()
 }

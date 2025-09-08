@@ -18,20 +18,16 @@ package androidx.glance.testing
 
 import androidx.annotation.RestrictTo
 
-/**
- * A chainable selector that allows specifying how to select nodes from a collection.
- */
+/** A chainable selector that allows specifying how to select nodes from a collection. */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class GlanceNodeSelector<R>(
-    val description: String,
+public class GlanceNodeSelector<R>(
+    public val description: String,
     private val previousChainedSelector: GlanceNodeSelector<R>? = null,
-    private val selector: (Iterable<GlanceNode<R>>) -> SelectionResult<R>
+    private val selector: (Iterable<GlanceNode<R>>) -> SelectionResult<R>,
 ) {
 
-    /**
-     * Returns nodes selected by previous chained selectors followed by the current selector.
-     */
-    fun map(nodes: Iterable<GlanceNode<R>>): SelectionResult<R> {
+    /** Returns nodes selected by previous chained selectors followed by the current selector. */
+    public fun map(nodes: Iterable<GlanceNode<R>>): SelectionResult<R> {
         val previousSelectionResult = previousChainedSelector?.map(nodes)
         val inputNodes = previousSelectionResult?.selectedNodes ?: nodes
         return selector(inputNodes)
@@ -39,9 +35,9 @@ class GlanceNodeSelector<R>(
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class SelectionResult<R>(
-    val selectedNodes: List<GlanceNode<R>>,
-    val errorMessageOnNoMatch: String? = null
+public class SelectionResult<R>(
+    public val selectedNodes: List<GlanceNode<R>>,
+    public val errorMessageOnNoMatch: String? = null,
 )
 
 /**
@@ -50,14 +46,10 @@ class SelectionResult<R>(
  * [GlanceNodeAssertionsProvider.onAllNodes] where there is no previous chained selector.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun <R> GlanceNodeMatcher<R>.matcherToSelector(): GlanceNodeSelector<R> {
-    return GlanceNodeSelector(
-        description = description,
-        previousChainedSelector = null
-    ) { glanceNodes ->
-        SelectionResult(
-            selectedNodes = glanceNodes.filter { matches(it) }
-        )
+public fun <R> GlanceNodeMatcher<R>.matcherToSelector(): GlanceNodeSelector<R> {
+    return GlanceNodeSelector(description = description, previousChainedSelector = null) {
+        glanceNodes ->
+        SelectionResult(selectedNodes = glanceNodes.filter { matches(it) })
     }
 }
 
@@ -66,25 +58,24 @@ fun <R> GlanceNodeMatcher<R>.matcherToSelector(): GlanceNodeSelector<R> {
  * the result of current selection.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun <R> GlanceNodeSelector<R>.addIndexedSelector(index: Int): GlanceNodeSelector<R> {
+public fun <R> GlanceNodeSelector<R>.addIndexedSelector(index: Int): GlanceNodeSelector<R> {
     return GlanceNodeSelector(
         description = "(${this.description})[$index]",
-        previousChainedSelector = this
+        previousChainedSelector = this,
     ) { nodes ->
         val nodesList = nodes.toList()
         val minimumExpectedCount = index + 1
         if (index >= 0 && index < nodesList.size) {
-            SelectionResult(
-                selectedNodes = listOf(nodesList[index])
-            )
+            SelectionResult(selectedNodes = listOf(nodesList[index]))
         } else {
             SelectionResult(
                 selectedNodes = emptyList(),
-                errorMessageOnNoMatch = buildErrorReasonForIndexOutOfMatchedNodeBounds(
-                    description,
-                    requestedIndex = minimumExpectedCount,
-                    actualCount = nodesList.size
-                )
+                errorMessageOnNoMatch =
+                    buildErrorReasonForIndexOutOfMatchedNodeBounds(
+                        description,
+                        requestedIndex = minimumExpectedCount,
+                        actualCount = nodesList.size,
+                    ),
             )
         }
     }
@@ -95,17 +86,15 @@ fun <R> GlanceNodeSelector<R>.addIndexedSelector(index: Int): GlanceNodeSelector
  * to return ones matched by the matcher.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun <R> GlanceNodeSelector<R>.addMatcherSelector(
+public fun <R> GlanceNodeSelector<R>.addMatcherSelector(
     selectorName: String,
-    matcher: GlanceNodeMatcher<R>
+    matcher: GlanceNodeMatcher<R>,
 ): GlanceNodeSelector<R> {
     return GlanceNodeSelector(
         description = "(${this.description}).$selectorName(${matcher.description})",
-        previousChainedSelector = this
+        previousChainedSelector = this,
     ) { nodes ->
-        SelectionResult(
-            selectedNodes = nodes.filter { matcher.matches(it) }
-        )
+        SelectionResult(selectedNodes = nodes.filter { matcher.matches(it) })
     }
 }
 
@@ -114,24 +103,23 @@ fun <R> GlanceNodeSelector<R>.addMatcherSelector(
  * returned by current selector and selects children of that node.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun <R> GlanceNodeSelector<R>.addChildrenSelector(): GlanceNodeSelector<R> {
+public fun <R> GlanceNodeSelector<R>.addChildrenSelector(): GlanceNodeSelector<R> {
     return GlanceNodeSelector(
         description = "($description).children()",
-        previousChainedSelector = this
+        previousChainedSelector = this,
     ) { nodes ->
         if (nodes.count() != 1) {
             SelectionResult(
                 selectedNodes = emptyList(),
-                errorMessageOnNoMatch = buildErrorReasonForCountMismatch(
-                    matcherDescription = description,
-                    expectedCount = 1,
-                    actualCount = nodes.count()
-                )
+                errorMessageOnNoMatch =
+                    buildErrorReasonForCountMismatch(
+                        matcherDescription = description,
+                        expectedCount = 1,
+                        actualCount = nodes.count(),
+                    ),
             )
         } else {
-            SelectionResult(
-                selectedNodes = nodes.single().children()
-            )
+            SelectionResult(selectedNodes = nodes.single().children())
         }
     }
 }

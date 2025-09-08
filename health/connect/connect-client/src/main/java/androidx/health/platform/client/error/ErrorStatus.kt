@@ -21,15 +21,10 @@ import androidx.health.platform.client.impl.data.ProtoParcelable
 import androidx.health.platform.client.proto.ErrorProto
 import java.lang.reflect.Field
 
-/**
- * Data object holding error state for IPC method calls.
- */
+/** Data object holding error state for IPC method calls. */
 @RestrictTo(RestrictTo.Scope.LIBRARY)
-class ErrorStatus
-constructor(
-    @ErrorCode val errorCode: Int,
-    val errorMessage: String? = null,
-) : ProtoParcelable<ErrorProto.ErrorStatus>() {
+class ErrorStatus constructor(@ErrorCode val errorCode: Int, val errorMessage: String? = null) :
+    ProtoParcelable<ErrorProto.ErrorStatus>() {
 
     override val proto: ErrorProto.ErrorStatus by lazy {
         val builder = ErrorProto.ErrorStatus.newBuilder().setCode(errorCode)
@@ -57,17 +52,13 @@ constructor(
                         return@map ErrorCode.INTERNAL_ERROR
                     }
                 }
-                .firstOrNull { value: Int -> value == errorCode }
-                ?: ErrorCode.INTERNAL_ERROR
+                .firstOrNull { value: Int -> value == errorCode } ?: ErrorCode.INTERNAL_ERROR
         }
 
         @JvmField
         val CREATOR: Parcelable.Creator<ErrorStatus> = newCreator {
             val proto = ErrorProto.ErrorStatus.parseFrom(it)
-            create(
-                proto.code,
-                if (proto.hasMessage()) proto.message else null,
-            )
+            create(proto.code, if (proto.hasMessage()) proto.message else null)
         }
     }
 }

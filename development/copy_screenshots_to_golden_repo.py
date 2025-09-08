@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 # This script helps to rename and copy the golden images required to run the screenshot tests to the golden directory.
 # To generate new golden images for a test, run the test on the emulator with the required device type, and download the screenshots from the device using adb
@@ -40,9 +40,9 @@ def rename_and_copy_files_to_new_location(input_path):
         input = ''
         output = ''
         for line in current_file.readlines():
-            if line.startswith('current_screenshot_file_name'):
+            if line.startswith('image_location_test'):
                 input = input_path+line.split(':')[1].strip().replace('"', '')
-            elif line.startswith('location_of_golden_in_repo'):
+            elif line.startswith('image_location_golden'):
                 output = output_path+line.split(':')[1].strip().replace('"', '')
         if input == '' or output == '':
            print('There was an error processing file -', file)

@@ -46,11 +46,9 @@ class GlanceAppWidgetViewAdapterTest {
     @Before
     fun setup() {
         glanceAppWidgetViewAdapter =
-            activityTestRule
-                .activity
-                .window
-                .decorView
-                .findViewInHierarchy(GlanceAppWidgetViewAdapter::class.java)!!
+            activityTestRule.activity.window.decorView.findViewInHierarchy(
+                GlanceAppWidgetViewAdapter::class.java
+            )!!
     }
 
     /**
@@ -73,11 +71,7 @@ class GlanceAppWidgetViewAdapterTest {
         return null
     }
 
-    private fun initAndInflate(
-        className: String,
-        methodName: String,
-        size: DpSize,
-    ) {
+    private fun initAndInflate(className: String, methodName: String, size: DpSize) {
         activityTestRule.runOnUiThread {
             glanceAppWidgetViewAdapter.init(className, methodName, size)
             glanceAppWidgetViewAdapter.requestLayout()
@@ -106,7 +100,7 @@ class GlanceAppWidgetViewAdapterTest {
         initAndInflate(
             className = "androidx.glance.appwidget.preview.GlanceAppWidgetPreviewsKt",
             methodName = "FirstGlancePreview",
-            size = DpSize.Unspecified
+            size = DpSize.Unspecified,
         )
 
         activityTestRule.runOnUiThread {
@@ -121,10 +115,16 @@ class GlanceAppWidgetViewAdapterTest {
             assertNotNull(linearLayoutRow, viewNotFoundMsg("LinearLayout", "Row"))
             // Backport button are implemented using FrameLayout and depending on the API version
             // Button might be wrapped in the RelativeLayout.
-            val button1 = linearLayoutRow.getChildOfType<Button>()
-                ?: linearLayoutRow.getChildOfType<RelativeLayout>()!!.getChildOfType<FrameLayout>()
-            val button2 = linearLayoutRow.getChildOfType<Button>(1)
-                ?: linearLayoutRow.getChildOfType<RelativeLayout>(1)!!.getChildOfType<FrameLayout>()
+            val button1 =
+                linearLayoutRow.getChildOfType<Button>()
+                    ?: linearLayoutRow
+                        .getChildOfType<RelativeLayout>()!!
+                        .getChildOfType<FrameLayout>()
+            val button2 =
+                linearLayoutRow.getChildOfType<Button>(1)
+                    ?: linearLayoutRow
+                        .getChildOfType<RelativeLayout>(1)!!
+                        .getChildOfType<FrameLayout>()
             assertNotNull(button1, viewNotFoundMsg("FrameLayout", "Button"))
             assertNotNull(button2, viewNotFoundMsg("FrameLayout", "Button"))
         }
@@ -135,7 +135,7 @@ class GlanceAppWidgetViewAdapterTest {
         initAndInflate(
             className = "androidx.glance.appwidget.preview.GlanceAppWidgetPreviewsKt",
             methodName = "FirstGlancePreview",
-            size = DpSize(Dp(123.0f), Dp(456.0f))
+            size = DpSize(Dp(123.0f), Dp(456.0f)),
         )
 
         activityTestRule.runOnUiThread {
@@ -150,10 +150,16 @@ class GlanceAppWidgetViewAdapterTest {
             assertNotNull(linearLayoutRow, viewNotFoundMsg("LinearLayout", "Row"))
             // Backport button are implemented using FrameLayout and depending on the API version
             // Button might be wrapped in the RelativeLayout.
-            val button1 = linearLayoutRow.getChildOfType<Button>()
-                ?: linearLayoutRow.getChildOfType<RelativeLayout>()!!.getChildOfType<FrameLayout>()
-            val button2 = linearLayoutRow.getChildOfType<Button>(1)
-                ?: linearLayoutRow.getChildOfType<RelativeLayout>(1)!!.getChildOfType<FrameLayout>()
+            val button1 =
+                linearLayoutRow.getChildOfType<Button>()
+                    ?: linearLayoutRow
+                        .getChildOfType<RelativeLayout>()!!
+                        .getChildOfType<FrameLayout>()
+            val button2 =
+                linearLayoutRow.getChildOfType<Button>(1)
+                    ?: linearLayoutRow
+                        .getChildOfType<RelativeLayout>(1)!!
+                        .getChildOfType<FrameLayout>()
             assertNotNull(button1, viewNotFoundMsg("FrameLayout", "Button"))
             assertNotNull(button2, viewNotFoundMsg("FrameLayout", "Button"))
         }

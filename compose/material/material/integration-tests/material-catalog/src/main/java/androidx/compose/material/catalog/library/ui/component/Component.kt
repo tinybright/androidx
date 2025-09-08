@@ -49,7 +49,7 @@ fun Component(
     theme: Theme,
     onThemeChange: (theme: Theme) -> Unit,
     onExampleClick: (example: Example) -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     CatalogScaffold(
         topBarTitle = component.name,
@@ -59,67 +59,58 @@ fun Component(
         docsUrl = component.docsUrl,
         sourceUrl = component.sourceUrl,
         onThemeChange = onThemeChange,
-        onBackClick = onBackClick
+        onBackClick = onBackClick,
     ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier
-                .padding(horizontal = ComponentPadding),
-            contentPadding = paddingValues
+            modifier = Modifier.padding(horizontal = ComponentPadding),
+            contentPadding = paddingValues,
         ) {
             item {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = ComponentIconVerticalPadding)
+                    modifier =
+                        Modifier.fillMaxWidth().padding(vertical = ComponentIconVerticalPadding)
                 ) {
                     Image(
                         painter = painterResource(id = component.icon),
                         contentDescription = null,
-                        modifier = Modifier
-                            .size(ComponentIconSize)
-                            .align(Alignment.Center),
-                        colorFilter = if (component.tintIcon) {
-                            ColorFilter.tint(
-                                LocalContentColor.current.copy(alpha = ContentAlpha.disabled)
-                            )
-                        } else {
-                            null
-                        }
+                        modifier = Modifier.size(ComponentIconSize).align(Alignment.Center),
+                        colorFilter =
+                            if (component.tintIcon) {
+                                ColorFilter.tint(
+                                    LocalContentColor.current.copy(alpha = ContentAlpha.disabled)
+                                )
+                            } else {
+                                null
+                            },
                     )
                 }
             }
             item {
                 Text(
                     text = stringResource(id = R.string.description),
-                    style = MaterialTheme.typography.body1
+                    style = MaterialTheme.typography.body1,
                 )
                 Spacer(modifier = Modifier.height(ComponentPadding))
-                Text(
-                    text = component.description,
-                    style = MaterialTheme.typography.body2
-                )
+                Text(text = component.description, style = MaterialTheme.typography.body2)
                 Spacer(modifier = Modifier.height(ComponentDescriptionPadding))
             }
             item {
                 Text(
                     text = stringResource(id = R.string.examples),
-                    style = MaterialTheme.typography.body1
+                    style = MaterialTheme.typography.body1,
                 )
                 Spacer(modifier = Modifier.height(ComponentPadding))
             }
             if (component.examples.isNotEmpty()) {
                 items(component.examples) { example ->
-                    ExampleItem(
-                        example = example,
-                        onClick = onExampleClick
-                    )
+                    ExampleItem(example = example, onClick = onExampleClick)
                     Spacer(modifier = Modifier.height(ComponentPadding))
                 }
             } else {
                 item {
                     Text(
                         text = stringResource(id = R.string.no_examples),
-                        style = MaterialTheme.typography.body2
+                        style = MaterialTheme.typography.body2,
                     )
                     Spacer(modifier = Modifier.height(ComponentPadding))
                 }

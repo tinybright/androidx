@@ -26,18 +26,17 @@ import androidx.compose.ui.text.InternalTextApi
 import androidx.compose.ui.text.TextLayoutResult
 
 /**
- * Handles communication with the IME. Informs about the IME changes via [EditCommand]s and
- * provides utilities for working with software keyboard.
+ * Handles communication with the IME. Informs about the IME changes via [EditCommand]s and provides
+ * utilities for working with software keyboard.
  *
  * This class is responsible for ensuring there is only one open [TextInputSession] which will
- * interact with software keyboards. Start new a TextInputSession by calling [startInput] and
- * close it with [stopInput].
+ * interact with software keyboards. Start new a TextInputSession by calling [startInput] and close
+ * it with [stopInput].
  */
 // Open for testing purposes.
 @Deprecated("Use PlatformTextInputModifierNode instead.")
 open class TextInputService(private val platformTextInputService: PlatformTextInputService) {
-    private val _currentInputSession: AtomicReference<TextInputSession?> =
-        AtomicReference(null)
+    private val _currentInputSession: AtomicReference<TextInputSession?> = AtomicReference(null)
 
     internal val currentInputSession: TextInputSession?
         get() = _currentInputSession.get()
@@ -45,36 +44,31 @@ open class TextInputService(private val platformTextInputService: PlatformTextIn
     /**
      * Start text input session for given client.
      *
-     * If there is a previous [TextInputSession] open, it will immediately be closed by this call
-     * to [startInput].
+     * If there is a previous [TextInputSession] open, it will immediately be closed by this call to
+     * [startInput].
      *
      * @param value initial [TextFieldValue]
      * @param imeOptions IME configuration
      * @param onEditCommand callback to inform about changes requested by IME
-     * @param onImeActionPerformed callback to inform if an IME action such as [ImeAction.Done]
-     * etc occurred.
+     * @param onImeActionPerformed callback to inform if an IME action such as [ImeAction.Done] etc
+     *   occurred.
      */
     open fun startInput(
         value: TextFieldValue,
         imeOptions: ImeOptions,
         onEditCommand: (List<EditCommand>) -> Unit,
-        onImeActionPerformed: (ImeAction) -> Unit
+        onImeActionPerformed: (ImeAction) -> Unit,
     ): TextInputSession {
-        platformTextInputService.startInput(
-            value,
-            imeOptions,
-            onEditCommand,
-            onImeActionPerformed
-        )
+        platformTextInputService.startInput(value, imeOptions, onEditCommand, onImeActionPerformed)
         val nextSession = TextInputSession(this, platformTextInputService)
         _currentInputSession.set(nextSession)
         return nextSession
     }
 
     /**
-    * Restart input and show the keyboard. This should only be called when starting a new
-    * `PlatformTextInputModifierNode.textInputSession`.
-    */
+     * Restart input and show the keyboard. This should only be called when starting a new
+     * `PlatformTextInputModifierNode.textInputSession`.
+     */
     @InternalTextApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun startInput() {
@@ -99,6 +93,8 @@ open class TextInputService(private val platformTextInputService: PlatformTextIn
     @InternalTextApi
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun stopInput() {
+        // This is a direct stop call, there's no need to compare the current input session.
+        _currentInputSession.set(null)
         platformTextInputService.stopInput()
     }
 
@@ -109,13 +105,14 @@ open class TextInputService(private val platformTextInputService: PlatformTextIn
      * nothing that will accept typed input. The most common way to open a TextInputSession is to
      * set the focus to an editable text composable.
      *
-     * There is no guarantee that the keyboard will be shown. The software keyboard or
-     * system service may silently ignore this request.
+     * There is no guarantee that the keyboard will be shown. The software keyboard or system
+     * service may silently ignore this request.
      */
     @Deprecated(
-        message = "Use SoftwareKeyboardController.show or " +
-            "TextInputSession.showSoftwareKeyboard instead.",
-        replaceWith = ReplaceWith("textInputSession.showSoftwareKeyboard()")
+        message =
+            "Use SoftwareKeyboardController.show or " +
+                "TextInputSession.showSoftwareKeyboard instead.",
+        replaceWith = ReplaceWith("textInputSession.showSoftwareKeyboard()"),
     )
     // TODO(b/183448615) @InternalTextApi
     fun showSoftwareKeyboard() {
@@ -124,13 +121,12 @@ open class TextInputService(private val platformTextInputService: PlatformTextIn
         }
     }
 
-    /**
-     * Hide onscreen keyboard.
-     */
+    /** Hide onscreen keyboard. */
     @Deprecated(
-        message = "Use SoftwareKeyboardController.hide or " +
-            "TextInputSession.hideSoftwareKeyboard instead.",
-        replaceWith = ReplaceWith("textInputSession.hideSoftwareKeyboard()")
+        message =
+            "Use SoftwareKeyboardController.hide or " +
+                "TextInputSession.hideSoftwareKeyboard instead.",
+        replaceWith = ReplaceWith("textInputSession.hideSoftwareKeyboard()"),
     )
     // TODO(b/183448615) @InternalTextApi
     fun hideSoftwareKeyboard(): Unit = platformTextInputService.hideSoftwareKeyboard()
@@ -139,13 +135,13 @@ open class TextInputService(private val platformTextInputService: PlatformTextIn
 /**
  * Represents a input session for interactions between a soft keyboard and editable text.
  *
- * This session may be closed at any time by [TextInputService] or by calling [dispose], after
- * which [isOpen] will return false and all further calls will have no effect.
+ * This session may be closed at any time by [TextInputService] or by calling [dispose], after which
+ * [isOpen] will return false and all further calls will have no effect.
  */
 @Deprecated("Use PlatformTextInputModifierNode instead.")
 class TextInputSession(
     private val textInputService: TextInputService,
-    private val platformTextInputService: PlatformTextInputService
+    private val platformTextInputService: PlatformTextInputService,
 ) {
     /**
      * If this session is currently open.
@@ -219,7 +215,7 @@ class TextInputSession(
         textLayoutResult: TextLayoutResult,
         textFieldToRootTransform: (Matrix) -> Unit,
         innerTextFieldBounds: Rect,
-        decorationBoxBounds: Rect
+        decorationBoxBounds: Rect,
     ) = ensureOpenSession {
         platformTextInputService.updateTextLayoutResult(
             textFieldValue,
@@ -227,7 +223,7 @@ class TextInputSession(
             textLayoutResult,
             textFieldToRootTransform,
             innerTextFieldBounds,
-            decorationBoxBounds
+            decorationBoxBounds,
         )
     }
 
@@ -235,10 +231,10 @@ class TextInputSession(
      * Notify IME about the new [TextFieldValue] and latest state of the editing buffer. [oldValue]
      * is the state of the buffer before the changes applied by the [newValue].
      *
-     * [oldValue] represents the changes that was requested by IME on the buffer, and [newValue]
-     * is the final state of the editing buffer that was requested by the application. In cases
-     * where [oldValue] is not equal to [newValue], it would mean the IME suggested value is
-     * rejected, and the IME connection will be restarted with the newValue.
+     * [oldValue] represents the changes that was requested by IME on the buffer, and [newValue] is
+     * the final state of the editing buffer that was requested by the application. In cases where
+     * [oldValue] is not equal to [newValue], it would mean the IME suggested value is rejected, and
+     * the IME connection will be restarted with the newValue.
      *
      * If the session is not open, action will be performed.
      *
@@ -246,12 +242,10 @@ class TextInputSession(
      * @param newValue final state of the editing buffer that was requested by the application
      * @return false if this session expired and no action was performed
      */
-    fun updateState(
-        oldValue: TextFieldValue?,
-        newValue: TextFieldValue
-    ): Boolean = ensureOpenSession {
-        platformTextInputService.updateState(oldValue, newValue)
-    }
+    fun updateState(oldValue: TextFieldValue?, newValue: TextFieldValue): Boolean =
+        ensureOpenSession {
+            platformTextInputService.updateState(oldValue, newValue)
+        }
 
     /**
      * Request showing onscreen keyboard.
@@ -262,8 +256,8 @@ class TextInputSession(
      * new editable text composable to show the keyboard in response to events related to that
      * composable.
      *
-     * There is no guarantee that the keyboard will be shown. The software keyboard or
-     * system service may silently ignore this request.
+     * There is no guarantee that the keyboard will be shown. The software keyboard or system
+     * service may silently ignore this request.
      *
      * @return false if this session expired and no action was performed
      */
@@ -291,9 +285,7 @@ class TextInputSession(
     }
 }
 
-/**
- * Platform specific text input service.
- */
+/** Platform specific text input service. */
 @Deprecated("Use PlatformTextInputModifierNode instead.")
 interface PlatformTextInputService {
     /**
@@ -305,7 +297,7 @@ interface PlatformTextInputService {
         value: TextFieldValue,
         imeOptions: ImeOptions,
         onEditCommand: (List<EditCommand>) -> Unit,
-        onImeActionPerformed: (ImeAction) -> Unit
+        onImeActionPerformed: (ImeAction) -> Unit,
     )
 
     /**
@@ -354,8 +346,7 @@ interface PlatformTextInputService {
      * For example, desktop systems show a popup near the focused input area (for some languages).
      */
     // TODO(b/262648050) Try to find a better API.
-    fun notifyFocusedRect(rect: Rect) {
-    }
+    fun notifyFocusedRect(rect: Rect) {}
 
     /**
      * Notify the input service of layout and position changes.
@@ -368,7 +359,6 @@ interface PlatformTextInputService {
         textLayoutResult: TextLayoutResult,
         textFieldToRootTransform: (Matrix) -> Unit,
         innerTextFieldBounds: Rect,
-        decorationBoxBounds: Rect
-    ) {
-    }
+        decorationBoxBounds: Rect,
+    ) {}
 }

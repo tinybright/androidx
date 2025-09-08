@@ -27,12 +27,9 @@ class CreateCustomCredentialResponseTest {
     fun constructor_emptyType_throws() {
         Assert.assertThrows(
             "Expected empty type to throw IAE",
-            IllegalArgumentException::class.java
+            IllegalArgumentException::class.java,
         ) {
-            CreateCustomCredentialResponse(
-                "",
-                Bundle()
-            )
+            CreateCustomCredentialResponse("", Bundle())
         }
     }
 
@@ -46,10 +43,7 @@ class CreateCustomCredentialResponseTest {
         val expectedType = "TYPE"
         val expectedBundle = Bundle()
         expectedBundle.putString("Test", "Test")
-        val option = CreateCustomCredentialResponse(
-            expectedType,
-            expectedBundle
-        )
+        val option = CreateCustomCredentialResponse(expectedType, expectedBundle)
         assertThat(option.type).isEqualTo(expectedType)
         assertThat(equals(option.data, expectedBundle)).isTrue()
     }

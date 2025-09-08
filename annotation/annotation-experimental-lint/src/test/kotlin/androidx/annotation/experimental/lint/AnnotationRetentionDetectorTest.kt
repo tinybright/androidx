@@ -33,7 +33,7 @@ class AnnotationRetentionDetectorTest {
             .files(
                 RequiresOptInDetectorTest.ANDROIDX_REQUIRES_OPT_IN_KT,
                 RequiresOptInDetectorTest.ANDROIDX_OPT_IN_KT,
-                *testFiles
+                *testFiles,
             )
             .issues(*AnnotationRetentionDetector.ISSUES.toTypedArray())
             .run()
@@ -48,7 +48,6 @@ class AnnotationRetentionDetectorTest {
                 javaSample("sample.optin.ExperimentalJavaAnnotationWrongRetention"),
             )
 
-        /* ktlint-disable max-line-length */
         val expected =
             """
 src/sample/optin/ExperimentalJavaAnnotationWrongRetention.java:28: Error: Experimental annotation has RUNTIME retention, should use default (CLASS) [ExperimentalAnnotationRetention]
@@ -57,7 +56,6 @@ public @interface ExperimentalJavaAnnotationWrongRetention {}
 1 errors, 0 warnings
         """
                 .trimIndent()
-        /* ktlint-enable max-line-length */
 
         check(*input).expect(expected)
     }
@@ -71,7 +69,6 @@ public @interface ExperimentalJavaAnnotationWrongRetention {}
                 ktSample("sample.optin.ExperimentalKotlinAnnotationWrongRetention"),
             )
 
-        /* ktlint-disable max-line-length */
         val expected =
             """
 src/sample/optin/ExperimentalKotlinAnnotationWrongRetention.kt:21: Error: Experimental annotation has default (RUNTIME) retention, should use BINARY [ExperimentalAnnotationRetention]
@@ -80,7 +77,6 @@ annotation class ExperimentalKotlinAnnotationWrongRetention
 1 errors, 0 warnings
         """
                 .trimIndent()
-        /* ktlint-enable max-line-length */
 
         check(*input).expect(expected)
     }
@@ -91,12 +87,8 @@ annotation class ExperimentalKotlinAnnotationWrongRetention
      */
     @Test
     fun wrongRequiresOptInAnnotation() {
-        val input =
-            arrayOf(
-                ktSample("sample.kotlin.ExperimentalKotlinAnnotationWrongAnnotation"),
-            )
+        val input = arrayOf(ktSample("sample.kotlin.ExperimentalKotlinAnnotationWrongAnnotation"))
 
-        /* ktlint-disable max-line-length */
         val expected =
             """
 src/sample/kotlin/ExperimentalKotlinAnnotationWrongAnnotation.kt:22: Error: Experimental annotation should use kotlin.RequiresOptIn [WrongRequiresOptIn]
@@ -105,7 +97,6 @@ annotation class ExperimentalKotlinAnnotationWrongAnnotation
 1 errors, 0 warnings
         """
                 .trimIndent()
-        /* ktlint-enable max-line-length */
 
         check(*input).expect(expected)
     }

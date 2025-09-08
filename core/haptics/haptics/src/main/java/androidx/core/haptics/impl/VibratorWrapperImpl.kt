@@ -22,7 +22,6 @@ import android.os.Build
 import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.Vibrator
-import androidx.annotation.DoNotInline
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.core.haptics.AttributesWrapper
@@ -33,12 +32,8 @@ import androidx.core.haptics.VibrationEffectWrapper
 import androidx.core.haptics.VibrationWrapper
 import androidx.core.haptics.VibratorWrapper
 
-/**
- * [VibratorWrapper] implementation backed by a real [Vibrator] service.
- */
-internal class VibratorWrapperImpl(
-    private val vibrator: Vibrator
-) : VibratorWrapper {
+/** [VibratorWrapper] implementation backed by a real [Vibrator] service. */
+internal class VibratorWrapperImpl(private val vibrator: Vibrator) : VibratorWrapper {
 
     override fun hasVibrator(): Boolean = ApiImpl.hasVibrator(vibrator)
 
@@ -92,21 +87,12 @@ internal class VibratorWrapperImpl(
                     Api26Impl.vibrate(vibrator, vibration, attrs)
                 }
             }
-
             is PatternVibrationWrapper -> {
-                if (Build.VERSION.SDK_INT >= 21) {
-                    check(attrs is AudioAttributesWrapper) {
-                        "Attempting to vibrate without AudioAttributes after" +
-                            " Android Lollipop (API 21+), not allowed"
-                    }
-                    Api21Impl.vibrate(vibrator, vibration, attrs)
-                } else {
-                    check(attrs == null) {
-                        "Attempting to vibrate with AudioAttributes before" +
-                            " Android Lollipop (< API 21), not supported"
-                    }
-                    ApiImpl.vibrate(vibrator, vibration)
+                check(attrs is AudioAttributesWrapper) {
+                    "Attempting to vibrate without AudioAttributes after" +
+                        " Android Lollipop (API 21+), not allowed"
                 }
+                Api21Impl.vibrate(vibrator, vibration, attrs)
             }
         }
     }
@@ -121,7 +107,6 @@ internal class VibratorWrapperImpl(
     private object Api33Impl {
 
         @JvmStatic
-        @DoNotInline
         @RequiresPermission(android.Manifest.permission.VIBRATE)
         fun vibrate(
             vibrator: Vibrator,
@@ -145,11 +130,7 @@ internal class VibratorWrapperImpl(
 
         @SuppressLint("WrongConstant") // custom conversion between jetpack and framework
         @JvmStatic
-        @DoNotInline
-        fun getPrimitivesDurations(
-            vibrator: Vibrator,
-            primitives: IntArray,
-        ): IntArray? {
+        fun getPrimitivesDurations(vibrator: Vibrator, primitives: IntArray): IntArray? {
             return vibrator.getPrimitiveDurations(*primitives)
         }
     }
@@ -160,27 +141,25 @@ internal class VibratorWrapperImpl(
 
         @SuppressLint("WrongConstant") // custom conversion between jetpack and framework
         @JvmStatic
-        @DoNotInline
         fun areEffectsSupported(
             vibrator: Vibrator,
             effects: IntArray,
         ): Array<VibratorWrapper.EffectSupport> {
-            return vibrator.areEffectsSupported(*effects).map {
-                when (it) {
-                    Vibrator.VIBRATION_EFFECT_SUPPORT_YES -> VibratorWrapper.EffectSupport.YES
-                    Vibrator.VIBRATION_EFFECT_SUPPORT_NO -> VibratorWrapper.EffectSupport.NO
-                    else -> VibratorWrapper.EffectSupport.UNKNOWN
+            return vibrator
+                .areEffectsSupported(*effects)
+                .map {
+                    when (it) {
+                        Vibrator.VIBRATION_EFFECT_SUPPORT_YES -> VibratorWrapper.EffectSupport.YES
+                        Vibrator.VIBRATION_EFFECT_SUPPORT_NO -> VibratorWrapper.EffectSupport.NO
+                        else -> VibratorWrapper.EffectSupport.UNKNOWN
+                    }
                 }
-            }.toTypedArray()
+                .toTypedArray()
         }
 
         @SuppressLint("WrongConstant") // custom conversion between jetpack and framework
         @JvmStatic
-        @DoNotInline
-        fun arePrimitivesSupported(
-            vibrator: Vibrator,
-            primitives: IntArray,
-        ): BooleanArray {
+        fun arePrimitivesSupported(vibrator: Vibrator, primitives: IntArray): BooleanArray {
             return vibrator.arePrimitivesSupported(*primitives).toTypedArray().toBooleanArray()
         }
     }
@@ -189,12 +168,9 @@ internal class VibratorWrapperImpl(
     @RequiresApi(26)
     private object Api26Impl {
 
-        @JvmStatic
-        @DoNotInline
-        fun hasAmplitudeControl(vibrator: Vibrator) = vibrator.hasAmplitudeControl()
+        @JvmStatic fun hasAmplitudeControl(vibrator: Vibrator) = vibrator.hasAmplitudeControl()
 
         @JvmStatic
-        @DoNotInline
         @Suppress("DEPRECATION") // ApkVariant for compatibility
         @RequiresPermission(android.Manifest.permission.VIBRATE)
         fun vibrate(
@@ -213,11 +189,9 @@ internal class VibratorWrapperImpl(
     }
 
     /** Version-specific static inner class. */
-    @RequiresApi(21)
     private object Api21Impl {
 
         @JvmStatic
-        @DoNotInline
         @Suppress("DEPRECATION") // ApkVariant for compatibility
         @RequiresPermission(android.Manifest.permission.VIBRATE)
         fun vibrate(
@@ -235,8 +209,7 @@ internal class VibratorWrapperImpl(
     /** Version-specific static inner class. */
     private object ApiImpl {
 
-        @JvmStatic
-        fun hasVibrator(vibrator: Vibrator) = vibrator.hasVibrator()
+        @JvmStatic fun hasVibrator(vibrator: Vibrator) = vibrator.hasVibrator()
 
         @JvmStatic
         @Suppress("DEPRECATION") // ApkVariant for compatibility

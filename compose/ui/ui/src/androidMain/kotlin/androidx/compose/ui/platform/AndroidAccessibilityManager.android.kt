@@ -18,26 +18,25 @@ package androidx.compose.ui.platform
 
 import android.content.Context
 import android.os.Build
-import androidx.annotation.DoNotInline
 import androidx.annotation.RequiresApi
 
-/**
- * Android implementation for [AccessibilityManager].
- */
+/** Android implementation for [AccessibilityManager]. */
 internal class AndroidAccessibilityManager(context: Context) : AccessibilityManager {
     private companion object {
         const val FlagContentIcons = 1
         const val FlagContentText = 2
         const val FlagContentControls = 4
     }
-    private val accessibilityManager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as
-        android.view.accessibility.AccessibilityManager
+
+    private val accessibilityManager =
+        context.getSystemService(Context.ACCESSIBILITY_SERVICE)
+            as android.view.accessibility.AccessibilityManager
 
     override fun calculateRecommendedTimeoutMillis(
         originalTimeoutMillis: Long,
         containsIcons: Boolean,
         containsText: Boolean,
-        containsControls: Boolean
+        containsControls: Boolean,
     ): Long {
         if (originalTimeoutMillis >= Int.MAX_VALUE) {
             return originalTimeoutMillis
@@ -53,11 +52,12 @@ internal class AndroidAccessibilityManager(context: Context) : AccessibilityMana
             uiContentFlags = uiContentFlags or FlagContentControls
         }
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val recommended = Api29Impl.getRecommendedTimeoutMillis(
-                accessibilityManager,
-                originalTimeoutMillis.toInt(),
-                uiContentFlags
-            )
+            val recommended =
+                Api29Impl.getRecommendedTimeoutMillis(
+                    accessibilityManager,
+                    originalTimeoutMillis.toInt(),
+                    uiContentFlags,
+                )
             if (recommended == Int.MAX_VALUE) {
                 Long.MAX_VALUE
             } else {
@@ -72,17 +72,16 @@ internal class AndroidAccessibilityManager(context: Context) : AccessibilityMana
 }
 
 /**
- * This class is here to ensure that the classes that use this API will get verified and can be
- * AOT compiled. It is expected that this class will soft-fail verification, but the classes
- * which use this method will pass.
+ * This class is here to ensure that the classes that use this API will get verified and can be AOT
+ * compiled. It is expected that this class will soft-fail verification, but the classes which use
+ * this method will pass.
  */
 @RequiresApi(Build.VERSION_CODES.Q)
 internal object Api29Impl {
-    @DoNotInline
     fun getRecommendedTimeoutMillis(
         accessibilityManager: android.view.accessibility.AccessibilityManager,
         originalTimeout: Int,
-        uiContentFlags: Int
+        uiContentFlags: Int,
     ): Int {
         return accessibilityManager.getRecommendedTimeoutMillis(originalTimeout, uiContentFlags)
     }

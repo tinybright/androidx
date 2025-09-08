@@ -35,8 +35,8 @@ import kotlin.reflect.KClass
  * }
  * ```
  *
- * Custom [ViewModelProvider.Factory] can be defined via [factoryProducer] parameter,
- * factory returned by it will be used to create [ViewModel]:
+ * Custom [ViewModelProvider.Factory] can be defined via [factoryProducer] parameter, factory
+ * returned by it will be used to create [ViewModel]:
  * ```
  * class MyFragment : Fragment() {
  *     val viewmodel: MyViewModel by viewModels { myFactory }
@@ -55,12 +55,12 @@ import kotlin.reflect.KClass
  */
 @Deprecated(
     "Superseded by viewModels that takes a CreationExtras producer",
-    level = DeprecationLevel.HIDDEN
+    level = DeprecationLevel.HIDDEN,
 )
 @MainThread
 public inline fun <reified VM : ViewModel> Fragment.viewModels(
     noinline ownerProducer: () -> ViewModelStoreOwner = { this },
-    noinline factoryProducer: (() -> Factory)? = null
+    noinline factoryProducer: (() -> Factory)? = null,
 ): Lazy<VM> {
     val owner by lazy(LazyThreadSafetyMode.NONE) { ownerProducer() }
     return createViewModelLazy(
@@ -70,10 +70,12 @@ public inline fun <reified VM : ViewModel> Fragment.viewModels(
             (owner as? HasDefaultViewModelProviderFactory)?.defaultViewModelCreationExtras
                 ?: CreationExtras.Empty
         },
-        factoryProducer ?: {
-            (owner as? HasDefaultViewModelProviderFactory)?.defaultViewModelProviderFactory
-                ?: defaultViewModelProviderFactory
-        })
+        factoryProducer
+            ?: {
+                (owner as? HasDefaultViewModelProviderFactory)?.defaultViewModelProviderFactory
+                    ?: defaultViewModelProviderFactory
+            },
+    )
 }
 
 /**
@@ -84,8 +86,8 @@ public inline fun <reified VM : ViewModel> Fragment.viewModels(
  * }
  * ```
  *
- * Custom [ViewModelProvider.Factory] can be defined via [factoryProducer] parameter,
- * factory returned by it will be used to create [ViewModel]:
+ * Custom [ViewModelProvider.Factory] can be defined via [factoryProducer] parameter, factory
+ * returned by it will be used to create [ViewModel]:
  * ```
  * class MyFragment : Fragment() {
  *     val viewmodel: MyViewModel by viewModels { myFactory }
@@ -106,7 +108,7 @@ public inline fun <reified VM : ViewModel> Fragment.viewModels(
 public inline fun <reified VM : ViewModel> Fragment.viewModels(
     noinline ownerProducer: () -> ViewModelStoreOwner = { this },
     noinline extrasProducer: (() -> CreationExtras)? = null,
-    noinline factoryProducer: (() -> Factory)? = null
+    noinline factoryProducer: (() -> Factory)? = null,
 ): Lazy<VM> {
     val owner by lazy(LazyThreadSafetyMode.NONE) { ownerProducer() }
     return createViewModelLazy(
@@ -114,21 +116,23 @@ public inline fun <reified VM : ViewModel> Fragment.viewModels(
         { owner.viewModelStore },
         {
             extrasProducer?.invoke()
-            ?: (owner as? HasDefaultViewModelProviderFactory)?.defaultViewModelCreationExtras
-            ?: CreationExtras.Empty
+                ?: (owner as? HasDefaultViewModelProviderFactory)?.defaultViewModelCreationExtras
+                ?: CreationExtras.Empty
         },
-        factoryProducer ?: {
-            (owner as? HasDefaultViewModelProviderFactory)?.defaultViewModelProviderFactory
-                ?: defaultViewModelProviderFactory
-        })
+        factoryProducer
+            ?: {
+                (owner as? HasDefaultViewModelProviderFactory)?.defaultViewModelProviderFactory
+                    ?: defaultViewModelProviderFactory
+            },
+    )
 }
 
 /**
- * Returns a property delegate to access parent activity's [ViewModel],
- * if [factoryProducer] is specified then [ViewModelProvider.Factory]
- * returned by it will be used to create [ViewModel] first time. Otherwise, the activity's
- * [androidx.activity.ComponentActivity.getDefaultViewModelProviderFactory](default factory)
- * will be used.
+ * Returns a property delegate to access parent activity's [ViewModel], if [factoryProducer] is
+ * specified then [ViewModelProvider.Factory] returned by it will be used to create [ViewModel]
+ * first time. Otherwise, the activity's
+ * [androidx.activity.ComponentActivity.getDefaultViewModelProviderFactory](default factory) will be
+ * used.
  *
  * ```
  * class MyFragment : Fragment() {
@@ -141,23 +145,25 @@ public inline fun <reified VM : ViewModel> Fragment.viewModels(
  */
 @Deprecated(
     "Superseded by activityViewModels that takes a CreationExtras producer",
-    level = DeprecationLevel.HIDDEN
+    level = DeprecationLevel.HIDDEN,
 )
 @MainThread
 public inline fun <reified VM : ViewModel> Fragment.activityViewModels(
     noinline factoryProducer: (() -> Factory)? = null
-): Lazy<VM> = createViewModelLazy(
-    VM::class, { requireActivity().viewModelStore },
-    { requireActivity().defaultViewModelCreationExtras },
-    factoryProducer ?: { requireActivity().defaultViewModelProviderFactory }
-)
+): Lazy<VM> =
+    createViewModelLazy(
+        VM::class,
+        { requireActivity().viewModelStore },
+        { requireActivity().defaultViewModelCreationExtras },
+        factoryProducer ?: { requireActivity().defaultViewModelProviderFactory },
+    )
 
 /**
- * Returns a property delegate to access parent activity's [ViewModel],
- * if [factoryProducer] is specified then [ViewModelProvider.Factory]
- * returned by it will be used to create [ViewModel] first time. Otherwise, the activity's
- * [androidx.activity.ComponentActivity.getDefaultViewModelProviderFactory](default factory)
- * will be used.
+ * Returns a property delegate to access parent activity's [ViewModel], if [factoryProducer] is
+ * specified then [ViewModelProvider.Factory] returned by it will be used to create [ViewModel]
+ * first time. Otherwise, the activity's
+ * [androidx.activity.ComponentActivity.getDefaultViewModelProviderFactory](default factory) will be
+ * used.
  *
  * ```
  * class MyFragment : Fragment() {
@@ -171,13 +177,14 @@ public inline fun <reified VM : ViewModel> Fragment.activityViewModels(
 @MainThread
 public inline fun <reified VM : ViewModel> Fragment.activityViewModels(
     noinline extrasProducer: (() -> CreationExtras)? = null,
-    noinline factoryProducer: (() -> Factory)? = null
-): Lazy<VM> = createViewModelLazy(
-    VM::class, { requireActivity().viewModelStore },
-    { extrasProducer?.invoke() ?: requireActivity().defaultViewModelCreationExtras },
-    factoryProducer ?: { requireActivity().defaultViewModelProviderFactory }
-
-)
+    noinline factoryProducer: (() -> Factory)? = null,
+): Lazy<VM> =
+    createViewModelLazy(
+        VM::class,
+        { requireActivity().viewModelStore },
+        { extrasProducer?.invoke() ?: requireActivity().defaultViewModelCreationExtras },
+        factoryProducer ?: { requireActivity().defaultViewModelProviderFactory },
+    )
 
 /**
  * Helper method for creation of [ViewModelLazy], that resolves `null` passed as [factoryProducer]
@@ -185,19 +192,20 @@ public inline fun <reified VM : ViewModel> Fragment.activityViewModels(
  */
 @Deprecated(
     "Superseded by createViewModelLazy that takes a CreationExtras producer",
-    level = DeprecationLevel.HIDDEN
+    level = DeprecationLevel.HIDDEN,
 )
 @MainThread
 public fun <VM : ViewModel> Fragment.createViewModelLazy(
     viewModelClass: KClass<VM>,
     storeProducer: () -> ViewModelStore,
-    factoryProducer: (() -> Factory)? = null
-): Lazy<VM> = createViewModelLazy(
-    viewModelClass,
-    storeProducer,
-    { defaultViewModelCreationExtras },
-    factoryProducer
-)
+    factoryProducer: (() -> Factory)? = null,
+): Lazy<VM> =
+    createViewModelLazy(
+        viewModelClass,
+        storeProducer,
+        { defaultViewModelCreationExtras },
+        factoryProducer,
+    )
 
 /**
  * Helper method for creation of [ViewModelLazy], that resolves `null` passed as [factoryProducer]
@@ -211,11 +219,8 @@ public fun <VM : ViewModel> Fragment.createViewModelLazy(
     viewModelClass: KClass<VM>,
     storeProducer: () -> ViewModelStore,
     extrasProducer: () -> CreationExtras = { defaultViewModelCreationExtras },
-    factoryProducer: (() -> Factory)? = null
-
+    factoryProducer: (() -> Factory)? = null,
 ): Lazy<VM> {
-    val factoryPromise = factoryProducer ?: {
-        defaultViewModelProviderFactory
-    }
+    val factoryPromise = factoryProducer ?: { defaultViewModelProviderFactory }
     return ViewModelLazy(viewModelClass, storeProducer, factoryPromise, extrasProducer)
 }

@@ -18,12 +18,9 @@ package androidx.camera.core;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.os.Build;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 import org.robolectric.annotation.internal.DoNotInstrument;
 
 import java.util.Arrays;
@@ -31,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 
 @RunWith(RobolectricTestRunner.class)
 @DoNotInstrument
-@Config(minSdk = Build.VERSION_CODES.LOLLIPOP)
 public class FocusMeteringActionTest {
     private SurfaceOrientedMeteringPointFactory mPointFactory =
             new SurfaceOrientedMeteringPointFactory(1.0f, 1.0f);
@@ -48,7 +44,7 @@ public class FocusMeteringActionTest {
         assertThat(action.getMeteringPointsAe()).containsExactly(mPoint1);
         assertThat(action.getMeteringPointsAwb()).containsExactly(mPoint1);
         assertThat(action.getAutoCancelDurationInMillis()).isEqualTo(
-                FocusMeteringAction.DEFAULT_AUTOCANCEL_DURATION);
+                FocusMeteringAction.DEFAULT_AUTO_CANCEL_DURATION_MILLIS);
         assertThat(action.isAutoCancelEnabled()).isTrue();
     }
 

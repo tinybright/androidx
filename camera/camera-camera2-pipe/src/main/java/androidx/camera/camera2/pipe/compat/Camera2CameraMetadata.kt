@@ -17,7 +17,6 @@
 package androidx.camera.camera2.pipe.compat
 
 import android.hardware.camera2.CameraCharacteristics
-import android.hardware.camera2.CameraExtensionCharacteristics
 import android.hardware.camera2.CaptureRequest
 import android.hardware.camera2.CaptureResult
 import android.os.Build
@@ -107,6 +106,9 @@ internal class Camera2CameraMetadata(
     override val sessionKeys: Set<CaptureRequest.Key<*>>
         get() = _sessionKeys.value
 
+    override val sessionCharacteristicsKeys: Set<CameraCharacteristics.Key<*>>
+        get() = _sessionCharacteristicsKeys.value
+
     override val physicalCameraIds: Set<CameraId>
         get() = _physicalCameraIds.value
 
@@ -128,10 +130,6 @@ internal class Camera2CameraMetadata(
             "$cameraId is not a valid physical camera on $this"
         }
         return metadataProvider.awaitCameraMetadata(cameraId)
-    }
-
-    private fun getExtensionCharacteristics(): CameraExtensionCharacteristics {
-        return metadataProvider.getCameraExtensionCharacteristics(camera)
     }
 
     override suspend fun getExtensionMetadata(extension: Int): CameraExtensionMetadata {
@@ -160,12 +158,7 @@ internal class Camera2CameraMetadata(
         lazy(LazyThreadSafetyMode.PUBLICATION) {
             try {
                 Debug.trace("Camera-$camera#supportedExtensions") {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        val extensionCharacteristics = getExtensionCharacteristics()
-                        Api31Compat.getSupportedExtensions(extensionCharacteristics).toSet()
-                    } else {
-                        emptySet()
-                    }
+                    metadataProvider.getSupportedCameraExtensions(camera)
                 }
             } catch (e: AssertionError) {
                 Log.warn(e) { "Failed to getSupportedExtensions from Camera-$camera" }
@@ -176,7 +169,10 @@ internal class Camera2CameraMetadata(
     private val _keys: Lazy<Set<CameraCharacteristics.Key<*>>> =
         lazy(LazyThreadSafetyMode.PUBLICATION) {
             try {
-                Debug.trace("$camera#keys") { characteristics.keys.orEmpty().toSet() }
+                Debug.trace("$camera#keys") {
+                    @Suppress("UselessCallOnNotNull") // Untrusted API
+                    characteristics.keys.orEmpty().toSet()
+                }
             } catch (e: AssertionError) {
                 Log.warn(e) { "Failed to getKeys from $camera}" }
                 emptySet()
@@ -187,6 +183,7 @@ internal class Camera2CameraMetadata(
         lazy(LazyThreadSafetyMode.PUBLICATION) {
             try {
                 Debug.trace("$camera#availableCaptureRequestKeys") {
+                    @Suppress("UselessCallOnNotNull") // Untrusted API
                     characteristics.availableCaptureRequestKeys.orEmpty().toSet()
                 }
             } catch (e: AssertionError) {
@@ -199,6 +196,7 @@ internal class Camera2CameraMetadata(
         lazy(LazyThreadSafetyMode.PUBLICATION) {
             try {
                 Debug.trace("$camera#availableCaptureResultKeys") {
+                    @Suppress("UselessCallOnNotNull") // Untrusted API
                     characteristics.availableCaptureResultKeys.orEmpty().toSet()
                 }
             } catch (e: AssertionError) {
@@ -250,6 +248,26 @@ internal class Camera2CameraMetadata(
             }
         }
 
+    private val _sessionCharacteristicsKeys: Lazy<Set<CameraCharacteristics.Key<*>>> =
+        lazy(LazyThreadSafetyMode.PUBLICATION) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                emptySet()
+            } else {
+                try {
+                    Debug.trace("Camera-${camera.value}#getAvailableSessionCharacteristicsKeys") {
+                        Api35Compat.getAvailableSessionCharacteristicsKeys(characteristics)
+                            .orEmpty()
+                            .toSet()
+                    }
+                } catch (e: AssertionError) {
+                    Log.warn(e) {
+                        "Failed to getAvailableSessionCharacteristicsKeys from Camera-${camera.value}"
+                    }
+                    emptySet()
+                }
+            }
+        }
+
     private val _sessionKeys: Lazy<Set<CaptureRequest.Key<*>>> =
         lazy(LazyThreadSafetyMode.PUBLICATION) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
@@ -271,7 +289,7 @@ internal class Camera2CameraMetadata(
             return this.get(key)
         } catch (exception: AssertionError) {
             throw IllegalStateException(
-                "Failed to get characteristic for $key: " + "Framework throw an AssertionError"
+                "Failed to get characteristic for $key: Framework throw an AssertionError"
             )
         }
     }

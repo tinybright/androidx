@@ -76,28 +76,25 @@ fun ScreenCoordinatesDemo(navigateBack: () -> Unit) {
             "This screen is covered by a transparent window (red border). Drag around to have " +
                 "that window record pointer events in screen coordinates, which will then be " +
                 "converted back to coordinates in this window and drawn here.",
-            Modifier.padding(16.dp)
+            Modifier.padding(16.dp),
         )
 
         var coords: LayoutCoordinates? by remember { mutableStateOf(null, neverEqualPolicy()) }
 
-        Canvas(modifier = Modifier
-            .fillMaxSize()
-            .onGloballyPositioned { coords = it }
-        ) {
+        Canvas(modifier = Modifier.fillMaxSize().onGloballyPositioned { coords = it }) {
             if (lastPointerPositionInScreen.isUnspecified) return@Canvas
-            val lastPointerPositionInLocal = coords?.screenToLocal(lastPointerPositionInScreen)
-                ?: return@Canvas
+            val lastPointerPositionInLocal =
+                coords?.screenToLocal(lastPointerPositionInScreen) ?: return@Canvas
             if (pointerDown) {
                 drawLine(
                     Color.Black,
                     start = lastPointerPositionInLocal.copy(x = 0f),
-                    end = lastPointerPositionInLocal.copy(x = size.width)
+                    end = lastPointerPositionInLocal.copy(x = size.width),
                 )
                 drawLine(
                     Color.Black,
                     start = lastPointerPositionInLocal.copy(y = 0f),
-                    end = lastPointerPositionInLocal.copy(y = size.height)
+                    end = lastPointerPositionInLocal.copy(y = size.height),
                 )
             }
         }
@@ -106,23 +103,24 @@ fun ScreenCoordinatesDemo(navigateBack: () -> Unit) {
     var popupOffset by remember { mutableStateOf(IntOffset(100, 100)) }
     // TODO(b/292257547) Workaround for popup not updating offset when state read from
     //  calculatePosition changes. Remove when fixed.
-    @Suppress("UNUSED_EXPRESSION")
-    popupOffset
+    @Suppress("UNUSED_EXPRESSION") popupOffset
     Popup(
-        popupPositionProvider = object : PopupPositionProvider {
-            override fun calculatePosition(
-                anchorBounds: IntRect,
-                windowSize: IntSize,
-                layoutDirection: LayoutDirection,
-                popupContentSize: IntSize
-            ): IntOffset = popupOffset
-        },
-        properties = PopupProperties(
-            focusable = true,
-            clippingEnabled = false,
-            dismissOnClickOutside = false,
-        ),
-        onDismissRequest = navigateBack
+        popupPositionProvider =
+            object : PopupPositionProvider {
+                override fun calculatePosition(
+                    anchorBounds: IntRect,
+                    windowSize: IntSize,
+                    layoutDirection: LayoutDirection,
+                    popupContentSize: IntSize,
+                ): IntOffset = popupOffset
+            },
+        properties =
+            PopupProperties(
+                focusable = true,
+                clippingEnabled = false,
+                dismissOnClickOutside = false,
+            ),
+        onDismissRequest = navigateBack,
     ) {
         var windowCoords: LayoutCoordinates? by remember {
             mutableStateOf(null, neverEqualPolicy())
@@ -132,74 +130,73 @@ fun ScreenCoordinatesDemo(navigateBack: () -> Unit) {
         }
         Box(
             contentAlignment = Alignment.BottomCenter,
-            modifier = Modifier
-                .onGloballyPositioned { windowCoords = it }
-                .fitSquare(fraction = 0.9f)
-                .border(2.dp, Color.Red.copy(alpha = 0.5f))
-                // Ensure the gesture area is actually offset from the window.
-                .padding(16.dp)
-                .background(Color.Magenta.copy(alpha = 0.1f))
-                .onGloballyPositioned { gestureAreaCoords = it }
-                .pointerInput(Unit) {
-                    detectDragGestures(
-                        onDragStart = { positionInLocal ->
-                            pointerDown = true
-                            lastPointerPositionInScreen =
-                                windowCoords?.localToScreen(positionInLocal)
-                                    ?: Offset.Unspecified
-                        },
-                        onDrag = { change, delta ->
-                            val positionInLocal = change.position
-                            lastPointerPositionInScreen =
-                                if (useMatrixToConvertToScreenCoordinates) {
-                                    val matrix = Matrix()
-                                    gestureAreaCoords?.transformToScreen(matrix)
-                                    matrix.map(positionInLocal)
-                                } else {
-                                    gestureAreaCoords?.localToScreen(positionInLocal)
+            modifier =
+                Modifier.onGloballyPositioned { windowCoords = it }
+                    .fitSquare(fraction = 0.9f)
+                    .border(2.dp, Color.Red.copy(alpha = 0.5f))
+                    // Ensure the gesture area is actually offset from the window.
+                    .padding(16.dp)
+                    .background(Color.Magenta.copy(alpha = 0.1f))
+                    .onGloballyPositioned { gestureAreaCoords = it }
+                    .pointerInput(Unit) {
+                        detectDragGestures(
+                            onDragStart = { positionInLocal ->
+                                pointerDown = true
+                                lastPointerPositionInScreen =
+                                    windowCoords?.localToScreen(positionInLocal)
                                         ?: Offset.Unspecified
-                                }
-                            popupOffset += delta.round()
-                        },
-                        onDragEnd = { pointerDown = false },
-                        onDragCancel = { pointerDown = false }
-                    )
-                }
+                            },
+                            onDrag = { change, delta ->
+                                val positionInLocal = change.position
+                                lastPointerPositionInScreen =
+                                    if (useMatrixToConvertToScreenCoordinates) {
+                                        val matrix = Matrix()
+                                        gestureAreaCoords?.transformToScreen(matrix)
+                                        matrix.map(positionInLocal)
+                                    } else {
+                                        gestureAreaCoords?.localToScreen(positionInLocal)
+                                            ?: Offset.Unspecified
+                                    }
+                                popupOffset += delta.round()
+                            },
+                            onDragEnd = { pointerDown = false },
+                            onDragCancel = { pointerDown = false },
+                        )
+                    },
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(8.dp)
+                    modifier = Modifier.padding(8.dp),
                 ) {
                     Text("Use matrix to convert to screen:")
                     Spacer(Modifier.weight(1f, fill = true))
                     Switch(
                         checked = useMatrixToConvertToScreenCoordinates,
-                        onCheckedChange = { useMatrixToConvertToScreenCoordinates = it }
+                        onCheckedChange = { useMatrixToConvertToScreenCoordinates = it },
                     )
                 }
                 Spacer(Modifier.weight(1f, fill = true))
                 Text(
                     "Red border positionOnScreen: ${windowCoords?.positionOnScreen()}",
-                    style = MaterialTheme.typography.body2
+                    style = MaterialTheme.typography.body2,
                 )
                 Text(
                     "Gesture area (red bg) positionOnScreen: " +
                         "${gestureAreaCoords?.positionOnScreen()}",
-                    style = MaterialTheme.typography.body2
+                    style = MaterialTheme.typography.body2,
                 )
                 TextField(value = "Tap to show keyboard", onValueChange = {})
-                Button(onClick = navigateBack) {
-                    Text("Close")
-                }
+                Button(onClick = navigateBack) { Text("Close") }
 
                 // Hack to get the window offset to update while keyboard is animating.
                 val imeOffset = WindowInsets.ime
                 LaunchedEffect(imeOffset) {
-                    snapshotFlow { imeOffset.getBottom(Density(1f)) }.collect {
-                        windowCoords = windowCoords
-                        gestureAreaCoords = gestureAreaCoords
-                    }
+                    snapshotFlow { imeOffset.getBottom(Density(1f)) }
+                        .collect {
+                            windowCoords = windowCoords
+                            gestureAreaCoords = gestureAreaCoords
+                        }
                 }
             }
         }
@@ -210,7 +207,5 @@ private fun Modifier.fitSquare(fraction: Float) = layout { measurable, constrain
     val minConstraint = (minOf(constraints.maxWidth, constraints.maxHeight) * fraction).roundToInt()
     val childConstraints = Constraints.fixed(minConstraint, minConstraint)
     val placeable = measurable.measure(childConstraints)
-    layout(placeable.width, placeable.height) {
-        placeable.place(0, 0)
-    }
+    layout(placeable.width, placeable.height) { placeable.place(0, 0) }
 }

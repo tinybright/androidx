@@ -18,16 +18,18 @@
 package androidx.compose.foundation.demos
 
 import android.annotation.SuppressLint
+import android.content.ClipData
 import android.content.res.Configuration
 import androidx.compose.animation.core.AnimationConstants
 import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.animateTo
 import androidx.compose.animation.core.calculateTargetValue
 import androidx.compose.animation.rememberSplineBasedDecay
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.draganddrop.dragAndDropSource
+import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollScope
@@ -45,6 +47,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -54,7 +57,9 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -66,11 +71,14 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.samples.StickyHeaderSample
+import androidx.compose.foundation.samples.StickyHeaderGridSample
+import androidx.compose.foundation.samples.StickyHeaderHeaderIndexSample
+import androidx.compose.foundation.samples.StickyHeaderListSample
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.integration.demos.common.ComposableDemo
 import androidx.compose.material.Button
+import androidx.compose.material.Card
 import androidx.compose.material.Checkbox
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -94,10 +102,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draganddrop.DragAndDropEvent
+import androidx.compose.ui.draganddrop.DragAndDropTarget
+import androidx.compose.ui.draganddrop.DragAndDropTransferData
+import androidx.compose.ui.draganddrop.toAndroidDragEvent
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.layout.LayoutBoundsHolder
+import androidx.compose.ui.layout.layoutBounds
+import androidx.compose.ui.layout.onFirstVisible
+import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
@@ -114,43 +130,138 @@ import kotlin.random.Random
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
-val LazyListDemos = listOf(
-    ComposableDemo("Simple column") { LazyColumnDemo() },
-    ComposableDemo("Add/remove items") { ListAddRemoveItemsDemo() },
-    ComposableDemo("Hoisted state") { ListHoistedStateDemo() },
-    ComposableDemo("Horizontal list") { LazyRowItemsDemo() },
-    ComposableDemo("List with indexes") { ListWithIndexSample() },
-    ComposableDemo("Pager-like list") { PagerLikeDemo() },
-    ComposableDemo("Rtl list") { RtlListDemo() },
-    ComposableDemo("LazyColumn DSL") { LazyColumnScope() },
-    ComposableDemo("LazyRow DSL") { LazyRowScope() },
-    ComposableDemo("LazyColumn with sticky headers") { StickyHeaderSample() },
-    ComposableDemo("Arrangements") { LazyListArrangements() },
-    ComposableDemo("ReverseLayout and RTL") { ReverseLayoutAndRtlDemo() },
-    ComposableDemo("Nested lazy lists") { NestedLazyDemo() },
-    ComposableDemo("LazyGrid") { LazyGridDemo() },
-    ComposableDemo("LazyGrid with Spacing") { LazyGridWithSpacingDemo() },
-    ComposableDemo("Custom keys") { ReorderWithCustomKeys() },
-    ComposableDemo("Fling Config") { LazyWithFlingConfig() },
-    ComposableDemo("Item reordering") { PopularBooksDemo() },
-    ComposableDemo("List drag and drop") { LazyColumnDragAndDropDemo() },
-    ComposableDemo("Grid drag and drop") { LazyGridDragAndDropDemo() },
-    ComposableDemo("Staggered grid") { LazyStaggeredGridDemo() },
-    ComposableDemo("Animate item placement") { AnimateItemPlacementDemo() },
-    ComposableDemo("Focus Scrolling") { BringIntoViewDemo() },
-    PagingDemos
-)
+val LazyListDemos =
+    listOf(
+        ComposableDemo("Simple column") { LazyColumnDemo() },
+        ComposableDemo("Add/remove items") { ListAddRemoveItemsDemo() },
+        ComposableDemo("Hoisted state") { ListHoistedStateDemo() },
+        ComposableDemo("Horizontal list") { LazyRowItemsDemo() },
+        ComposableDemo("List with indexes") { ListWithIndexSample() },
+        ComposableDemo("Impression Logging") { LazyColumnImpressionsDemo() },
+        ComposableDemo("Autoplay") { LazyColumnAutoplayDemo() },
+        ComposableDemo("Pager-like list") { PagerLikeDemo() },
+        ComposableDemo("Rtl list") { RtlListDemo() },
+        ComposableDemo("LazyColumn DSL") { LazyColumnScope() },
+        ComposableDemo("LazyRow DSL") { LazyRowScope() },
+        ComposableDemo("LazyColumn with sticky headers") { StickyHeaderListSample() },
+        ComposableDemo("LazyVerticalGrid with sticky headers") { StickyHeaderGridSample() },
+        ComposableDemo("LazyColumn with sticky headers - header index") {
+            StickyHeaderHeaderIndexSample()
+        },
+        ComposableDemo("Arrangements") { LazyListArrangements() },
+        ComposableDemo("ReverseLayout and RTL") { ReverseLayoutAndRtlDemo() },
+        ComposableDemo("Nested lazy lists") { NestedLazyDemo() },
+        ComposableDemo("LazyGrid") { LazyGridDemo() },
+        ComposableDemo("LazyGrid with Spacing") { LazyGridWithSpacingDemo() },
+        ComposableDemo("Custom keys") { ReorderWithCustomKeys() },
+        ComposableDemo("Fling Config") { LazyWithFlingConfig() },
+        ComposableDemo("Item reordering") { PopularBooksDemo() },
+        ComposableDemo("List drag and drop") { LazyColumnDragAndDropDemo() },
+        ComposableDemo("Cross List drag and drop") { CrossListDragAndDropDemo() },
+        ComposableDemo("Grid drag and drop") { LazyGridDragAndDropDemo() },
+        ComposableDemo("Staggered grid") { LazyStaggeredGridDemo() },
+        ComposableDemo("Animate item placement") { AnimateItemPlacementDemo() },
+        ComposableDemo("Focus Scrolling") { BringIntoViewDemo() },
+        PagingDemos,
+    )
+
+@Preview
+@Composable
+private fun LazyColumnImpressionsDemo() {
+    val viewport = remember { LayoutBoundsHolder() }
+    Box {
+        LazyColumn {
+            items(100) { index ->
+                var impressions by rememberSaveable { mutableIntStateOf(0) }
+                Card(Modifier.padding(10.dp)) {
+                    Column {
+                        Text("Item Title $index", fontSize = 40.sp)
+                        Text("This is a description")
+                        Text("Impression count: $impressions")
+
+                        Box(
+                            Modifier.onFirstVisible(
+                                    minDurationMs = 500,
+                                    minFractionVisible = 1f,
+                                    viewportBounds = viewport,
+                                ) {
+                                    impressions++
+                                }
+                                .border(1.dp, Color.Black)
+                                .background(Color.Blue)
+                                .fillMaxWidth()
+                                .height(80.dp)
+                        )
+                    }
+                }
+            }
+        }
+        Box(
+            Modifier.offset(x = 0.dp, y = 200.dp)
+                .layoutBounds(viewport)
+                .border(1.dp, Color.Red)
+                .fillMaxWidth()
+                .height(400.dp)
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun LazyColumnAutoplayDemo() {
+    val viewport = remember { LayoutBoundsHolder() }
+    Box {
+        LazyColumn {
+            items(100) { index ->
+                var visible by remember { mutableStateOf(false) }
+                Card(Modifier.padding(10.dp)) {
+                    Column {
+                        Text("Item Title $index", fontSize = 40.sp)
+                        Text("This is a description")
+
+                        Box(
+                            Modifier.onVisibilityChanged(
+                                    minDurationMs = 500,
+                                    minFractionVisible = 1f,
+                                    viewportBounds = viewport,
+                                ) {
+                                    visible = it
+                                }
+                                .border(1.dp, Color.Black)
+                                .background(if (visible) Color.Blue else Color.Red)
+                                .fillMaxWidth()
+                                .height(100.dp)
+                        )
+                    }
+                }
+            }
+        }
+        Box(
+            Modifier.offset(x = 0.dp, y = 200.dp)
+                .layoutBounds(viewport)
+                .border(1.dp, Color.Red)
+                .fillMaxWidth()
+                .height(400.dp)
+        )
+    }
+}
 
 @Preview
 @Composable
 private fun LazyColumnDemo() {
     LazyColumn {
         items(
-            items = listOf(
-                "Hello,", "World:", "It works!", "",
-                "this one is really long and spans a few lines for scrolling purposes",
-                "these", "are", "offscreen"
-            )
+            items =
+                listOf(
+                    "Hello,",
+                    "World:",
+                    "It works!",
+                    "",
+                    "this one is really long and spans a few lines for scrolling purposes",
+                    "these",
+                    "are",
+                    "offscreen",
+                )
         ) {
             Text(text = it, fontSize = 80.sp)
 
@@ -158,9 +269,7 @@ private fun LazyColumnDemo() {
                 Text("You can even emit multiple components per item.")
             }
         }
-        items(100) {
-            Text(text = "$it", fontSize = 80.sp)
-        }
+        items(100) { Text(text = "$it", fontSize = 80.sp) }
     }
 }
 
@@ -198,20 +307,16 @@ private fun ListHoistedStateDemo() {
             Button(
                 modifier = buttonModifier,
                 onClick = {
-                    coroutineScope.launch {
-                        state.scrollToItem(state.firstVisibleItemIndex - 1)
-                    }
-                }
+                    coroutineScope.launch { state.scrollToItem(state.firstVisibleItemIndex - 1) }
+                },
             ) {
                 Text("Previous")
             }
             Button(
                 modifier = buttonModifier,
                 onClick = {
-                    coroutineScope.launch {
-                        state.scrollToItem(state.firstVisibleItemIndex + 1)
-                    }
-                }
+                    coroutineScope.launch { state.scrollToItem(state.firstVisibleItemIndex + 1) }
+                },
             ) {
                 Text("Next")
             }
@@ -222,7 +327,7 @@ private fun ListHoistedStateDemo() {
                         val index = min(state.firstVisibleItemIndex + 500, numItems - 1)
                         state.animateScrollToItem(index)
                     }
-                }
+                },
             ) {
                 Text("+500")
             }
@@ -233,7 +338,7 @@ private fun ListHoistedStateDemo() {
                         val index = max(state.firstVisibleItemIndex - 500, 0)
                         state.animateScrollToItem(index)
                     }
-                }
+                },
             ) {
                 Text("-500")
             }
@@ -241,12 +346,9 @@ private fun ListHoistedStateDemo() {
                 modifier = buttonModifier,
                 onClick = {
                     coroutineScope.launch {
-                        state.animateScrollToItem(
-                            state.firstVisibleItemIndex,
-                            500
-                        )
+                        state.animateScrollToItem(state.firstVisibleItemIndex, 500)
                     }
-                }
+                },
             ) {
                 Text("Offset")
             }
@@ -256,15 +358,16 @@ private fun ListHoistedStateDemo() {
                     with(density) {
                         coroutineScope.launch {
                             val requestedScroll = 10000.dp.toPx()
-                            lastScrollDescription = try {
-                                val actualScroll = state.animateScrollBy(requestedScroll)
-                                "$actualScroll/$requestedScroll px"
-                            } catch (_: CancellationException) {
-                                "Interrupted!"
-                            }
+                            lastScrollDescription =
+                                try {
+                                    val actualScroll = state.animateScrollBy(requestedScroll)
+                                    "$actualScroll/$requestedScroll px"
+                                } catch (_: CancellationException) {
+                                    "Interrupted!"
+                                }
                         }
                     }
-                }
+                },
             ) {
                 Text("Scroll")
             }
@@ -272,21 +375,16 @@ private fun ListHoistedStateDemo() {
         Column {
             Text(
                 "First item: ${state.firstVisibleItemIndex}, Last scroll: $lastScrollDescription",
-                fontSize = 20.sp
+                fontSize = 20.sp,
             )
             Text(
                 "Dragging: ${state.interactionSource.collectIsDraggedAsState().value}, " +
                     "Flinging: ${state.isScrollInProgress}",
-                fontSize = 20.sp
+                fontSize = 20.sp,
             )
         }
-        LazyColumn(
-            Modifier.fillMaxWidth(),
-            state = state
-        ) {
-            items(numItems) {
-                Text("$it", style = LocalTextStyle.current.copy(fontSize = 40.sp))
-            }
+        LazyColumn(Modifier.fillMaxWidth(), state = state) {
+            items(numItems) { Text("$it", style = LocalTextStyle.current.copy(fontSize = 40.sp)) }
         }
     }
 }
@@ -294,22 +392,15 @@ private fun ListHoistedStateDemo() {
 @Preview
 @Composable
 private fun LazyRowItemsDemo() {
-    LazyRow {
-        items(1000) {
-            Square(it)
-        }
-    }
+    LazyRow { items(1000) { Square(it) } }
 }
 
 @Composable
 private fun Square(index: Int) {
     val width = remember { Random.nextInt(50, 150).dp }
     Box(
-        Modifier
-            .width(width)
-            .fillMaxHeight()
-            .background(colors[index % colors.size]),
-        contentAlignment = Alignment.Center
+        Modifier.width(width).fillMaxHeight().background(colors[index % colors.size]),
+        contentAlignment = Alignment.Center,
     ) {
         Text(index.toString())
     }
@@ -339,10 +430,9 @@ private fun RtlListDemo() {
             items(100) {
                 Text(
                     "$it",
-                    Modifier
-                        .requiredSize(100.dp)
+                    Modifier.requiredSize(100.dp)
                         .background(if (it % 2 == 0) Color.LightGray else Color.Transparent)
-                        .padding(16.dp)
+                        .padding(16.dp),
                 )
             }
         }
@@ -352,61 +442,42 @@ private fun RtlListDemo() {
 @Composable
 private fun PagerLikeDemo() {
     val pages = listOf(Color.LightGray, Color.White, Color.DarkGray)
-    LazyRow {
-        items(pages) {
-            Spacer(
-                Modifier
-                    .fillParentMaxSize()
-                    .background(it)
-            )
-        }
-    }
+    LazyRow { items(pages) { Spacer(Modifier.fillParentMaxSize().background(it)) } }
 }
 
-private val colors = listOf(
-    Color(0xFFffd7d7.toInt()),
-    Color(0xFFffe9d6.toInt()),
-    Color(0xFFfffbd0.toInt()),
-    Color(0xFFe3ffd9.toInt()),
-    Color(0xFFd0fff8.toInt())
-)
+private val colors =
+    listOf(
+        Color(0xFFffd7d7.toInt()),
+        Color(0xFFffe9d6.toInt()),
+        Color(0xFFfffbd0.toInt()),
+        Color(0xFFe3ffd9.toInt()),
+        Color(0xFFd0fff8.toInt()),
+    )
 
 @Composable
 private fun LazyColumnScope() {
     LazyColumn {
-        items(10) {
-            Text("$it", fontSize = 40.sp)
-        }
+        items(10) { Text("$it", fontSize = 40.sp) }
 
-        item {
-            Text("Single item", fontSize = 40.sp)
-        }
+        item { Text("Single item", fontSize = 40.sp) }
 
         val items = listOf("A", "B", "C")
-        itemsIndexed(items) { index, item ->
-            Text("Item $item has index $index", fontSize = 40.sp)
-        }
+        itemsIndexed(items) { index, item -> Text("Item $item has index $index", fontSize = 40.sp) }
     }
 }
 
 @Composable
 private fun LazyRowScope() {
     LazyRow {
-        items(10) {
-            Text("$it", fontSize = 40.sp)
-        }
+        items(10) { Text("$it", fontSize = 40.sp) }
 
-        item {
-            Text("Single item", fontSize = 40.sp)
-        }
+        item { Text("Single item", fontSize = 40.sp) }
 
         val items = listOf(Color.Cyan, Color.Blue, Color.Magenta)
         itemsIndexed(items) { index, item ->
             Box(
-                modifier = Modifier
-                    .background(item)
-                    .requiredSize(40.dp),
-                contentAlignment = Alignment.Center
+                modifier = Modifier.background(item).requiredSize(40.dp),
+                contentAlignment = Alignment.Center,
             ) {
                 Text("$index", fontSize = 30.sp)
             }
@@ -420,12 +491,8 @@ private fun LazyListArrangements() {
     var arrangement by remember { mutableIntStateOf(6) }
     Column {
         Row {
-            Button(onClick = { count-- }) {
-                Text("--")
-            }
-            Button(onClick = { count++ }) {
-                Text("++")
-            }
+            Button(onClick = { count-- }) { Text("--") }
+            Button(onClick = { count++ }) { Text("++") }
             Button(
                 onClick = {
                     arrangement++
@@ -439,50 +506,42 @@ private fun LazyListArrangements() {
             Text("$arrangement ${Arrangements[arrangement]}")
         }
         Row {
-            val item = @Composable {
-                Box(
-                    Modifier
-                        .requiredHeight(200.dp)
-                        .fillMaxWidth()
-                        .background(Color.Red)
-                        .border(1.dp, Color.Cyan)
-                )
-            }
+            val item =
+                @Composable {
+                    Box(
+                        Modifier.requiredHeight(200.dp)
+                            .fillMaxWidth()
+                            .background(Color.Red)
+                            .border(1.dp, Color.Cyan)
+                    )
+                }
             Column(
                 verticalArrangement = Arrangements[arrangement],
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .verticalScroll(rememberScrollState())
+                modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()),
             ) {
-                repeat(count) {
-                    item()
-                }
+                repeat(count) { item() }
             }
             LazyColumn(
                 verticalArrangement = Arrangements[arrangement],
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
+                modifier = Modifier.weight(1f).fillMaxHeight(),
             ) {
-                items(count) {
-                    item()
-                }
+                items(count) { item() }
             }
         }
     }
 }
 
-private val Arrangements = listOf(
-    Arrangement.Center,
-    Arrangement.Top,
-    Arrangement.Bottom,
-    Arrangement.SpaceAround,
-    Arrangement.SpaceBetween,
-    Arrangement.SpaceEvenly,
-    Arrangement.spacedBy(40.dp),
-    Arrangement.spacedBy(40.dp, Alignment.Bottom),
-)
+private val Arrangements =
+    listOf(
+        Arrangement.Center,
+        Arrangement.Top,
+        Arrangement.Bottom,
+        Arrangement.SpaceAround,
+        Arrangement.SpaceBetween,
+        Arrangement.SpaceEvenly,
+        Arrangement.spacedBy(40.dp),
+        Arrangement.spacedBy(40.dp, Alignment.Bottom),
+    )
 
 @Composable
 private fun ReverseLayoutAndRtlDemo() {
@@ -499,14 +558,10 @@ private fun ReverseLayoutAndRtlDemo() {
         Row(
             modifier = Modifier.padding(10.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Button(onClick = { count = max(0, count - 5) }) {
-                Text("--")
-            }
-            Button(onClick = { count += 5 }) {
-                Text("++")
-            }
+            Button(onClick = { count = max(0, count - 5) }) { Text("--") }
+            Button(onClick = { count += 5 }) { Text("++") }
             Column {
                 Row {
                     Checkbox(checked = reverse, onCheckedChange = { reverse = it })
@@ -529,26 +584,17 @@ private fun ReverseLayoutAndRtlDemo() {
             }
         }
 
-        val itemModifier = if (column) {
-            Modifier
-                .heightIn(200.dp)
-                .fillMaxWidth()
-        } else {
-            Modifier
-                .widthIn(200.dp)
-                .fillMaxHeight()
-        }
-        val item1 = @Composable { index: Int ->
-            Text(
-                "${index}A",
-                itemModifier
-                    .background(backgroundColor)
-                    .border(1.dp, Color.Cyan)
-            )
-        }
-        val item2 = @Composable { index: Int ->
-            Text("${index}B")
-        }
+        val itemModifier =
+            if (column) {
+                Modifier.heightIn(200.dp).fillMaxWidth()
+            } else {
+                Modifier.widthIn(200.dp).fillMaxHeight()
+            }
+        val item1 =
+            @Composable { index: Int ->
+                Text("${index}A", itemModifier.background(backgroundColor).border(1.dp, Color.Cyan))
+            }
+        val item2 = @Composable { index: Int -> Text("${index}B") }
 
         @Composable
         fun NonLazyContent() {
@@ -578,17 +624,17 @@ private fun ReverseLayoutAndRtlDemo() {
                 Text(
                     "LazyColumn: index=${lazyState.firstVisibleItemIndex}, " +
                         "offset=${lazyState.firstVisibleItemScrollOffset}",
-                    Modifier.weight(1f)
+                    Modifier.weight(1f),
                 )
             }
             Row {
                 CompositionLocalProvider(LocalLayoutDirection provides direction) {
                     Column(
                         verticalArrangement = if (reverse) Arrangement.Bottom else Arrangement.Top,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .verticalScroll(scrollState, reverseScrolling = reverse)
+                        modifier =
+                            Modifier.weight(1f)
+                                .fillMaxHeight()
+                                .verticalScroll(scrollState, reverseScrolling = reverse),
                     ) {
                         NonLazyContent()
                     }
@@ -597,10 +643,8 @@ private fun ReverseLayoutAndRtlDemo() {
                     LazyColumn(
                         reverseLayout = reverse,
                         state = lazyState,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
-                        content = lazyContent
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                        content = lazyContent,
                     )
                 }
             }
@@ -609,10 +653,10 @@ private fun ReverseLayoutAndRtlDemo() {
             CompositionLocalProvider(LocalLayoutDirection provides direction) {
                 Row(
                     horizontalArrangement = if (reverse) Arrangement.End else Arrangement.Start,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .horizontalScroll(scrollState, reverseScrolling = reverse)
+                    modifier =
+                        Modifier.weight(1f)
+                            .fillMaxWidth()
+                            .horizontalScroll(scrollState, reverseScrolling = reverse),
                 ) {
                     NonLazyContent()
                 }
@@ -624,11 +668,9 @@ private fun ReverseLayoutAndRtlDemo() {
             CompositionLocalProvider(LocalLayoutDirection provides direction) {
                 LazyRow(
                     state = lazyState,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
                     reverseLayout = reverse,
-                    content = lazyContent
+                    content = lazyContent,
                 )
             }
         }
@@ -637,47 +679,30 @@ private fun ReverseLayoutAndRtlDemo() {
 
 @Composable
 private fun NestedLazyDemo() {
-    val item = @Composable { index: Int ->
-        Box(
-            Modifier
-                .padding(16.dp)
-                .requiredSize(200.dp)
-                .background(Color.LightGray),
-            contentAlignment = Alignment.Center
-        ) {
-            var state by rememberSaveable { mutableIntStateOf(0) }
-            Button(onClick = { state++ }) {
-                Text("Index=$index State=$state")
+    val item =
+        @Composable { index: Int ->
+            Box(
+                Modifier.padding(16.dp).requiredSize(200.dp).background(Color.LightGray),
+                contentAlignment = Alignment.Center,
+            ) {
+                var state by rememberSaveable { mutableIntStateOf(0) }
+                Button(onClick = { state++ }) { Text("Index=$index State=$state") }
             }
         }
-    }
     LazyColumn {
-        item {
-            LazyRow {
-                items(100) {
-                    item(it)
-                }
-            }
-        }
-        items(100) {
-            item(it)
-        }
+        item { LazyRow { items(100) { item(it) } } }
+        items(100) { item(it) }
     }
 }
 
 @Composable
 private fun LazyGridDemo() {
-    val columnModes = listOf(
-        GridCells.Fixed(3),
-        GridCells.Adaptive(minSize = 60.dp)
-    )
+    val columnModes = listOf(GridCells.Fixed(3), GridCells.Adaptive(minSize = 60.dp))
     var currentMode by remember { mutableIntStateOf(0) }
     Column {
         Button(
             modifier = Modifier.wrapContentSize(),
-            onClick = {
-                currentMode = (currentMode + 1) % columnModes.size
-            }
+            onClick = { currentMode = (currentMode + 1) % columnModes.size },
         ) {
             Text("Switch mode")
         }
@@ -692,34 +717,33 @@ private fun LazyGridForMode(mode: GridCells) {
             Text(
                 text = "$it",
                 fontSize = 20.sp,
-                modifier = Modifier
-                    .background(Color.Gray.copy(alpha = (it % 10) / 10f))
-                    .padding(8.dp)
+                modifier =
+                    Modifier.background(Color.Gray.copy(alpha = (it % 10) / 10f)).padding(8.dp),
             )
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Preview
 @Composable
 private fun LazyGridWithSpacingDemo() {
-    val columnModes = listOf(
-        GridCells.Fixed(3),
-        GridCells.Adaptive(minSize = 60.dp),
-        GridCells.FixedSize(50.dp),
-        object : GridCells {
-            // columns widths have ratio 1:1:2:3
-            override fun Density.calculateCrossAxisCellSizes(
-                availableSize: Int,
-                spacing: Int,
-            ): List<Int> {
-                val totalSlots = 1 + 1 + 2 + 3
-                val slotWidth = (availableSize - spacing * 3) / totalSlots
-                return listOf(slotWidth, slotWidth, slotWidth * 2, slotWidth * 3)
-            }
-        }
-    )
+    val columnModes =
+        listOf(
+            GridCells.Fixed(3),
+            GridCells.Adaptive(minSize = 60.dp),
+            GridCells.FixedSize(50.dp),
+            object : GridCells {
+                // columns widths have ratio 1:1:2:3
+                override fun Density.calculateCrossAxisCellSizes(
+                    availableSize: Int,
+                    spacing: Int,
+                ): List<Int> {
+                    val totalSlots = 1 + 1 + 2 + 3
+                    val slotWidth = (availableSize - spacing * 3) / totalSlots
+                    return listOf(slotWidth, slotWidth, slotWidth * 2, slotWidth * 3)
+                }
+            },
+        )
     var currentMode by remember { mutableIntStateOf(0) }
     var horizontalSpacing by remember { mutableIntStateOf(8) }
     var horizontalSpacingExpanded by remember { mutableStateOf(false) }
@@ -729,23 +753,21 @@ private fun LazyGridWithSpacingDemo() {
         Row {
             Button(
                 modifier = Modifier.wrapContentSize(),
-                onClick = {
-                    currentMode = (currentMode + 1) % columnModes.size
-                }
+                onClick = { currentMode = (currentMode + 1) % columnModes.size },
             ) {
                 Text("Switch mode")
             }
             Box {
                 OutlinedButton(
                     modifier = Modifier.wrapContentSize(),
-                    onClick = { verticalSpacingExpanded = true }
+                    onClick = { verticalSpacingExpanded = true },
                 ) {
                     Text("Vertical:\n$verticalSpacing dp")
                     Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "expand")
                 }
                 DropdownMenu(
                     expanded = verticalSpacingExpanded,
-                    onDismissRequest = { verticalSpacingExpanded = false }
+                    onDismissRequest = { verticalSpacingExpanded = false },
                 ) {
                     DropdownMenuItem(
                         onClick = {
@@ -785,14 +807,14 @@ private fun LazyGridWithSpacingDemo() {
             Box {
                 OutlinedButton(
                     modifier = Modifier.wrapContentSize(),
-                    onClick = { horizontalSpacingExpanded = true }
+                    onClick = { horizontalSpacingExpanded = true },
                 ) {
                     Text("Horizontal:\n$horizontalSpacing dp")
                     Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "expand")
                 }
                 DropdownMenu(
                     expanded = horizontalSpacingExpanded,
-                    onDismissRequest = { horizontalSpacingExpanded = false }
+                    onDismissRequest = { horizontalSpacingExpanded = false },
                 ) {
                     DropdownMenuItem(
                         onClick = {
@@ -833,7 +855,7 @@ private fun LazyGridWithSpacingDemo() {
         LazyGridWithSpacingForMode(
             mode = columnModes[currentMode],
             horizontalSpacing = horizontalSpacing.dp,
-            verticalSpacing = verticalSpacing.dp
+            verticalSpacing = verticalSpacing.dp,
         )
     }
 }
@@ -842,44 +864,35 @@ private fun LazyGridWithSpacingDemo() {
 private fun LazyGridWithSpacingForMode(
     mode: GridCells,
     horizontalSpacing: Dp,
-    verticalSpacing: Dp
+    verticalSpacing: Dp,
 ) {
     LazyVerticalGrid(
         columns = mode,
         horizontalArrangement = Arrangement.spacedBy(horizontalSpacing),
-        verticalArrangement = Arrangement.spacedBy(verticalSpacing)
+        verticalArrangement = Arrangement.spacedBy(verticalSpacing),
     ) {
         items(100) {
             Text(
                 text = "$it",
                 fontSize = 20.sp,
-                modifier = Modifier
-                    .background(Color.Gray.copy(alpha = (it % 10) / 10f))
-                    .padding(8.dp)
+                modifier =
+                    Modifier.background(Color.Gray.copy(alpha = (it % 10) / 10f)).padding(8.dp),
             )
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ReorderWithCustomKeys() {
     var names by remember { mutableStateOf(listOf("John", "Sara", "Dan")) }
     Column {
-        Button(onClick = { names = names.shuffled() }) {
-            Text("Shuffle")
-        }
+        Button(onClick = { names = names.shuffled() }) { Text("Shuffle") }
         LazyColumn {
             item {
                 var counter by rememberSaveable { mutableIntStateOf(0) }
-                Button(onClick = { counter++ }) {
-                    Text("Header has $counter")
-                }
+                Button(onClick = { counter++ }) { Text("Header has $counter") }
             }
-            items(
-                items = names,
-                key = { it }
-            ) {
+            items(items = names, key = { it }) {
                 var counter by rememberSaveable { mutableIntStateOf(0) }
                 Button(onClick = { counter++ }, modifier = Modifier.animateItem()) {
                     Text("$it has $counter")
@@ -894,7 +907,7 @@ private fun LazyWithFlingConfig() {
     Column {
         Text(
             "Custom fling config will dance back and forth when you fling",
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         )
         val defaultDecay = rememberSplineBasedDecay<Float>()
         val flingConfig = remember {
@@ -910,39 +923,34 @@ private fun LazyWithFlingConfig() {
                         listOf(perDance * 3 / 4, -perDance * 1 / 4).forEach { toGo ->
                             if (abs(lastLeft) > 1f) return@forEach
                             var lastValue = 0f
-                            AnimationState(
-                                initialValue = 0f,
-                                lastFrameTimeNanos = lastFrameTime
-                            ).animateTo(
-                                targetValue = toGo,
-                                sequentialAnimation = lastFrameTime != unspecifiedFrame
-                            ) {
-                                val delta = value - lastValue
-                                lastLeft = delta - scrollBy(delta)
-                                lastValue = value
-                                velocityLeft = this.velocity
-                                lastFrameTime = this.lastFrameTimeNanos
-                                if (abs(lastLeft) > 0.5f) this.cancelAnimation()
-                            }
+                            AnimationState(initialValue = 0f, lastFrameTimeNanos = lastFrameTime)
+                                .animateTo(
+                                    targetValue = toGo,
+                                    sequentialAnimation = lastFrameTime != unspecifiedFrame,
+                                ) {
+                                    val delta = value - lastValue
+                                    lastLeft = delta - scrollBy(delta)
+                                    lastValue = value
+                                    velocityLeft = this.velocity
+                                    lastFrameTime = this.lastFrameTimeNanos
+                                    if (abs(lastLeft) > 0.5f) this.cancelAnimation()
+                                }
                         }
                     }
                     return velocityLeft
                 }
             }
         }
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            flingBehavior = flingConfig
-        ) {
+        LazyColumn(modifier = Modifier.fillMaxSize(), flingBehavior = flingConfig) {
             items(100) {
                 Text(
                     text = "$it",
                     fontSize = 20.sp,
-                    modifier = Modifier
-                        .fillParentMaxWidth()
-                        .background(Color.Gray.copy(alpha = it / 100f))
-                        .border(1.dp, Color.Gray)
-                        .padding(16.dp)
+                    modifier =
+                        Modifier.fillParentMaxWidth()
+                            .background(Color.Gray.copy(alpha = it / 100f))
+                            .border(1.dp, Color.Gray)
+                            .padding(16.dp),
                 )
             }
         }
@@ -952,45 +960,26 @@ private fun LazyWithFlingConfig() {
 @Preview
 @Composable
 private fun LazyStaggeredGridDemo() {
-    val heights = remember {
-        List(100) {
-            (Random.nextInt(100) + 100).dp
-        }
-    }
+    val heights = remember { List(100) { (Random.nextInt(100) + 100).dp } }
 
-    val colors = remember {
-        List(100) {
-            Color.hsl(
-                Random.nextFloat() * 360,
-                .5f,
-                .65f
-            )
-        }
-    }
+    val colors = remember { List(100) { Color.hsl(Random.nextFloat() * 360, .5f, .65f) } }
 
-    val indices = remember {
-        mutableStateOf(List(100) { it })
-    }
+    val indices = remember { mutableStateOf(List(100) { it }) }
 
     var count by remember { mutableIntStateOf(10) }
     var reverseLayout by remember { mutableStateOf(false) }
     var rtl by remember { mutableStateOf(false) }
 
     Column(Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Button(onClick = { count++ }) { Text(text = "++") }
-            Button(onClick = { reverseLayout = !reverseLayout }) {
-                Text("reverse")
+            Button(onClick = { reverseLayout = !reverseLayout }) { Text("reverse") }
+            Button(onClick = { rtl = !rtl }) { Text(if (rtl) "rtl" else "ltr") }
+            Button(
+                onClick = { indices.value = indices.value.toMutableList().apply { shuffle() } }
+            ) {
+                Text(text = "shuffle")
             }
-            Button(onClick = { rtl = !rtl }) {
-                Text(if (rtl) "rtl" else "ltr")
-            }
-            Button(onClick = {
-                indices.value = indices.value.toMutableList().apply { shuffle() }
-            }) { Text(text = "shuffle") }
             Button(onClick = { if (count != 0) count-- }) { Text(text = "--") }
         }
 
@@ -1010,139 +999,190 @@ private fun LazyStaggeredGridDemo() {
                     items(
                         count,
                         span = {
-                            if (it % 30 == 0)
-                                StaggeredGridItemSpan.FullLine
-                            else
-                                StaggeredGridItemSpan.SingleLane
+                            if (it % 30 == 0) StaggeredGridItemSpan.FullLine
+                            else StaggeredGridItemSpan.SingleLane
                         },
-                        key = { indices.value[it % indices.value.size] }
+                        key = { indices.value[it % indices.value.size] },
                     ) {
                         var expanded by remember { mutableStateOf(false) }
                         val index = indices.value[it % indices.value.size]
                         val color = colors[index]
                         Box(
-                            modifier = Modifier
-                                .animateItem()
-                                .height(if (!expanded) heights[index] else heights[index] * 2)
-                                .border(2.dp, color, RoundedCornerShape(5.dp))
-                                .clickable {
-                                    expanded = !expanded
-                                }
+                            modifier =
+                                Modifier.animateItem()
+                                    .height(if (!expanded) heights[index] else heights[index] * 2)
+                                    .border(2.dp, color, RoundedCornerShape(5.dp))
+                                    .clickable { expanded = !expanded }
                         ) {
                             Text(
                                 "$it",
                                 modifier = Modifier.align(Alignment.Center),
                                 color = color,
-                                fontSize = 36.sp
+                                fontSize = 36.sp,
                             )
                         }
                     }
-                }
+                },
             )
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun AnimateItemPlacementDemo() {
-    val items = remember {
-        mutableStateListOf<Int>().apply {
-            repeat(20) { add(it) }
-        }
-    }
+    val items = remember { mutableStateListOf<Int>().apply { repeat(20) { add(it) } } }
     val selectedIndexes = remember { mutableStateMapOf<Int, Boolean>() }
     var reverse by remember { mutableStateOf(false) }
     Column {
         Row {
-            Button(onClick = {
-                selectedIndexes.entries.reversed().forEach { entry ->
-                    if (entry.value) {
-                        items.remove(entry.key)
-                        items.add(items.size - 3, entry.key)
+            Button(
+                onClick = {
+                    selectedIndexes.entries.reversed().forEach { entry ->
+                        if (entry.value) {
+                            items.remove(entry.key)
+                            items.add(items.size - 3, entry.key)
+                        }
                     }
                 }
-            }) {
+            ) {
                 Text("MoveToEnd")
             }
-            Button(onClick = {
-                selectedIndexes.clear()
-            }) {
-                Text("RmvSelected")
-            }
-            Button(onClick = {
-                reverse = !reverse
-            }) {
-                Text("Reverse=$reverse")
-            }
+            Button(onClick = { selectedIndexes.clear() }) { Text("RmvSelected") }
+            Button(onClick = { reverse = !reverse }) { Text("Reverse=$reverse") }
         }
-        LazyColumn(
-            Modifier
-                .fillMaxWidth()
-                .weight(1f), reverseLayout = reverse
-        ) {
+        LazyColumn(Modifier.fillMaxWidth().weight(1f), reverseLayout = reverse) {
             items(items, key = { it }) { item ->
                 val selected = selectedIndexes.getOrDefault(item, false)
                 val modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null)
                 var height by remember { mutableStateOf(40.dp) }
                 Row(
-                    modifier
-                        .padding(8.dp)
-                        .fillMaxWidth()
-                        .border(1.dp, Color.Black)
-                        .clickable {
-                            height = if (height == 40.dp) 120.dp else 40.dp
-                        },
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier.padding(8.dp).fillMaxWidth().border(1.dp, Color.Black).clickable {
+                        height = if (height == 40.dp) 120.dp else 40.dp
+                    },
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Checkbox(checked = selected, onCheckedChange = {
-                        selectedIndexes[item] = it
-                    })
-                    Spacer(
-                        Modifier
-                            .width(16.dp)
-                            .height(height)
-                    )
+                    Checkbox(checked = selected, onCheckedChange = { selectedIndexes[item] = it })
+                    Spacer(Modifier.width(16.dp).height(height))
                     Text("Item $item")
                 }
             }
         }
         var size by remember { mutableStateOf(40.dp) }
         Box(
-            Modifier
-                .height(size)
-                .fillMaxWidth()
-                .border(1.dp, Color.DarkGray)
-                .clickable {
-                    size = if (size == 40.dp) 350.dp else 40.dp
-                })
+            Modifier.height(size).fillMaxWidth().border(1.dp, Color.DarkGray).clickable {
+                size = if (size == 40.dp) 350.dp else 40.dp
+            }
+        )
     }
 }
 
 @Preview(uiMode = Configuration.UI_MODE_TYPE_TELEVISION)
 @Composable
 private fun BringIntoViewDemo() {
-    LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-    ) {
+    LazyRow(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
         items(100) {
             var color by remember { mutableStateOf(Color.White) }
             Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .padding(4.dp)
-                    .background(Color.Gray)
-                    .onFocusChanged {
-                        color = if (it.isFocused) Red else White
-                    }
-                    .border(5.dp, color)
-                    .focusable(),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier.size(100.dp)
+                        .padding(4.dp)
+                        .background(Color.Gray)
+                        .onFocusChanged { color = if (it.isFocused) Red else White }
+                        .border(5.dp, color)
+                        .focusable(),
+                contentAlignment = Alignment.Center,
             ) {
                 Text(text = it.toString())
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun CrossListDragAndDropDemo() {
+    val targetListState = rememberLazyListState()
+    val dragAndDropListState = remember(targetListState) { DragAndDropListState(targetListState) }
+
+    Row {
+        LazyColumn(Modifier.weight(0.5f).fillMaxHeight().padding(4.dp)) {
+            items(dragAndDropListState.sourceListData, key = { it }) {
+                DragAndDropItem(it, if (it % 2 == 0) Color.Cyan else Color.Red)
+            }
+        }
+
+        LazyColumn(
+            Modifier.dragAndDropTarget(
+                    shouldStartDragAndDrop = { true },
+                    target = dragAndDropListState.dragAndDropTarget,
+                )
+                .background(dragAndDropListState.targetListBackground)
+                .weight(0.5f)
+                .fillMaxHeight()
+                .padding(4.dp),
+            state = targetListState,
+        ) {
+            items(dragAndDropListState.targetListData, key = { it }) {
+                DragAndDropItem(it, if (it % 2 == 0) Color.Cyan else Color.Red)
+            }
+        }
+    }
+}
+
+@Composable
+private fun LazyItemScope.DragAndDropItem(index: Int, color: Color) {
+    Box(
+        Modifier.dragAndDropSource { _ ->
+                DragAndDropTransferData(
+                    clipData = ClipData.newPlainText("item_id", index.toString()),
+                    localState = index,
+                )
+            }
+            .animateItem()
+            .fillMaxWidth()
+            .height(72.dp)
+            .padding(8.dp)
+            .background(color)
+    ) {
+        Text(index.toString())
+    }
+}
+
+@SuppressLint("PrimitiveInCollection")
+private class DragAndDropListState(val targetListState: LazyListState) {
+
+    private val dragAndDropList = (0..200).toList()
+
+    var targetListBackground by mutableStateOf(Color.Transparent)
+        private set
+
+    var sourceListData by mutableStateOf(dragAndDropList.filter { it % 2 == 0 })
+        private set
+
+    var targetListData by mutableStateOf(dragAndDropList.filter { it % 2 != 0 })
+        private set
+
+    fun onDragAndDropEventDropped(event: DragAndDropEvent) {
+        (event.toAndroidDragEvent().localState as? Int)?.let { transferredItem ->
+            sourceListData = sourceListData.filter { it != transferredItem }
+            targetListData = (listOf(transferredItem) + targetListData)
+            targetListState.requestScrollToItem(0)
+        }
+    }
+
+    val dragAndDropTarget =
+        object : DragAndDropTarget {
+            override fun onStarted(event: DragAndDropEvent) {
+                targetListBackground = Color.DarkGray.copy(alpha = 0.2f)
+            }
+
+            override fun onDrop(event: DragAndDropEvent): Boolean {
+                onDragAndDropEventDropped(event)
+                return true
+            }
+
+            override fun onEnded(event: DragAndDropEvent) {
+                targetListBackground = Color.Transparent
+            }
+        }
 }

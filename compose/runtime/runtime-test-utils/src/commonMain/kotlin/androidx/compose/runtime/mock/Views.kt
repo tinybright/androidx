@@ -26,14 +26,9 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberUpdatedState
 
 @Composable
-fun <T : Any> Repeated(
-    of: Iterable<T>,
-    block: @Composable (value: T) -> Unit
-) {
+fun <T : Any> Repeated(of: Iterable<T>, block: @Composable (value: T) -> Unit) {
     for (value in of) {
-        key(value) {
-            block(value)
-        }
+        key(value) { block(value) }
     }
 }
 
@@ -41,17 +36,16 @@ fun <T : Any> Repeated(
 fun Linear(content: @Composable () -> Unit) {
     ReusableComposeNode<View, ViewApplier>(
         factory = { View().also { it.name = "linear" } },
-        update = { }
-    ) {
-        content()
-    }
+        update = {},
+        content = content,
+    )
 }
 
 @Composable
 inline fun InlineLinear(content: @Composable () -> Unit) {
     ReusableComposeNode<View, ViewApplier>(
         factory = { View().also { it.name = "linear" } },
-        update = { }
+        update = {},
     ) {
         content()
     }
@@ -63,7 +57,7 @@ fun Linear(
     onDeactivate: () -> Unit = {},
     onRelease: () -> Unit = {},
     onSet: () -> Unit = {},
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val currentOnReuse by rememberUpdatedState(onReuse)
     val currentOnDeactivate by rememberUpdatedState(onDeactivate)
@@ -88,29 +82,26 @@ fun Linear(
                 }
             }
         },
-        update = {
-            set(onSet) { onSet() }
-        },
-    ) {
-        content()
-    }
+        update = { set(onSet) { onSet() } },
+        content = content,
+    )
 }
 
 @Composable
 fun NonReusableLinear(content: @Composable () -> Unit) {
     ComposeNode<View, ViewApplier>(
         factory = { View().also { it.name = "linear" } },
-        update = { }
-    ) {
-        content()
-    }
+        update = {},
+        content = content,
+    )
 }
 
-@Composable @NonRestartableComposable
+@Composable
+@NonRestartableComposable
 fun Text(value: String) {
     ReusableComposeNode<View, ViewApplier>(
         factory = { View().also { it.name = "text" } },
-        update = { set(value) { text = it } }
+        update = { set(value) { text = it } },
     )
 }
 
@@ -118,7 +109,7 @@ fun Text(value: String) {
 fun NonReusableText(value: String) {
     ComposeNode<View, ViewApplier>(
         factory = { View().also { it.name = "text" } },
-        update = { set(value) { text = it } }
+        update = { set(value) { text = it } },
     )
 }
 
@@ -126,20 +117,17 @@ fun NonReusableText(value: String) {
 fun Edit(value: String) {
     ReusableComposeNode<View, ViewApplier>(
         factory = { View().also { it.name = "edit" } },
-        update = { set(value) { this.value = it } }
+        update = { set(value) { this.value = it } },
     )
 }
 
 @Composable
-fun SelectBox(
-    selected: Boolean,
-    content: @Composable () -> Unit
-) {
+fun SelectBox(selected: Boolean, content: @Composable () -> Unit) {
     if (selected) {
         ReusableComposeNode<View, ViewApplier>(
             factory = { View().also { it.name = "box" } },
-            update = { },
-            content = { content() }
+            update = {},
+            content = content,
         )
     } else {
         content()

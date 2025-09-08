@@ -23,12 +23,8 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.util.fastJoinToString
 
-/**
- * Primary internal interface for resolving typefaces from Android platform
- */
+/** Primary internal interface for resolving typefaces from Android platform */
 internal interface PlatformTypefaces {
     /**
      * Resolve the system default font
@@ -56,14 +52,14 @@ internal interface PlatformTypefaces {
      * @param weight weight to load, if available, will fallback
      * @param style italic or not, will fallback
      * @return typeface from system cache if available, or null if the system doesn't know this font
-     * name
+     *   name
      */
     fun optionalOnDeviceFontFamilyByName(
         familyName: String,
         weight: FontWeight,
         style: FontStyle,
         variationSettings: FontVariation.Settings,
-        context: Context
+        context: Context,
     ): Typeface?
 }
 
@@ -83,12 +79,12 @@ private class PlatformTypefacesApi : PlatformTypefaces {
     override fun createNamed(
         name: GenericFontFamily,
         fontWeight: FontWeight,
-        fontStyle: FontStyle
+        fontStyle: FontStyle,
     ): Typeface {
         return loadNamedFromTypefaceCacheOrNull(
             getWeightSuffixForFallbackFamilyName(name.name, fontWeight),
             fontWeight,
-            fontStyle
+            fontStyle,
         ) ?: createAndroidTypefaceUsingTypefaceStyle(name.name, fontWeight, fontStyle)
     }
 
@@ -98,24 +94,25 @@ private class PlatformTypefacesApi : PlatformTypefaces {
         weight: FontWeight,
         style: FontStyle,
         variationSettings: FontVariation.Settings,
-        context: Context
+        context: Context,
     ): Typeface? {
         // if the developer specified one of the named fonts, behave identically to the
         // GenericFontFamily behavior, return the same as createNamed always
-        val typeface = when (familyName) {
-            FontFamily.SansSerif.name -> createNamed(FontFamily.SansSerif, weight, style)
-            FontFamily.Serif.name -> createNamed(FontFamily.Serif, weight, style)
-            FontFamily.Monospace.name -> createNamed(FontFamily.Monospace, weight, style)
-            FontFamily.Cursive.name -> createNamed(FontFamily.Cursive, weight, style)
-            else -> loadNamedFromTypefaceCacheOrNull(familyName, weight, style)
-        }
+        val typeface =
+            when (familyName) {
+                FontFamily.SansSerif.name -> createNamed(FontFamily.SansSerif, weight, style)
+                FontFamily.Serif.name -> createNamed(FontFamily.Serif, weight, style)
+                FontFamily.Monospace.name -> createNamed(FontFamily.Monospace, weight, style)
+                FontFamily.Cursive.name -> createNamed(FontFamily.Cursive, weight, style)
+                else -> loadNamedFromTypefaceCacheOrNull(familyName, weight, style)
+            }
         return typeface.setFontVariationSettings(variationSettings, context)
     }
 
     private fun loadNamedFromTypefaceCacheOrNull(
         familyName: String,
         weight: FontWeight,
-        style: FontStyle
+        style: FontStyle,
     ): Typeface? {
         if (familyName.isEmpty()) return null
         val typeface = createAndroidTypefaceUsingTypefaceStyle(familyName, weight, style)
@@ -129,11 +126,12 @@ private class PlatformTypefacesApi : PlatformTypefaces {
     private fun createAndroidTypefaceUsingTypefaceStyle(
         genericFontFamily: String? = null,
         fontWeight: FontWeight = FontWeight.Normal,
-        fontStyle: FontStyle = FontStyle.Normal
+        fontStyle: FontStyle = FontStyle.Normal,
     ): Typeface {
-        if (fontStyle == FontStyle.Normal &&
-            fontWeight == FontWeight.Normal &&
-            genericFontFamily.isNullOrEmpty()
+        if (
+            fontStyle == FontStyle.Normal &&
+                fontWeight == FontWeight.Normal &&
+                genericFontFamily.isNullOrEmpty()
         ) {
             return Typeface.DEFAULT
         }
@@ -156,17 +154,18 @@ private class PlatformTypefacesApi28 : PlatformTypefaces {
         weight: FontWeight,
         style: FontStyle,
         variationSettings: FontVariation.Settings,
-        context: Context
+        context: Context,
     ): Typeface? {
         // if the developer specified one of the named fonts, behave identically to the
         // GenericFontFamily behavior, return the same as createNamed always
-        val result = when (familyName) {
-            FontFamily.SansSerif.name -> createNamed(FontFamily.SansSerif, weight, style)
-            FontFamily.Serif.name -> createNamed(FontFamily.Serif, weight, style)
-            FontFamily.Monospace.name -> createNamed(FontFamily.Monospace, weight, style)
-            FontFamily.Cursive.name -> createNamed(FontFamily.Cursive, weight, style)
-            else -> loadNamedFromTypefaceCacheOrNull(familyName, weight, style)
-        }
+        val result =
+            when (familyName) {
+                FontFamily.SansSerif.name -> createNamed(FontFamily.SansSerif, weight, style)
+                FontFamily.Serif.name -> createNamed(FontFamily.Serif, weight, style)
+                FontFamily.Monospace.name -> createNamed(FontFamily.Monospace, weight, style)
+                FontFamily.Cursive.name -> createNamed(FontFamily.Cursive, weight, style)
+                else -> loadNamedFromTypefaceCacheOrNull(familyName, weight, style)
+            }
         return result.setFontVariationSettings(variationSettings, context)
     }
 
@@ -180,13 +179,13 @@ private class PlatformTypefacesApi28 : PlatformTypefaces {
     override fun createNamed(
         name: GenericFontFamily,
         fontWeight: FontWeight,
-        fontStyle: FontStyle
+        fontStyle: FontStyle,
     ): Typeface = createAndroidTypefaceApi28(name.name, fontWeight, fontStyle)
 
     private fun loadNamedFromTypefaceCacheOrNull(
         familyName: String,
         weight: FontWeight,
-        style: FontStyle
+        style: FontStyle,
     ): Typeface? {
         if (familyName.isEmpty()) return null
         val typeface = createAndroidTypefaceApi28(familyName, weight, style)
@@ -201,32 +200,28 @@ private class PlatformTypefacesApi28 : PlatformTypefaces {
     private fun createAndroidTypefaceApi28(
         genericFontFamily: String? = null,
         fontWeight: FontWeight,
-        fontStyle: FontStyle
+        fontStyle: FontStyle,
     ): Typeface {
-        if (fontStyle == FontStyle.Normal &&
-            fontWeight == FontWeight.Normal &&
-            genericFontFamily.isNullOrEmpty()
+        if (
+            fontStyle == FontStyle.Normal &&
+                fontWeight == FontWeight.Normal &&
+                genericFontFamily.isNullOrEmpty()
         ) {
             return Typeface.DEFAULT
         }
 
-        val familyTypeface = if (genericFontFamily == null) {
-            Typeface.DEFAULT
-        } else {
-            Typeface.create(genericFontFamily, Typeface.NORMAL)
-        }
+        val familyTypeface =
+            if (genericFontFamily == null) {
+                Typeface.DEFAULT
+            } else {
+                Typeface.create(genericFontFamily, Typeface.NORMAL)
+            }
 
-        return Typeface.create(
-            familyTypeface,
-            fontWeight.weight,
-            fontStyle == FontStyle.Italic
-        )
+        return Typeface.create(familyTypeface, fontWeight.weight, fontStyle == FontStyle.Italic)
     }
 }
 
-/**
- * Apply font variation settings to a typeface on supported API levels (26+)
- */
+/** Apply font variation settings to a typeface on supported API levels (26+) */
 @ExperimentalTextApi
 internal fun Typeface?.setFontVariationSettings(
     variationSettings: FontVariation.Settings,
@@ -258,29 +253,19 @@ private object TypefaceCompatApi26 {
             localPaint = Paint()
             this.threadLocalPaint.set(localPaint)
         }
+        localPaint.fontVariationSettings = null /* don't let paint cache b/353609778 */
         localPaint.typeface = typeface
         localPaint.fontVariationSettings = variationSettings.toAndroidString(context)
         return localPaint.typeface
     }
-
-    @ExperimentalTextApi
-    private fun FontVariation.Settings.toAndroidString(context: Context): String {
-        val density = Density(context)
-        return settings.fastJoinToString { setting ->
-            "'${setting.axisName}' ${setting.toVariationValue(density)}"
-        }
-    }
 }
 
 /**
- * Convert system family name like "sans-serif" to fallback family names like
- * "sans-serif-medium" for platforms <28.
+ * Convert system family name like "sans-serif" to fallback family names like "sans-serif-medium"
+ * for platforms <28.
  */
 @VisibleForTesting
-internal fun getWeightSuffixForFallbackFamilyName(
-    name: String,
-    fontWeight: FontWeight
-): String {
+internal fun getWeightSuffixForFallbackFamilyName(name: String, fontWeight: FontWeight): String {
     // logic for matching comes from FontFamily.cpp#computeMatch(FontStyle, FontStyle)
 
     // for our purposes, we expect full-coverage from 100-900 for system fonts, and can ignore

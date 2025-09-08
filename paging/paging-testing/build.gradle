@@ -21,15 +21,14 @@
  * Please use that script when creating a new project, rather than copying an existing project and
  * modifying its settings.
  */
-import androidx.build.LibraryType
+
+import androidx.build.SoftwareType
 import androidx.build.PlatformIdentifier
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
-import androidx.build.Publish
 import org.jetbrains.kotlin.konan.target.Family
 
 plugins {
     id("AndroidXPlugin")
-    id("com.android.library")
 }
 
 androidXMultiplatform {
@@ -37,7 +36,14 @@ androidXMultiplatform {
     mac()
     linux()
     ios()
-    android()
+    watchos()
+    tvos()
+    js()
+    wasmJs()
+    mingwX64()
+    androidLibrary {
+        namespace = "androidx.paging.testing"
+    }
 
     defaultPlatform(PlatformIdentifier.ANDROID)
 
@@ -59,6 +65,17 @@ androidXMultiplatform {
 
         androidMain {
             dependsOn(commonJvmMain)
+        }
+
+        nonJvmMain {
+            dependsOn(commonMain)
+            dependencies {
+                implementation(libs.atomicFu)
+            }
+        }
+
+        webMain {
+            dependsOn(nonJvmMain)
         }
 
         commonTest {
@@ -88,31 +105,18 @@ androidXMultiplatform {
             }
         }
 
-        nativeMain {
-            dependsOn(commonMain)
-            dependencies {
-                implementation(libs.atomicFu)
-            }
-        }
-        darwinMain {
-            dependsOn(nativeMain)
-        }
-        linuxMain {
-            dependsOn(nativeMain)
+        webTest {
+            dependsOn(commonTest)
         }
 
         targets.configureEach { target ->
             if (target.platformType == KotlinPlatformType.native) {
                 target.compilations["main"].defaultSourceSet {
-                    def konanTargetFamily = target.konanTarget.family
-                    if (konanTargetFamily == Family.OSX || konanTargetFamily == Family.IOS) {
-                        dependsOn(darwinMain)
-                    } else if (konanTargetFamily == Family.LINUX) {
-                        dependsOn(linuxMain)
-                    } else {
-                        throw new GradleException("unknown native target ${target}")
-                    }
+                    dependsOn(nonJvmMain)
                 }
+            } else if (target.platformType in [KotlinPlatformType.js, KotlinPlatformType.wasm]) {
+                target.compilations["main"].defaultSourceSet.dependsOn(webMain)
+                target.compilations["test"].defaultSourceSet.dependsOn(webTest)
             }
         }
     }
@@ -120,11 +124,8 @@ androidXMultiplatform {
 
 androidx {
     name = "Paging Testing Extensions"
-    type = LibraryType.PUBLISHED_TEST_LIBRARY
+    type = SoftwareType.PUBLISHED_TEST_LIBRARY
     inceptionYear = "2022"
     description = "Test artifact for Paging implementation"
 }
 
-android {
-    namespace "androidx.paging.testing"
-}

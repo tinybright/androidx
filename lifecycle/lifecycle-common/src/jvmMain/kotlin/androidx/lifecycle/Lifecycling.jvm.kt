@@ -19,9 +19,7 @@ import androidx.annotation.RestrictTo
 import java.lang.reflect.Constructor
 import java.lang.reflect.InvocationTargetException
 
-/**
- * Internal class to handle lifecycle conversion etc.
- */
+/** Internal class to handle lifecycle conversion etc. */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 public actual object Lifecycling {
     private const val REFLECTIVE_CALLBACK = 1
@@ -38,7 +36,7 @@ public actual object Lifecycling {
         if (isLifecycleEventObserver && isDefaultLifecycleObserver) {
             return DefaultLifecycleObserverAdapter(
                 `object` as DefaultLifecycleObserver,
-                `object` as LifecycleEventObserver
+                `object` as LifecycleEventObserver,
             )
         }
         if (isDefaultLifecycleObserver) {
@@ -52,14 +50,11 @@ public actual object Lifecycling {
         if (type == GENERATED_CALLBACK) {
             val constructors = classToAdapters[klass]!!
             if (constructors.size == 1) {
-                val generatedAdapter = createGeneratedAdapter(
-                    constructors[0], `object`
-                )
+                val generatedAdapter = createGeneratedAdapter(constructors[0], `object`)
                 return SingleGeneratedAdapterObserver(generatedAdapter)
             }
-            val adapters: Array<GeneratedAdapter> = Array(constructors.size) { i ->
-                createGeneratedAdapter(constructors[i], `object`)
-            }
+            val adapters: Array<GeneratedAdapter> =
+                Array(constructors.size) { i -> createGeneratedAdapter(constructors[i], `object`) }
             return CompositeGeneratedAdaptersObserver(adapters)
         }
         return ReflectiveGenericLifecycleObserver(`object`)
@@ -67,7 +62,7 @@ public actual object Lifecycling {
 
     private fun createGeneratedAdapter(
         constructor: Constructor<out GeneratedAdapter>,
-        `object`: Any
+        `object`: Any,
     ): GeneratedAdapter {
         return try {
             constructor.newInstance(`object`)
@@ -88,13 +83,13 @@ public actual object Lifecycling {
             val fullPackage = if (aPackage != null) aPackage.name else ""
             val adapterName =
                 getAdapterName(
-                    if (fullPackage.isEmpty()) name
-                    else name.substring(fullPackage.length + 1)
+                    if (fullPackage.isEmpty()) name else name.substring(fullPackage.length + 1)
                 )
             @Suppress("UNCHECKED_CAST")
-            val aClass = Class.forName(
-                if (fullPackage.isEmpty()) adapterName else "$fullPackage.$adapterName"
-            ) as Class<out GeneratedAdapter>
+            val aClass =
+                Class.forName(
+                    if (fullPackage.isEmpty()) adapterName else "$fullPackage.$adapterName"
+                ) as Class<out GeneratedAdapter>
             val constructor = aClass.getDeclaredConstructor(klass)
             if (!constructor.isAccessible) {
                 constructor.isAccessible = true
@@ -139,9 +134,7 @@ public actual object Lifecycling {
             if (getObserverConstructorType(superclass) == REFLECTIVE_CALLBACK) {
                 return REFLECTIVE_CALLBACK
             }
-            adapterConstructors = ArrayList(
-                classToAdapters[superclass]!!
-            )
+            adapterConstructors = ArrayList(classToAdapters[superclass]!!)
         }
         for (intrface in klass.interfaces) {
             if (!isLifecycleParent(intrface)) {
@@ -166,9 +159,7 @@ public actual object Lifecycling {
         return klass != null && LifecycleObserver::class.java.isAssignableFrom(klass)
     }
 
-    /**
-     * Create a name for an adapter class.
-     */
+    /** Create a name for an adapter class. */
     @JvmStatic
     public actual fun getAdapterName(className: String): String {
         return className.replace(".", "_") + "_LifecycleAdapter"

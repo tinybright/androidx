@@ -31,13 +31,10 @@ internal object LambdaActionBroadcasts {
     internal const val ExtraActionKey = "EXTRA_ACTION_KEY"
     internal const val ExtraAppWidgetId = "EXTRA_APPWIDGET_ID"
 
-    internal fun createIntent(
-        receiver: ComponentName,
-        actionKey: String,
-        appWidgetId: Int,
-    ) = Intent()
-        .setComponent(receiver)
-        .setAction(ActionTriggerLambda)
-        .putExtra(ExtraActionKey, actionKey)
-        .putExtra(ExtraAppWidgetId, appWidgetId)
+    internal fun createIntent(receiver: ComponentName, actionKey: String, appWidgetId: Int) =
+        Intent()
+            .setComponent(receiver)
+            .setAction(ActionTriggerLambda)
+            .putExtra(ExtraActionKey, actionKey)
+            .putExtra(ExtraAppWidgetId, appWidgetId)
 }

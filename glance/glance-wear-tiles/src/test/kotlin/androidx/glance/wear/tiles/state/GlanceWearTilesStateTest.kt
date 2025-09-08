@@ -47,7 +47,7 @@ class GlanceWearTilesStateTest {
             GlanceState.deleteStore(
                 context,
                 PreferencesGlanceStateDefinition,
-                wearTileId.tileServiceClass.name
+                wearTileId.tileServiceClass.name,
             )
         }
     }
@@ -57,9 +57,7 @@ class GlanceWearTilesStateTest {
         val key = intPreferencesKey("int_key")
         val storedPrefs = runBlocking {
             updateWearTileState(context, PreferencesGlanceStateDefinition, wearTileId) { prefs ->
-                prefs.toMutablePreferences().apply {
-                    set(key, 1)
-                }
+                prefs.toMutablePreferences().apply { set(key, 1) }
             }
             getWearTileState<Preferences>(context, PreferencesGlanceStateDefinition, wearTileId)
         }

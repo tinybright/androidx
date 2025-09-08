@@ -34,27 +34,31 @@ class SlidingPaneLayoutResizeSample : Activity() {
                     PaneView(context).apply {
                         minimumWidth = minSize
                         setBackgroundColor(0xe0aa0000.toInt())
-                        layoutParams = SlidingPaneLayout.LayoutParams(
-                            LayoutParams.WRAP_CONTENT,
-                            LayoutParams.MATCH_PARENT
-                        ).apply { weight = 1f }
+                        layoutParams =
+                            SlidingPaneLayout.LayoutParams(
+                                    LayoutParams.WRAP_CONTENT,
+                                    LayoutParams.MATCH_PARENT,
+                                )
+                                .apply { weight = 1f }
                     }
                 )
                 addView(
                     PaneView(context).apply {
                         minimumWidth = minSize
                         setBackgroundColor(0xe00000aa.toInt())
-                        layoutParams = SlidingPaneLayout.LayoutParams(
-                            LayoutParams.WRAP_CONTENT,
-                            LayoutParams.MATCH_PARENT
-                        ).apply { weight = 1f }
+                        layoutParams =
+                            SlidingPaneLayout.LayoutParams(
+                                    LayoutParams.WRAP_CONTENT,
+                                    LayoutParams.MATCH_PARENT,
+                                )
+                                .apply { weight = 1f }
                     }
                 )
                 isUserResizingEnabled = true
                 isOverlappingEnabled = false
                 setUserResizingDividerDrawable(R.drawable.divider)
             },
-            LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+            LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT),
         )
     }
 }

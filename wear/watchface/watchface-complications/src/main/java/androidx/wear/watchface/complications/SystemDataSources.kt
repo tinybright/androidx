@@ -22,8 +22,8 @@ import androidx.annotation.RestrictTo
 import androidx.wear.watchface.complications.data.ComplicationType
 
 /**
- * Methods to retrieve the component names for system complication complication data sources. This
- * will allow these complication data sources to be used as defaults by watch faces.
+ * Methods to retrieve the component names for system complication data sources. This will allow
+ * these complication data sources to be used as defaults by watch faces.
  */
 public class SystemDataSources private constructor() {
     public companion object {
@@ -213,7 +213,7 @@ public class SystemDataSources private constructor() {
          * [ComplicationType.ICON] too since OEMs may choose to serve a shortcut to their health app
          * instead of the live value.
          *
-         *  Starting in Wear OS 5, this complication data source can only be configured with
+         * Starting in Wear OS 5, this complication data source can only be configured with
          * [ComplicationType.ICON] type, if used in a watch face that isn't built using Watch Face
          * Format. Depending on the device manufacturer, this data source in [ComplicationType.ICON]
          * type may or may not be available.
@@ -237,7 +237,7 @@ public class SystemDataSources private constructor() {
         DATA_SOURCE_DAY_OF_WEEK,
         DATA_SOURCE_FAVORITE_CONTACT,
         DATA_SOURCE_DAY_AND_DATE,
-        DATA_SOURCE_HEART_RATE
+        DATA_SOURCE_HEART_RATE,
     )
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Retention(AnnotationRetention.SOURCE)

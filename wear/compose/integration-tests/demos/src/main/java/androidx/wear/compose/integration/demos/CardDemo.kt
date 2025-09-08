@@ -44,17 +44,12 @@ import androidx.wear.compose.material.TitleCard
 fun CardDemo() {
     ScalingLazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(
-            space = 4.dp,
-            alignment = Alignment.CenterVertically
-        ),
-        modifier = Modifier.fillMaxSize()
+        verticalArrangement =
+            Arrangement.spacedBy(space = 4.dp, alignment = Alignment.CenterVertically),
+        modifier = Modifier.fillMaxSize(),
     ) {
         item {
-            Card(
-                onClick = {},
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            Card(onClick = {}, modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text("Basic unopinionated chip")
                     Text("Sets the shape")
@@ -97,7 +92,7 @@ fun CardDemo() {
                 appImage = {
                     DemoImage(
                         resourceId = R.drawable.ic_maps_icon,
-                        size = CardDefaults.AppImageSize
+                        size = CardDefaults.AppImageSize,
                     )
                 },
                 title = { Text("AppCard") },
@@ -110,11 +105,7 @@ fun CardDemo() {
             }
         }
         item {
-            TitleCard(
-                onClick = {},
-                title = { Text("TitleCard") },
-                time = { Text("now") },
-            ) {
+            TitleCard(onClick = {}, title = { Text("TitleCard") }, time = { Text("now") }) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text("Some body content")
                     Text("and some more body content")
@@ -122,10 +113,7 @@ fun CardDemo() {
             }
         }
         item {
-            TitleCard(
-                onClick = {},
-                title = { Text("TitleCard") },
-            ) {
+            TitleCard(onClick = {}, title = { Text("TitleCard") }) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text("This title card doesn't show time")
                 }
@@ -135,7 +123,7 @@ fun CardDemo() {
             TitleCard(
                 onClick = {},
                 title = { Text("Custom TitleCard") },
-                titleColor = AlternatePrimaryColor2
+                titleColor = AlternatePrimaryColor2,
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text("This title card emphasises the title with custom color")
@@ -148,15 +136,12 @@ fun CardDemo() {
                 title = {
                     DemoIcon(
                         resourceId = R.drawable.ic_accessibility_24px,
-                        size = CardDefaults.AppImageSize
+                        size = CardDefaults.AppImageSize,
                     )
                     Spacer(Modifier.width(6.dp))
-                    Text(
-                        text = "Title text",
-                        style = MaterialTheme.typography.caption1,
-                    )
+                    Text(text = "Title text", style = MaterialTheme.typography.caption1)
                 },
-                titleColor = AlternatePrimaryColor2
+                titleColor = AlternatePrimaryColor2,
             ) {
                 Spacer(Modifier.height(6.dp))
                 Text(
@@ -169,19 +154,16 @@ fun CardDemo() {
             TitleCard(
                 onClick = {},
                 title = { Text("TitleCard With an ImageBackground") },
-                backgroundPainter = CardDefaults.imageWithScrimBackgroundPainter(
-                    backgroundImagePainter = painterResource(id = R.drawable.backgroundimage1)
-                ),
+                backgroundPainter =
+                    CardDefaults.imageWithScrimBackgroundPainter(
+                        backgroundImagePainter = painterResource(id = R.drawable.backgroundimage1)
+                    ),
                 contentColor = MaterialTheme.colors.onSurface,
                 titleColor = MaterialTheme.colors.onSurface,
             ) {
                 // Apply 24.dp padding in bottom for TitleCard with an ImageBackground.
                 // Already 12.dp padding exists. Ref - [CardDefaults.ContentPadding]
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = 12.dp),
-                ) {
+                Column(modifier = Modifier.fillMaxSize().padding(bottom = 12.dp)) {
                     Text("Text coloured to stand out on the image")
                 }
             }

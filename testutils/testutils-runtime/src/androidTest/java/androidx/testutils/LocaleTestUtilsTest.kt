@@ -38,19 +38,17 @@ private val DEFAULT_LANGUAGE = Locale.getDefault().toString()
 @LargeTest
 class LocaleTestUtilsTest {
     private val configuration: Configuration
-        get() =
-            (ApplicationProvider.getApplicationContext() as Context).resources.configuration
-    private val Configuration.language: String get() =
-        ConfigurationCompat.getLocales(this).get(0).toString()
+        get() = (ApplicationProvider.getApplicationContext() as Context).resources.configuration
+
+    private val Configuration.language: String
+        get() = ConfigurationCompat.getLocales(this).get(0).toString()
 
     private lateinit var localeUtil: LocaleTestUtils
     private var expectRtlInDefaultLanguage: Boolean = false
 
     @Before
     fun setUp() {
-        localeUtil = LocaleTestUtils(
-            ApplicationProvider.getApplicationContext() as Context
-        )
+        localeUtil = LocaleTestUtils(ApplicationProvider.getApplicationContext() as Context)
         determineDefaultLayoutDirection()
     }
 
@@ -84,22 +82,19 @@ class LocaleTestUtilsTest {
             "$name test language '$code' does not exist on test device"
         }
         assertThat(
-            getReason(
-                "Default",
-                LocaleTestUtils.DEFAULT_TEST_LANGUAGE
-            ),
+            getReason("Default", LocaleTestUtils.DEFAULT_TEST_LANGUAGE),
             availableLanguages,
-            CoreMatchers.hasItem(LocaleTestUtils.DEFAULT_TEST_LANGUAGE)
+            CoreMatchers.hasItem(LocaleTestUtils.DEFAULT_TEST_LANGUAGE),
         )
         assertThat(
             getReason("LTR", LocaleTestUtils.LTR_LANGUAGE),
             availableLanguages,
-            CoreMatchers.hasItem(LocaleTestUtils.LTR_LANGUAGE)
+            CoreMatchers.hasItem(LocaleTestUtils.LTR_LANGUAGE),
         )
         assertThat(
             getReason("RTL", LocaleTestUtils.RTL_LANGUAGE),
             availableLanguages,
-            CoreMatchers.hasItem(LocaleTestUtils.RTL_LANGUAGE)
+            CoreMatchers.hasItem(LocaleTestUtils.RTL_LANGUAGE),
         )
     }
 
@@ -108,17 +103,13 @@ class LocaleTestUtilsTest {
     }
 
     private fun assertLocaleIs(lang: String, expectRtl: Boolean) {
-        assertThat(
-            "Locale should be $lang",
-            configuration.language,
-            CoreMatchers.equalTo(lang)
-        )
+        assertThat("Locale should be $lang", configuration.language, CoreMatchers.equalTo(lang))
         assertThat(
             "Layout direction should be ${if (expectRtl) "RTL" else "LTR"}",
             configuration.layoutDirection,
             CoreMatchers.equalTo(
                 if (expectRtl) View.LAYOUT_DIRECTION_RTL else View.LAYOUT_DIRECTION_LTR
-            )
+            ),
         )
     }
 
@@ -126,7 +117,7 @@ class LocaleTestUtilsTest {
         assertThat(
             "Locale must still be the default when determining the default layout direction",
             configuration.language,
-            CoreMatchers.equalTo(DEFAULT_LANGUAGE)
+            CoreMatchers.equalTo(DEFAULT_LANGUAGE),
         )
         expectRtlInDefaultLanguage = configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
     }

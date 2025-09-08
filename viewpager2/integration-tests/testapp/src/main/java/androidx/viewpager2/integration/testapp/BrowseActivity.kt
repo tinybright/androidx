@@ -22,20 +22,21 @@ import android.view.View
 import android.widget.ListView
 import android.widget.SimpleAdapter
 
-/**
- * This activity lists all the activities in this application.
- */
+/** This activity lists all the activities in this application. */
 @Suppress("DEPRECATION")
 class BrowseActivity : android.app.ListActivity() {
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        listAdapter = SimpleAdapter(
-            this, getData(),
-            android.R.layout.simple_list_item_1, arrayOf("title"),
-            intArrayOf(android.R.id.text1)
-        )
+        listAdapter =
+            SimpleAdapter(
+                this,
+                getData(),
+                android.R.layout.simple_list_item_1,
+                arrayOf("title"),
+                intArrayOf(android.R.id.text1),
+            )
     }
 
     private fun getData(): List<Map<String, Any>> {
@@ -44,55 +45,55 @@ class BrowseActivity : android.app.ListActivity() {
         myData.add(
             mapOf(
                 "title" to "ViewPager2 with Views",
-                "intent" to activityToIntent(CardViewActivity::class.java.name)
+                "intent" to activityToIntent(CardViewActivity::class.java.name),
             )
         )
         myData.add(
             mapOf(
                 "title" to "ViewPager2 with Fragments",
-                "intent" to activityToIntent(CardFragmentActivity::class.java.name)
+                "intent" to activityToIntent(CardFragmentActivity::class.java.name),
             )
         )
         myData.add(
             mapOf(
                 "title" to "ViewPager2 with a Mutable Collection (Views)",
-                "intent" to activityToIntent(MutableCollectionViewActivity::class.java.name)
+                "intent" to activityToIntent(MutableCollectionViewActivity::class.java.name),
             )
         )
         myData.add(
             mapOf(
                 "title" to "ViewPager2 with a Mutable Collection (Fragments)",
-                "intent" to activityToIntent(MutableCollectionFragmentActivity::class.java.name)
+                "intent" to activityToIntent(MutableCollectionFragmentActivity::class.java.name),
             )
         )
         myData.add(
             mapOf(
                 "title" to "ViewPager2 with a TabLayout (Views)",
-                "intent" to activityToIntent(CardViewTabLayoutActivity::class.java.name)
+                "intent" to activityToIntent(CardViewTabLayoutActivity::class.java.name),
             )
         )
         myData.add(
             mapOf(
                 "title" to "ViewPager2 with Fake Dragging",
-                "intent" to activityToIntent(FakeDragActivity::class.java.name)
+                "intent" to activityToIntent(FakeDragActivity::class.java.name),
             )
         )
         myData.add(
             mapOf(
                 "title" to "ViewPager2 with PageTransformers",
-                "intent" to activityToIntent(PageTransformerActivity::class.java.name)
+                "intent" to activityToIntent(PageTransformerActivity::class.java.name),
             )
         )
         myData.add(
             mapOf(
                 "title" to "ViewPager2 with a Preview of Next/Prev Page",
-                "intent" to activityToIntent(PreviewPagesActivity::class.java.name)
+                "intent" to activityToIntent(PreviewPagesActivity::class.java.name),
             )
         )
         myData.add(
             mapOf(
                 "title" to "ViewPager2 with Nested RecyclerViews",
-                "intent" to activityToIntent(ParallelNestedScrollingActivity::class.java.name)
+                "intent" to activityToIntent(ParallelNestedScrollingActivity::class.java.name),
             )
         )
 
@@ -102,6 +103,7 @@ class BrowseActivity : android.app.ListActivity() {
     private fun activityToIntent(activity: String): Intent =
         Intent(Intent.ACTION_VIEW).setClassName(this.packageName, activity)
 
+    @Suppress("OVERRIDE_DEPRECATION") // b/407504576
     override fun onListItemClick(listView: ListView, view: View, position: Int, id: Long) {
         val map = listView.getItemAtPosition(position) as Map<*, *>
 

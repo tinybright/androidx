@@ -43,16 +43,13 @@ class LazyGridsReverseLayoutTest {
 
     private val ContainerTag = "ContainerTag"
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     private var itemSize: Dp = Dp.Infinity
 
     @Before
     fun before() {
-        with(rule.density) {
-            itemSize = 50.toDp()
-        }
+        with(rule.density) { itemSize = 50.toDp() }
     }
 
     @Test
@@ -61,24 +58,26 @@ class LazyGridsReverseLayoutTest {
             LazyVerticalGrid(
                 GridCells.Fixed(2),
                 Modifier.width(itemSize * 2),
-                reverseLayout = true
+                reverseLayout = true,
             ) {
-                items(4) {
-                    Box(Modifier.height(itemSize).testTag(it.toString()))
-                }
+                items(4) { Box(Modifier.height(itemSize).testTag(it.toString())) }
             }
         }
 
-        rule.onNodeWithTag("2")
+        rule
+            .onNodeWithTag("2")
             .assertTopPositionInRootIsEqualTo(0.dp)
             .assertLeftPositionInRootIsEqualTo(0.dp)
-        rule.onNodeWithTag("3")
+        rule
+            .onNodeWithTag("3")
             .assertTopPositionInRootIsEqualTo(0.dp)
             .assertLeftPositionInRootIsEqualTo(itemSize)
-        rule.onNodeWithTag("0")
+        rule
+            .onNodeWithTag("0")
             .assertTopPositionInRootIsEqualTo(itemSize)
             .assertLeftPositionInRootIsEqualTo(0.dp)
-        rule.onNodeWithTag("1")
+        rule
+            .onNodeWithTag("1")
             .assertTopPositionInRootIsEqualTo(itemSize)
             .assertLeftPositionInRootIsEqualTo(itemSize)
     }
@@ -89,7 +88,7 @@ class LazyGridsReverseLayoutTest {
             LazyVerticalGrid(
                 GridCells.Fixed(2),
                 Modifier.width(itemSize * 2),
-                reverseLayout = true
+                reverseLayout = true,
             ) {
                 items(4) {
                     Box(Modifier.height(itemSize).testTag((it * 2).toString()))
@@ -98,28 +97,36 @@ class LazyGridsReverseLayoutTest {
             }
         }
 
-        rule.onNodeWithTag("4")
+        rule
+            .onNodeWithTag("4")
             .assertTopPositionInRootIsEqualTo(0.dp)
             .assertLeftPositionInRootIsEqualTo(0.dp)
-        rule.onNodeWithTag("5")
+        rule
+            .onNodeWithTag("5")
             .assertTopPositionInRootIsEqualTo(0.dp)
             .assertLeftPositionInRootIsEqualTo(0.dp)
-        rule.onNodeWithTag("6")
+        rule
+            .onNodeWithTag("6")
             .assertTopPositionInRootIsEqualTo(0.dp)
             .assertLeftPositionInRootIsEqualTo(itemSize)
-        rule.onNodeWithTag("7")
+        rule
+            .onNodeWithTag("7")
             .assertTopPositionInRootIsEqualTo(0.dp)
             .assertLeftPositionInRootIsEqualTo(itemSize)
-        rule.onNodeWithTag("0")
+        rule
+            .onNodeWithTag("0")
             .assertTopPositionInRootIsEqualTo(itemSize)
             .assertLeftPositionInRootIsEqualTo(0.dp)
-        rule.onNodeWithTag("1")
+        rule
+            .onNodeWithTag("1")
             .assertTopPositionInRootIsEqualTo(itemSize)
             .assertLeftPositionInRootIsEqualTo(0.dp)
-        rule.onNodeWithTag("2")
+        rule
+            .onNodeWithTag("2")
             .assertTopPositionInRootIsEqualTo(itemSize)
             .assertLeftPositionInRootIsEqualTo(itemSize)
-        rule.onNodeWithTag("3")
+        rule
+            .onNodeWithTag("3")
             .assertTopPositionInRootIsEqualTo(itemSize)
             .assertLeftPositionInRootIsEqualTo(itemSize)
     }
@@ -132,11 +139,9 @@ class LazyGridsReverseLayoutTest {
                 GridCells.Fixed(2),
                 reverseLayout = true,
                 state = rememberLazyGridState().also { state = it },
-                modifier = Modifier.size(itemSize * 2).testTag(ContainerTag)
+                modifier = Modifier.size(itemSize * 2).testTag(ContainerTag),
             ) {
-                items((0..5).toList()) {
-                    Box(Modifier.size(itemSize).testTag("$it"))
-                }
+                items((0..5).toList()) { Box(Modifier.size(itemSize).testTag("$it")) }
             }
         }
 
@@ -154,27 +159,22 @@ class LazyGridsReverseLayoutTest {
                 GridCells.Fixed(1),
                 reverseLayout = true,
                 state = rememberLazyGridState().also { state = it },
-                modifier = Modifier.size(itemSize * 2).testTag(ContainerTag)
+                modifier = Modifier.size(itemSize * 2).testTag(ContainerTag),
             ) {
-                items((0..2).toList()) {
-                    Box(Modifier.size(itemSize).testTag("$it"))
-                }
+                items((0..2).toList()) { Box(Modifier.size(itemSize).testTag("$it")) }
             }
         }
 
         // we scroll down and as the scrolling is reversed it shouldn't affect anything
-        rule.onNodeWithTag(ContainerTag)
-            .scrollBy(y = itemSize, density = rule.density)
+        rule.onNodeWithTag(ContainerTag).scrollBy(y = itemSize, density = rule.density)
 
         rule.runOnIdle {
             assertThat(state.firstVisibleItemScrollOffset).isEqualTo(0)
             assertThat(state.firstVisibleItemIndex).isEqualTo(0)
         }
 
-        rule.onNodeWithTag("1")
-            .assertTopPositionInRootIsEqualTo(0.dp)
-        rule.onNodeWithTag("0")
-            .assertTopPositionInRootIsEqualTo(itemSize)
+        rule.onNodeWithTag("1").assertTopPositionInRootIsEqualTo(0.dp)
+        rule.onNodeWithTag("0").assertTopPositionInRootIsEqualTo(itemSize)
     }
 
     @Test
@@ -185,29 +185,24 @@ class LazyGridsReverseLayoutTest {
                 GridCells.Fixed(1),
                 reverseLayout = true,
                 state = rememberLazyGridState().also { state = it },
-                modifier = Modifier.requiredSize(itemSize * 2).testTag(ContainerTag)
+                modifier = Modifier.requiredSize(itemSize * 2).testTag(ContainerTag),
             ) {
-                items((0..2).toList()) {
-                    Box(Modifier.requiredSize(itemSize).testTag("$it"))
-                }
+                items((0..2).toList()) { Box(Modifier.requiredSize(itemSize).testTag("$it")) }
             }
         }
 
-        rule.onNodeWithTag(ContainerTag)
-            .scrollBy(y = -itemSize * 0.5f, density = rule.density)
+        rule.onNodeWithTag(ContainerTag).scrollBy(y = -itemSize * 0.5f, density = rule.density)
 
-        val scrolled = rule.runOnIdle {
-            assertThat(state.firstVisibleItemScrollOffset).isGreaterThan(0)
-            assertThat(state.firstVisibleItemIndex).isEqualTo(0)
-            with(rule.density) { state.firstVisibleItemScrollOffset.toDp() }
-        }
+        val scrolled =
+            rule.runOnIdle {
+                assertThat(state.firstVisibleItemScrollOffset).isGreaterThan(0)
+                assertThat(state.firstVisibleItemIndex).isEqualTo(0)
+                with(rule.density) { state.firstVisibleItemScrollOffset.toDp() }
+            }
 
-        rule.onNodeWithTag("2")
-            .assertTopPositionInRootIsEqualTo(-itemSize + scrolled)
-        rule.onNodeWithTag("1")
-            .assertTopPositionInRootIsEqualTo(scrolled)
-        rule.onNodeWithTag("0")
-            .assertTopPositionInRootIsEqualTo(itemSize + scrolled)
+        rule.onNodeWithTag("2").assertTopPositionInRootIsEqualTo(-itemSize + scrolled)
+        rule.onNodeWithTag("1").assertTopPositionInRootIsEqualTo(scrolled)
+        rule.onNodeWithTag("0").assertTopPositionInRootIsEqualTo(itemSize + scrolled)
     }
 
     @Test
@@ -218,30 +213,26 @@ class LazyGridsReverseLayoutTest {
                 GridCells.Fixed(1),
                 reverseLayout = true,
                 state = rememberLazyGridState().also { state = it },
-                modifier = Modifier.size(itemSize * 2).testTag(ContainerTag)
+                modifier = Modifier.size(itemSize * 2).testTag(ContainerTag),
             ) {
-                items((0..3).toList()) {
-                    Box(Modifier.size(itemSize).testTag("$it"))
-                }
+                items((0..3).toList()) { Box(Modifier.size(itemSize).testTag("$it")) }
             }
         }
 
         // we scroll a bit more than it is possible just to make sure we would stop correctly
-        rule.onNodeWithTag(ContainerTag)
-            .scrollBy(y = -itemSize * 2.2f, density = rule.density)
+        rule.onNodeWithTag(ContainerTag).scrollBy(y = -itemSize * 2.2f, density = rule.density)
 
         rule.runOnIdle {
             with(rule.density) {
-                val realOffset = state.firstVisibleItemScrollOffset.toDp() +
-                    itemSize * state.firstVisibleItemIndex
+                val realOffset =
+                    state.firstVisibleItemScrollOffset.toDp() +
+                        itemSize * state.firstVisibleItemIndex
                 assertThat(realOffset).isEqualTo(itemSize * 2)
             }
         }
 
-        rule.onNodeWithTag("3")
-            .assertTopPositionInRootIsEqualTo(0.dp)
-        rule.onNodeWithTag("2")
-            .assertTopPositionInRootIsEqualTo(itemSize)
+        rule.onNodeWithTag("3").assertTopPositionInRootIsEqualTo(0.dp)
+        rule.onNodeWithTag("2").assertTopPositionInRootIsEqualTo(itemSize)
     }
 
     // @Test
@@ -485,41 +476,45 @@ class LazyGridsReverseLayoutTest {
             LazyVerticalGrid(
                 GridCells.Fixed(2),
                 Modifier.width(itemSize * 2),
-                reverseLayout = reverse
+                reverseLayout = reverse,
             ) {
-                items(4) {
-                    Box(Modifier.size(itemSize).testTag(it.toString()))
-                }
+                items(4) { Box(Modifier.size(itemSize).testTag(it.toString())) }
             }
         }
 
-        rule.onNodeWithTag("2")
+        rule
+            .onNodeWithTag("2")
             .assertTopPositionInRootIsEqualTo(0.dp)
             .assertLeftPositionInRootIsEqualTo(0.dp)
-        rule.onNodeWithTag("3")
+        rule
+            .onNodeWithTag("3")
             .assertTopPositionInRootIsEqualTo(0.dp)
             .assertLeftPositionInRootIsEqualTo(itemSize)
-        rule.onNodeWithTag("0")
+        rule
+            .onNodeWithTag("0")
             .assertTopPositionInRootIsEqualTo(itemSize)
             .assertLeftPositionInRootIsEqualTo(0.dp)
-        rule.onNodeWithTag("1")
+        rule
+            .onNodeWithTag("1")
             .assertTopPositionInRootIsEqualTo(itemSize)
             .assertLeftPositionInRootIsEqualTo(itemSize)
 
-        rule.runOnIdle {
-            reverse = false
-        }
+        rule.runOnIdle { reverse = false }
 
-        rule.onNodeWithTag("0")
+        rule
+            .onNodeWithTag("0")
             .assertTopPositionInRootIsEqualTo(0.dp)
             .assertLeftPositionInRootIsEqualTo(0.dp)
-        rule.onNodeWithTag("1")
+        rule
+            .onNodeWithTag("1")
             .assertTopPositionInRootIsEqualTo(0.dp)
             .assertLeftPositionInRootIsEqualTo(itemSize)
-        rule.onNodeWithTag("2")
+        rule
+            .onNodeWithTag("2")
             .assertTopPositionInRootIsEqualTo(itemSize)
             .assertLeftPositionInRootIsEqualTo(0.dp)
-        rule.onNodeWithTag("3")
+        rule
+            .onNodeWithTag("3")
             .assertTopPositionInRootIsEqualTo(itemSize)
             .assertLeftPositionInRootIsEqualTo(itemSize)
     }

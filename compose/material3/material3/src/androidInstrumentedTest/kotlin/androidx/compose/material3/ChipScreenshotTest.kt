@@ -16,7 +16,6 @@
 
 package androidx.compose.material3
 
-import android.os.Build
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
@@ -38,14 +37,12 @@ import org.junit.runner.RunWith
 
 @MediumTest
 @RunWith(AndroidJUnit4::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 class ChipScreenshotTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL3)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL3)
 
     @Test
     fun assistChip_flat_lightTheme() {
@@ -54,7 +51,7 @@ class ChipScreenshotTest {
                 onClick = {},
                 enabled = true,
                 modifier = Modifier.testTag(TestTag),
-                label = { Text("Assist chip") }
+                label = { Text("Assist chip") },
             )
         }
         assertChipAgainstGolden("assistChip_flat_lightTheme")
@@ -67,7 +64,7 @@ class ChipScreenshotTest {
                 onClick = {},
                 enabled = true,
                 modifier = Modifier.testTag(TestTag),
-                label = { Text("Assist chip") }
+                label = { Text("Assist chip") },
             )
         }
         assertChipAgainstGolden("assistChip_flat_darkTheme")
@@ -79,7 +76,7 @@ class ChipScreenshotTest {
             ElevatedAssistChip(
                 onClick = {},
                 modifier = Modifier.testTag(TestTag),
-                label = { Text("Assist chip") }
+                label = { Text("Assist chip") },
             )
         }
         assertChipAgainstGolden("assistChip_elevated_lightTheme")
@@ -91,7 +88,7 @@ class ChipScreenshotTest {
             ElevatedAssistChip(
                 onClick = {},
                 modifier = Modifier.testTag(TestTag),
-                label = { Text("Assist chip") }
+                label = { Text("Assist chip") },
             )
         }
         assertChipAgainstGolden("assistChip_elevated_darkTheme")
@@ -104,7 +101,7 @@ class ChipScreenshotTest {
                 onClick = {},
                 enabled = false,
                 modifier = Modifier.testTag(TestTag),
-                label = { Text("Assist chip") }
+                label = { Text("Assist chip") },
             )
         }
         assertChipAgainstGolden("assistChip_flat_disabled_lightTheme")
@@ -117,7 +114,7 @@ class ChipScreenshotTest {
                 onClick = {},
                 modifier = Modifier.testTag(TestTag),
                 enabled = false,
-                label = { Text("Assist chip") }
+                label = { Text("Assist chip") },
             )
         }
         assertChipAgainstGolden("assistChip_elevated_disabled_lightTheme")
@@ -136,16 +133,16 @@ class ChipScreenshotTest {
                     Icon(
                         imageVector = Icons.Filled.Search,
                         contentDescription = "Localized Description",
-                        modifier = Modifier.requiredSize(InputChipDefaults.IconSize)
+                        modifier = Modifier.requiredSize(InputChipDefaults.IconSize),
                     )
                 },
                 trailingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Done,
                         contentDescription = "Localized Description",
-                        modifier = Modifier.requiredSize(InputChipDefaults.IconSize)
+                        modifier = Modifier.requiredSize(InputChipDefaults.IconSize),
                     )
-                }
+                },
             )
         }
         assertChipAgainstGolden("inputChip_lightTheme")
@@ -164,16 +161,16 @@ class ChipScreenshotTest {
                     Icon(
                         imageVector = Icons.Filled.Search,
                         contentDescription = "Localized Description",
-                        modifier = Modifier.requiredSize(InputChipDefaults.IconSize)
+                        modifier = Modifier.requiredSize(InputChipDefaults.IconSize),
                     )
                 },
                 trailingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Done,
                         contentDescription = "Localized Description",
-                        modifier = Modifier.requiredSize(InputChipDefaults.IconSize)
+                        modifier = Modifier.requiredSize(InputChipDefaults.IconSize),
                     )
-                }
+                },
             )
         }
         assertChipAgainstGolden("inputChip_selected_lightTheme")
@@ -192,16 +189,16 @@ class ChipScreenshotTest {
                     Icon(
                         imageVector = Icons.Filled.Person,
                         contentDescription = "Localized Description",
-                        modifier = Modifier.requiredSize(InputChipDefaults.AvatarSize)
+                        modifier = Modifier.requiredSize(InputChipDefaults.AvatarSize),
                     )
                 },
                 trailingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Done,
                         contentDescription = "Localized Description",
-                        modifier = Modifier.requiredSize(InputChipDefaults.IconSize)
+                        modifier = Modifier.requiredSize(InputChipDefaults.IconSize),
                     )
-                }
+                },
             )
         }
         assertChipAgainstGolden("inputChip_withAvatar_lightTheme")
@@ -220,16 +217,16 @@ class ChipScreenshotTest {
                     Icon(
                         imageVector = Icons.Filled.Search,
                         contentDescription = "Localized Description",
-                        modifier = Modifier.requiredSize(InputChipDefaults.IconSize)
+                        modifier = Modifier.requiredSize(InputChipDefaults.IconSize),
                     )
                 },
                 trailingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Done,
                         contentDescription = "Localized Description",
-                        modifier = Modifier.requiredSize(InputChipDefaults.IconSize)
+                        modifier = Modifier.requiredSize(InputChipDefaults.IconSize),
                     )
-                }
+                },
             )
         }
         assertChipAgainstGolden("inputChip_darkTheme")
@@ -248,16 +245,16 @@ class ChipScreenshotTest {
                     Icon(
                         imageVector = Icons.Filled.Search,
                         contentDescription = "Localized Description",
-                        modifier = Modifier.requiredSize(InputChipDefaults.IconSize)
+                        modifier = Modifier.requiredSize(InputChipDefaults.IconSize),
                     )
                 },
                 trailingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Done,
                         contentDescription = "Localized Description",
-                        modifier = Modifier.requiredSize(InputChipDefaults.IconSize)
+                        modifier = Modifier.requiredSize(InputChipDefaults.IconSize),
                     )
-                }
+                },
             )
         }
         assertChipAgainstGolden("inputChip_selected_darkTheme")
@@ -271,7 +268,7 @@ class ChipScreenshotTest {
                 onClick = {},
                 enabled = false,
                 modifier = Modifier.testTag(TestTag),
-                label = { Text("Input chip") }
+                label = { Text("Input chip") },
             )
         }
         assertChipAgainstGolden("inputChip_disabled_lightTheme")
@@ -285,7 +282,7 @@ class ChipScreenshotTest {
                 onClick = {},
                 enabled = false,
                 modifier = Modifier.testTag(TestTag),
-                label = { Text("Input chip") }
+                label = { Text("Input chip") },
             )
         }
         assertChipAgainstGolden("inputChip_disabled_selected_lightTheme")
@@ -299,7 +296,7 @@ class ChipScreenshotTest {
                 onClick = {},
                 enabled = false,
                 modifier = Modifier.testTag(TestTag),
-                label = { Text("Input chip") }
+                label = { Text("Input chip") },
             )
         }
         assertChipAgainstGolden("inputChip_disabled_darkTheme")
@@ -313,7 +310,7 @@ class ChipScreenshotTest {
                 onClick = {},
                 enabled = false,
                 modifier = Modifier.testTag(TestTag),
-                label = { Text("Input chip") }
+                label = { Text("Input chip") },
             )
         }
         assertChipAgainstGolden("inputChip_disabled_selected_darkTheme")
@@ -331,9 +328,9 @@ class ChipScreenshotTest {
                     Icon(
                         imageVector = Icons.Filled.Done,
                         contentDescription = "Localized Description",
-                        modifier = Modifier.requiredSize(FilterChipDefaults.IconSize)
+                        modifier = Modifier.requiredSize(FilterChipDefaults.IconSize),
                     )
-                }
+                },
             )
         }
         assertChipAgainstGolden("filterChip_flat_selected_lightTheme")
@@ -346,7 +343,7 @@ class ChipScreenshotTest {
                 selected = false,
                 onClick = {},
                 label = { Text("Filter Chip") },
-                modifier = Modifier.testTag(TestTag)
+                modifier = Modifier.testTag(TestTag),
             )
         }
         assertChipAgainstGolden("filterChip_flat_notSelected")
@@ -366,9 +363,9 @@ class ChipScreenshotTest {
                         imageVector = Icons.Filled.Done,
                         tint = LocalContentColor.current,
                         contentDescription = "Localized Description",
-                        modifier = Modifier.requiredSize(FilterChipDefaults.IconSize)
+                        modifier = Modifier.requiredSize(FilterChipDefaults.IconSize),
                     )
-                }
+                },
             )
         }
         assertChipAgainstGolden("filterChip_flat_disabled_selected")
@@ -382,7 +379,7 @@ class ChipScreenshotTest {
                 onClick = {},
                 label = { Text("Filter Chip") },
                 enabled = false,
-                modifier = Modifier.testTag(TestTag)
+                modifier = Modifier.testTag(TestTag),
             )
         }
         assertChipAgainstGolden("filterChip_flat_disabled_notSelected")
@@ -400,9 +397,9 @@ class ChipScreenshotTest {
                     Icon(
                         imageVector = Icons.Filled.Done,
                         contentDescription = "Localized Description",
-                        modifier = Modifier.requiredSize(FilterChipDefaults.IconSize)
+                        modifier = Modifier.requiredSize(FilterChipDefaults.IconSize),
                     )
-                }
+                },
             )
         }
         assertChipAgainstGolden("filterChip_elevated_selected_darkTheme")
@@ -415,7 +412,7 @@ class ChipScreenshotTest {
                 onClick = {},
                 enabled = true,
                 modifier = Modifier.testTag(TestTag),
-                label = { Text("Suggestion Chip") }
+                label = { Text("Suggestion Chip") },
             )
         }
         assertChipAgainstGolden("suggestionChip_flat_lightTheme")
@@ -428,7 +425,7 @@ class ChipScreenshotTest {
                 onClick = {},
                 enabled = true,
                 modifier = Modifier.testTag(TestTag),
-                label = { Text("Suggestion Chip") }
+                label = { Text("Suggestion Chip") },
             )
         }
         assertChipAgainstGolden("suggestionChip_flat_darkTheme")
@@ -440,7 +437,7 @@ class ChipScreenshotTest {
             ElevatedSuggestionChip(
                 onClick = {},
                 modifier = Modifier.testTag(TestTag),
-                label = { Text("Suggestion Chip") }
+                label = { Text("Suggestion Chip") },
             )
         }
         assertChipAgainstGolden("suggestionChip_elevated_lightTheme")
@@ -452,7 +449,7 @@ class ChipScreenshotTest {
             ElevatedSuggestionChip(
                 onClick = {},
                 modifier = Modifier.testTag(TestTag),
-                label = { Text("Suggestion Chip") }
+                label = { Text("Suggestion Chip") },
             )
         }
         assertChipAgainstGolden("suggestionChip_elevated_darkTheme")
@@ -465,7 +462,7 @@ class ChipScreenshotTest {
                 onClick = {},
                 enabled = false,
                 modifier = Modifier.testTag(TestTag),
-                label = { Text("Suggestion Chip") }
+                label = { Text("Suggestion Chip") },
             )
         }
         assertChipAgainstGolden("suggestionChip_flat_disabled_lightTheme")
@@ -478,14 +475,15 @@ class ChipScreenshotTest {
                 onClick = {},
                 modifier = Modifier.testTag(TestTag),
                 enabled = false,
-                label = { Text("Suggestion Chip") }
+                label = { Text("Suggestion Chip") },
             )
         }
         assertChipAgainstGolden("suggestionChip_elevated_disabled_lightTheme")
     }
 
     private fun assertChipAgainstGolden(goldenIdentifier: String) {
-        rule.onNodeWithTag(TestTag)
+        rule
+            .onNodeWithTag(TestTag)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, goldenIdentifier)
     }

@@ -21,19 +21,21 @@ import kotlin.jvm.JvmField
 /**
  * A class to represent the width size buckets for a viewport. The possible values are [COMPACT],
  * [MEDIUM], and [EXPANDED]. [WindowWidthSizeClass] should not be used as a proxy for the device
- * type. It is possible to have resizeable windows in different device types.
- * The viewport might change from a [COMPACT] all the way to an [EXPANDED] size class.
+ * type. It is possible to have resizeable windows in different device types. The viewport might
+ * change from a [COMPACT] all the way to an [EXPANDED] size class.
  */
-class WindowWidthSizeClass private constructor(
-    private val rawValue: Int
-) {
+@Suppress("DEPRECATION")
+@Deprecated("WindowWidthSizeClass will not be developed further, use WindowSizeClass instead.")
+public class WindowWidthSizeClass private constructor(private val rawValue: Int) {
+
     override fun toString(): String {
-        val name = when (this) {
-            COMPACT -> "COMPACT"
-            MEDIUM -> "MEDIUM"
-            EXPANDED -> "EXPANDED"
-            else -> "UNKNOWN"
-        }
+        val name =
+            when (this) {
+                COMPACT -> "COMPACT"
+                MEDIUM -> "MEDIUM"
+                EXPANDED -> "EXPANDED"
+                else -> "UNKNOWN"
+            }
         return "WindowWidthSizeClass: $name"
     }
 
@@ -51,34 +53,37 @@ class WindowWidthSizeClass private constructor(
         return rawValue
     }
 
-    companion object {
-        /**
-         * A bucket to represent a compact width window, typical for a phone in portrait.
-         */
+    public companion object {
+        /** A bucket to represent a compact width window, typical for a phone in portrait. */
+        @Deprecated("WindowWidthSizeClass not be developed further.")
         @JvmField
-        val COMPACT: WindowWidthSizeClass = WindowWidthSizeClass(0)
+        public val COMPACT: WindowWidthSizeClass = WindowWidthSizeClass(0)
 
         /**
-         * A bucket to represent a medium width window, typical for a phone in landscape or
-         * a tablet.
+         * A bucket to represent a medium width window, typical for a phone in landscape or a
+         * tablet.
          */
+        @Deprecated("WindowWidthSizeClass not be developed further.")
         @JvmField
-        val MEDIUM: WindowWidthSizeClass = WindowWidthSizeClass(1)
+        public val MEDIUM: WindowWidthSizeClass = WindowWidthSizeClass(1)
 
         /**
          * A bucket to represent an expanded width window, typical for a large tablet or desktop
          * form-factor.
          */
+        @Deprecated("WindowWidthSizeClass not be developed further.")
         @JvmField
-        val EXPANDED: WindowWidthSizeClass = WindowWidthSizeClass(2)
+        public val EXPANDED: WindowWidthSizeClass = WindowWidthSizeClass(2)
 
         /**
-         * Returns a recommended [WindowWidthSizeClass] for the width of a window given the width
-         * in DP.
+         * Returns a recommended [WindowWidthSizeClass] for the width of a window given the width in
+         * DP.
+         *
          * @param dpWidth the width of the window in DP
          * @return A recommended size class for the width
          * @throws IllegalArgumentException if the width is negative
          */
+        @Deprecated("WindowWidthSizeClass not be developed further.")
         internal fun compute(dpWidth: Float): WindowWidthSizeClass {
             require(dpWidth >= 0) { "Width must be positive, received $dpWidth" }
             return when {

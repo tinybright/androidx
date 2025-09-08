@@ -16,7 +16,6 @@
 
 package androidx.compose.material3
 
-import android.os.Build
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -40,20 +39,19 @@ import androidx.test.filters.SdkSuppress
 import androidx.test.screenshot.AndroidXScreenshotTestRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @LargeTest
 @RunWith(AndroidJUnit4::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 class TabScreenshotTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+    @get:Rule val composeTestRule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL3)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL3)
 
     @Test
     fun lightTheme_primary() {
@@ -63,16 +61,14 @@ class TabScreenshotTest {
 
         composeTestRule.setContent {
             scope = rememberCoroutineScope()
-            MaterialTheme(lightColorScheme()) {
-                DefaultPrimaryTabs(interactionSource)
-            }
+            MaterialTheme(lightColorScheme()) { DefaultPrimaryTabs(interactionSource) }
         }
 
         assertTabsMatch(
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = null,
-            goldenIdentifier = "tabs_lightTheme_primary"
+            goldenIdentifier = "tabs_lightTheme_primary",
         )
     }
 
@@ -84,20 +80,19 @@ class TabScreenshotTest {
 
         composeTestRule.setContent {
             scope = rememberCoroutineScope()
-            MaterialTheme(lightColorScheme()) {
-                DefaultSecondaryTabs(interactionSource)
-            }
+            MaterialTheme(lightColorScheme()) { DefaultSecondaryTabs(interactionSource) }
         }
 
         assertTabsMatch(
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = null,
-            goldenIdentifier = "tabs_lightTheme_secondary"
+            goldenIdentifier = "tabs_lightTheme_secondary",
         )
     }
 
     @Test
+    @Ignore("b/355413615")
     fun lightTheme_primary_pressed() {
         val interactionSource = MutableInteractionSource()
 
@@ -105,20 +100,19 @@ class TabScreenshotTest {
 
         composeTestRule.setContent {
             scope = rememberCoroutineScope()
-            MaterialTheme(lightColorScheme()) {
-                DefaultPrimaryTabs(interactionSource)
-            }
+            MaterialTheme(lightColorScheme()) { DefaultPrimaryTabs(interactionSource) }
         }
 
         assertTabsMatch(
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = PressInteraction.Press(Offset(10f, 10f)),
-            goldenIdentifier = "tabs_lightTheme_primary_pressed"
+            goldenIdentifier = "tabs_lightTheme_primary_pressed",
         )
     }
 
     @Test
+    @Ignore("b/355413615")
     fun lightTheme_secondary_pressed() {
         val interactionSource = MutableInteractionSource()
 
@@ -126,16 +120,14 @@ class TabScreenshotTest {
 
         composeTestRule.setContent {
             scope = rememberCoroutineScope()
-            MaterialTheme(lightColorScheme()) {
-                DefaultSecondaryTabs(interactionSource)
-            }
+            MaterialTheme(lightColorScheme()) { DefaultSecondaryTabs(interactionSource) }
         }
 
         assertTabsMatch(
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = PressInteraction.Press(Offset(10f, 10f)),
-            goldenIdentifier = "tabs_lightTheme_secondary_pressed"
+            goldenIdentifier = "tabs_lightTheme_secondary_pressed",
         )
     }
 
@@ -147,16 +139,14 @@ class TabScreenshotTest {
 
         composeTestRule.setContent {
             scope = rememberCoroutineScope()
-            MaterialTheme(darkColorScheme()) {
-                DefaultPrimaryTabs(interactionSource)
-            }
+            MaterialTheme(darkColorScheme()) { DefaultPrimaryTabs(interactionSource) }
         }
 
         assertTabsMatch(
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = null,
-            goldenIdentifier = "tabs_darkTheme_primary"
+            goldenIdentifier = "tabs_darkTheme_primary",
         )
     }
 
@@ -168,20 +158,19 @@ class TabScreenshotTest {
 
         composeTestRule.setContent {
             scope = rememberCoroutineScope()
-            MaterialTheme(darkColorScheme()) {
-                DefaultSecondaryTabs(interactionSource)
-            }
+            MaterialTheme(darkColorScheme()) { DefaultSecondaryTabs(interactionSource) }
         }
 
         assertTabsMatch(
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = null,
-            goldenIdentifier = "tabs_darkTheme_secondary"
+            goldenIdentifier = "tabs_darkTheme_secondary",
         )
     }
 
     @Test
+    @Ignore("b/355413615")
     fun darkTheme_primary_pressed() {
         val interactionSource = MutableInteractionSource()
 
@@ -189,20 +178,19 @@ class TabScreenshotTest {
 
         composeTestRule.setContent {
             scope = rememberCoroutineScope()
-            MaterialTheme(darkColorScheme()) {
-                DefaultPrimaryTabs(interactionSource)
-            }
+            MaterialTheme(darkColorScheme()) { DefaultPrimaryTabs(interactionSource) }
         }
 
         assertTabsMatch(
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = PressInteraction.Press(Offset(10f, 10f)),
-            goldenIdentifier = "tabs_darkTheme_primary_pressed"
+            goldenIdentifier = "tabs_darkTheme_primary_pressed",
         )
     }
 
     @Test
+    @Ignore("b/355413615")
     fun darkTheme_secondary_pressed() {
         val interactionSource = MutableInteractionSource()
 
@@ -210,16 +198,14 @@ class TabScreenshotTest {
 
         composeTestRule.setContent {
             scope = rememberCoroutineScope()
-            MaterialTheme(darkColorScheme()) {
-                DefaultSecondaryTabs(interactionSource)
-            }
+            MaterialTheme(darkColorScheme()) { DefaultSecondaryTabs(interactionSource) }
         }
 
         assertTabsMatch(
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = PressInteraction.Press(Offset(10f, 10f)),
-            goldenIdentifier = "tabs_darkTheme_secondary_pressed"
+            goldenIdentifier = "tabs_darkTheme_secondary_pressed",
         )
     }
 
@@ -236,7 +222,7 @@ class TabScreenshotTest {
                     interactionSource,
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     selectedContentColor = MaterialTheme.colorScheme.onTertiary,
-                    unselectedContentColor = Color.Black
+                    unselectedContentColor = Color.Black,
                 )
             }
         }
@@ -245,7 +231,7 @@ class TabScreenshotTest {
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = null,
-            goldenIdentifier = "customTabs_lightTheme_primary"
+            goldenIdentifier = "customTabs_lightTheme_primary",
         )
     }
 
@@ -262,7 +248,7 @@ class TabScreenshotTest {
                     interactionSource,
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     selectedContentColor = MaterialTheme.colorScheme.onTertiary,
-                    unselectedContentColor = Color.Black
+                    unselectedContentColor = Color.Black,
                 )
             }
         }
@@ -271,7 +257,7 @@ class TabScreenshotTest {
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = null,
-            goldenIdentifier = "customTabs_lightTheme_secondary"
+            goldenIdentifier = "customTabs_lightTheme_secondary",
         )
     }
 
@@ -288,7 +274,7 @@ class TabScreenshotTest {
                     interactionSource,
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     selectedContentColor = MaterialTheme.colorScheme.onTertiary,
-                    unselectedContentColor = Color.Black
+                    unselectedContentColor = Color.Black,
                 )
             }
         }
@@ -297,7 +283,7 @@ class TabScreenshotTest {
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = null,
-            goldenIdentifier = "customTabs_darkTheme_primary"
+            goldenIdentifier = "customTabs_darkTheme_primary",
         )
     }
 
@@ -314,7 +300,7 @@ class TabScreenshotTest {
                     interactionSource,
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     selectedContentColor = MaterialTheme.colorScheme.onTertiary,
-                    unselectedContentColor = Color.Black
+                    unselectedContentColor = Color.Black,
                 )
             }
         }
@@ -323,7 +309,7 @@ class TabScreenshotTest {
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = null,
-            goldenIdentifier = "customTabs_darkTheme_secondary"
+            goldenIdentifier = "customTabs_darkTheme_secondary",
         )
     }
 
@@ -335,16 +321,14 @@ class TabScreenshotTest {
 
         composeTestRule.setContent {
             scope = rememberCoroutineScope()
-            MaterialTheme(lightColorScheme()) {
-                DefaultPrimaryLeadingIconTabs(interactionSource)
-            }
+            MaterialTheme(lightColorScheme()) { DefaultPrimaryLeadingIconTabs(interactionSource) }
         }
 
         assertTabsMatch(
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = null,
-            goldenIdentifier = "leadingIconTabs_lightTheme_primary"
+            goldenIdentifier = "leadingIconTabs_lightTheme_primary",
         )
     }
 
@@ -356,16 +340,14 @@ class TabScreenshotTest {
 
         composeTestRule.setContent {
             scope = rememberCoroutineScope()
-            MaterialTheme(lightColorScheme()) {
-                DefaultSecondaryLeadingIconTabs(interactionSource)
-            }
+            MaterialTheme(lightColorScheme()) { DefaultSecondaryLeadingIconTabs(interactionSource) }
         }
 
         assertTabsMatch(
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = null,
-            goldenIdentifier = "leadingIconTabs_lightTheme_secondary"
+            goldenIdentifier = "leadingIconTabs_lightTheme_secondary",
         )
     }
 
@@ -377,16 +359,14 @@ class TabScreenshotTest {
 
         composeTestRule.setContent {
             scope = rememberCoroutineScope()
-            MaterialTheme(darkColorScheme()) {
-                DefaultPrimaryLeadingIconTabs(interactionSource)
-            }
+            MaterialTheme(darkColorScheme()) { DefaultPrimaryLeadingIconTabs(interactionSource) }
         }
 
         assertTabsMatch(
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = null,
-            goldenIdentifier = "leadingIconTabs_darkTheme_primary"
+            goldenIdentifier = "leadingIconTabs_darkTheme_primary",
         )
     }
 
@@ -398,16 +378,14 @@ class TabScreenshotTest {
 
         composeTestRule.setContent {
             scope = rememberCoroutineScope()
-            MaterialTheme(darkColorScheme()) {
-                DefaultSecondaryLeadingIconTabs(interactionSource)
-            }
+            MaterialTheme(darkColorScheme()) { DefaultSecondaryLeadingIconTabs(interactionSource) }
         }
 
         assertTabsMatch(
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = null,
-            goldenIdentifier = "leadingIconTabs_darkTheme_secondary"
+            goldenIdentifier = "leadingIconTabs_darkTheme_secondary",
         )
     }
 
@@ -419,16 +397,14 @@ class TabScreenshotTest {
 
         composeTestRule.setContent {
             scope = rememberCoroutineScope()
-            MaterialTheme(lightColorScheme()) {
-                DefaultPrimaryScrollableTabs(interactionSource)
-            }
+            MaterialTheme(lightColorScheme()) { DefaultPrimaryScrollableTabs(interactionSource) }
         }
 
         assertTabsMatch(
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = null,
-            goldenIdentifier = "tabs_lightTheme_primary_scrollable"
+            goldenIdentifier = "tabs_lightTheme_primary_scrollable",
         )
     }
 
@@ -440,16 +416,14 @@ class TabScreenshotTest {
 
         composeTestRule.setContent {
             scope = rememberCoroutineScope()
-            MaterialTheme(lightColorScheme()) {
-                DefaultSecondaryScrollableTabs(interactionSource)
-            }
+            MaterialTheme(lightColorScheme()) { DefaultSecondaryScrollableTabs(interactionSource) }
         }
 
         assertTabsMatch(
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = null,
-            goldenIdentifier = "tabs_lightTheme_secondary_scrollable"
+            goldenIdentifier = "tabs_lightTheme_secondary_scrollable",
         )
     }
 
@@ -461,16 +435,14 @@ class TabScreenshotTest {
 
         composeTestRule.setContent {
             scope = rememberCoroutineScope()
-            MaterialTheme(darkColorScheme()) {
-                DefaultPrimaryScrollableTabs(interactionSource)
-            }
+            MaterialTheme(darkColorScheme()) { DefaultPrimaryScrollableTabs(interactionSource) }
         }
 
         assertTabsMatch(
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = null,
-            goldenIdentifier = "tabs_darkTheme_primary_scrollable"
+            goldenIdentifier = "tabs_darkTheme_primary_scrollable",
         )
     }
 
@@ -482,16 +454,14 @@ class TabScreenshotTest {
 
         composeTestRule.setContent {
             scope = rememberCoroutineScope()
-            MaterialTheme(darkColorScheme()) {
-                DefaultSecondaryScrollableTabs(interactionSource)
-            }
+            MaterialTheme(darkColorScheme()) { DefaultSecondaryScrollableTabs(interactionSource) }
         }
 
         assertTabsMatch(
             scope = scope!!,
             interactionSource = interactionSource,
             interaction = null,
-            goldenIdentifier = "tabs_darkTheme_secondary_scrollable"
+            goldenIdentifier = "tabs_darkTheme_secondary_scrollable",
         )
     }
 
@@ -506,14 +476,12 @@ class TabScreenshotTest {
         scope: CoroutineScope,
         interactionSource: MutableInteractionSource,
         interaction: Interaction? = null,
-        goldenIdentifier: String
+        goldenIdentifier: String,
     ) {
         if (interaction != null) {
             composeTestRule.runOnIdle {
                 // Start ripple
-                scope.launch {
-                    interactionSource.emit(interaction)
-                }
+                scope.launch { interactionSource.emit(interaction) }
             }
 
             composeTestRule.waitForIdle()
@@ -524,89 +492,67 @@ class TabScreenshotTest {
         }
 
         // Capture and compare screenshots
-        composeTestRule.onNodeWithTag(TAG)
+        composeTestRule
+            .onNodeWithTag(TAG)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, goldenIdentifier)
     }
 }
 
 /**
- * Default primary colored [TabRow] with three [Tab]s. The first [Tab] is selected, and the rest are not.
+ * Default primary colored [TabRow] with three [Tab]s. The first [Tab] is selected, and the rest are
+ * not.
  *
  * @param interactionSource the [MutableInteractionSource] for the first [Tab], to control its
- * visual state.
+ *   visual state.
  */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun DefaultPrimaryTabs(
-    interactionSource: MutableInteractionSource
-) {
-    Box(
-        Modifier
-            .semantics(mergeDescendants = true) {}
-            .testTag(TAG)) {
+private fun DefaultPrimaryTabs(interactionSource: MutableInteractionSource) {
+    Box(Modifier.semantics(mergeDescendants = true) {}.testTag(TAG)) {
         PrimaryTabRow(selectedTabIndex = 0) {
             Tab(
                 selected = true,
                 onClick = {},
                 text = { Text("TAB") },
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
             )
-            Tab(
-                selected = false,
-                onClick = {},
-                text = { Text("TAB") }
-            )
-            Tab(
-                selected = false,
-                onClick = {},
-                text = { Text("TAB") }
-            )
+            Tab(selected = false, onClick = {}, text = { Text("TAB") })
+            Tab(selected = false, onClick = {}, text = { Text("TAB") })
         }
     }
 }
 
 /**
- * Default secondary colored [TabRow] with three [Tab]s. The first [Tab] is selected, and the rest are not.
+ * Default secondary colored [TabRow] with three [Tab]s. The first [Tab] is selected, and the rest
+ * are not.
  *
  * @param interactionSource the [MutableInteractionSource] for the first [Tab], to control its
- * visual state.
+ *   visual state.
  */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun DefaultSecondaryTabs(
-    interactionSource: MutableInteractionSource
-) {
-    Box(
-        Modifier
-            .semantics(mergeDescendants = true) {}
-            .testTag(TAG)) {
+private fun DefaultSecondaryTabs(interactionSource: MutableInteractionSource) {
+    Box(Modifier.semantics(mergeDescendants = true) {}.testTag(TAG)) {
         SecondaryTabRow(selectedTabIndex = 0) {
             Tab(
                 selected = true,
                 onClick = {},
                 text = { Text("TAB") },
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
             )
-            Tab(
-                selected = false,
-                onClick = {},
-                text = { Text("TAB") }
-            )
-            Tab(
-                selected = false,
-                onClick = {},
-                text = { Text("TAB") }
-            )
+            Tab(selected = false, onClick = {}, text = { Text("TAB") })
+            Tab(selected = false, onClick = {}, text = { Text("TAB") })
         }
     }
 }
 
 /**
- * Custom primary colored [TabRow] with three [Tab]s. The first [Tab] is selected, and the rest are not.
+ * Custom primary colored [TabRow] with three [Tab]s. The first [Tab] is selected, and the rest are
+ * not.
  *
  * @param interactionSource the [MutableInteractionSource] for the first [Tab], to control its
- * visual state.
+ *   visual state.
  * @param containerColor the containerColor of the [TabRow]
  * @param selectedContentColor the content color for a selected [Tab] (first tab)
  * @param unselectedContentColor the content color for an unselected [Tab] (second and third tabs)
@@ -617,47 +563,42 @@ private fun CustomPrimaryTabs(
     interactionSource: MutableInteractionSource,
     containerColor: Color,
     selectedContentColor: Color,
-    unselectedContentColor: Color
+    unselectedContentColor: Color,
 ) {
-    Box(
-        Modifier
-            .semantics(mergeDescendants = true) {}
-            .testTag(TAG)) {
-        PrimaryTabRow(
-            selectedTabIndex = 0,
-            containerColor = containerColor
-        ) {
+    Box(Modifier.semantics(mergeDescendants = true) {}.testTag(TAG)) {
+        PrimaryTabRow(selectedTabIndex = 0, containerColor = containerColor) {
             Tab(
                 selected = true,
                 onClick = {},
                 text = { Text("TAB") },
                 selectedContentColor = selectedContentColor,
                 unselectedContentColor = unselectedContentColor,
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
             )
             Tab(
                 selected = false,
                 onClick = {},
                 text = { Text("TAB") },
                 selectedContentColor = selectedContentColor,
-                unselectedContentColor = unselectedContentColor
+                unselectedContentColor = unselectedContentColor,
             )
             Tab(
                 selected = false,
                 onClick = {},
                 text = { Text("TAB") },
                 selectedContentColor = selectedContentColor,
-                unselectedContentColor = unselectedContentColor
+                unselectedContentColor = unselectedContentColor,
             )
         }
     }
 }
 
 /**
- * Custom secondary colored [TabRow] with three [Tab]s. The first [Tab] is selected, and the rest are not.
+ * Custom secondary colored [TabRow] with three [Tab]s. The first [Tab] is selected, and the rest
+ * are not.
  *
  * @param interactionSource the [MutableInteractionSource] for the first [Tab], to control its
- * visual state.
+ *   visual state.
  * @param containerColor the containerColor of the [TabRow]
  * @param selectedContentColor the content color for a selected [Tab] (first tab)
  * @param unselectedContentColor the content color for an unselected [Tab] (second and third tabs)
@@ -668,21 +609,18 @@ private fun CustomSecondaryTabs(
     interactionSource: MutableInteractionSource,
     containerColor: Color,
     selectedContentColor: Color,
-    unselectedContentColor: Color
+    unselectedContentColor: Color,
 ) {
-    Box(
-        Modifier
-            .semantics(mergeDescendants = true) {}
-            .testTag(TAG)) {
+    Box(Modifier.semantics(mergeDescendants = true) {}.testTag(TAG)) {
         SecondaryTabRow(
             selectedTabIndex = 0,
             containerColor = containerColor,
             indicator = {
                 TabRowDefaults.SecondaryIndicator(
                     modifier = Modifier.tabIndicatorOffset(0),
-                    color = selectedContentColor
+                    color = selectedContentColor,
                 )
-            }
+            },
         ) {
             Tab(
                 selected = true,
@@ -690,181 +628,147 @@ private fun CustomSecondaryTabs(
                 text = { Text("TAB") },
                 selectedContentColor = selectedContentColor,
                 unselectedContentColor = unselectedContentColor,
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
             )
             Tab(
                 selected = false,
                 onClick = {},
                 text = { Text("TAB") },
                 selectedContentColor = selectedContentColor,
-                unselectedContentColor = unselectedContentColor
+                unselectedContentColor = unselectedContentColor,
             )
             Tab(
                 selected = false,
                 onClick = {},
                 text = { Text("TAB") },
                 selectedContentColor = selectedContentColor,
-                unselectedContentColor = unselectedContentColor
+                unselectedContentColor = unselectedContentColor,
             )
         }
     }
 }
 
 /**
- * Default primary colored [TabRow] with three [LeadingIconTab]s. The first [LeadingIconTab] is selected,
- * and the rest are not.
+ * Default primary colored [TabRow] with three [LeadingIconTab]s. The first [LeadingIconTab] is
+ * selected, and the rest are not.
  *
- * @param interactionSource the [MutableInteractionSource] for the first [LeadingIconTab], to control its
- * visual state.
+ * @param interactionSource the [MutableInteractionSource] for the first [LeadingIconTab], to
+ *   control its visual state.
  */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun DefaultPrimaryLeadingIconTabs(
-    interactionSource: MutableInteractionSource
-) {
-    Box(
-        Modifier
-            .semantics(mergeDescendants = true) {}
-            .testTag(TAG)) {
+private fun DefaultPrimaryLeadingIconTabs(interactionSource: MutableInteractionSource) {
+    Box(Modifier.semantics(mergeDescendants = true) {}.testTag(TAG)) {
         PrimaryTabRow(selectedTabIndex = 0) {
             LeadingIconTab(
                 selected = true,
                 onClick = {},
                 text = { Text("TAB") },
                 icon = { Icon(Icons.Filled.Favorite, contentDescription = "Favorite") },
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
             )
             LeadingIconTab(
                 selected = false,
                 onClick = {},
                 text = { Text("TAB") },
-                icon = { Icon(Icons.Filled.Favorite, contentDescription = "Favorite") }
+                icon = { Icon(Icons.Filled.Favorite, contentDescription = "Favorite") },
             )
             LeadingIconTab(
                 selected = false,
                 onClick = {},
                 text = { Text("TAB") },
-                icon = { Icon(Icons.Filled.Favorite, contentDescription = "Favorite") }
+                icon = { Icon(Icons.Filled.Favorite, contentDescription = "Favorite") },
             )
         }
     }
 }
 
 /**
- * Default secondary colored [TabRow] with three [LeadingIconTab]s. The first [LeadingIconTab] is selected,
- * and the rest are not.
+ * Default secondary colored [TabRow] with three [LeadingIconTab]s. The first [LeadingIconTab] is
+ * selected, and the rest are not.
  *
- * @param interactionSource the [MutableInteractionSource] for the first [LeadingIconTab], to control its
- * visual state.
+ * @param interactionSource the [MutableInteractionSource] for the first [LeadingIconTab], to
+ *   control its visual state.
  */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun DefaultSecondaryLeadingIconTabs(
-    interactionSource: MutableInteractionSource
-) {
-    Box(
-        Modifier
-            .semantics(mergeDescendants = true) {}
-            .testTag(TAG)) {
+private fun DefaultSecondaryLeadingIconTabs(interactionSource: MutableInteractionSource) {
+    Box(Modifier.semantics(mergeDescendants = true) {}.testTag(TAG)) {
         SecondaryTabRow(selectedTabIndex = 0) {
             LeadingIconTab(
                 selected = true,
                 onClick = {},
                 text = { Text("TAB") },
                 icon = { Icon(Icons.Filled.Favorite, contentDescription = "Favorite") },
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
             )
             LeadingIconTab(
                 selected = false,
                 onClick = {},
                 text = { Text("TAB") },
-                icon = { Icon(Icons.Filled.Favorite, contentDescription = "Favorite") }
+                icon = { Icon(Icons.Filled.Favorite, contentDescription = "Favorite") },
             )
             LeadingIconTab(
                 selected = false,
                 onClick = {},
                 text = { Text("TAB") },
-                icon = { Icon(Icons.Filled.Favorite, contentDescription = "Favorite") }
+                icon = { Icon(Icons.Filled.Favorite, contentDescription = "Favorite") },
             )
         }
     }
 }
 
 /**
- * Default primary colored [ScrollableTabRow] with three [Tab]s. The first [Tab] is selected, and the rest are not.
+ * Default primary colored [ScrollableTabRow] with three [Tab]s. The first [Tab] is selected, and
+ * the rest are not.
  *
  * @param interactionSource the [MutableInteractionSource] for the first [Tab], to control its
- * visual state.
+ *   visual state.
  */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun DefaultPrimaryScrollableTabs(
-    interactionSource: MutableInteractionSource
-) {
-    Box(
-        Modifier
-            .semantics(mergeDescendants = true) {}
-            .testTag(TAG)) {
+private fun DefaultPrimaryScrollableTabs(interactionSource: MutableInteractionSource) {
+    Box(Modifier.semantics(mergeDescendants = true) {}.testTag(TAG)) {
         PrimaryScrollableTabRow(
             selectedTabIndex = 0,
             indicator = {
                 TabRowDefaults.PrimaryIndicator(
-                    modifier = Modifier.tabIndicatorOffset(0, matchContentSize = true),
+                    modifier = Modifier.tabIndicatorOffset(0, matchContentSize = true)
                 )
-            }
+            },
         ) {
             Tab(
                 selected = true,
                 onClick = {},
                 text = { Text("TAB") },
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
             )
-            Tab(
-                selected = false,
-                onClick = {},
-                text = { Text("TAB") }
-            )
-            Tab(
-                selected = false,
-                onClick = {},
-                text = { Text("TAB") }
-            )
+            Tab(selected = false, onClick = {}, text = { Text("TAB") })
+            Tab(selected = false, onClick = {}, text = { Text("TAB") })
         }
     }
 }
 
 /**
- * Default secondary colored [ScrollableTabRow] with three [Tab]s. The first [Tab] is selected, and the rest are not.
+ * Default secondary colored [ScrollableTabRow] with three [Tab]s. The first [Tab] is selected, and
+ * the rest are not.
  *
  * @param interactionSource the [MutableInteractionSource] for the first [Tab], to control its
- * visual state.
+ *   visual state.
  */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun DefaultSecondaryScrollableTabs(
-    interactionSource: MutableInteractionSource
-) {
-    Box(
-        Modifier
-            .semantics(mergeDescendants = true) {}
-            .testTag(TAG)) {
+private fun DefaultSecondaryScrollableTabs(interactionSource: MutableInteractionSource) {
+    Box(Modifier.semantics(mergeDescendants = true) {}.testTag(TAG)) {
         SecondaryScrollableTabRow(selectedTabIndex = 0) {
             Tab(
                 selected = true,
                 onClick = {},
                 text = { Text("TAB") },
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
             )
-            Tab(
-                selected = false,
-                onClick = {},
-                text = { Text("TAB") }
-            )
-            Tab(
-                selected = false,
-                onClick = {},
-                text = { Text("TAB") }
-            )
+            Tab(selected = false, onClick = {}, text = { Text("TAB") })
+            Tab(selected = false, onClick = {}, text = { Text("TAB") })
         }
     }
 }

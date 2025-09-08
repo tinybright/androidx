@@ -28,10 +28,10 @@ import androidx.core.os.asOutcomeReceiver
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 @RestrictTo(RestrictTo.Scope.LIBRARY)
-@SuppressLint("ClassVerificationFailure", "NewApi")
+@SuppressLint("NewApi")
 @RequiresExtension(extension = SdkExtensions.AD_SERVICES, version = 4)
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 9)
-open class AdIdManagerImplCommon(
+public open class AdIdManagerImplCommon(
     private val mAdIdManager: android.adservices.adid.AdIdManager
 ) : AdIdManager() {
 
@@ -42,14 +42,10 @@ open class AdIdManagerImplCommon(
     }
 
     @RequiresPermission(AdServicesPermissions.ACCESS_ADSERVICES_AD_ID)
-    private suspend fun
-        getAdIdAsyncInternal(): android.adservices.adid.AdId = suspendCancellableCoroutine {
-            continuation ->
-        mAdIdManager.getAdId(
-            Runnable::run,
-            continuation.asOutcomeReceiver()
-        )
-    }
+    private suspend fun getAdIdAsyncInternal(): android.adservices.adid.AdId =
+        suspendCancellableCoroutine { continuation ->
+            mAdIdManager.getAdId(Runnable::run, continuation.asOutcomeReceiver())
+        }
 
     private fun convertResponse(response: android.adservices.adid.AdId): AdId {
         return AdId(response.adId, response.isLimitAdTrackingEnabled)

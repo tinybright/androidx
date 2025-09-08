@@ -29,21 +29,18 @@ import androidx.privacysandbox.sdkruntime.core.SandboxedSdkProviderCompat
 /**
  * Implementation of platform [SandboxedSdkProvider] that delegate to [SandboxedSdkProviderCompat]
  * Gets compat class name from asset "SandboxedSdkProviderCompatClassName.txt"
- *
  */
 @RequiresApi(34)
-class SandboxedSdkProviderAdapter internal constructor(
-    private val classNameProvider: CompatClassNameProvider
-) : SandboxedSdkProvider() {
+public class SandboxedSdkProviderAdapter
+internal constructor(private val classNameProvider: CompatClassNameProvider) :
+    SandboxedSdkProvider() {
 
-    /**
-     * Provides classname of [SandboxedSdkProviderCompat] implementation.
-     */
+    /** Provides classname of [SandboxedSdkProviderCompat] implementation. */
     internal interface CompatClassNameProvider {
         fun getCompatProviderClassName(context: Context): String
     }
 
-    constructor () : this(DefaultClassNameProvider())
+    public constructor() : this(DefaultClassNameProvider())
 
     internal val delegate: SandboxedSdkProviderCompat by lazy {
         val currentContext = context!!
@@ -68,22 +65,17 @@ class SandboxedSdkProviderAdapter internal constructor(
         delegate.beforeUnloadSdk()
     }
 
-    override fun getView(
-        windowContext: Context,
-        params: Bundle,
-        width: Int,
-        height: Int
-    ): View {
-        return delegate.getView(windowContext, params, width, height)
+    @Suppress("OVERRIDE_DEPRECATION") // b/407503025
+    override fun getView(windowContext: Context, params: Bundle, width: Int, height: Int): View {
+        throw UnsupportedOperationException("This SDK doesn't support SurfaceView requests.")
     }
 
     private class DefaultClassNameProvider : CompatClassNameProvider {
         override fun getCompatProviderClassName(context: Context): String {
             // TODO(b/257966930) Read classname from SDK manifest property
-            return context.assets.open(COMPAT_SDK_PROVIDER_CLASS_ASSET_NAME)
-                .use { inputStream ->
-                    inputStream.bufferedReader().readLine()
-                }
+            return context.assets.open(COMPAT_SDK_PROVIDER_CLASS_ASSET_NAME).use { inputStream ->
+                inputStream.bufferedReader().readLine()
+            }
         }
     }
 

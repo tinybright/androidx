@@ -29,7 +29,9 @@ import javax.lang.model.element.TypeElement
  * Javac implementation of a [XBasicAnnotationProcessor] with built-in support for validating and
  * deferring elements.
  */
-abstract class JavacBasicAnnotationProcessor @JvmOverloads constructor(
+abstract class JavacBasicAnnotationProcessor
+@JvmOverloads
+constructor(
     configureEnv: (Map<String, String>) -> XProcessingEnvConfig = { XProcessingEnvConfig.DEFAULT }
 ) : AbstractProcessor(), XBasicAnnotationProcessor {
     constructor(config: XProcessingEnvConfig) : this({ config })
@@ -55,15 +57,15 @@ abstract class JavacBasicAnnotationProcessor @JvmOverloads constructor(
 
     final override fun process(
         annotations: MutableSet<out TypeElement>,
-        roundEnv: RoundEnvironment
+        roundEnv: RoundEnvironment,
     ): Boolean {
         val xRoundEnv = JavacRoundEnv(xEnv, roundEnv)
         if (roundEnv.processingOver()) {
             preRound(xEnv, xRoundEnv)
             val missingElements = commonDelegate.processLastRound()
             postRound(xEnv, xRoundEnv)
-            if (!xProcessingEnv.config.disableAnnotatedElementValidation &&
-                !roundEnv.errorRaised()
+            if (
+                !xProcessingEnv.config.disableAnnotatedElementValidation && !roundEnv.errorRaised()
             ) {
                 // Report missing elements if no error was raised to avoid being noisy.
                 commonDelegate.reportMissingElements(missingElements)

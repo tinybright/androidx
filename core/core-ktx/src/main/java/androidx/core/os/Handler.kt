@@ -19,8 +19,8 @@ package androidx.core.os
 import android.os.Handler
 
 /**
- * Version of [Handler.postDelayed] which re-orders the parameters, allowing the action to be
- * placed outside of parentheses.
+ * Version of [Handler.postDelayed] which re-orders the parameters, allowing the action to be placed
+ * outside of parentheses.
  *
  * ```
  * handler.postDelayed(200) {
@@ -33,7 +33,7 @@ import android.os.Handler
 public inline fun Handler.postDelayed(
     delayInMillis: Long,
     token: Any? = null,
-    crossinline action: () -> Unit
+    crossinline action: () -> Unit,
 ): Runnable {
     val runnable = Runnable { action() }
     if (token == null) {
@@ -45,8 +45,8 @@ public inline fun Handler.postDelayed(
 }
 
 /**
- * Version of [Handler.postAtTime] which re-orders the parameters, allowing the action to be
- * placed outside of parentheses.
+ * Version of [Handler.postAtTime] which re-orders the parameters, allowing the action to be placed
+ * outside of parentheses.
  *
  * ```
  * handler.postAtTime(200) {
@@ -55,7 +55,7 @@ public inline fun Handler.postDelayed(
  * ```
  *
  * @param uptimeMillis The absolute time at which the callback should run, using the
- * [android.os.SystemClock#uptimeMillis] time-base.
+ *   [android.os.SystemClock#uptimeMillis] time-base.
  * @param token An optional object with which the posted message will be associated.
  * @param action The action that will be executed.
  * @return the created Runnable
@@ -63,7 +63,7 @@ public inline fun Handler.postDelayed(
 public inline fun Handler.postAtTime(
     uptimeMillis: Long,
     token: Any? = null,
-    crossinline action: () -> Unit
+    crossinline action: () -> Unit,
 ): Runnable {
     val runnable = Runnable { action() }
     postAtTime(runnable, token, uptimeMillis)

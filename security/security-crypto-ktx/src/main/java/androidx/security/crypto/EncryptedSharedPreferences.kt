@@ -38,11 +38,12 @@ public fun EncryptedSharedPreferences(
     fileName: String,
     masterKey: MasterKey,
     prefKeyEncryptionScheme: PrefKeyEncryptionScheme = PrefKeyEncryptionScheme.AES256_SIV,
-    prefValueEncryptionScheme: PrefValueEncryptionScheme = PrefValueEncryptionScheme.AES256_GCM
-): SharedPreferences = EncryptedSharedPreferences.create(
-    context,
-    fileName,
-    masterKey,
-    prefKeyEncryptionScheme,
-    prefValueEncryptionScheme
-)
+    prefValueEncryptionScheme: PrefValueEncryptionScheme = PrefValueEncryptionScheme.AES256_GCM,
+): SharedPreferences =
+    EncryptedSharedPreferences.create(
+        context,
+        fileName,
+        masterKey,
+        prefKeyEncryptionScheme,
+        prefValueEncryptionScheme,
+    )

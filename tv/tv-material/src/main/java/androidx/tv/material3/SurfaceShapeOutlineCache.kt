@@ -22,26 +22,24 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 
-/**
- * Caches the shape's outline across re-compositions
- */
+/** Caches the shape's outline across re-compositions */
 internal class SurfaceShapeOutlineCache(
     private var shape: Shape,
     private var size: Size,
     private var layoutDirection: LayoutDirection,
-    private var density: Density
+    private var density: Density,
 ) {
     private var outline: Outline? = null
 
     /**
-     * If there are updates to the arguments, creates a new outline
-     * based on the updated values, else, returns the cached value
+     * If there are updates to the arguments, creates a new outline based on the updated values,
+     * else, returns the cached value
      */
     fun updatedOutline(
         shape: Shape,
         size: Size,
         layoutDirection: LayoutDirection,
-        density: Density
+        density: Density,
     ): Outline {
         if (outline == null || hasUpdates(shape, size, layoutDirection, density)) {
             syncUpdates(shape, size, layoutDirection, density)
@@ -51,18 +49,15 @@ internal class SurfaceShapeOutlineCache(
     }
 
     private fun createNewOutline() {
-        outline = shape.createOutline(
-            size = size,
-            layoutDirection = layoutDirection,
-            density = density
-        )
+        outline =
+            shape.createOutline(size = size, layoutDirection = layoutDirection, density = density)
     }
 
     private fun syncUpdates(
         shape: Shape,
         size: Size,
         layoutDirection: LayoutDirection,
-        density: Density
+        density: Density,
     ) {
         this.shape = shape
         this.size = size
@@ -74,7 +69,7 @@ internal class SurfaceShapeOutlineCache(
         shape: Shape,
         size: Size,
         layoutDirection: LayoutDirection,
-        density: Density
+        density: Density,
     ): Boolean {
         if (shape != this.shape) return true
         if (size != this.size) return true

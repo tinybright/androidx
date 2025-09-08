@@ -40,14 +40,13 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/**
- * Object containing the result from composition of [GlanceWearTiles].
- */
+/** Object containing the result from composition of [GlanceWearTiles]. */
 @ExperimentalGlanceWearTilesApi
+@Deprecated("glance-wear-tiles is deprecated and will be removed")
 @Suppress("deprecation") // For backwards compatibility.
-class WearTilesCompositionResult(
-    val layout: androidx.wear.tiles.LayoutElementBuilders.LayoutElement,
-    val resources: androidx.wear.tiles.ResourceBuilders.Resources
+public class WearTilesCompositionResult(
+    public val layout: androidx.wear.tiles.LayoutElementBuilders.LayoutElement,
+    public val resources: androidx.wear.tiles.ResourceBuilders.Resources,
 )
 
 @ExperimentalGlanceWearTilesApi
@@ -58,30 +57,30 @@ class WearTilesCompositionResult(
  * @param state Local view state that can be passed to composition through [LocalState].
  * @param size Size of the glance ui to be displayed at.
  * @param content Definition of the UI.
- *
  * @return Composition result containing the glance ui.
  */
-suspend fun compose(
+@Deprecated("glance-wear-tiles is deprecated and will be removed")
+public suspend fun compose(
     context: Context,
     size: DpSize,
     state: Any? = null,
-    content: @Composable () -> Unit
-): WearTilesCompositionResult =
-        coroutineScope {
-            withContext(BroadcastFrameClock()) {
-                val WEAR_TILES_ID = object : GlanceId {}
-                val compositionResult = composeTileHelper(
-                    size,
-                    { state },
-                    /*timeInterval=*/null,
-                    /*glanceId=*/WEAR_TILES_ID,
-                    context,
-                    errorUiLayout(),
-                    content)
-                WearTilesCompositionResult(compositionResult.layout,
-                    compositionResult.resources.build())
-            }
-        }
+    content: @Composable () -> Unit,
+): WearTilesCompositionResult = coroutineScope {
+    withContext(BroadcastFrameClock()) {
+        val WEAR_TILES_ID = object : GlanceId {}
+        val compositionResult =
+            composeTileHelper(
+                size,
+                { state },
+                /*timeInterval=*/ null,
+                /*glanceId=*/ WEAR_TILES_ID,
+                context,
+                errorUiLayout(),
+                content,
+            )
+        WearTilesCompositionResult(compositionResult.layout, compositionResult.resources.build())
+    }
+}
 
 /**
  * Triggers the composition of [content] and returns the result.
@@ -93,7 +92,6 @@ suspend fun compose(
  * @param context The [Context] to get the resources during glance ui building.
  * @param errorUiLayout The prebuilt layout to return if the content fails to compose.
  * @param content Definition of the UI.
- *
  * @return Composition result containing the glance ui.
  */
 @Suppress("deprecation") // For backwards compatibility.
@@ -104,45 +102,42 @@ internal suspend fun composeTileHelper(
     glanceId: GlanceId,
     context: Context,
     errorUiLayout: androidx.wear.tiles.LayoutElementBuilders.LayoutElement?,
-    content: @Composable () -> Unit
-): CompositionResult =
-    coroutineScope {
-        val root = EmittableBox()
-        root.modifier = GlanceModifier.fillMaxSize()
-        root.contentAlignment = Alignment.Center
-        val applier = Applier(root)
-        val recomposer = Recomposer(currentCoroutineContext())
-        val composition = Composition(applier, recomposer)
-        val currentState = state()
-        composition.setContent {
-            CompositionLocalProvider(
-                LocalContext provides context,
-                LocalSize provides screenSize,
-                LocalState provides currentState,
-                LocalTimeInterval provides timeInterval,
-                LocalGlanceId provides glanceId,
-                content = content
-            )
-        }
-
-        launch { recomposer.runRecomposeAndApplyChanges() }
-
-        recomposer.close()
-        recomposer.join()
-
-        normalizeCompositionTree(context, root)
-
-        try {
-            translateTopLevelComposition(context, root)
-        } catch (ex: CancellationException) {
-            throw ex
-        } catch (throwable: Throwable) {
-            if (errorUiLayout == null) {
-                throw throwable
-            }
-            Log.e(GlanceWearTileTag, throwable.toString())
-            CompositionResult(
-                errorUiLayout,
-                androidx.wear.tiles.ResourceBuilders.Resources.Builder())
-        }
+    content: @Composable () -> Unit,
+): CompositionResult = coroutineScope {
+    val root = EmittableBox()
+    root.modifier = GlanceModifier.fillMaxSize()
+    root.contentAlignment = Alignment.Center
+    val applier = Applier(root)
+    val recomposer = Recomposer(currentCoroutineContext())
+    val composition = Composition(applier, recomposer)
+    val currentState = state()
+    composition.setContent {
+        CompositionLocalProvider(
+            LocalContext provides context,
+            LocalSize provides screenSize,
+            LocalState provides currentState,
+            LocalTimeInterval provides timeInterval,
+            LocalGlanceId provides glanceId,
+            content = content,
+        )
     }
+
+    launch { recomposer.runRecomposeAndApplyChanges() }
+
+    recomposer.close()
+    recomposer.join()
+
+    normalizeCompositionTree(context, root)
+
+    try {
+        translateTopLevelComposition(context, root)
+    } catch (ex: CancellationException) {
+        throw ex
+    } catch (throwable: Throwable) {
+        if (errorUiLayout == null) {
+            throw throwable
+        }
+        Log.e(GlanceWearTileTag, throwable.toString())
+        CompositionResult(errorUiLayout, androidx.wear.tiles.ResourceBuilders.Resources.Builder())
+    }
+}

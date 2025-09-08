@@ -44,21 +44,17 @@ class PagerGestureTest(private val paramConfig: ParamConfig) : BasePagerTest(con
             onPager().performTouchInput {
                 swipeWithVelocityAcrossMainAxis(
                     with(rule.density) { 0.5f * MinFlingVelocityDp.toPx() },
-                    delta
+                    delta,
                 )
             }
         }
 
-        rule.onNodeWithTag(
-            max(
-                0,
-                initialPage - paramConfig.beyondViewportPageCount - 1
-            ).toString()
-        ).assertDoesNotExist()
+        rule
+            .onNodeWithTag(max(0, initialPage - paramConfig.beyondViewportPageCount - 1).toString())
+            .assertDoesNotExist()
     }
+
     companion object {
-        @JvmStatic
-        @Parameterized.Parameters(name = "{0}")
-        fun params() = AllOrientationsParams
+        @JvmStatic @Parameterized.Parameters(name = "{0}") fun params() = AllOrientationsParams
     }
 }

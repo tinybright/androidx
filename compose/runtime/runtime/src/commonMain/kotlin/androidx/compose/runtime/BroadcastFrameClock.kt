@@ -16,124 +16,74 @@
 
 package androidx.compose.runtime
 
-import androidx.compose.runtime.internal.AtomicInt
-import androidx.compose.runtime.snapshots.fastForEach
-import kotlin.coroutines.Continuation
+import androidx.compose.runtime.internal.AwaiterQueue
 import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
  * A simple frame clock.
  *
- * This implementation is intended for low-contention environments involving
- * low total numbers of threads in a pool on the order of ~number of CPU cores available for UI
- * recomposition work, while avoiding additional allocation where possible.
+ * This implementation is intended for low-contention environments involving low total numbers of
+ * threads in a pool on the order of ~number of CPU cores available for UI recomposition work, while
+ * avoiding additional allocation where possible.
  *
- * [onNewAwaiters] will be invoked whenever the number of awaiters has changed from 0 to 1.
- * If [onNewAwaiters] **fails** by throwing an exception it will permanently fail this
+ * [onNewAwaiters] will be invoked whenever the number of awaiters has changed from 0 to 1. If
+ * [onNewAwaiters] **fails** by throwing an exception it will permanently fail this
  * [BroadcastFrameClock]; all current and future awaiters will resume with the thrown exception.
  */
-class BroadcastFrameClock(
-    private val onNewAwaiters: (() -> Unit)? = null
-) : MonotonicFrameClock {
+public class BroadcastFrameClock(private val onNewAwaiters: (() -> Unit)? = null) :
+    MonotonicFrameClock {
 
-    private class FrameAwaiter<R>(val onFrame: (Long) -> R, val continuation: Continuation<R>) {
+    private class FrameAwaiter<R>(onFrame: (Long) -> R, continuation: CancellableContinuation<R>) :
+        AwaiterQueue.Awaiter() {
+
+        private var continuation: CancellableContinuation<R>? = continuation
+        private var onFrame: ((Long) -> R)? = onFrame
+
+        override fun cancel() {
+            onFrame = null
+            continuation = null
+        }
+
+        override fun resumeWithException(exception: Throwable) {
+            continuation?.resumeWithException(exception)
+        }
+
         fun resume(timeNanos: Long) {
-            continuation.resumeWith(runCatching { onFrame(timeNanos) })
+            val onFrame = onFrame ?: return
+            continuation?.resumeWith(runCatching { onFrame(timeNanos) })
         }
     }
 
-    private val lock = SynchronizedObject()
-    private var failureCause: Throwable? = null
-    private var awaiters = mutableListOf<FrameAwaiter<*>>()
-    private var spareList = mutableListOf<FrameAwaiter<*>>()
+    private val queue = AwaiterQueue<FrameAwaiter<*>>()
 
-    // Uses AtomicInt to avoid adding AtomicBoolean to the Expect/Actual requirements of the
-    // runtime.
-    private val hasAwaitersUnlocked = AtomicInt(0)
+    /** `true` if there are any callers of [withFrameNanos] awaiting to run for a pending frame. */
+    public val hasAwaiters: Boolean
+        get() = queue.hasAwaiters
 
     /**
-     * `true` if there are any callers of [withFrameNanos] awaiting to run for a pending frame.
+     * Send a frame for time [timeNanos] to all current callers of [withFrameNanos]. The `onFrame`
+     * callback for each caller is invoked synchronously during the call to [sendFrame].
      */
-    val hasAwaiters: Boolean get() = hasAwaitersUnlocked.get() != 0
+    public fun sendFrame(timeNanos: Long) {
+        queue.flushAndDispatchAwaiters { awaiter -> awaiter.resume(timeNanos) }
+    }
+
+    override suspend fun <R> withFrameNanos(onFrame: (Long) -> R): R =
+        suspendCancellableCoroutine { co ->
+            val cancellationHandle = queue.addAwaiter(FrameAwaiter(onFrame, co), onNewAwaiters)
+            co.invokeOnCancellation { cancellationHandle.cancel() }
+        }
 
     /**
-     * Send a frame for time [timeNanos] to all current callers of [withFrameNanos].
-     * The `onFrame` callback for each caller is invoked synchronously during the call to
-     * [sendFrame].
+     * Permanently cancel this [BroadcastFrameClock] and cancel all current and future awaiters with
+     * [cancellationException].
      */
-    fun sendFrame(timeNanos: Long) {
-        synchronized(lock) {
-            // Rotate the lists so that if a resumed continuation on an immediate dispatcher
-            // bound to the thread calling sendFrame immediately awaits again we don't disrupt
-            // iteration of resuming the rest.
-            val toResume = awaiters
-            awaiters = spareList
-            spareList = toResume
-            hasAwaitersUnlocked.set(0)
-
-            for (i in 0 until toResume.size) {
-                toResume[i].resume(timeNanos)
-            }
-            toResume.clear()
-        }
-    }
-
-    override suspend fun <R> withFrameNanos(
-        onFrame: (Long) -> R
-    ): R = suspendCancellableCoroutine { co ->
-        val awaiter = FrameAwaiter(onFrame, co)
-        val hasNewAwaiters = synchronized(lock) {
-            val cause = failureCause
-            if (cause != null) {
-                co.resumeWithException(cause)
-                return@suspendCancellableCoroutine
-            }
-            val hadAwaiters = awaiters.isNotEmpty()
-            awaiters.add(awaiter)
-            if (!hadAwaiters) hasAwaitersUnlocked.set(1)
-            !hadAwaiters
-        }
-
-        co.invokeOnCancellation {
-            synchronized(lock) {
-                awaiters.remove(awaiter)
-                if (awaiters.isEmpty()) hasAwaitersUnlocked.set(0)
-            }
-        }
-
-        // Wake up anything that was waiting for someone to schedule a frame
-        if (hasNewAwaiters && onNewAwaiters != null) {
-            try {
-                // BUG: Kotlin 1.4.21 plugin doesn't smart cast for a direct onNewAwaiters() here
-                onNewAwaiters.invoke()
-            } catch (t: Throwable) {
-                // If onNewAwaiters fails, we permanently fail the BroadcastFrameClock.
-                fail(t)
-            }
-        }
-    }
-
-    private fun fail(cause: Throwable) {
-        synchronized(lock) {
-            if (failureCause != null) return
-            failureCause = cause
-            awaiters.fastForEach { awaiter ->
-                awaiter.continuation.resumeWithException(cause)
-            }
-            awaiters.clear()
-            hasAwaitersUnlocked.set(0)
-        }
-    }
-
-    /**
-     * Permanently cancel this [BroadcastFrameClock] and cancel all current and future
-     * awaiters with [cancellationException].
-     */
-    fun cancel(
+    public fun cancel(
         cancellationException: CancellationException = CancellationException("clock cancelled")
     ) {
-        fail(cancellationException)
+        queue.fail(cancellationException)
     }
 }

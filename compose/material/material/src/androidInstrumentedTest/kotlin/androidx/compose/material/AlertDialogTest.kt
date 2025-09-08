@@ -26,7 +26,7 @@ import androidx.compose.testutils.assertContainsColor
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
@@ -53,8 +53,7 @@ import org.junit.runner.RunWith
 @SdkSuppress(minSdkVersion = Build.VERSION_CODES.P) // Should be O: b/163023027
 class AlertDialogTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     @FlakyTest(bugId = 170333139)
     @Test
@@ -70,12 +69,13 @@ class AlertDialogTest {
                 },
                 confirmButton = {},
                 backgroundColor = Color.Yellow,
-                contentColor = Color.Red
+                contentColor = Color.Red,
             )
         }
 
         // Assert background
-        rule.onNode(isDialog())
+        rule
+            .onNode(isDialog())
             .captureToImage()
             .assertContainsColor(Color.Yellow) // Background
             .assertContainsColor(Color.Blue) // Modifier border
@@ -87,22 +87,19 @@ class AlertDialogTest {
         }
     }
 
-    /**
-     * Ensure that AlertDialogs don't press up against the edges of the screen.
-     */
+    /** Ensure that AlertDialogs don't press up against the edges of the screen. */
     @Test
     fun alertDialogDoesNotConsumeFullScreenWidth() {
         val dialogWidthCh = Channel<Int>(Channel.CONFLATED)
         var screenWidth by mutableStateOf(0)
         rule.setContent {
-            val context = LocalContext.current
             val density = LocalDensity.current
-            val resScreenWidth = context.resources.configuration.screenWidthDp
+            val resScreenWidth = LocalConfiguration.current.screenWidthDp
             with(density) { screenWidth = resScreenWidth.dp.roundToPx() }
 
             AlertDialog(
-                modifier = Modifier.onSizeChanged { dialogWidthCh.trySend(it.width) }
-                    .fillMaxWidth(),
+                modifier =
+                    Modifier.onSizeChanged { dialogWidthCh.trySend(it.width) }.fillMaxWidth(),
                 onDismissRequest = {},
                 title = { Text(text = "Title") },
                 text = {
@@ -132,9 +129,7 @@ class AlertDialogTest {
                 confirmButton = {
                     TextButton(
                         onClick = { /* doSomething() */ },
-                        Modifier
-                            .testTag(ConfirmButtonTestTag)
-                            .semantics(mergeDescendants = true) {}
+                        Modifier.testTag(ConfirmButtonTestTag).semantics(mergeDescendants = true) {},
                     ) {
                         Text("Confirm with a long text")
                     }
@@ -142,13 +137,11 @@ class AlertDialogTest {
                 dismissButton = {
                     TextButton(
                         onClick = { /* doSomething() */ },
-                        Modifier
-                            .testTag(DismissButtonTestTag)
-                            .semantics(mergeDescendants = true) {}
+                        Modifier.testTag(DismissButtonTestTag).semantics(mergeDescendants = true) {},
                     ) {
                         Text("Dismiss with a long text")
                     }
-                }
+                },
             )
         }
 

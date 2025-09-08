@@ -36,24 +36,21 @@ internal interface InputMethodManager {
 
     fun hideSoftInput()
 
-    fun updateExtractedText(
-        token: Int,
-        extractedText: ExtractedText
-    )
+    fun updateExtractedText(token: Int, extractedText: ExtractedText)
 
     fun updateSelection(
         selectionStart: Int,
         selectionEnd: Int,
         compositionStart: Int,
-        compositionEnd: Int
+        compositionEnd: Int,
     )
 
     fun updateCursorAnchorInfo(cursorAnchorInfo: CursorAnchorInfo)
 }
 
 /**
- * Wrapper class to prevent depending on getSystemService and final InputMethodManager.
- * Let's us test TextInputServiceAndroid class.
+ * Wrapper class to prevent depending on getSystemService and final InputMethodManager. Let's us
+ * test TextInputServiceAndroid class.
  */
 @Suppress("DEPRECATION")
 @Deprecated(
@@ -62,13 +59,13 @@ internal interface InputMethodManager {
 )
 internal class InputMethodManagerImpl(private val view: View) : InputMethodManager {
 
-    private val imm by lazy(LazyThreadSafetyMode.NONE) {
-        view.context.getSystemService(Context.INPUT_METHOD_SERVICE)
-            as android.view.inputmethod.InputMethodManager
-    }
+    private val imm by
+        lazy(LazyThreadSafetyMode.NONE) {
+            view.context.getSystemService(Context.INPUT_METHOD_SERVICE)
+                as android.view.inputmethod.InputMethodManager
+        }
 
-    private val softwareKeyboardControllerCompat =
-        SoftwareKeyboardControllerCompat(view)
+    private val softwareKeyboardControllerCompat = SoftwareKeyboardControllerCompat(view)
 
     override fun isActive(): Boolean = imm.isActive(view)
 
@@ -88,10 +85,7 @@ internal class InputMethodManagerImpl(private val view: View) : InputMethodManag
         softwareKeyboardControllerCompat.hide()
     }
 
-    override fun updateExtractedText(
-        token: Int,
-        extractedText: ExtractedText
-    ) {
+    override fun updateExtractedText(token: Int, extractedText: ExtractedText) {
         imm.updateExtractedText(view, token, extractedText)
     }
 
@@ -99,7 +93,7 @@ internal class InputMethodManagerImpl(private val view: View) : InputMethodManag
         selectionStart: Int,
         selectionEnd: Int,
         compositionStart: Int,
-        compositionEnd: Int
+        compositionEnd: Int,
     ) {
         imm.updateSelection(view, selectionStart, selectionEnd, compositionStart, compositionEnd)
     }

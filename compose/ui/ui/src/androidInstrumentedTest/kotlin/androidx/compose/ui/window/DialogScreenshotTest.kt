@@ -15,7 +15,6 @@
  */
 package androidx.compose.ui.window
 
-import android.os.Build
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,29 +40,27 @@ import org.junit.runner.RunWith
 
 @LargeTest
 @RunWith(AndroidJUnit4::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 class DialogScreenshotTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_UI)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_UI)
 
     @Test
     fun dialogWithNoElevation() {
         rule.setContent {
             Dialog(onDismissRequest = {}) {
                 Box(
-                    Modifier
-                        .graphicsLayer(shape = RoundedCornerShape(percent = 15), clip = true)
+                    Modifier.graphicsLayer(shape = RoundedCornerShape(percent = 15), clip = true)
                         .size(200.dp)
                         .background(Color(0xFFA896B0))
                 )
             }
         }
 
-        rule.onNode(isDialog())
+        rule
+            .onNode(isDialog())
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "dialogWithNoElevation")
     }
@@ -74,11 +71,10 @@ class DialogScreenshotTest {
             Dialog(onDismissRequest = {}) {
                 val elevation = with(LocalDensity.current) { 8.dp.toPx() }
                 Box(
-                    Modifier
-                        .graphicsLayer(
+                    Modifier.graphicsLayer(
                             shadowElevation = elevation,
                             shape = RoundedCornerShape(percent = 15),
-                            clip = true
+                            clip = true,
                         )
                         .size(200.dp)
                         .background(Color(0xFFA896B0))
@@ -86,12 +82,13 @@ class DialogScreenshotTest {
             }
         }
 
-        rule.onNode(isDialog())
+        rule
+            .onNode(isDialog())
             .captureToImage()
             .assertAgainstGolden(
                 screenshotRule,
                 "dialogWithElevation",
-                matcher = MSSIMMatcher(threshold = 0.999)
+                matcher = MSSIMMatcher(threshold = 0.999),
             )
     }
 }

@@ -35,12 +35,13 @@ class GenericShape(
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
-        density: Density
+        density: Density,
     ): Outline {
-        val path = Path().apply {
-            builder(size, layoutDirection)
-            close()
-        }
+        val path =
+            Path().apply {
+                builder(size, layoutDirection)
+                close()
+            }
         return Outline.Generic(path)
     }
 

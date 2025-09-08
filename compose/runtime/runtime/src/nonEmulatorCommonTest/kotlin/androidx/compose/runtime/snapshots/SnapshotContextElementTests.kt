@@ -16,7 +16,6 @@
 
 package androidx.compose.runtime.snapshots
 
-import androidx.compose.runtime.ExperimentalComposeApi
 import kotlin.test.Test
 import kotlin.test.assertSame
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,33 +24,44 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
+import kotlinx.test.IgnoreJsTarget
+import kotlinx.test.IgnoreNativeTarget
+import kotlinx.test.IgnoreWasmTarget
 
-@OptIn(ExperimentalComposeApi::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class SnapshotContextElementTests {
+    // TODO: b/409725929
     @Test
-    fun coroutineEntersExpectedSnapshot() = runTest(UnconfinedTestDispatcher()) {
-        val snapshot = Snapshot.takeSnapshot()
-        try {
-            withContext(snapshot.asContextElement()) {
-                assertSame(snapshot, Snapshot.current, "expected snapshot")
+    @IgnoreJsTarget
+    @IgnoreWasmTarget
+    @IgnoreNativeTarget
+    fun coroutineEntersExpectedSnapshot() =
+        runTest(UnconfinedTestDispatcher()) {
+            val snapshot = Snapshot.takeSnapshot()
+            try {
+                withContext(snapshot.asContextElement()) {
+                    assertSame(snapshot, Snapshot.current, "expected snapshot")
+                }
+            } finally {
+                snapshot.dispose()
             }
-        } finally {
-            snapshot.dispose()
         }
-    }
 
     @Test
+    @IgnoreJsTarget
+    @IgnoreNativeTarget
     fun snapshotRestoredAfterResume() {
         val snapshotOne = Snapshot.takeSnapshot()
         val snapshotTwo = Snapshot.takeSnapshot()
         try {
             runTest(UnconfinedTestDispatcher()) {
                 val stopA = Job()
-                val jobA = launch(snapshotOne.asContextElement()) {
-                    assertSame(snapshotOne, Snapshot.current, "expected snapshotOne, A")
-                    stopA.join()
-                    assertSame(snapshotOne, Snapshot.current, "expected snapshotOne, B")
-                }
+                val jobA =
+                    launch(snapshotOne.asContextElement()) {
+                        assertSame(snapshotOne, Snapshot.current, "expected snapshotOne, A")
+                        stopA.join()
+                        assertSame(snapshotOne, Snapshot.current, "expected snapshotOne, B")
+                    }
                 launch(snapshotTwo.asContextElement()) {
                     assertSame(snapshotTwo, Snapshot.current, "expected snapshotTwo, A")
                     stopA.complete()

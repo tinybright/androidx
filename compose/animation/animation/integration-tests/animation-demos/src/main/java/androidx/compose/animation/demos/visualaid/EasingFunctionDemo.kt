@@ -60,15 +60,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun EasingInfoDemo() {
     val coroutineScope = rememberCoroutineScope()
-    LazyColumn {
-        bezierCurveList(coroutineScope)
-    }
+    LazyColumn { bezierCurveList(coroutineScope) }
 }
 
 fun LazyListScope.bezierCurveList(coroutineScope: CoroutineScope) {
-    val graphModifier = Modifier
-        .height(200.dp)
-        .fillMaxWidth()
+    val graphModifier = Modifier.height(200.dp).fillMaxWidth()
 
     items(EasingItemDemo.values()) { item: EasingItemDemo ->
         EasingInfo(easing = item, modifier = graphModifier, coroutineScope = coroutineScope)
@@ -80,14 +76,12 @@ fun LazyListScope.bezierCurveList(coroutineScope: CoroutineScope) {
 fun EasingInfo(
     easing: EasingItemDemo,
     coroutineScope: CoroutineScope,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.padding(16.dp)) {
         Text(easing.description)
         Spacer(modifier = Modifier.height(16.dp))
-        Box {
-            EasingGraph(easing = easing.function, coroutineScope = coroutineScope)
-        }
+        Box { EasingGraph(easing = easing.function, coroutineScope = coroutineScope) }
     }
 }
 
@@ -97,17 +91,14 @@ fun EasingGraph(
     modifier: Modifier = Modifier,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
 ) {
-    val path = remember(easing) {
-        val path = Path()
-        path
-    }
+    val path =
+        remember(easing) {
+            val path = Path()
+            path
+        }
 
-    val time = remember(easing) {
-        Animatable(0f)
-    }
-    val easedValue = remember(easing) {
-        Animatable(0f)
-    }
+    val time = remember(easing) { Animatable(0f) }
+    val easedValue = remember(easing) { Animatable(0f) }
     val listPoints = remember {
         val list = mutableStateListOf<Animatable<Float, AnimationVector1D>>()
         for (i in 0..NUMBER_SAMPLES) {
@@ -121,7 +112,7 @@ fun EasingGraph(
             launch {
                 listPoints[i].animateTo(
                     point,
-                    animationSpec = tween(durationMillis = 300, easing = LinearEasing)
+                    animationSpec = tween(durationMillis = 300, easing = LinearEasing),
                 )
             }
         }
@@ -129,22 +120,18 @@ fun EasingGraph(
     Row(modifier = modifier.fillMaxWidth()) {
         Box {
             Text("y", modifier = Modifier.align(Alignment.TopStart), fontSize = 12.sp)
-            Canvas(modifier = modifier
-                .aspectRatio(1f)
-                .padding(16.dp)
-                .pointerInput(Any()) {
-                    detectTapGestures {
-                        runAnimation(coroutineScope, time, easedValue, easing)
-                    }
-                },
+            Canvas(
+                modifier =
+                    modifier.aspectRatio(1f).padding(16.dp).pointerInput(Any()) {
+                        detectTapGestures { runAnimation(coroutineScope, time, easedValue, easing) }
+                    },
                 onDraw = {
                     drawGraphAxis()
                     updateGraphPath(easing, path, listPoints)
                     drawEasingPath(path, easing, time)
-                })
-            Text("time",
-                modifier = Modifier.align(Alignment.BottomEnd),
-                fontSize = 12.sp)
+                },
+            )
+            Text("time", modifier = Modifier.align(Alignment.BottomEnd), fontSize = 12.sp)
         }
         ExtraEasingSamples(easedValue)
     }
@@ -153,7 +140,7 @@ fun EasingGraph(
 private fun DrawScope.drawEasingPath(
     path: Path,
     easing: Easing,
-    time: Animatable<Float, AnimationVector1D>
+    time: Animatable<Float, AnimationVector1D>,
 ) {
     translate(0f, this.size.height) {
         // draw animation path
@@ -162,9 +149,9 @@ private fun DrawScope.drawEasingPath(
         val transformedYValue = easing.transform(time.value)
         // animated circle on graph
         drawCircle(
-            androidGreen, 8.dp.toPx(), center = Offset(
-                time.value * this.size.width, -transformedYValue * this.size.height
-            )
+            androidGreen,
+            8.dp.toPx(),
+            center = Offset(time.value * this.size.width, -transformedYValue * this.size.height),
         )
     }
 }
@@ -172,18 +159,14 @@ private fun DrawScope.drawEasingPath(
 private fun DrawScope.updateGraphPath(
     easing: Easing,
     path: Path,
-    listPoints: SnapshotStateList<Animatable<Float, AnimationVector1D>>
+    listPoints: SnapshotStateList<Animatable<Float, AnimationVector1D>>,
 ) {
     val initialPoint = easing.transform(0f)
     path.reset()
     path.moveTo(0f, -initialPoint)
     for (i in 0..NUMBER_SAMPLES) {
         val point = listPoints[i]
-        path.lineTo(
-            i / NUMBER_SAMPLES.toFloat() * this.size.width, -point.value * this
-                .size
-                .height
-        )
+        path.lineTo(i / NUMBER_SAMPLES.toFloat() * this.size.width, -point.value * this.size.height)
     }
 }
 
@@ -209,27 +192,24 @@ private fun runAnimation(
     coroutineScope: CoroutineScope,
     time: Animatable<Float, AnimationVector1D>,
     easedValue: Animatable<Float, AnimationVector1D>,
-    easing: Easing
+    easing: Easing,
 ) {
     coroutineScope.launch {
         time.snapTo(0f)
         time.animateTo(
-            1f, animationSpec = tween(
-                easing = LinearEasing,
-                durationMillis = EASING_DURATION_MILLIS
-            )
+            1f,
+            animationSpec = tween(easing = LinearEasing, durationMillis = EASING_DURATION_MILLIS),
         )
     }
     coroutineScope.launch {
         easedValue.snapTo(0f)
         easedValue.animateTo(
-            1f, animationSpec = tween(
-                easing = easing,
-                durationMillis = EASING_DURATION_MILLIS
-            )
+            1f,
+            animationSpec = tween(easing = easing, durationMillis = EASING_DURATION_MILLIS),
         )
     }
 }
+
 private const val EASING_DURATION_MILLIS = 3000
 
 private fun DrawScope.drawGraphAxis() {
@@ -240,7 +220,7 @@ private fun DrawScope.drawGraphAxis() {
         lineColor,
         start = Offset.Zero,
         end = Offset(0f, this.size.height),
-        strokeWidth = lineThickness
+        strokeWidth = lineThickness,
     )
 
     // x axis
@@ -248,7 +228,7 @@ private fun DrawScope.drawGraphAxis() {
         lineColor,
         start = Offset(0f, this.size.height),
         end = Offset(this.size.width, this.size.height),
-        strokeWidth = lineThickness
+        strokeWidth = lineThickness,
     )
 }
 

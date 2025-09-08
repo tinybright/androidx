@@ -35,12 +35,9 @@ import android.view.View.MeasureSpec
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -67,13 +64,11 @@ import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.node.ComposeUiNode
 import androidx.compose.ui.node.LayoutNode
 import androidx.compose.ui.node.Owner
 import androidx.compose.ui.node.Ref
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.TestActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
@@ -94,8 +89,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import androidx.test.filters.SdkSuppress
 import com.google.common.truth.Truth.assertThat
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import junit.framework.TestCase.assertNotNull
 import kotlin.math.roundToInt
 import org.hamcrest.CoreMatchers.allOf
@@ -106,19 +99,15 @@ import org.hamcrest.CoreMatchers.not
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Testing the support for Android Views in Compose UI.
- */
+/** Testing the support for Android Views in Compose UI. */
 @MediumTest
 @RunWith(AndroidJUnit4::class)
 class AndroidViewCompatTest {
-    @get:Rule
-    val rule = createAndroidComposeRule<TestActivity>()
+    @get:Rule val rule = createAndroidComposeRule<TestActivity>()
 
     private val tag = "TestTag"
 
@@ -131,30 +120,25 @@ class AndroidViewCompatTest {
             Align {
                 Layout(
                     modifier = Modifier.testTag("content"),
-                    content = @Composable {
+                    content = {
                         AndroidView(::ColoredSquareView) {
                             it.size = squareSize.value
                             it.ref = squareRef
                         }
-                    }
+                    },
                 ) { measurables, constraints ->
                     assertEquals(1, measurables.size)
-                    val placeable = measurables.first().measure(
-                        constraints.copy(minWidth = 0, minHeight = 0)
-                    )
+                    val placeable = measurables.first().measure(constraints.copyMaxDimensions())
                     assertEquals(placeable.width, expectedSize)
                     assertEquals(placeable.height, expectedSize)
-                    layout(constraints.maxWidth, constraints.maxHeight) {
-                        placeable.place(0, 0)
-                    }
+                    layout(constraints.maxWidth, constraints.maxHeight) { placeable.place(0, 0) }
                 }
             }
         }
         rule.onNodeWithTag("content").assertIsDisplayed()
         val squareView = squareRef.value
         assertNotNull(squareView)
-        Espresso
-            .onView(instanceOf(ColoredSquareView::class.java))
+        Espresso.onView(instanceOf(ColoredSquareView::class.java))
             .check(matches(isDescendantOfA(instanceOf(Owner::class.java))))
             .check(matches(`is`(squareView)))
 
@@ -164,8 +148,7 @@ class AndroidViewCompatTest {
             expectedSize = 200
         }
         rule.onNodeWithTag("content").assertIsDisplayed()
-        Espresso
-            .onView(instanceOf(ColoredSquareView::class.java))
+        Espresso.onView(instanceOf(ColoredSquareView::class.java))
             .check(matches(isDescendantOfA(instanceOf(Owner::class.java))))
             .check(matches(`is`(squareView)))
 
@@ -175,8 +158,7 @@ class AndroidViewCompatTest {
             expectedSize = 300
         }
         rule.onNodeWithTag("content").assertIsDisplayed()
-        Espresso
-            .onView(instanceOf(ColoredSquareView::class.java))
+        Espresso.onView(instanceOf(ColoredSquareView::class.java))
             .check(matches(isDescendantOfA(instanceOf(Owner::class.java))))
             .check(matches(`is`(squareView)))
     }
@@ -200,8 +182,7 @@ class AndroidViewCompatTest {
         }
         val squareView = squareRef.value
         assertNotNull(squareView)
-        Espresso
-            .onView(instanceOf(ColoredSquareView::class.java))
+        Espresso.onView(instanceOf(ColoredSquareView::class.java))
             .check(matches(isDescendantOfA(instanceOf(Owner::class.java))))
             .check(matches(`is`(squareView)))
         val expectedPixelColor = { position: IntOffset ->
@@ -211,7 +192,8 @@ class AndroidViewCompatTest {
                 Color.White
             }
         }
-        rule.onNodeWithTag("content")
+        rule
+            .onNodeWithTag("content")
             .assertIsDisplayed()
             .captureToImage()
             .assertPixels(expectedColorProvider = expectedPixelColor)
@@ -221,11 +203,11 @@ class AndroidViewCompatTest {
             colorModel.value = Color.Green
             expectedColor = Color.Green
         }
-        Espresso
-            .onView(instanceOf(ColoredSquareView::class.java))
+        Espresso.onView(instanceOf(ColoredSquareView::class.java))
             .check(matches(isDescendantOfA(instanceOf(Owner::class.java))))
             .check(matches(`is`(squareView)))
-        rule.onNodeWithTag("content")
+        rule
+            .onNodeWithTag("content")
             .assertIsDisplayed()
             .captureToImage()
             .assertPixels(expectedColorProvider = expectedPixelColor)
@@ -235,11 +217,11 @@ class AndroidViewCompatTest {
             colorModel.value = Color.Red
             expectedColor = Color.Red
         }
-        Espresso
-            .onView(instanceOf(ColoredSquareView::class.java))
+        Espresso.onView(instanceOf(ColoredSquareView::class.java))
             .check(matches(isDescendantOfA(instanceOf(Owner::class.java))))
             .check(matches(`is`(squareView)))
-        rule.onNodeWithTag("content")
+        rule
+            .onNodeWithTag("content")
             .assertIsDisplayed()
             .captureToImage()
             .assertPixels(expectedColorProvider = expectedPixelColor)
@@ -253,7 +235,7 @@ class AndroidViewCompatTest {
             MeasureSpec.makeMeasureSpec(20, MeasureSpec.EXACTLY),
             MeasureSpec.makeMeasureSpec(30, MeasureSpec.EXACTLY),
             Constraints.fixed(20, 30),
-            ViewGroup.LayoutParams(40, 50)
+            ViewGroup.LayoutParams(40, 50),
         )
     }
 
@@ -263,7 +245,7 @@ class AndroidViewCompatTest {
             MeasureSpec.makeMeasureSpec(20, MeasureSpec.EXACTLY),
             MeasureSpec.makeMeasureSpec(30, MeasureSpec.EXACTLY),
             Constraints.fixed(20, 30),
-            ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+            ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT),
         )
     }
 
@@ -273,7 +255,7 @@ class AndroidViewCompatTest {
             MeasureSpec.makeMeasureSpec(20, MeasureSpec.EXACTLY),
             MeasureSpec.makeMeasureSpec(30, MeasureSpec.EXACTLY),
             Constraints.fixed(20, 30),
-            ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+            ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT),
         )
     }
 
@@ -284,10 +266,8 @@ class AndroidViewCompatTest {
         testMeasurement_isDoneWithCorrectMeasureSpecs(
             MeasureSpec.makeMeasureSpec(25, MeasureSpec.EXACTLY),
             MeasureSpec.makeMeasureSpec(35, MeasureSpec.EXACTLY),
-            Constraints(
-                minWidth = 20, maxWidth = 30, minHeight = 35, maxHeight = 45
-            ),
-            ViewGroup.LayoutParams(25, 35)
+            Constraints(minWidth = 20, maxWidth = 30, minHeight = 35, maxHeight = 45),
+            ViewGroup.LayoutParams(25, 35),
         )
     }
 
@@ -296,10 +276,8 @@ class AndroidViewCompatTest {
         testMeasurement_isDoneWithCorrectMeasureSpecs(
             MeasureSpec.makeMeasureSpec(20, MeasureSpec.EXACTLY),
             MeasureSpec.makeMeasureSpec(35, MeasureSpec.EXACTLY),
-            Constraints(
-                minWidth = 20, maxWidth = 30, minHeight = 35, maxHeight = 45
-            ),
-            ViewGroup.LayoutParams(15, 25)
+            Constraints(minWidth = 20, maxWidth = 30, minHeight = 35, maxHeight = 45),
+            ViewGroup.LayoutParams(15, 25),
         )
     }
 
@@ -308,10 +286,8 @@ class AndroidViewCompatTest {
         testMeasurement_isDoneWithCorrectMeasureSpecs(
             MeasureSpec.makeMeasureSpec(30, MeasureSpec.EXACTLY),
             MeasureSpec.makeMeasureSpec(45, MeasureSpec.EXACTLY),
-            Constraints(
-                minWidth = 20, maxWidth = 30, minHeight = 35, maxHeight = 45
-            ),
-            ViewGroup.LayoutParams(35, 50)
+            Constraints(minWidth = 20, maxWidth = 30, minHeight = 35, maxHeight = 45),
+            ViewGroup.LayoutParams(35, 50),
         )
     }
 
@@ -321,7 +297,7 @@ class AndroidViewCompatTest {
             MeasureSpec.makeMeasureSpec(40, MeasureSpec.AT_MOST),
             MeasureSpec.makeMeasureSpec(50, MeasureSpec.AT_MOST),
             Constraints(maxWidth = 40, maxHeight = 50),
-            ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+            ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT),
         )
     }
 
@@ -331,7 +307,7 @@ class AndroidViewCompatTest {
             MeasureSpec.makeMeasureSpec(40, MeasureSpec.EXACTLY),
             MeasureSpec.makeMeasureSpec(50, MeasureSpec.EXACTLY),
             Constraints(maxWidth = 40, maxHeight = 50),
-            ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+            ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT),
         )
     }
 
@@ -343,7 +319,7 @@ class AndroidViewCompatTest {
             MeasureSpec.makeMeasureSpec(25, MeasureSpec.EXACTLY),
             MeasureSpec.makeMeasureSpec(35, MeasureSpec.EXACTLY),
             Constraints(),
-            ViewGroup.LayoutParams(25, 35)
+            ViewGroup.LayoutParams(25, 35),
         )
     }
 
@@ -353,7 +329,7 @@ class AndroidViewCompatTest {
             MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
             MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
             Constraints(),
-            ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+            ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT),
         )
     }
 
@@ -363,7 +339,7 @@ class AndroidViewCompatTest {
             MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
             MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
             Constraints(),
-            ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+            ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT),
         )
     }
 
@@ -371,7 +347,7 @@ class AndroidViewCompatTest {
         expectedWidthSpec: Int,
         expectedHeightSpec: Int,
         constraints: Constraints,
-        layoutParams: ViewGroup.LayoutParams
+        layoutParams: ViewGroup.LayoutParams,
     ) {
         val viewRef = Ref<MeasureSpecSaverView>()
         val widthMeasureSpecRef = Ref<Int>()
@@ -410,9 +386,7 @@ class AndroidViewCompatTest {
                 AndroidView(::MeasureSpecSaverView) { it.ref = viewRef }
             }
         }
-        rule.runOnUiThread {
-            constraintsHolder.value = Constraints(minWidth = 20, minHeight = 30)
-        }
+        rule.runOnUiThread { constraintsHolder.value = Constraints(minWidth = 20, minHeight = 30) }
 
         rule.runOnIdle {
             assertEquals(20, viewRef.value!!.minimumWidth)
@@ -434,50 +408,46 @@ class AndroidViewCompatTest {
             }
         }
         rule.setContent {
-            Layout(
-                content = {
-                    AndroidView(::MeasureSpecsSaver)
-                }
-            ) { measurables, _ ->
+            Layout(content = { AndroidView(::MeasureSpecsSaver) }) { measurables, _ ->
                 val view = measurables.first()
                 assertEquals(20, view.minIntrinsicWidth(70))
                 assertEquals(MeasureSpec.UNSPECIFIED, MeasureSpec.getMode(obtainedWidthMeasureSpec))
                 assertEquals(
                     MeasureSpec.makeMeasureSpec(70, MeasureSpec.AT_MOST),
-                    obtainedHeightMeasureSpec
+                    obtainedHeightMeasureSpec,
                 )
                 assertEquals(20, view.maxIntrinsicWidth(80))
                 assertEquals(MeasureSpec.UNSPECIFIED, MeasureSpec.getMode(obtainedWidthMeasureSpec))
                 assertEquals(
                     MeasureSpec.makeMeasureSpec(80, MeasureSpec.AT_MOST),
-                    obtainedHeightMeasureSpec
+                    obtainedHeightMeasureSpec,
                 )
                 assertEquals(40, view.minIntrinsicHeight(70))
                 assertEquals(
                     MeasureSpec.makeMeasureSpec(70, MeasureSpec.AT_MOST),
-                    obtainedWidthMeasureSpec
+                    obtainedWidthMeasureSpec,
                 )
                 assertEquals(
                     MeasureSpec.UNSPECIFIED,
-                    MeasureSpec.getMode(obtainedHeightMeasureSpec)
+                    MeasureSpec.getMode(obtainedHeightMeasureSpec),
                 )
                 assertEquals(40, view.minIntrinsicHeight(80))
                 assertEquals(
                     MeasureSpec.makeMeasureSpec(80, MeasureSpec.AT_MOST),
-                    obtainedWidthMeasureSpec
+                    obtainedWidthMeasureSpec,
                 )
                 assertEquals(
                     MeasureSpec.UNSPECIFIED,
-                    MeasureSpec.getMode(obtainedHeightMeasureSpec)
+                    MeasureSpec.getMode(obtainedHeightMeasureSpec),
                 )
                 view.measure(Constraints(maxWidth = 50, maxHeight = 50))
                 assertEquals(
                     MeasureSpec.makeMeasureSpec(50, MeasureSpec.AT_MOST),
-                    obtainedWidthMeasureSpec
+                    obtainedWidthMeasureSpec,
                 )
                 assertEquals(
                     MeasureSpec.makeMeasureSpec(50, MeasureSpec.AT_MOST),
-                    obtainedHeightMeasureSpec
+                    obtainedHeightMeasureSpec,
                 )
                 layout(0, 0) {}
             }
@@ -499,18 +469,15 @@ class AndroidViewCompatTest {
                 view.setBackgroundColor(android.graphics.Color.BLUE)
             }
         }
-        rule.onNodeWithTag("view").captureToImage()
-            .assertPixels(IntSize(size, size)) { Color.Blue }
+        rule.onNodeWithTag("view").captureToImage().assertPixels(IntSize(size, size)) { Color.Blue }
 
         rule.runOnIdle { size += 20 }
-        rule.runOnIdle { } // just wait for composition to finish
-        rule.onNodeWithTag("view").captureToImage()
-            .assertPixels(IntSize(size, size)) { Color.Blue }
+        rule.runOnIdle {} // just wait for composition to finish
+        rule.onNodeWithTag("view").captureToImage().assertPixels(IntSize(size, size)) { Color.Blue }
 
         rule.runOnIdle { size += 20 }
-        rule.runOnIdle { } // just wait for composition to finish
-        rule.onNodeWithTag("view").captureToImage()
-            .assertPixels(IntSize(size, size)) { Color.Blue }
+        rule.runOnIdle {} // just wait for composition to finish
+        rule.onNodeWithTag("view").captureToImage().assertPixels(IntSize(size, size)) { Color.Blue }
     }
 
     @Test
@@ -524,18 +491,17 @@ class AndroidViewCompatTest {
             Box(Modifier.onGloballyPositioned { outer = it.positionInWindow() }) {
                 val paddingDp = with(LocalDensity.current) { padding.toDp() }
                 Box(Modifier.padding(paddingDp)) {
-                    AndroidView(
-                        {
-                            ComposeView(it).apply {
-                                setContent {
-                                    Box(
-                                        Modifier.padding(paddingDp)
-                                            .onGloballyPositioned { inner = it.positionInWindow() }
-                                    )
-                                }
+                    AndroidView({
+                        ComposeView(it).apply {
+                            setContent {
+                                Box(
+                                    Modifier.padding(paddingDp).onGloballyPositioned {
+                                        inner = it.positionInWindow()
+                                    }
+                                )
                             }
                         }
-                    )
+                    })
                 }
             }
         }
@@ -568,18 +534,17 @@ class AndroidViewCompatTest {
                 Box {
                     val paddingDp = with(LocalDensity.current) { padding.toDp() }
                     Box(Modifier.padding(paddingDp)) {
-                        AndroidView(
-                            {
-                                ComposeView(it).apply {
-                                    setContent {
-                                        Box(
-                                            Modifier.padding(paddingDp)
-                                                .onGloballyPositioned { coordinates = it }
-                                        )
-                                    }
+                        AndroidView({
+                            ComposeView(it).apply {
+                                setContent {
+                                    Box(
+                                        Modifier.padding(paddingDp).onGloballyPositioned {
+                                            coordinates = it
+                                        }
+                                    )
                                 }
                             }
-                        )
+                        })
                     }
                 }
             }
@@ -588,9 +553,7 @@ class AndroidViewCompatTest {
 
         rule.runOnIdle { topView.visibility = View.GONE }
 
-        rule.runOnIdle {
-            assertEquals(100, startX - coordinates.positionInWindow().x.roundToInt())
-        }
+        rule.runOnIdle { assertEquals(100, startX - coordinates.positionInWindow().x.roundToInt()) }
     }
 
     @Test
@@ -600,22 +563,20 @@ class AndroidViewCompatTest {
         rule.setContent {
             if (composeContent) {
                 Box {
-                    AndroidView(
-                        {
-                            ComposeView(it).apply {
-                                setViewCompositionStrategy(
-                                    ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
-                                )
-                            }
+                    AndroidView({
+                        ComposeView(it).apply {
+                            setViewCompositionStrategy(
+                                ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+                            )
                         }
-                    ) {
+                    }) {
                         it.setContent {
                             ComposeNode<LayoutNode, Applier<Any>>(
                                 factory = LayoutNode.Constructor,
                                 update = {
                                     init { node = this }
                                     set(noOpMeasurePolicy, ComposeUiNode.SetMeasurePolicy)
-                                }
+                                },
                             )
                         }
                     }
@@ -624,26 +585,28 @@ class AndroidViewCompatTest {
         }
 
         Espresso.onView(
-            allOf(
-                withClassName(endsWith("AndroidComposeView")),
-                not(isDescendantOfA(withClassName(endsWith("AndroidComposeView"))))
+                allOf(
+                    withClassName(endsWith("AndroidComposeView")),
+                    not(isDescendantOfA(withClassName(endsWith("AndroidComposeView")))),
+                )
             )
-        ).check { view, exception ->
-            view as AndroidComposeView
-            // The root layout node should have one child, the Box.
-            if (view.root.children.size != 1) throw exception
-        }
+            .check { view, exception ->
+                view as AndroidComposeView
+                // The root layout node should have one child, the Box.
+                if (view.root.children.size != 1) throw exception
+            }
         var innerAndroidComposeView: AndroidComposeView? = null
         Espresso.onView(
-            allOf(
-                withClassName(endsWith("AndroidComposeView")),
-                isDescendantOfA(withClassName(endsWith("AndroidComposeView")))
+                allOf(
+                    withClassName(endsWith("AndroidComposeView")),
+                    isDescendantOfA(withClassName(endsWith("AndroidComposeView"))),
+                )
             )
-        ).check { view, exception ->
-            innerAndroidComposeView = view as AndroidComposeView
-            // It should have one layout node child, the inner emitted LayoutNode.
-            if (view.root.children.size != 1) throw exception
-        }
+            .check { view, exception ->
+                innerAndroidComposeView = view as AndroidComposeView
+                // It should have one layout node child, the inner emitted LayoutNode.
+                if (view.root.children.size != 1) throw exception
+            }
         // The layout node and its AndroidComposeView should be attached.
         assertNotNull(innerAndroidComposeView)
         assertTrue(innerAndroidComposeView!!.isAttachedToWindow)
@@ -670,9 +633,7 @@ class AndroidViewCompatTest {
             composeView.layoutParams = FrameLayout.LayoutParams(size, size)
             root.addView(composeView)
             rule.activity.setContentView(root)
-            composeView.setContent {
-                AndroidView(::View, Modifier.size(10.dp))
-            }
+            composeView.setContent { AndroidView(::View, Modifier.size(10.dp)) }
         }
 
         Espresso.onView(withClassName(endsWith("AndroidViewsHandler"))).check { view, exception ->
@@ -702,9 +663,7 @@ class AndroidViewCompatTest {
             expectedColor = Color.Green
         }
 
-        rule.runOnUiThread {
-            assertTrue(squareView!!.drawnAfterLastColorChange)
-        }
+        rule.runOnUiThread { assertTrue(squareView!!.drawnAfterLastColorChange) }
     }
 
     @Test
@@ -726,12 +685,14 @@ class AndroidViewCompatTest {
                 null
             }
         }
-        rule.onNodeWithTag("box").captureToImage()
+        rule
+            .onNodeWithTag("box")
+            .captureToImage()
             .assertPixels(expectedColorProvider = offsetColorProvider)
-        rule.runOnUiThread {
-            offset = 100
-        }
-        rule.onNodeWithTag("box").captureToImage()
+        rule.runOnUiThread { offset = 100 }
+        rule
+            .onNodeWithTag("box")
+            .captureToImage()
             .assertPixels(expectedColorProvider = offsetColorProvider)
     }
 
@@ -775,57 +736,18 @@ class AndroidViewCompatTest {
                 invalidate()
             }
         }
-        rule.waitUntil(10000) {
-            view!!.draws == invalidatesDuringScroll + 1
-        }
-    }
-
-    @Ignore // b/254573760
-    @SdkSuppress(minSdkVersion = Build.VERSION_CODES.M)
-    @Test
-    fun testWebViewIsRelaidOut_afterPageLoad() {
-        var boxY = 0
-        val latch = CountDownLatch(1)
-        rule.setContent {
-            Column {
-                AndroidView(
-                    factory = {
-                        val webView = WebView(it)
-                        webView.webViewClient = object : WebViewClient() {
-                            override fun onPageCommitVisible(view: WebView?, url: String?) {
-                                super.onPageCommitVisible(view, url)
-                                latch.countDown()
-                            }
-                        }
-                        webView.loadData("This is a test text", "text/html", "UTF-8")
-                        webView
-                    }
-                )
-                Box(Modifier.onGloballyPositioned { boxY = it.positionInRoot().y.roundToInt() })
-            }
-        }
-        assertTrue(latch.await(3, TimeUnit.SECONDS))
-        rule.waitUntil { boxY > 0 }
+        rule.waitUntil(10000) { view!!.draws == invalidatesDuringScroll + 1 }
     }
 
     @Test
     fun testView_isNotLayoutRequested_afterFirstLayout() {
         var view: View? = null
 
-        rule.setContent {
-            AndroidView(
-                factory = { context ->
-                    View(context).also { view = it }
-                }
-            )
-        }
+        rule.setContent { AndroidView(factory = { context -> View(context).also { view = it } }) }
 
-        rule.runOnIdle {
-            assertFalse(view!!.isLayoutRequested)
-        }
+        rule.runOnIdle { assertFalse(view!!.isLayoutRequested) }
     }
 
-    @OptIn(ExperimentalTestApi::class)
     @Test
     fun hoverEventsAreDispatched() {
         val view = createCaptureEventsView()
@@ -837,11 +759,8 @@ class AndroidViewCompatTest {
         }
 
         rule.runOnIdle {
-            assertThat(view.hoverEvents).containsExactly(
-                ACTION_HOVER_ENTER,
-                ACTION_HOVER_MOVE,
-                ACTION_HOVER_EXIT
-            )
+            assertThat(view.hoverEvents)
+                .containsExactly(ACTION_HOVER_ENTER, ACTION_HOVER_MOVE, ACTION_HOVER_EXIT)
         }
     }
 
@@ -860,15 +779,16 @@ class AndroidViewCompatTest {
         }
 
         rule.runOnIdle {
-            assertThat(view.touchEvents).containsExactly(
-                ACTION_DOWN,
-                ACTION_MOVE,
-                ACTION_POINTER_DOWN,
-                ACTION_MOVE,
-                ACTION_POINTER_UP,
-                ACTION_MOVE,
-                ACTION_UP
-            )
+            assertThat(view.touchEvents)
+                .containsExactly(
+                    ACTION_DOWN,
+                    ACTION_MOVE,
+                    ACTION_POINTER_DOWN,
+                    ACTION_MOVE,
+                    ACTION_POINTER_UP,
+                    ACTION_MOVE,
+                    ACTION_UP,
+                )
         }
     }
 
@@ -880,12 +800,10 @@ class AndroidViewCompatTest {
                     view = CaptureEventsView(it)
                     view
                 },
-                modifier = Modifier.fillMaxSize().testTag(tag)
+                modifier = Modifier.fillMaxSize().testTag(tag),
             )
         }
-        return rule.runOnIdle {
-            view
-        }
+        return rule.runOnIdle { view }
     }
 
     class ColoredSquareView(context: Context) : View(context) {
@@ -924,7 +842,7 @@ class AndroidViewCompatTest {
             drawnAfterLastColorChange = true
             canvas.drawRect(
                 Rect(0, 0, size, size),
-                Paint().apply { color = this@ColoredSquareView.color.toArgb() }
+                Paint().apply { color = this@ColoredSquareView.color.toArgb() },
             )
         }
     }
@@ -935,6 +853,7 @@ class AndroidViewCompatTest {
                 field = value
                 value?.value = this
             }
+
         var widthMeasureSpecRef: Ref<Int>? = null
         var heightMeasureSpecRef: Ref<Int>? = null
 
@@ -963,44 +882,42 @@ class AndroidViewCompatTest {
     }
 
     fun Modifier.layoutConstraints(childConstraints: Constraints): Modifier =
-        this.then(object : LayoutModifier {
-            override fun MeasureScope.measure(
-                measurable: Measurable,
-                constraints: Constraints
-            ): MeasureResult {
-                val placeable = measurable.measure(childConstraints)
-                return layout(placeable.width, placeable.height) {
-                    placeable.place(0, 0)
+        this.then(
+            object : LayoutModifier {
+                override fun MeasureScope.measure(
+                    measurable: Measurable,
+                    constraints: Constraints,
+                ): MeasureResult {
+                    val placeable = measurable.measure(childConstraints)
+                    return layout(placeable.width, placeable.height) { placeable.place(0, 0) }
                 }
             }
-        })
+        )
 
     @Composable
-    fun Container(
-        modifier: Modifier = Modifier,
-        content: @Composable () -> Unit
-    ) {
+    fun Container(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
         Layout(content, modifier) { measurables, constraints ->
             val placeable = measurables[0].measure(constraints)
-            layout(placeable.width, placeable.height) {
-                placeable.place(0, 0)
-            }
+            layout(placeable.width, placeable.height) { placeable.place(0, 0) }
         }
     }
 
-    private val noOpMeasurePolicy = object : LayoutNode.NoIntrinsicsMeasurePolicy("") {
-        override fun MeasureScope.measure(
-            measurables: List<Measurable>,
-            constraints: Constraints
-        ): MeasureResult {
-            return object : MeasureResult {
-                override val width = 0
-                override val height = 0
-                override val alignmentLines: Map<AlignmentLine, Int> get() = mapOf()
-                override fun placeChildren() {}
+    private val noOpMeasurePolicy =
+        object : LayoutNode.NoIntrinsicsMeasurePolicy("") {
+            override fun MeasureScope.measure(
+                measurables: List<Measurable>,
+                constraints: Constraints,
+            ): MeasureResult {
+                return object : MeasureResult {
+                    override val width = 0
+                    override val height = 0
+                    override val alignmentLines: Map<AlignmentLine, Int>
+                        get() = mapOf()
+
+                    override fun placeChildren() {}
+                }
             }
         }
-    }
 
     private class CaptureEventsView(context: Context) : View(context) {
         val touchEvents = mutableListOf<Int>()

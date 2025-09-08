@@ -45,11 +45,9 @@ class LazyVerticalGridActivity : ComponentActivity() {
             MaterialTheme {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(4),
-                    modifier = Modifier.fillMaxWidth().semantics { contentDescription = "IamLazy" }
+                    modifier = Modifier.fillMaxWidth().semantics { contentDescription = "IamLazy" },
                 ) {
-                    items(entries) {
-                        ListCell(it)
-                    }
+                    items(entries) { ListCell(it) }
                 }
             }
         }
@@ -64,16 +62,12 @@ class LazyVerticalGridActivity : ComponentActivity() {
 
 @Composable
 private fun ListCell(entry: Entry) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ) {
+    Card(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
         Text(
             text = entry.contents,
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.h5,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         )
     }
 }

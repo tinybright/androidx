@@ -29,8 +29,7 @@ import org.junit.runner.RunWith
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 class SpringEstimationBenchmark {
-    @get:Rule
-    val benchmarkRule = BenchmarkRule()
+    @get:Rule val benchmarkRule = BenchmarkRule()
 
     @Test
     @LargeTest
@@ -43,7 +42,7 @@ class SpringEstimationBenchmark {
                 dampingCoefficient = dampingCoeff,
                 initialDisplacement = -3000.0,
                 initialVelocity = 800.0,
-                delta = 1.0
+                delta = 1.0,
             )
         }
     }
@@ -58,7 +57,7 @@ class SpringEstimationBenchmark {
                 dampingCoefficient = 6501.0,
                 initialDisplacement = -200000.0,
                 initialVelocity = 4200.0,
-                delta = 1.0
+                delta = 1.0,
             )
         }
     }
@@ -73,7 +72,7 @@ class SpringEstimationBenchmark {
                 dampingCoefficient = 1.0,
                 initialDisplacement = -200000.0,
                 initialVelocity = 100.0,
-                delta = 1.0
+                delta = 1.0,
             )
         }
     }

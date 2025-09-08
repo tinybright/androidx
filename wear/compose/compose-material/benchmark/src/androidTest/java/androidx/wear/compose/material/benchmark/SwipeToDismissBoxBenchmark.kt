@@ -36,11 +36,8 @@ import org.junit.Test
 class SwipeToDismissBoxBenchmark {
     @OptIn(ExperimentalBenchmarkConfigApi::class)
     @get:Rule
-    val benchmarkRule = ComposeBenchmarkRule(
-        MicrobenchmarkConfig(
-            profiler = ProfilerConfig.MethodTracing()
-        )
-    )
+    val benchmarkRule =
+        ComposeBenchmarkRule(MicrobenchmarkConfig(profiler = ProfilerConfig.MethodTracing()))
 
     @Test
     fun s2dbox_benchmarkToFirstPixel() {
@@ -57,22 +54,11 @@ private class S2DBoxTestCase : LayeredComposeTestCase() {
     @Composable
     private fun Screen() {
         val state = rememberSwipeToDismissBoxState()
-        SwipeToDismissBox(
-            state = state,
-            onDismissed = { },
-        ) { isBackground ->
+        SwipeToDismissBox(state = state, onDismissed = {}) { isBackground ->
             if (isBackground) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colors.onSurface)
-                )
+                Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.onSurface))
             } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colors.primary)
-                )
+                Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.primary))
             }
         }
     }

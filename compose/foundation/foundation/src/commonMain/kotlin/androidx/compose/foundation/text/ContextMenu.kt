@@ -24,18 +24,15 @@ import androidx.compose.runtime.Composable
 @Composable
 internal expect fun ContextMenuArea(
     manager: TextFieldSelectionManager,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 )
 
 @Composable
 internal expect fun ContextMenuArea(
     selectionState: TextFieldSelectionState,
     enabled: Boolean,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 )
 
 @Composable
-internal expect fun ContextMenuArea(
-    manager: SelectionManager,
-    content: @Composable () -> Unit
-)
+internal expect fun ContextMenuArea(manager: SelectionManager, content: @Composable () -> Unit)

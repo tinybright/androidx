@@ -33,7 +33,6 @@ internal const val WORKMANAGER_NAMESPACE = "androidx.work.systemjobscheduler"
 // SystemJobScheduler
 private val TAG = Logger.tagWithPrefix("SystemJobScheduler")
 
-@get:RequiresApi(21)
 internal val Context.wmJobScheduler: JobScheduler
     get() {
         val defaultJobScheduler = getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
@@ -49,15 +48,13 @@ private object JobScheduler34 {
     }
 }
 
-@RequiresApi(21)
 private object JobScheduler21 {
     fun getAllPendingJobs(jobScheduler: JobScheduler): List<JobInfo> {
         return jobScheduler.allPendingJobs
     }
 }
 
-@get:RequiresApi(21)
-val JobScheduler.safePendingJobs: List<JobInfo>?
+public val JobScheduler.safePendingJobs: List<JobInfo>?
     get() {
         return try {
             // Note: despite what the word "pending" and the associated Javadoc might imply, this is
@@ -72,7 +69,6 @@ val JobScheduler.safePendingJobs: List<JobInfo>?
         }
     }
 
-@RequiresApi(23)
 internal fun createErrorMessage(
     context: Context,
     workDatabase: WorkDatabase,
@@ -80,39 +76,44 @@ internal fun createErrorMessage(
 ): String {
     val totalLimit = if (Build.VERSION.SDK_INT >= 31) 150 else 100
     val dbScheduledCount = workDatabase.workSpecDao().getScheduledWork().size
-    val jobSchedulerStats = if (Build.VERSION.SDK_INT >= 34) {
-        val namespacedScheduler = context.wmJobScheduler
-        val allJobsInNamespace = namespacedScheduler.safePendingJobs
-        if (allJobsInNamespace != null) {
-            val pendingJobs = getPendingJobs(context, namespacedScheduler)
-            val diff = if (pendingJobs != null) allJobsInNamespace.size - pendingJobs.size else 0
+    val jobSchedulerStats =
+        if (Build.VERSION.SDK_INT >= 34) {
+            val namespacedScheduler = context.wmJobScheduler
+            val allJobsInNamespace = namespacedScheduler.safePendingJobs
+            if (allJobsInNamespace != null) {
+                val pendingJobs = getPendingJobs(context, namespacedScheduler)
+                val diff =
+                    if (pendingJobs != null) allJobsInNamespace.size - pendingJobs.size else 0
 
-            val nonWmJobsMessage = when (diff) {
-                0 -> null
-                else -> "$diff of which are not owned by WorkManager"
+                val nonWmJobsMessage =
+                    when (diff) {
+                        0 -> null
+                        else -> "$diff of which are not owned by WorkManager"
+                    }
+
+                val defaultJobScheduler =
+                    context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+                val wmJobsInDefault = getPendingJobs(context, defaultJobScheduler)?.size ?: 0
+
+                val defaultNamespaceMessage =
+                    when (wmJobsInDefault) {
+                        0 -> null
+                        else -> "$wmJobsInDefault from WorkManager in the default namespace"
+                    }
+
+                listOfNotNull(
+                        "${allJobsInNamespace.size} jobs in \"$WORKMANAGER_NAMESPACE\" namespace",
+                        nonWmJobsMessage,
+                        defaultNamespaceMessage,
+                    )
+                    .joinToString(",\n")
+            } else "<faulty JobScheduler failed to getPendingJobs>"
+        } else {
+            when (val pendingJobs = getPendingJobs(context, context.wmJobScheduler)) {
+                null -> "<faulty JobScheduler failed to getPendingJobs>"
+                else -> "${pendingJobs.size} jobs from WorkManager"
             }
-
-            val defaultJobScheduler =
-                context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-            val wmJobsInDefault = getPendingJobs(context, defaultJobScheduler)?.size ?: 0
-
-            val defaultNamespaceMessage = when (wmJobsInDefault) {
-                0 -> null
-                else -> "$wmJobsInDefault from WorkManager in the default namespace"
-            }
-
-            listOfNotNull(
-                "${allJobsInNamespace.size} jobs in \"$WORKMANAGER_NAMESPACE\" namespace",
-                nonWmJobsMessage,
-                defaultNamespaceMessage
-            ).joinToString(",\n")
-        } else "<faulty JobScheduler failed to getPendingJobs>"
-    } else {
-        when (val pendingJobs = getPendingJobs(context, context.wmJobScheduler)) {
-            null -> "<faulty JobScheduler failed to getPendingJobs>"
-            else -> "${pendingJobs.size} jobs from WorkManager"
         }
-    }
 
     return "JobScheduler $totalLimit job limit exceeded.\n" +
         "In JobScheduler there are $jobSchedulerStats.\n" +

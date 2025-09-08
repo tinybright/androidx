@@ -16,27 +16,23 @@
 
 package androidx.paging.internal
 
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
-
 internal expect class CopyOnWriteArrayList<T>() : Iterable<T> {
     fun add(value: T): Boolean
-    fun remove(value: T): Boolean
-    override fun iterator(): Iterator<T>
-}
 
-internal expect class ReentrantLock constructor() {
-    fun lock()
-    fun unlock()
+    fun remove(value: T): Boolean
+
+    override fun iterator(): Iterator<T>
 }
 
 internal expect class AtomicInt {
     constructor(initialValue: Int)
 
     fun getAndIncrement(): Int
+
     fun incrementAndGet(): Int
+
     fun decrementAndGet(): Int
+
     fun get(): Int
 }
 
@@ -44,18 +40,8 @@ internal expect class AtomicBoolean {
     constructor(initialValue: Boolean)
 
     fun get(): Boolean
-    fun set(value: Boolean)
-    fun compareAndSet(expect: Boolean, update: Boolean): Boolean
-}
 
-@OptIn(ExperimentalContracts::class)
-@Suppress("BanInlineOptIn") // b/296638070
-internal inline fun <T> ReentrantLock.withLock(block: () -> T): T {
-    contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
-    try {
-        lock()
-        return block()
-    } finally {
-        unlock()
-    }
+    fun set(value: Boolean)
+
+    fun compareAndSet(expect: Boolean, update: Boolean): Boolean
 }

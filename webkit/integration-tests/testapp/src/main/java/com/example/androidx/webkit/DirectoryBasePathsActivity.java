@@ -23,11 +23,12 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.webkit.ProcessGlobalConfig;
 import androidx.webkit.WebViewFeature;
+
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 
@@ -59,6 +60,8 @@ public class DirectoryBasePathsActivity extends AppCompatActivity {
         config.setDataDirectorySuffix(this, "directory_base_path_activity_suffix");
         ProcessGlobalConfig.apply(config);
         setContentView(R.layout.activity_data_directory_config);
+        WebkitHelpers.enableEdgeToEdge(this);
+
         WebView wv = findViewById(R.id.data_directory_config_webview);
         wv.getSettings().setJavaScriptEnabled(true);
         wv.setWebViewClient(new WebViewClient());

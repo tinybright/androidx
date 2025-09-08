@@ -43,12 +43,13 @@ class DefaultViewModelProviderFactoryTest {
             fail("Expected `IllegalArgumentException` but no exception has been throw.")
         } catch (e: RuntimeException) {
             assertThat(e).hasCauseThat().isInstanceOf<NoSuchMethodException>()
-            assertThat(e).hasMessageThat()
+            assertThat(e)
+                .hasMessageThat()
                 .contains("Cannot create an instance of class ${TestViewModel2::class.java.name}")
         }
     }
 
-    @org.junit.Test
+    @Test
     fun create_withPrivateConstructor_throwsIllegalAccessException() {
         val modelClass = TestViewModel3::class
         val factory = DefaultViewModelProviderFactory
@@ -56,8 +57,9 @@ class DefaultViewModelProviderFactoryTest {
             factory.create(modelClass, CreationExtras.Empty)
             fail("Expected `IllegalArgumentException` but no exception has been throw.")
         } catch (e: RuntimeException) {
-            assertThat(e).hasCauseThat().isInstanceOf<IllegalAccessException>()
-            assertThat(e).hasMessageThat()
+            assertThat(e).hasCauseThat().isNull()
+            assertThat(e)
+                .hasMessageThat()
                 .contains("Cannot create an instance of class ${TestViewModel3::class.java.name}")
         }
     }
@@ -71,12 +73,15 @@ class DefaultViewModelProviderFactoryTest {
             fail("Expected `IllegalArgumentException` but no exception has been throw.")
         } catch (e: RuntimeException) {
             assertThat(e).hasCauseThat().isInstanceOf<InstantiationException>()
-            assertThat(e).hasMessageThat()
+            assertThat(e)
+                .hasMessageThat()
                 .contains("Cannot create an instance of class ${ViewModel::class.java.name}")
         }
     }
 
     class TestViewModel1 : ViewModel()
+
     class TestViewModel2(@Suppress("unused") val unused: Int) : ViewModel()
+
     private class TestViewModel3 private constructor() : ViewModel()
 }

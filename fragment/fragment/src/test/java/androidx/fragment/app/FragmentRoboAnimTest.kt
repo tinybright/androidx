@@ -42,9 +42,7 @@ class FragmentRoboAnimTest {
         val activityController = Robolectric.buildActivity(FragmentActivity::class.java).setup()
         val activity = activityController.get()
 
-        val container = FrameLayout(activity).apply {
-            id = 1
-        }
+        val container = FrameLayout(activity).apply { id = 1 }
         activity.setContentView(container)
 
         activity.supportFragmentManager
@@ -67,7 +65,7 @@ class ViewFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         return View(activity)
     }

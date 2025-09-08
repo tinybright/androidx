@@ -23,34 +23,34 @@ import androidx.room.solver.QueryResultBinderProvider
 import androidx.room.solver.TypeAdapterExtras
 import androidx.room.solver.query.result.QueryResultBinder
 
-/**
- * Common functionality for binder providers that require an additional artifact
- */
+/** Common functionality for binder providers that require an additional artifact */
 fun QueryResultBinderProvider.requireArtifact(
     context: Context,
     requiredType: XClassName,
-    missingArtifactErrorMsg: String
-): QueryResultBinderProvider = QueryResultBinderProviderWithRequiredArtifact(
-    context = context,
-    requiredType = requiredType,
-    missingArtifactErrorMsg = missingArtifactErrorMsg,
-    delegate = this
-)
+    missingArtifactErrorMsg: String,
+): QueryResultBinderProvider =
+    QueryResultBinderProviderWithRequiredArtifact(
+        context = context,
+        requiredType = requiredType,
+        missingArtifactErrorMsg = missingArtifactErrorMsg,
+        delegate = this,
+    )
 
 private class QueryResultBinderProviderWithRequiredArtifact(
     val context: Context,
     val requiredType: XClassName,
     val missingArtifactErrorMsg: String,
-    val delegate: QueryResultBinderProvider
+    val delegate: QueryResultBinderProvider,
 ) : QueryResultBinderProvider {
-    private val hasRequiredArtifact by lazy(LazyThreadSafetyMode.NONE) {
-        context.processingEnv.findTypeElement(requiredType.canonicalName) != null
-    }
+    private val hasRequiredArtifact by
+        lazy(LazyThreadSafetyMode.NONE) {
+            context.processingEnv.findTypeElement(requiredType.canonicalName) != null
+        }
 
     override fun provide(
         declared: XType,
         query: ParsedQuery,
-        extras: TypeAdapterExtras
+        extras: TypeAdapterExtras,
     ): QueryResultBinder {
         return delegate.provide(declared, query, extras)
     }

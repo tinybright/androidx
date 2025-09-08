@@ -17,8 +17,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application android:supportsRtl="true"
-        android:theme="@style/Theme.Androidx"
-        android:name="androidx.multidex.MultiDexApplication">
+        android:theme="@style/Theme.Androidx">
         <activity android:name="androidx.metrics.performance.test.DelayedActivity"/>
+        <activity android:name="androidx.metrics.performance.test.SoftwareActivity" android:hardwareAccelerated="false"/>
     </application>
 </manifest>

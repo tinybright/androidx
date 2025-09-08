@@ -53,13 +53,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
-private val colors = listOf(
-    Color(0xFFffd7d7.toInt()),
-    Color(0xFFffe9d6.toInt()),
-    Color(0xFFfffbd0.toInt()),
-    Color(0xFFe3ffd9.toInt()),
-    Color(0xFFd0fff8.toInt())
-)
+private val colors =
+    listOf(
+        Color(0xFFffd7d7.toInt()),
+        Color(0xFFffe9d6.toInt()),
+        Color(0xFFfffbd0.toInt()),
+        Color(0xFFe3ffd9.toInt()),
+        Color(0xFFd0fff8.toInt()),
+    )
 
 @Sampled
 @Composable
@@ -69,37 +70,22 @@ fun BottomSheetScaffoldSample() {
     val scaffoldState = rememberBottomSheetScaffoldState()
     BottomSheetScaffold(
         sheetContent = {
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(128.dp),
-                contentAlignment = Alignment.Center
-            ) {
+            Box(Modifier.fillMaxWidth().height(128.dp), contentAlignment = Alignment.Center) {
                 Text("Swipe up to expand sheet")
             }
             Column(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(64.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                Modifier.fillMaxWidth().padding(64.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text("Sheet content")
                 Spacer(Modifier.height(20.dp))
-                Button(
-                    onClick = {
-                        scope.launch { scaffoldState.bottomSheetState.collapse() }
-                    }
-                ) {
+                Button(onClick = { scope.launch { scaffoldState.bottomSheetState.collapse() } }) {
                     Text("Click to collapse sheet")
                 }
             }
         },
         scaffoldState = scaffoldState,
-        topBar = {
-            TopAppBar {
-                Text("Bottom sheet scaffold")
-            }
-        },
+        topBar = { TopAppBar { Text("Bottom sheet scaffold") } },
         floatingActionButton = {
             var clickCount by remember { mutableStateOf(0) }
             FloatingActionButton(
@@ -114,16 +100,11 @@ fun BottomSheetScaffoldSample() {
             }
         },
         floatingActionButtonPosition = FabPosition.End,
-        sheetPeekHeight = 128.dp
+        sheetPeekHeight = 128.dp,
     ) { innerPadding ->
         LazyColumn(contentPadding = innerPadding) {
             items(100) {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .background(colors[it % colors.size])
-                )
+                Box(Modifier.fillMaxWidth().height(50.dp).background(colors[it % colors.size]))
             }
         }
     }
@@ -139,10 +120,8 @@ fun BottomSheetScaffoldWithDrawerSample() {
         drawerState = drawerState,
         drawerContent = {
             Column(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                Modifier.fillMaxWidth().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text("Drawer content")
                 Spacer(Modifier.height(20.dp))
@@ -150,30 +129,21 @@ fun BottomSheetScaffoldWithDrawerSample() {
                     Text("Click to close drawer")
                 }
             }
-        }
+        },
     ) {
         BottomSheetScaffold(
             sheetContent = {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(128.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(Modifier.fillMaxWidth().height(128.dp), contentAlignment = Alignment.Center) {
                     Text("Swipe up to expand sheet")
                 }
                 Column(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(64.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    Modifier.fillMaxWidth().padding(64.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text("Sheet content")
                     Spacer(Modifier.height(20.dp))
                     Button(
-                        onClick = {
-                            scope.launch { scaffoldState.bottomSheetState.collapse() }
-                        }
+                        onClick = { scope.launch { scaffoldState.bottomSheetState.collapse() } }
                     ) {
                         Text("Click to collapse sheet")
                     }
@@ -187,7 +157,7 @@ fun BottomSheetScaffoldWithDrawerSample() {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(Icons.Default.Menu, contentDescription = "Localized description")
                         }
-                    }
+                    },
                 )
             },
             floatingActionButton = {
@@ -196,8 +166,9 @@ fun BottomSheetScaffoldWithDrawerSample() {
                     onClick = {
                         // show snackbar as a suspend function
                         scope.launch {
-                            scaffoldState.snackbarHostState
-                                .showSnackbar("Snackbar #${++clickCount}")
+                            scaffoldState.snackbarHostState.showSnackbar(
+                                "Snackbar #${++clickCount}"
+                            )
                         }
                     }
                 ) {
@@ -205,16 +176,11 @@ fun BottomSheetScaffoldWithDrawerSample() {
                 }
             },
             floatingActionButtonPosition = FabPosition.End,
-            sheetPeekHeight = 128.dp
+            sheetPeekHeight = 128.dp,
         ) { innerPadding ->
             LazyColumn(contentPadding = innerPadding) {
                 items(100) {
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(50.dp)
-                            .background(colors[it % colors.size])
-                    )
+                    Box(Modifier.fillMaxWidth().height(50.dp).background(colors[it % colors.size]))
                 }
             }
         }

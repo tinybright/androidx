@@ -28,9 +28,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import org.hamcrest.CoreMatchers.allOf
 
-/**
- * Creates a [ViewInteraction] that interacts with a [ViewPager2].
- */
+/** Creates a [ViewInteraction] that interacts with a [ViewPager2]. */
 fun onViewPager(): ViewInteraction {
     return onView(isAssignableFrom(ViewPager2::class.java))
 }
@@ -44,7 +42,7 @@ fun onCurrentPage(): ViewInteraction {
     return onView(
         allOf(
             withParent(withParent(isAssignableFrom(ViewPager2::class.java))),
-            isDisplayingAtLeast(50)
+            isDisplayingAtLeast(50),
         )
     )
 }
@@ -57,7 +55,7 @@ fun onTab(withText: String): ViewInteraction {
     return onView(
         allOf(
             isDescendantOfA(isAssignableFrom(TabLayout::class.java)),
-            withChild(withText(withText))
+            withChild(withText(withText)),
         )
     )
 }

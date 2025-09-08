@@ -28,43 +28,31 @@ internal class JavacTypeVariableType(
     env: JavacProcessingEnv,
     override val typeMirror: TypeVariable,
     nullability: XNullability?,
-    override val kotlinType: KmBaseTypeContainer?
+    override val kotlinType: KmBaseTypeContainer?,
 ) : JavacType(env, typeMirror, nullability), XTypeVariableType {
     constructor(
         env: JavacProcessingEnv,
-        typeMirror: TypeVariable
-    ) : this(
-        env = env,
-        typeMirror = typeMirror,
-        nullability = null,
-        kotlinType = null
-    )
+        typeMirror: TypeVariable,
+    ) : this(env = env, typeMirror = typeMirror, nullability = null, kotlinType = null)
 
     constructor(
         env: JavacProcessingEnv,
         typeMirror: TypeVariable,
-        kotlinType: KmBaseTypeContainer
+        kotlinType: KmBaseTypeContainer,
     ) : this(
         env = env,
         typeMirror = typeMirror,
         nullability = kotlinType.nullability,
-        kotlinType = kotlinType
+        kotlinType = kotlinType,
     )
 
     constructor(
         env: JavacProcessingEnv,
         typeMirror: TypeVariable,
-        nullability: XNullability
-    ) : this(
-        env = env,
-        typeMirror = typeMirror,
-        nullability = nullability,
-        kotlinType = null
-    )
+        nullability: XNullability,
+    ) : this(env = env, typeMirror = typeMirror, nullability = nullability, kotlinType = null)
 
-    override val equalityItems by lazy {
-        arrayOf(typeMirror)
-    }
+    override val equalityItems by lazy { arrayOf(typeMirror) }
 
     override val typeArguments: List<XType>
         get() = emptyList()
@@ -76,7 +64,7 @@ internal class JavacTypeVariableType(
                     env.wrap(
                         typeMirror = bound,
                         kotlinType = kotlinType?.upperBounds?.getOrNull(i),
-                        elementNullability = maybeNullability
+                        elementNullability = maybeNullability,
                     )
                 }
             } else {
@@ -85,7 +73,7 @@ internal class JavacTypeVariableType(
                         typeMirror = typeMirror.upperBound,
                         // If this isn't an intersection type then there is only 1 upper bound
                         kotlinType = kotlinType?.upperBounds?.singleOrNull(),
-                        elementNullability = maybeNullability
+                        elementNullability = maybeNullability,
                     )
                 )
             }
@@ -96,7 +84,7 @@ internal class JavacTypeVariableType(
             env = env,
             typeMirror = typeMirror,
             kotlinType = kotlinType,
-            nullability = nullability
+            nullability = nullability,
         )
     }
 }

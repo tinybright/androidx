@@ -18,9 +18,7 @@ package androidx.room.solver
 
 import kotlin.reflect.KClass
 
-/**
- * Bag of objects to pass additional information to the [TypeAdapterStore].
- */
+/** Bag of objects to pass additional information to the [TypeAdapterStore]. */
 class TypeAdapterExtras {
     private val data = mutableMapOf<KClass<*>, Any>()
 

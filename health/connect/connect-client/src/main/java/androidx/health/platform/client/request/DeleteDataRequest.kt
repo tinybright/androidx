@@ -21,13 +21,11 @@ import androidx.annotation.RestrictTo
 import androidx.health.platform.client.impl.data.ProtoParcelable
 import androidx.health.platform.client.proto.RequestProto
 
-/**
- * Internal parcelable for IPC calls.
- */
+/** Internal parcelable for IPC calls. */
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 class DeleteDataRequest(
     val uids: List<RequestProto.DataTypeIdPair>,
-    val clientIds: List<RequestProto.DataTypeIdPair>
+    val clientIds: List<RequestProto.DataTypeIdPair>,
 ) : ProtoParcelable<RequestProto.DeleteDataRequest>() {
     override val proto: RequestProto.DeleteDataRequest
         get() {
@@ -46,9 +44,7 @@ class DeleteDataRequest(
                 fromProto(proto)
             }
 
-        internal fun fromProto(
-            proto: RequestProto.DeleteDataRequest,
-        ): DeleteDataRequest {
+        internal fun fromProto(proto: RequestProto.DeleteDataRequest): DeleteDataRequest {
             return DeleteDataRequest(proto.uidsList, proto.clientIdsList)
         }
     }

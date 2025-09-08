@@ -60,14 +60,10 @@ class StartDestinationArgsActivity : FragmentActivity() {
         setContentView(R.layout.start_destination_args_activity)
 
         if (savedInstanceState == null) {
-            val args = Bundle().apply {
-                putString(TEST_ARG, TEST_ARG_VALUE)
-            }
-            val navHostFragment = NavHostFragment.create(
-                R.navigation.nav_fragment_start_args,
-                args
-            )
-            supportFragmentManager.beginTransaction()
+            val args = Bundle().apply { putString(TEST_ARG, TEST_ARG_VALUE) }
+            val navHostFragment = NavHostFragment.create(R.navigation.nav_fragment_start_args, args)
+            supportFragmentManager
+                .beginTransaction()
                 .replace(R.id.nav_host, navHostFragment)
                 .setPrimaryNavigationFragment(navHostFragment)
                 .commit()
@@ -85,7 +81,7 @@ class StartDestinationArgsFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         return FrameLayout(requireContext())
     }

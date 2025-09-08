@@ -31,8 +31,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 class CrossfadeBenchmark(private val compilationMode: CompilationMode) {
 
-    @get:Rule
-    val benchmarkRule = MacrobenchmarkRule()
+    @get:Rule val benchmarkRule = MacrobenchmarkRule()
 
     @Test
     fun crossfadeBenchmarkInitialComposition() {
@@ -44,7 +43,7 @@ class CrossfadeBenchmark(private val compilationMode: CompilationMode) {
             setupBlock = {
                 val intent = Intent().apply { action = Action }
                 startActivityAndWait(intent)
-            }
+            },
         ) {
             repeat(2) {
                 device.findObject(By.desc(ToggleCrossfadeDescription)).click()
@@ -63,7 +62,7 @@ class CrossfadeBenchmark(private val compilationMode: CompilationMode) {
             setupBlock = {
                 val intent = Intent().apply { action = Action }
                 startActivityAndWait(intent)
-            }
+            },
         ) {
             repeat(2) {
                 device.findObject(By.desc(ToggleTargetStateDescription)).click()

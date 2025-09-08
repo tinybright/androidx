@@ -38,21 +38,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 
 @Composable
 fun FocusableDemo() {
-    Column(
-        verticalArrangement = Arrangement.SpaceEvenly
-    ) {
-        CenteredRow {
-            Text("Click on any focusable to bring it into focus:")
-        }
-        CenteredRow {
-            FocusableText("Focusable 1")
-        }
-        CenteredRow {
-            FocusableText("Focusable 2")
-        }
-        CenteredRow {
-            FocusableText("Focusable 3")
-        }
+    Column(verticalArrangement = Arrangement.SpaceEvenly) {
+        CenteredRow { Text("Click on any focusable to bring it into focus:") }
+        CenteredRow { FocusableText("Focusable 1") }
+        CenteredRow { FocusableText("Focusable 2") }
+        CenteredRow { FocusableText("Focusable 3") }
     }
 }
 
@@ -61,13 +51,13 @@ private fun FocusableText(text: String) {
     var color by remember { mutableStateOf(Black) }
     val focusRequester = remember { FocusRequester() }
     Text(
-        modifier = Modifier
-            .focusRequester(focusRequester)
-            .onFocusChanged { color = if (it.isFocused) Green else Black }
-            .focusTarget()
-            .pointerInput(Unit) { detectTapGestures { focusRequester.requestFocus() } },
+        modifier =
+            Modifier.focusRequester(focusRequester)
+                .onFocusChanged { color = if (it.isFocused) Green else Black }
+                .focusTarget()
+                .pointerInput(Unit) { detectTapGestures { focusRequester.requestFocus() } },
         text = text,
-        color = color
+        color = color,
     )
 }
 
@@ -76,6 +66,6 @@ private fun CenteredRow(content: @Composable RowScope.() -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
-        content = content
+        content = content,
     )
 }

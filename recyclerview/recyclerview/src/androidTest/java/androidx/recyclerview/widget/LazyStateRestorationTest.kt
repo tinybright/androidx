@@ -33,7 +33,6 @@ import androidx.test.annotation.UiThreadTest
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.filters.SmallTest
 import com.google.common.truth.Truth.assertThat
-import java.util.LinkedHashMap
 import java.util.UUID
 import org.junit.Before
 import org.junit.Test
@@ -48,10 +47,11 @@ class LazyStateRestorationTest(
      * Views are not designed to restore state multiple times yet there is a common patter of doing
      * it that used to work so we add support for it.
      */
-    private val reuseRecyclerView: Boolean
+    private val reuseRecyclerView: Boolean,
 ) {
     private lateinit var recyclerView: RecyclerView
     private val items = (0..99).map { Item(it, "text $it") }
+
     @Before
     fun init() {
         recyclerView = RecyclerView(getApplicationContext())
@@ -77,12 +77,11 @@ class LazyStateRestorationTest(
         recyclerView.layout(0, 0, 320, 320)
     }
 
-    private fun restore(
-        setAdapter: Boolean
-    ): Parcelable {
-        val prevAdapter = checkNotNull(recyclerView.adapter as? LazyStateAdapter) {
-            "Previous RecyclerView should have a LazyStateAdapter for the test"
-        }
+    private fun restore(setAdapter: Boolean): Parcelable {
+        val prevAdapter =
+            checkNotNull(recyclerView.adapter as? LazyStateAdapter) {
+                "Previous RecyclerView should have a LazyStateAdapter for the test"
+            }
         val savedState = saveState()
         if (!reuseRecyclerView) {
             recyclerView = RecyclerView(getApplicationContext())
@@ -232,21 +231,20 @@ class LazyStateRestorationTest(
     companion object {
         @Parameterized.Parameters(name = "{0}_reUseRV_{1}")
         @JvmStatic
-        fun params(): List<Array<Any>> = listOf(
-            LinearLayoutManagerFactory(),
-            GridLayoutManagerFactory(),
-            StaggeredGridLayoutManagerFactory()
-        ).flatMap {
+        fun params(): List<Array<Any>> =
             listOf(
-                arrayOf(it, true),
-                arrayOf(it, false)
-            )
-        }
+                    LinearLayoutManagerFactory(),
+                    GridLayoutManagerFactory(),
+                    StaggeredGridLayoutManagerFactory(),
+                )
+                .flatMap { listOf(arrayOf(it, true), arrayOf(it, false)) }
     }
 
     abstract class LayoutManagerFactory {
         abstract fun create(context: Context): RecyclerView.LayoutManager
+
         abstract fun describe(): String
+
         override fun toString() = describe()
     }
 
@@ -276,9 +274,8 @@ class LazyStateRestorationTest(
         override fun describe() = "StaggeredGridLayoutManager"
     }
 
-    private class LazyStateAdapter(
-        var items: List<Item>
-    ) : RecyclerView.Adapter<LazyStateViewHolder>() {
+    private class LazyStateAdapter(var items: List<Item>) :
+        RecyclerView.Adapter<LazyStateViewHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LazyStateViewHolder {
             return LazyStateViewHolder(parent.context)
         }
@@ -290,18 +287,16 @@ class LazyStateRestorationTest(
         override fun getItemCount() = items.size
     }
 
-    private class LazyStateViewHolder(
-        context: Context
-    ) : RecyclerView.ViewHolder(
-        View(context)
-    ) {
+    private class LazyStateViewHolder(context: Context) : RecyclerView.ViewHolder(View(context)) {
         var item: Item? = null
+
         fun bindTo(item: Item) {
             this.item = item
-            itemView.layoutParams = RecyclerView.LayoutParams(
-                RecyclerView.LayoutParams.MATCH_PARENT,
-                25 + (item.mId % 10)
-            )
+            itemView.layoutParams =
+                RecyclerView.LayoutParams(
+                    RecyclerView.LayoutParams.MATCH_PARENT,
+                    25 + (item.mId % 10),
+                )
         }
     }
 

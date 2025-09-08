@@ -34,38 +34,49 @@ internal fun createTestWorkManagerImpl(
     context: Context,
     configuration: Configuration,
     serialExecutor: SerialExecutor,
-    executorsMode: ExecutorsMode
+    executorsMode: ExecutorsMode,
 ): WorkManagerImpl {
-    val taskExecutor = object : TaskExecutor {
-        val synchronousExecutor = SynchronousExecutor()
-        override fun getMainThreadExecutor() = synchronousExecutor
+    val taskExecutor =
+        object : TaskExecutor {
+            val synchronousExecutor = SynchronousExecutor()
 
-        override fun getSerialTaskExecutor() = serialExecutor
-    }
+            override fun getMainThreadExecutor() = synchronousExecutor
+
+            override fun getSerialTaskExecutor() = serialExecutor
+        }
     return WorkManagerImpl(
         context = context,
         configuration = configuration,
         workTaskExecutor = taskExecutor,
-        workDatabase = WorkDatabase.create(
-            context, taskExecutor.serialTaskExecutor, configuration.clock, true
-        ), schedulersCreator = createTestSchedulersOuter(executorsMode)
+        workDatabase =
+            WorkDatabase.create(
+                context,
+                taskExecutor.serialTaskExecutor,
+                configuration.clock,
+                true,
+            ),
+        schedulersCreator = createTestSchedulersOuter(executorsMode),
     )
 }
 
 internal fun createTestWorkManagerImpl(
     context: Context,
     configuration: Configuration,
-    executorsMode: ExecutorsMode
+    executorsMode: ExecutorsMode,
 ): WorkManagerImpl {
-    val taskExecutor =
-        WorkManagerTaskExecutor(configuration.taskExecutor)
+    val taskExecutor = WorkManagerTaskExecutor(configuration.taskExecutor)
     return WorkManagerImpl(
         context = context,
         configuration = configuration,
         workTaskExecutor = taskExecutor,
-        workDatabase = WorkDatabase.create(
-            context, taskExecutor.serialTaskExecutor, configuration.clock, true
-        ), schedulersCreator = createTestSchedulersOuter(executorsMode)
+        workDatabase =
+            WorkDatabase.create(
+                context,
+                taskExecutor.serialTaskExecutor,
+                configuration.clock,
+                true,
+            ),
+        schedulersCreator = createTestSchedulersOuter(executorsMode),
     )
 }
 
@@ -81,8 +92,13 @@ internal val WorkManagerImpl.testDriver: TestDriver
 private fun createTestSchedulersOuter(executorsMode: ExecutorsMode): SchedulersCreator =
     { context, configuration, workTaskExecutor, workDatabase, trackers, processor ->
         createTestSchedulers(
-            context, configuration, workTaskExecutor, workDatabase, trackers, processor,
-            executorsMode
+            context,
+            configuration,
+            workTaskExecutor,
+            workDatabase,
+            trackers,
+            processor,
+            executorsMode,
         )
     }
 
@@ -94,7 +110,7 @@ private fun createTestSchedulers(
     workDatabase: WorkDatabase,
     trackers: Trackers,
     processor: Processor,
-    executorsMode: ExecutorsMode
+    executorsMode: ExecutorsMode,
 ): List<Scheduler> {
     val launcher = WorkLauncherImpl(processor, workTaskExecutor)
     return listOf<Scheduler>(
@@ -103,7 +119,7 @@ private fun createTestSchedulers(
             launcher,
             configuration.clock,
             configuration.runnableScheduler,
-            executorsMode
+            executorsMode,
         )
     )
 }

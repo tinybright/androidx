@@ -36,12 +36,14 @@ import androidx.compose.ui.window.PopupProperties
 
 @Deprecated(
     level = DeprecationLevel.HIDDEN,
-    replaceWith = ReplaceWith(
-        expression = "DropdownMenu(expanded,onDismissRequest, modifier, offset, " +
-            "rememberScrollState(), properties, content)",
-        "androidx.compose.foundation.rememberScrollState"
-    ),
-    message = "Replaced by a DropdownMenu function with a ScrollState parameter"
+    replaceWith =
+        ReplaceWith(
+            expression =
+                "DropdownMenu(expanded,onDismissRequest, modifier, offset, " +
+                    "rememberScrollState(), properties, content)",
+            "androidx.compose.foundation.rememberScrollState",
+        ),
+    message = "Replaced by a DropdownMenu function with a ScrollState parameter",
 )
 @Composable
 fun DropdownMenu(
@@ -50,16 +52,17 @@ fun DropdownMenu(
     modifier: Modifier = Modifier,
     offset: DpOffset = DpOffset(0.dp, 0.dp),
     properties: PopupProperties = PopupProperties(focusable = true),
-    content: @Composable ColumnScope.() -> Unit
-) = DropdownMenu(
-    expanded = expanded,
-    onDismissRequest = onDismissRequest,
-    modifier = modifier,
-    offset = offset,
-    scrollState = rememberScrollState(),
-    properties = properties,
-    content = content
-)
+    content: @Composable ColumnScope.() -> Unit,
+) =
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = modifier,
+        offset = offset,
+        scrollState = rememberScrollState(),
+        properties = properties,
+        content = content,
+    )
 
 @Composable
 actual fun DropdownMenu(
@@ -69,7 +72,7 @@ actual fun DropdownMenu(
     offset: DpOffset,
     scrollState: ScrollState,
     properties: PopupProperties,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     val expandedStates = remember { MutableTransitionState(false) }
     expandedStates.targetState = expanded
@@ -77,24 +80,22 @@ actual fun DropdownMenu(
     if (expandedStates.currentState || expandedStates.targetState) {
         val transformOriginState = remember { mutableStateOf(TransformOrigin.Center) }
         val density = LocalDensity.current
-        val popupPositionProvider = DropdownMenuPositionProvider(
-            offset,
-            density
-        ) { parentBounds, menuBounds ->
-            transformOriginState.value = calculateTransformOrigin(parentBounds, menuBounds)
-        }
+        val popupPositionProvider =
+            DropdownMenuPositionProvider(offset, density) { parentBounds, menuBounds ->
+                transformOriginState.value = calculateTransformOrigin(parentBounds, menuBounds)
+            }
 
         Popup(
             onDismissRequest = onDismissRequest,
             popupPositionProvider = popupPositionProvider,
-            properties = properties
+            properties = properties,
         ) {
             DropdownMenuContent(
                 expandedStates = expandedStates,
                 transformOriginState = transformOriginState,
                 scrollState = scrollState,
                 modifier = modifier,
-                content = content
+                content = content,
             )
         }
     }
@@ -107,15 +108,15 @@ actual fun DropdownMenuItem(
     enabled: Boolean,
     contentPadding: PaddingValues,
     interactionSource: MutableInteractionSource?,
-    content: @Composable RowScope.() -> Unit
-): Unit = DropdownMenuItemContent(
-    onClick,
-    modifier,
-    enabled,
-    contentPadding,
-    interactionSource,
-    content = content
-)
+    content: @Composable RowScope.() -> Unit,
+): Unit =
+    DropdownMenuItemContent(
+        onClick,
+        modifier,
+        enabled,
+        contentPadding,
+        interactionSource,
+        content = content,
+    )
 
-internal actual val DefaultMenuProperties =
-    PopupProperties(focusable = true)
+internal actual val DefaultMenuProperties = PopupProperties(focusable = true)

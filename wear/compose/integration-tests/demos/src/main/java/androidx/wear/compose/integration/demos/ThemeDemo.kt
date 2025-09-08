@@ -36,52 +36,24 @@ import androidx.wear.compose.material.Text
 @Composable
 fun ThemeFonts() {
     ScalingLazyColumn {
-        item {
-            ThemeFontRow(style = MaterialTheme.typography.display1, description = "display1")
-        }
-        item {
-            ThemeFontRow(style = MaterialTheme.typography.display2, description = "display2")
-        }
-        item {
-            ThemeFontRow(style = MaterialTheme.typography.display3, description = "display3")
-        }
-        item {
-            ThemeFontRow(style = MaterialTheme.typography.title1, description = "title1")
-        }
-        item {
-            ThemeFontRow(style = MaterialTheme.typography.title2, description = "title2")
-        }
-        item {
-            ThemeFontRow(style = MaterialTheme.typography.title3, description = "title3")
-        }
-        item {
-            ThemeFontRow(style = MaterialTheme.typography.body1, description = "body1")
-        }
-        item {
-            ThemeFontRow(style = MaterialTheme.typography.body2, description = "body2")
-        }
-        item {
-            ThemeFontRow(style = MaterialTheme.typography.button, description = "button")
-        }
-        item {
-            ThemeFontRow(style = MaterialTheme.typography.caption1, description = "caption1")
-        }
-        item {
-            ThemeFontRow(style = MaterialTheme.typography.caption2, description = "caption2")
-        }
-        item {
-            ThemeFontRow(style = MaterialTheme.typography.caption3, description = "caption3")
-        }
+        item { ThemeFontRow(style = MaterialTheme.typography.display1, description = "display1") }
+        item { ThemeFontRow(style = MaterialTheme.typography.display2, description = "display2") }
+        item { ThemeFontRow(style = MaterialTheme.typography.display3, description = "display3") }
+        item { ThemeFontRow(style = MaterialTheme.typography.title1, description = "title1") }
+        item { ThemeFontRow(style = MaterialTheme.typography.title2, description = "title2") }
+        item { ThemeFontRow(style = MaterialTheme.typography.title3, description = "title3") }
+        item { ThemeFontRow(style = MaterialTheme.typography.body1, description = "body1") }
+        item { ThemeFontRow(style = MaterialTheme.typography.body2, description = "body2") }
+        item { ThemeFontRow(style = MaterialTheme.typography.button, description = "button") }
+        item { ThemeFontRow(style = MaterialTheme.typography.caption1, description = "caption1") }
+        item { ThemeFontRow(style = MaterialTheme.typography.caption2, description = "caption2") }
+        item { ThemeFontRow(style = MaterialTheme.typography.caption3, description = "caption3") }
     }
 }
 
 @Composable
 fun ThemeFontRow(style: TextStyle, description: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentWidth(align = Alignment.CenterHorizontally)
-    ) {
+    Row(modifier = Modifier.fillMaxWidth().wrapContentWidth(align = Alignment.CenterHorizontally)) {
         Text(text = description, style = style)
     }
 }
@@ -94,7 +66,7 @@ fun ThemeColors() {
                 backgroundColor = MaterialTheme.colors.background,
                 backgroundColorName = "background",
                 foregroundColor = MaterialTheme.colors.onBackground,
-                foregroundColorName = "onBackground"
+                foregroundColorName = "onBackground",
             )
         }
         item {
@@ -102,7 +74,7 @@ fun ThemeColors() {
                 backgroundColor = MaterialTheme.colors.surface,
                 backgroundColorName = "surface",
                 foregroundColor = MaterialTheme.colors.onSurface,
-                foregroundColorName = "onSurface"
+                foregroundColorName = "onSurface",
             )
         }
         item {
@@ -110,7 +82,7 @@ fun ThemeColors() {
                 backgroundColor = MaterialTheme.colors.surface,
                 backgroundColorName = "surface",
                 foregroundColor = MaterialTheme.colors.onSurfaceVariant,
-                foregroundColorName = "onSurfaceVariant"
+                foregroundColorName = "onSurfaceVariant",
             )
         }
         item {
@@ -118,7 +90,7 @@ fun ThemeColors() {
                 backgroundColor = MaterialTheme.colors.primary,
                 backgroundColorName = "primary",
                 foregroundColor = MaterialTheme.colors.onPrimary,
-                foregroundColorName = "onPrimary"
+                foregroundColorName = "onPrimary",
             )
         }
         item {
@@ -126,7 +98,7 @@ fun ThemeColors() {
                 backgroundColor = MaterialTheme.colors.primaryVariant,
                 backgroundColorName = "primaryVariant",
                 foregroundColor = MaterialTheme.colors.onPrimary,
-                foregroundColorName = "onPrimary"
+                foregroundColorName = "onPrimary",
             )
         }
         item {
@@ -134,7 +106,7 @@ fun ThemeColors() {
                 backgroundColor = MaterialTheme.colors.secondary,
                 backgroundColorName = "secondary",
                 foregroundColor = MaterialTheme.colors.onSecondary,
-                foregroundColorName = "onSecondary"
+                foregroundColorName = "onSecondary",
             )
         }
         item {
@@ -142,7 +114,7 @@ fun ThemeColors() {
                 backgroundColor = MaterialTheme.colors.secondaryVariant,
                 backgroundColorName = "secondaryVariant",
                 foregroundColor = MaterialTheme.colors.onSecondary,
-                foregroundColorName = "onSecondary"
+                foregroundColorName = "onSecondary",
             )
         }
         item {
@@ -150,7 +122,7 @@ fun ThemeColors() {
                 backgroundColor = MaterialTheme.colors.error,
                 backgroundColorName = "error",
                 foregroundColor = MaterialTheme.colors.onError,
-                foregroundColorName = "onError"
+                foregroundColorName = "onError",
             )
         }
     }
@@ -161,15 +133,15 @@ fun ThemeColorRow(
     backgroundColor: Color,
     backgroundColorName: String,
     foregroundColor: Color,
-    foregroundColorName: String
+    foregroundColorName: String,
 ) {
     Row(
-        modifier = Modifier
-            .padding(vertical = 2.dp)
-            .background(color = backgroundColor)
-            .fillMaxWidth()
-            .wrapContentWidth(align = Alignment.CenterHorizontally)
-            .border(width = 1.dp, color = MaterialTheme.colors.onBackground)
+        modifier =
+            Modifier.padding(vertical = 2.dp)
+                .background(color = backgroundColor)
+                .fillMaxWidth()
+                .wrapContentWidth(align = Alignment.CenterHorizontally)
+                .border(width = 1.dp, color = MaterialTheme.colors.onBackground)
     ) {
         Text(
             text = "foreground=$foregroundColorName background=$backgroundColorName",

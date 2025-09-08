@@ -54,24 +54,24 @@ internal sealed class Animator {
     @Composable
     fun createVectorConfig(
         transition: Transition<Boolean>,
-        overallDuration: Int
+        overallDuration: Int,
     ): StateVectorConfig {
-        return remember { StateVectorConfig() }.also { config ->
-            Configure(transition, config, overallDuration)
-        }
+        return remember { StateVectorConfig() }
+            .also { config -> Configure(transition, config, overallDuration) }
     }
 
     @Composable
     fun Configure(
         transition: Transition<Boolean>,
         config: StateVectorConfig,
-        overallDuration: Int
+        overallDuration: Int,
     ) {
-        val propertyValuesMap = remember(overallDuration) {
-            mutableScatterMapOf<String, PropertyValues<*>>().also {
-                collectPropertyValues(it, overallDuration, 0)
+        val propertyValuesMap =
+            remember(overallDuration) {
+                mutableScatterMapOf<String, PropertyValues<*>>().also {
+                    collectPropertyValues(it, overallDuration, 0)
+                }
             }
-        }
         propertyValuesMap.forEach { propertyName, values ->
             values.timestamps.sortBy { it.timeMillis }
             val state = values.createState(transition, propertyName, overallDuration)
@@ -101,7 +101,7 @@ internal sealed class Animator {
     abstract fun collectPropertyValues(
         propertyValuesMap: MutableScatterMap<String, PropertyValues<*>>,
         overallDuration: Int,
-        parentDelay: Int
+        parentDelay: Int,
     )
 }
 
@@ -110,26 +110,29 @@ internal class Timestamp<T>(
     val durationMillis: Int,
     val repeatCount: Int,
     val repeatMode: RepeatMode,
-    val holder: PropertyValuesHolder<T>
+    val holder: PropertyValuesHolder<T>,
 ) {
     fun asAnimationSpec(): FiniteAnimationSpec<T> {
         @Suppress("UNCHECKED_CAST")
-        val spec = when (holder) {
-            is PropertyValuesHolderFloat -> holder.asKeyframeSpec(durationMillis)
-            is PropertyValuesHolderColor -> holder.asKeyframeSpec(durationMillis)
-            else -> throw RuntimeException("Unexpected value type: $holder")
-        } as KeyframesSpec<T>
+        val spec =
+            when (holder) {
+                is PropertyValuesHolderFloat -> holder.asKeyframeSpec(durationMillis)
+                is PropertyValuesHolderColor -> holder.asKeyframeSpec(durationMillis)
+                else -> throw RuntimeException("Unexpected value type: $holder")
+            }
+                as KeyframesSpec<T>
         return if (repeatCount == 0) {
             spec
         } else {
             repeatable(
-                iterations = if (repeatCount == RepeatCountInfinite) {
-                    Int.MAX_VALUE
-                } else {
-                    repeatCount + 1
-                },
+                iterations =
+                    if (repeatCount == RepeatCountInfinite) {
+                        Int.MAX_VALUE
+                    } else {
+                        repeatCount + 1
+                    },
                 animation = spec,
-                repeatMode = repeatMode
+                repeatMode = repeatMode,
             )
         }
     }
@@ -142,16 +145,19 @@ internal sealed class PropertyValues<T> {
     abstract fun createState(
         transition: Transition<Boolean>,
         propertyName: String,
-        overallDuration: Int
+        overallDuration: Int,
     ): State<T>
 
     protected fun createAnimationSpec(
         overallDuration: Int
     ): @Composable Transition.Segment<Boolean>.() -> FiniteAnimationSpec<T> {
         return {
-            val spec = combined(timestamps.fastMap { timestamp ->
-                timestamp.timeMillis to timestamp.asAnimationSpec()
-            })
+            val spec =
+                combined(
+                    timestamps.fastMap { timestamp ->
+                        timestamp.timeMillis to timestamp.asAnimationSpec()
+                    }
+                )
             if (targetState) spec else spec.reversed(overallDuration)
         }
     }
@@ -163,7 +169,7 @@ private class FloatPropertyValues : PropertyValues<Float>() {
     override fun createState(
         transition: Transition<Boolean>,
         propertyName: String,
-        overallDuration: Int
+        overallDuration: Int,
     ): State<Float> {
         return transition.animateFloat(
             transitionSpec = createAnimationSpec(overallDuration),
@@ -171,12 +177,16 @@ private class FloatPropertyValues : PropertyValues<Float>() {
             targetValueByState = { atEnd ->
                 if (atEnd) {
                     (timestamps.last().holder as PropertyValuesHolderFloat)
-                        .animatorKeyframes.last().value
+                        .animatorKeyframes
+                        .last()
+                        .value
                 } else {
                     (timestamps.first().holder as PropertyValuesHolderFloat)
-                        .animatorKeyframes.first().value
+                        .animatorKeyframes
+                        .first()
+                        .value
                 }
-            }
+            },
         )
     }
 }
@@ -187,7 +197,7 @@ private class ColorPropertyValues : PropertyValues<Color>() {
     override fun createState(
         transition: Transition<Boolean>,
         propertyName: String,
-        overallDuration: Int
+        overallDuration: Int,
     ): State<Color> {
         return transition.animateColor(
             transitionSpec = createAnimationSpec(overallDuration),
@@ -195,12 +205,16 @@ private class ColorPropertyValues : PropertyValues<Color>() {
             targetValueByState = { atEnd ->
                 if (atEnd) {
                     (timestamps.last().holder as PropertyValuesHolderColor)
-                        .animatorKeyframes.last().value
+                        .animatorKeyframes
+                        .last()
+                        .value
                 } else {
                     (timestamps.first().holder as PropertyValuesHolderColor)
-                        .animatorKeyframes.first().value
+                        .animatorKeyframes
+                        .first()
+                        .value
                 }
-            }
+            },
         )
     }
 }
@@ -211,17 +225,18 @@ private class PathPropertyValues : PropertyValues<List<PathNode>>() {
     override fun createState(
         transition: Transition<Boolean>,
         propertyName: String,
-        overallDuration: Int
+        overallDuration: Int,
     ): State<List<PathNode>> {
-        val timeState = transition.animateFloat(
-            transitionSpec = {
-                val spec = tween<Float>(durationMillis = overallDuration, easing = LinearEasing)
-                if (targetState) spec else spec.reversed(overallDuration)
-            },
-            label = propertyName
-        ) { atEnd ->
-            if (atEnd) overallDuration.toFloat() else 0f
-        }
+        val timeState =
+            transition.animateFloat(
+                transitionSpec = {
+                    val spec = tween<Float>(durationMillis = overallDuration, easing = LinearEasing)
+                    if (targetState) spec else spec.reversed(overallDuration)
+                },
+                label = propertyName,
+            ) { atEnd ->
+                if (atEnd) overallDuration.toFloat() else 0f
+            }
         @Suppress("UnrememberedMutableState") // b/279909531
         return derivedStateOf { interpolate(timeState.value) }
     }
@@ -248,19 +263,20 @@ internal data class ObjectAnimator(
     val startDelay: Int,
     val repeatCount: Int,
     val repeatMode: RepeatMode,
-    val holders: List<PropertyValuesHolder<*>>
+    val holders: List<PropertyValuesHolder<*>>,
 ) : Animator() {
 
-    override val totalDuration = if (repeatCount == RepeatCountInfinite) {
-        Int.MAX_VALUE
-    } else {
-        startDelay + duration * (repeatCount + 1)
-    }
+    override val totalDuration =
+        if (repeatCount == RepeatCountInfinite) {
+            Int.MAX_VALUE
+        } else {
+            startDelay + duration * (repeatCount + 1)
+        }
 
     override fun collectPropertyValues(
         propertyValuesMap: MutableScatterMap<String, PropertyValues<*>>,
         overallDuration: Int,
-        parentDelay: Int
+        parentDelay: Int,
     ) {
         holders.fastForEach { holder ->
             when (holder) {
@@ -277,7 +293,7 @@ internal data class ObjectAnimator(
                             duration,
                             repeatCount,
                             repeatMode,
-                            holder
+                            holder,
                         )
                     )
                     propertyValuesMap[holder.propertyName] = values
@@ -292,7 +308,7 @@ internal data class ObjectAnimator(
                             duration,
                             repeatCount,
                             repeatMode,
-                            holder
+                            holder,
                         )
                     )
                     propertyValuesMap[holder.propertyName] = values
@@ -307,7 +323,7 @@ internal data class ObjectAnimator(
                             duration,
                             repeatCount,
                             repeatMode,
-                            holder
+                            holder,
                         )
                     )
                     propertyValuesMap[holder.propertyName] = values
@@ -320,29 +336,24 @@ internal data class ObjectAnimator(
     }
 }
 
-internal data class AnimatorSet(
-    val animators: List<Animator>,
-    val ordering: Ordering
-) : Animator() {
+internal data class AnimatorSet(val animators: List<Animator>, val ordering: Ordering) :
+    Animator() {
 
-    override val totalDuration = when (ordering) {
-        Ordering.Together -> animators.fastMaxBy { it.totalDuration }?.totalDuration ?: 0
-        Ordering.Sequentially -> animators.fastSumBy { it.totalDuration }
-    }
+    override val totalDuration =
+        when (ordering) {
+            Ordering.Together -> animators.fastMaxBy { it.totalDuration }?.totalDuration ?: 0
+            Ordering.Sequentially -> animators.fastSumBy { it.totalDuration }
+        }
 
     override fun collectPropertyValues(
         propertyValuesMap: MutableScatterMap<String, PropertyValues<*>>,
         overallDuration: Int,
-        parentDelay: Int
+        parentDelay: Int,
     ) {
         when (ordering) {
             Ordering.Together -> {
                 animators.fastForEach { animator ->
-                    animator.collectPropertyValues(
-                        propertyValuesMap,
-                        overallDuration,
-                        parentDelay
-                    )
+                    animator.collectPropertyValues(propertyValuesMap, overallDuration, parentDelay)
                 }
             }
             Ordering.Sequentially -> {
@@ -351,7 +362,7 @@ internal data class AnimatorSet(
                     animator.collectPropertyValues(
                         propertyValuesMap,
                         overallDuration,
-                        accumulatedDelay
+                        accumulatedDelay,
                     )
                     accumulatedDelay += animator.totalDuration
                 }
@@ -366,19 +377,18 @@ internal data class PropertyValuesHolder2D(
     val xPropertyName: String,
     val yPropertyName: String,
     val pathData: List<PathNode>,
-    val interpolator: Easing
+    val interpolator: Easing,
 ) : PropertyValuesHolder<Pair<Float, Float>>()
 
-internal sealed class PropertyValuesHolder1D<T>(
-    val propertyName: String
-) : PropertyValuesHolder<T>() {
+internal sealed class PropertyValuesHolder1D<T>(val propertyName: String) :
+    PropertyValuesHolder<T>() {
 
     abstract val animatorKeyframes: List<Keyframe<T>>
 }
 
 internal class PropertyValuesHolderFloat(
     propertyName: String,
-    override val animatorKeyframes: List<Keyframe<Float>>
+    override val animatorKeyframes: List<Keyframe<Float>>,
 ) : PropertyValuesHolder1D<Float>(propertyName) {
 
     fun asKeyframeSpec(duration: Int): KeyframesSpec<Float> {
@@ -393,12 +403,12 @@ internal class PropertyValuesHolderFloat(
 
 internal class PropertyValuesHolderInt(
     propertyName: String,
-    override val animatorKeyframes: List<Keyframe<Int>>
+    override val animatorKeyframes: List<Keyframe<Int>>,
 ) : PropertyValuesHolder1D<Int>(propertyName)
 
 internal class PropertyValuesHolderColor(
     propertyName: String,
-    override val animatorKeyframes: List<Keyframe<Color>>
+    override val animatorKeyframes: List<Keyframe<Color>>,
 ) : PropertyValuesHolder1D<Color>(propertyName) {
 
     fun asKeyframeSpec(duration: Int): KeyframesSpec<Color> {
@@ -413,35 +423,32 @@ internal class PropertyValuesHolderColor(
 
 internal class PropertyValuesHolderPath(
     propertyName: String,
-    override val animatorKeyframes: List<Keyframe<List<PathNode>>>
+    override val animatorKeyframes: List<Keyframe<List<PathNode>>>,
 ) : PropertyValuesHolder1D<List<PathNode>>(propertyName) {
 
     fun interpolate(fraction: Float): List<PathNode> {
-        val index = (animatorKeyframes.indexOfFirst { it.fraction >= fraction } - 1)
-            .coerceAtLeast(0)
+        val index =
+            (animatorKeyframes.indexOfFirst { it.fraction >= fraction } - 1).coerceAtLeast(0)
         val easing = animatorKeyframes[index + 1].interpolator
-        val innerFraction = easing.transform(
-            ((fraction - animatorKeyframes[index].fraction) /
-                (animatorKeyframes[index + 1].fraction - animatorKeyframes[index].fraction))
-                .fastCoerceIn(0f, 1f)
-        )
+        val innerFraction =
+            easing.transform(
+                ((fraction - animatorKeyframes[index].fraction) /
+                        (animatorKeyframes[index + 1].fraction - animatorKeyframes[index].fraction))
+                    .fastCoerceIn(0f, 1f)
+            )
         return lerp(
             animatorKeyframes[index].value,
             animatorKeyframes[index + 1].value,
-            innerFraction
+            innerFraction,
         )
     }
 }
 
-internal data class Keyframe<T>(
-    val fraction: Float,
-    val value: T,
-    val interpolator: Easing
-)
+internal data class Keyframe<T>(val fraction: Float, val value: T, val interpolator: Easing)
 
 internal enum class Ordering {
     Together,
-    Sequentially
+    Sequentially,
 }
 
 internal class StateVectorConfig : VectorConfig {
@@ -474,19 +481,18 @@ internal class StateVectorConfig : VectorConfig {
             is VectorProperty.TranslateX -> translateXState?.value ?: defaultValue
             is VectorProperty.TranslateY -> translateYState?.value ?: defaultValue
             is VectorProperty.PathData -> pathDataState?.value ?: defaultValue
-            is VectorProperty.Fill -> fillColorState?.let { state ->
-                SolidColor(state.value)
-            } ?: defaultValue
+            is VectorProperty.Fill ->
+                fillColorState?.let { state -> SolidColor(state.value) } ?: defaultValue
             is VectorProperty.FillAlpha -> fillAlphaState?.value ?: defaultValue
-            is VectorProperty.Stroke -> strokeColorState?.let { state ->
-                SolidColor(state.value)
-            } ?: defaultValue
+            is VectorProperty.Stroke ->
+                strokeColorState?.let { state -> SolidColor(state.value) } ?: defaultValue
             is VectorProperty.StrokeLineWidth -> strokeWidthState?.value ?: defaultValue
             is VectorProperty.StrokeAlpha -> strokeAlphaState?.value ?: defaultValue
             is VectorProperty.TrimPathStart -> trimPathStartState?.value ?: defaultValue
             is VectorProperty.TrimPathEnd -> trimPathEndState?.value ?: defaultValue
             is VectorProperty.TrimPathOffset -> trimPathOffsetState?.value ?: defaultValue
-        } as T
+        }
+            as T
     }
 
     fun merge(config: StateVectorConfig) {
@@ -515,62 +521,46 @@ private fun lerp(start: List<PathNode>, stop: List<PathNode>, fraction: Float): 
 
 private const val DifferentStartAndStopPathNodes = "start and stop path nodes have different types"
 
-/**
- * Linearly interpolate between [start] and [stop] with [fraction] fraction between them.
- */
+/** Linearly interpolate between [start] and [stop] with [fraction] fraction between them. */
 private fun lerp(start: PathNode, stop: PathNode, fraction: Float): PathNode {
     return when (start) {
         is PathNode.RelativeMoveTo -> {
             require(stop is PathNode.RelativeMoveTo) { DifferentStartAndStopPathNodes }
             PathNode.RelativeMoveTo(
                 lerp(start.dx, stop.dx, fraction),
-                lerp(start.dy, stop.dy, fraction)
+                lerp(start.dy, stop.dy, fraction),
             )
         }
         is PathNode.MoveTo -> {
             require(stop is PathNode.MoveTo) { DifferentStartAndStopPathNodes }
-            PathNode.MoveTo(
-                lerp(start.x, stop.x, fraction),
-                lerp(start.y, stop.y, fraction)
-            )
+            PathNode.MoveTo(lerp(start.x, stop.x, fraction), lerp(start.y, stop.y, fraction))
         }
         is PathNode.RelativeLineTo -> {
             require(stop is PathNode.RelativeLineTo) { DifferentStartAndStopPathNodes }
             PathNode.RelativeLineTo(
                 lerp(start.dx, stop.dx, fraction),
-                lerp(start.dy, stop.dy, fraction)
+                lerp(start.dy, stop.dy, fraction),
             )
         }
         is PathNode.LineTo -> {
             require(stop is PathNode.LineTo) { DifferentStartAndStopPathNodes }
-            PathNode.LineTo(
-                lerp(start.x, stop.x, fraction),
-                lerp(start.y, stop.y, fraction)
-            )
+            PathNode.LineTo(lerp(start.x, stop.x, fraction), lerp(start.y, stop.y, fraction))
         }
         is PathNode.RelativeHorizontalTo -> {
             require(stop is PathNode.RelativeHorizontalTo) { DifferentStartAndStopPathNodes }
-            PathNode.RelativeHorizontalTo(
-                lerp(start.dx, stop.dx, fraction)
-            )
+            PathNode.RelativeHorizontalTo(lerp(start.dx, stop.dx, fraction))
         }
         is PathNode.HorizontalTo -> {
             require(stop is PathNode.HorizontalTo) { DifferentStartAndStopPathNodes }
-            PathNode.HorizontalTo(
-                lerp(start.x, stop.x, fraction)
-            )
+            PathNode.HorizontalTo(lerp(start.x, stop.x, fraction))
         }
         is PathNode.RelativeVerticalTo -> {
             require(stop is PathNode.RelativeVerticalTo) { DifferentStartAndStopPathNodes }
-            PathNode.RelativeVerticalTo(
-                lerp(start.dy, stop.dy, fraction)
-            )
+            PathNode.RelativeVerticalTo(lerp(start.dy, stop.dy, fraction))
         }
         is PathNode.VerticalTo -> {
             require(stop is PathNode.VerticalTo) { DifferentStartAndStopPathNodes }
-            PathNode.VerticalTo(
-                lerp(start.y, stop.y, fraction)
-            )
+            PathNode.VerticalTo(lerp(start.y, stop.y, fraction))
         }
         is PathNode.RelativeCurveTo -> {
             require(stop is PathNode.RelativeCurveTo) { DifferentStartAndStopPathNodes }
@@ -580,7 +570,7 @@ private fun lerp(start: PathNode, stop: PathNode, fraction: Float): PathNode {
                 lerp(start.dx2, stop.dx2, fraction),
                 lerp(start.dy2, stop.dy2, fraction),
                 lerp(start.dx3, stop.dx3, fraction),
-                lerp(start.dy3, stop.dy3, fraction)
+                lerp(start.dy3, stop.dy3, fraction),
             )
         }
         is PathNode.CurveTo -> {
@@ -591,7 +581,7 @@ private fun lerp(start: PathNode, stop: PathNode, fraction: Float): PathNode {
                 lerp(start.x2, stop.x2, fraction),
                 lerp(start.y2, stop.y2, fraction),
                 lerp(start.x3, stop.x3, fraction),
-                lerp(start.y3, stop.y3, fraction)
+                lerp(start.y3, stop.y3, fraction),
             )
         }
         is PathNode.RelativeReflectiveCurveTo -> {
@@ -600,7 +590,7 @@ private fun lerp(start: PathNode, stop: PathNode, fraction: Float): PathNode {
                 lerp(start.dx1, stop.dx1, fraction),
                 lerp(start.dy1, stop.dy1, fraction),
                 lerp(start.dx2, stop.dx2, fraction),
-                lerp(start.dy2, stop.dy2, fraction)
+                lerp(start.dy2, stop.dy2, fraction),
             )
         }
         is PathNode.ReflectiveCurveTo -> {
@@ -609,7 +599,7 @@ private fun lerp(start: PathNode, stop: PathNode, fraction: Float): PathNode {
                 lerp(start.x1, stop.x1, fraction),
                 lerp(start.y1, stop.y1, fraction),
                 lerp(start.x2, stop.x2, fraction),
-                lerp(start.y2, stop.y2, fraction)
+                lerp(start.y2, stop.y2, fraction),
             )
         }
         is PathNode.RelativeQuadTo -> {
@@ -618,7 +608,7 @@ private fun lerp(start: PathNode, stop: PathNode, fraction: Float): PathNode {
                 lerp(start.dx1, stop.dx1, fraction),
                 lerp(start.dy1, stop.dy1, fraction),
                 lerp(start.dx2, stop.dx2, fraction),
-                lerp(start.dy2, stop.dy2, fraction)
+                lerp(start.dy2, stop.dy2, fraction),
             )
         }
         is PathNode.QuadTo -> {
@@ -627,21 +617,21 @@ private fun lerp(start: PathNode, stop: PathNode, fraction: Float): PathNode {
                 lerp(start.x1, stop.x1, fraction),
                 lerp(start.y1, stop.y1, fraction),
                 lerp(start.x2, stop.x2, fraction),
-                lerp(start.y2, stop.y2, fraction)
+                lerp(start.y2, stop.y2, fraction),
             )
         }
         is PathNode.RelativeReflectiveQuadTo -> {
             require(stop is PathNode.RelativeReflectiveQuadTo) { DifferentStartAndStopPathNodes }
             PathNode.RelativeReflectiveQuadTo(
                 lerp(start.dx, stop.dx, fraction),
-                lerp(start.dy, stop.dy, fraction)
+                lerp(start.dy, stop.dy, fraction),
             )
         }
         is PathNode.ReflectiveQuadTo -> {
             require(stop is PathNode.ReflectiveQuadTo) { DifferentStartAndStopPathNodes }
             PathNode.ReflectiveQuadTo(
                 lerp(start.x, stop.x, fraction),
-                lerp(start.y, stop.y, fraction)
+                lerp(start.y, stop.y, fraction),
             )
         }
         is PathNode.RelativeArcTo -> {
@@ -653,7 +643,7 @@ private fun lerp(start: PathNode, stop: PathNode, fraction: Float): PathNode {
                 start.isMoreThanHalf,
                 start.isPositiveArc,
                 lerp(start.arcStartDx, stop.arcStartDx, fraction),
-                lerp(start.arcStartDy, stop.arcStartDy, fraction)
+                lerp(start.arcStartDy, stop.arcStartDy, fraction),
             )
         }
         is PathNode.ArcTo -> {
@@ -665,7 +655,7 @@ private fun lerp(start: PathNode, stop: PathNode, fraction: Float): PathNode {
                 start.isMoreThanHalf,
                 start.isPositiveArc,
                 lerp(start.arcStartX, stop.arcStartX, fraction),
-                lerp(start.arcStartY, stop.arcStartY, fraction)
+                lerp(start.arcStartY, stop.arcStartY, fraction),
             )
         }
         PathNode.Close -> PathNode.Close

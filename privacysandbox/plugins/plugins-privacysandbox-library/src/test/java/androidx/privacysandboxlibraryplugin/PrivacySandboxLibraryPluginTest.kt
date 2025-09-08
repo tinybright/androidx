@@ -32,8 +32,7 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 class PrivacySandboxLibraryPluginTest {
 
-    @get:Rule
-    val projectSetup = ProjectSetupRule()
+    @get:Rule val projectSetup = ProjectSetupRule()
 
     lateinit var gradleRunner: GradleRunner
 
@@ -42,30 +41,33 @@ class PrivacySandboxLibraryPluginTest {
         File(projectSetup.rootDir, "settings.gradle")
             .writeText("rootProject.name = \"test-privacysandbox-library\"")
         projectSetup.writeDefaultBuildGradle(
-            prefix = """
+            prefix =
+                """
                 plugins {
                     id("kotlin-android")
                     id("androidx.privacysandbox.library")
                 }
-            """.trimIndent(),
-            suffix = """
+            """
+                    .trimIndent(),
+            suffix =
+                """
                     android {
-                         namespace "test.privacysandboxlibrary"
-                         compileOptions {
+                        namespace "test.privacysandboxlibrary"
+                        compileOptions {
                             sourceCompatibility JavaVersion.VERSION_17
                             targetCompatibility JavaVersion.VERSION_17
-                         }
+                        }
                         kotlinOptions {
                             jvmTarget=17
                         }
                     }
-            """
+            """,
         )
 
-        val myServiceSource = File(
-            projectSetup.rootDir,
-            "src/main/java/test/privacysandboxlibraryplugintest"
-        ).also { it.mkdirs() }
+        val myServiceSource =
+            File(projectSetup.rootDir, "src/main/java/test/privacysandboxlibraryplugintest").also {
+                it.mkdirs()
+            }
 
         myServiceSource.resolve("MyService.kt").also {
             Files.createFile(it.toPath())
@@ -81,19 +83,17 @@ class PrivacySandboxLibraryPluginTest {
                 """
             )
         }
-
-        gradleRunner = GradleRunner.create()
-            .withProjectDir(projectSetup.rootDir)
-            .withPluginClasspath()
+        gradleRunner =
+            GradleRunner.create().withProjectDir(projectSetup.rootDir).withPluginClasspath()
     }
 
     /* Test plugin applies successfully and produces KSP generated directory. The output of KSP
-    * is unit tested in :tools:apicompiler and integration tested in Android Gradle Plugin tests.
-    */
+     * is unit tested in :tools:apicompiler and integration tested in Android Gradle Plugin tests.
+     */
     @Test
     fun applyPlugin() {
-        val output = gradleRunner.withArguments("build", "--stacktrace").build()
-        assertEquals(output.task(":build")!!.outcome, TaskOutcome.SUCCESS)
+        val output = gradleRunner.withArguments("assemble", "--stacktrace").build()
+        assertEquals(output.task(":assemble")!!.outcome, TaskOutcome.SUCCESS)
         assertEquals(output.task(":kspDebugKotlin")!!.outcome, TaskOutcome.SUCCESS)
         val build = File(projectSetup.rootDir, "build")
         assertTrue(File(build, "generated/ksp/debug").exists())

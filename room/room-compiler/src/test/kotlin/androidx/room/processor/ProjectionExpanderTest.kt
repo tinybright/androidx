@@ -36,17 +36,20 @@ import org.junit.runners.JUnit4
 class ProjectionExpanderTest {
 
     companion object {
-        const val DATABASE_PREFIX = """
+        const val DATABASE_PREFIX =
+            """
             package foo.bar;
             import androidx.room.*;
             import androidx.annotation.NonNull;
             import java.util.*;
         """
 
-        val ENTITIES = listOf(
-            Source.java(
-                "foo.bar.User",
-                DATABASE_PREFIX + """
+        val ENTITIES =
+            listOf(
+                Source.java(
+                    "foo.bar.User",
+                    DATABASE_PREFIX +
+                        """
                     @Entity
                     public class User {
                         @PrimaryKey
@@ -55,33 +58,36 @@ class ProjectionExpanderTest {
                         public String lastName;
                         public int teamId;
                     }
-                """
-            ),
-            Source.java(
-                "foo.bar.Pet",
-                DATABASE_PREFIX + """
+                """,
+                ),
+                Source.java(
+                    "foo.bar.Pet",
+                    DATABASE_PREFIX +
+                        """
                     @Entity
                     public class Pet {
                         @PrimaryKey
                         public int petId;
                         public int ownerId;
                     }
-                """
-            ),
-            Source.java(
-                "foo.bar.Team",
-                DATABASE_PREFIX + """
+                """,
+                ),
+                Source.java(
+                    "foo.bar.Team",
+                    DATABASE_PREFIX +
+                        """
                     @Entity
                     public class Team {
                         @PrimaryKey
                         public int id;
                         public String name;
                     }
-                """
-            ),
-            Source.java(
-                "foo.bar.Employee",
-                DATABASE_PREFIX + """
+                """,
+                ),
+                Source.java(
+                    "foo.bar.Employee",
+                    DATABASE_PREFIX +
+                        """
                     @Entity
                     public class Employee {
                         @PrimaryKey
@@ -89,18 +95,19 @@ class ProjectionExpanderTest {
                         public String name;
                         public Integer managerId;
                     }
-                """
-            ),
-            Source.java(
-                "foo.bar.EmployeeSummary",
-                DATABASE_PREFIX + """
+                """,
+                ),
+                Source.java(
+                    "foo.bar.EmployeeSummary",
+                    DATABASE_PREFIX +
+                        """
                     public class EmployeeSummary {
                         public int id;
                         public String name;
                     }
-                """
+                """,
+                ),
             )
-        )
     }
 
     @Test
@@ -114,7 +121,7 @@ class ProjectionExpanderTest {
                 }
             """,
             "SELECT * FROM User",
-            "SELECT `id`, `firstName` FROM User"
+            "SELECT `id`, `firstName` FROM User",
         )
     }
 
@@ -132,8 +139,7 @@ class ProjectionExpanderTest {
             """
                 SELECT `User`.`id` AS `id`, `User`.`firstName` AS `firstName`,
                 `User`.`lastName` AS `lastName`, `User`.`teamId` AS `teamId` FROM User
-            """
-
+            """,
         )
     }
 
@@ -147,7 +153,7 @@ class ProjectionExpanderTest {
                 }
             """,
             "SELECT 'a' AS firstName",
-            "SELECT 'a' AS firstName"
+            "SELECT 'a' AS firstName",
         )
     }
 
@@ -161,7 +167,7 @@ class ProjectionExpanderTest {
                 }
             """,
             "SELECT :firstName AS firstName",
-            "SELECT ? AS firstName"
+            "SELECT ? AS firstName",
         )
     }
 
@@ -183,7 +189,7 @@ class ProjectionExpanderTest {
                 `u`.`lastName` AS `lastName`, `u`.`teamId` AS `teamId`,
                 `p`.`petId` AS `petId`, `p`.`ownerId` AS `ownerId`
                 FROM user u LEFT OUTER JOIN pet p ON u.id = p.ownerId
-            """
+            """,
         )
     }
 
@@ -198,7 +204,7 @@ class ProjectionExpanderTest {
                 }
             """,
             "SELECT *, firstName | ' ' | lastName AS name FROM User",
-            "SELECT `id`, firstName | ' ' | lastName AS name FROM User"
+            "SELECT `id`, firstName | ' ' | lastName AS name FROM User",
         )
     }
 
@@ -214,7 +220,7 @@ class ProjectionExpanderTest {
                 }
             """,
             "SELECT *, 1 AS uno FROM User",
-            "SELECT `id`, `firstName`, 1 AS uno FROM User"
+            "SELECT `id`, `firstName`, 1 AS uno FROM User",
         )
     }
 
@@ -229,7 +235,7 @@ class ProjectionExpanderTest {
                 }
             """,
             "SELECT *, firstName IN ('juan', 'pedro') AS isJuanOrPedro FROM User",
-            "SELECT `id`, firstName IN ('juan', 'pedro') AS isJuanOrPedro FROM User"
+            "SELECT `id`, firstName IN ('juan', 'pedro') AS isJuanOrPedro FROM User",
         )
     }
 
@@ -249,7 +255,7 @@ class ProjectionExpanderTest {
             """
                 SELECT `id`, `firstName`, (SELECT COUNT(*) FROM User AS u
                 WHERE u.firstName = User.firstName) = 1 AS hasUniqueFirstName FROM User
-            """
+            """,
         )
     }
 
@@ -266,7 +272,7 @@ class ProjectionExpanderTest {
                 }
             """,
             "SELECT * FROM User",
-            "SELECT `id`, `firstName` FROM User"
+            "SELECT `id`, `firstName` FROM User",
         )
     }
 
@@ -282,7 +288,7 @@ class ProjectionExpanderTest {
                 }
             """,
             "SELECT * FROM User",
-            "SELECT `id`, `firstName` FROM User"
+            "SELECT `id`, `firstName` FROM User",
         )
     }
 
@@ -304,7 +310,7 @@ class ProjectionExpanderTest {
                 `User`.`lastName` AS `lastName`, `User`.`teamId` AS `teamId`,
                 `team_`.`id` AS `team_id`, `team_`.`name` AS `team_name`
                 FROM User INNER JOIN Team AS team_ ON User.teamId = team_.id
-            """
+            """,
         )
     }
 
@@ -328,7 +334,7 @@ class ProjectionExpanderTest {
                 `manager_`.`name` AS `manager_name`,
                 `manager_`.`managerId` AS `manager_managerId` FROM Employee
                 LEFT OUTER JOIN Employee AS manager_ ON User.managerId = manager_.id
-            """
+            """,
         )
     }
 
@@ -350,7 +356,7 @@ class ProjectionExpanderTest {
                 `User`.`lastName` AS `lastName`, `User`.`teamId` AS `teamId`,
                 `Pet`.`petId` AS `petId`, `Pet`.`ownerId` AS `ownerId`
                 FROM User LEFT OUTER JOIN Pet ON User.id = Pet.ownerId
-            """
+            """,
         )
     }
 
@@ -373,7 +379,7 @@ class ProjectionExpanderTest {
                 `employee_`.`id` AS `employee_id`, `employee_`.`name` AS `employee_name`
                 FROM Team LEFT OUTER JOIN Employee AS employee_
                 ON Team.id = employee_.teamId
-            """
+            """,
         )
     }
 
@@ -395,7 +401,7 @@ class ProjectionExpanderTest {
                 `User`.`lastName` AS `lastName`, `User`.`teamId` AS `teamId`,
                 `team_`.`id` AS `team_id`, `team_`.`name` AS `team_name`
                 FROM User INNER JOIN Team AS team_ ON User.teamId = team_.id
-            """
+            """,
         )
     }
 
@@ -417,7 +423,7 @@ class ProjectionExpanderTest {
                 `a_`.`lastName` AS `a_lastName`, `a_`.`teamId` AS `a_teamId`, `b_`.`id` AS `b_id`,
                 `b_`.`firstName` AS `b_firstName`, `b_`.`lastName` AS `b_lastName`,
                 `b_`.`teamId` AS `b_teamId` FROM User AS a_, User AS b_
-            """
+            """,
         )
     }
 
@@ -432,7 +438,7 @@ class ProjectionExpanderTest {
                 }
             """,
             "SELECT id, firstName FROM User WHERE id = :id",
-            "SELECT id, firstName FROM User WHERE id = ?"
+            "SELECT id, firstName FROM User WHERE id = ?",
         )
     }
 
@@ -447,7 +453,7 @@ class ProjectionExpanderTest {
                 }
             """,
             "SELECT id, firstName FROM User",
-            "SELECT id, firstName FROM User"
+            "SELECT id, firstName FROM User",
         )
     }
 
@@ -462,7 +468,7 @@ class ProjectionExpanderTest {
             }
             """,
             "SELECT User.* FROM User",
-            "SELECT `User`.`id`, `User`.`firstName` FROM User"
+            "SELECT `User`.`id`, `User`.`firstName` FROM User",
         )
     }
 
@@ -477,7 +483,7 @@ class ProjectionExpanderTest {
             }
             """,
             "SELECT `u`.* FROM User u",
-            "SELECT `u`.`id`, `u`.`firstName` FROM User u"
+            "SELECT `u`.`id`, `u`.`firstName` FROM User u",
         )
     }
 
@@ -487,9 +493,10 @@ class ProjectionExpanderTest {
             name = "foo.bar.User",
             input = null,
             original = "SELECT * FROM user as u INNER JOIN Employee AS e ON(u.id = e.id)",
-            expected = "SELECT `u`.`id` AS `id`, `u`.`firstName` AS `firstName`, `u`" +
-                ".`lastName` AS `lastName`, `u`.`teamId` AS `teamId` FROM user as u INNER " +
-                "JOIN Employee AS e ON(u.id = e.id)"
+            expected =
+                "SELECT `u`.`id` AS `id`, `u`.`firstName` AS `firstName`, `u`" +
+                    ".`lastName` AS `lastName`, `u`.`teamId` AS `teamId` FROM user as u INNER " +
+                    "JOIN Employee AS e ON(u.id = e.id)",
         )
     }
 
@@ -508,45 +515,42 @@ class ProjectionExpanderTest {
                 SELECT `User`.`id` AS `id`, `User`.`firstName` AS `firstName`,
                 `User`.`lastName` AS `lastName`, `User`.`teamId` AS `teamId`
                 FROM User JOIN Team ON User.id = Team.id
-            """
+            """,
         )
     }
 
     @Test
     fun joinAndAbandonEntity() {
-        runProcessorTest(
-            sources = ENTITIES
-        ) { invocation ->
-            val entities = invocation.roundEnv
-                .getElementsAnnotatedWith(androidx.room.Entity::class.qualifiedName!!)
-                .filterIsInstance<XTypeElement>()
-                .map { element ->
-                    TableEntityProcessor(
-                        invocation.context,
-                        element
-                    ).process()
-                }
-            val entityElement = invocation.processingEnv
-                .requireTypeElement("foo.bar.User")
+        runProcessorTest(sources = ENTITIES) { invocation ->
+            val entities =
+                invocation.roundEnv
+                    .getElementsAnnotatedWith(androidx.room.Entity::class.qualifiedName!!)
+                    .filterIsInstance<XTypeElement>()
+                    .map { element -> TableEntityProcessor(invocation.context, element).process() }
+            val entityElement = invocation.processingEnv.requireTypeElement("foo.bar.User")
             check(entityElement.isTypeElement())
-            val entity = PojoProcessor.createFor(
-                invocation.context,
-                entityElement,
-                bindingScope = FieldProcessor.BindingScope.READ_FROM_CURSOR,
-                parent = null
-            ).process()
+            val entity =
+                DataClassProcessor.createFor(
+                        invocation.context,
+                        entityElement,
+                        bindingScope = PropertyProcessor.BindingScope.READ_FROM_STMT,
+                        parent = null,
+                    )
+                    .process()
             val query = SqlParser.parse("SELECT * FROM User JOIN Team ON User.id = Team.id")
             val verifier = createVerifierFromEntitiesAndViews(invocation)
             query.resultInfo = verifier.analyze(query.original)
-            val interpreter = ProjectionExpander(
-                entities
-            )
+            val interpreter = ProjectionExpander(entities)
             val expanded = interpreter.interpret(query, entity)
-            val expected = """
+            val expected =
+                """
                 SELECT `User`.`id` AS `id`, `User`.`firstName` AS `firstName`,
                 `User`.`lastName` AS `lastName`, `User`.`teamId` AS `teamId`
                 FROM User JOIN Team ON User.id = Team.id
-            """.trimIndent().lines().joinToString(" ")
+            """
+                    .trimIndent()
+                    .lines()
+                    .joinToString(" ")
             assertThat(expanded, `is`(equalTo(expected)))
         }
     }
@@ -572,7 +576,7 @@ class ProjectionExpanderTest {
                 lastName
                 AS
                 `name` FROM User
-            """
+            """,
         ) { expanded, _ ->
             assertThat(
                 expanded,
@@ -589,17 +593,12 @@ class ProjectionExpanderTest {
                 `name` FROM User
             """
                     )
-                )
+                ),
             )
         }
     }
 
-    private fun testInterpret(
-        name: String,
-        input: String?,
-        original: String,
-        expected: String
-    ) {
+    private fun testInterpret(name: String, input: String?, original: String, expected: String) {
         queryWithPojo(name, input, original) { actual, _ ->
             assertThat(actual, `is`(equalTo(expected.trimIndent().lines().joinToString(" "))))
         }
@@ -609,32 +608,27 @@ class ProjectionExpanderTest {
         name: String,
         input: String?,
         original: String,
-        handler: (expanded: String, invocation: XTestInvocation) -> Unit
+        handler: (expanded: String, invocation: XTestInvocation) -> Unit,
     ) {
-        val extraSource = input?.let {
-            listOf(Source.java(name, DATABASE_PREFIX + input))
-        } ?: emptyList()
+        val extraSource =
+            input?.let { listOf(Source.java(name, DATABASE_PREFIX + input)) } ?: emptyList()
         val all = ENTITIES + extraSource
-        return runProcessorTest(
-            sources = all
-        ) { invocation ->
-            val entities = invocation.roundEnv
-                .getElementsAnnotatedWith(androidx.room.Entity::class.qualifiedName!!)
-                .filterIsInstance<XTypeElement>()
-                .map { element ->
-                    TableEntityProcessor(
-                        invocation.context,
-                        element
-                    ).process()
-                }
+        return runProcessorTest(sources = all) { invocation ->
+            val entities =
+                invocation.roundEnv
+                    .getElementsAnnotatedWith(androidx.room.Entity::class.qualifiedName!!)
+                    .filterIsInstance<XTypeElement>()
+                    .map { element -> TableEntityProcessor(invocation.context, element).process() }
             val pojoElement = invocation.processingEnv.requireTypeElement(name)
             check(pojoElement.isTypeElement())
-            val pojo = PojoProcessor.createFor(
-                invocation.context,
-                pojoElement,
-                bindingScope = FieldProcessor.BindingScope.READ_FROM_CURSOR,
-                parent = null
-            ).process()
+            val pojo =
+                DataClassProcessor.createFor(
+                        invocation.context,
+                        pojoElement,
+                        bindingScope = PropertyProcessor.BindingScope.READ_FROM_STMT,
+                        parent = null,
+                    )
+                    .process()
             val query = SqlParser.parse(original)
             val verifier = createVerifierFromEntitiesAndViews(invocation)
             query.resultInfo = verifier.analyze(query.original)

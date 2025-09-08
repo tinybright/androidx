@@ -16,18 +16,16 @@
 
 package androidx.paging
 
-class CombinedLoadStatesCapture : (CombinedLoadStates) -> Unit {
+class CombinedLoadStatesCapture {
     private var lastEventsListIndex = -1
 
     val events = mutableListOf<CombinedLoadStates>()
 
-    override fun invoke(value: CombinedLoadStates) {
+    fun invoke(value: CombinedLoadStates) {
         events.add(value)
     }
 
     fun newEvents(): List<CombinedLoadStates> {
-        return events.drop(lastEventsListIndex + 1).also {
-            lastEventsListIndex = events.lastIndex
-        }
+        return events.drop(lastEventsListIndex + 1).also { lastEventsListIndex = events.lastIndex }
     }
 }

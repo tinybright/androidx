@@ -63,11 +63,7 @@ class IoSettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
-                Surface {
-                    SettingsScreen(isLoading.value, switchesOn.value)
-                }
-            }
+            MaterialTheme { Surface { SettingsScreen(isLoading.value, switchesOn.value) } }
 
             if (isLoading.value) {
                 // Forces another recomposition right after this one. Simulates a delayed ViewModel
@@ -82,15 +78,12 @@ class IoSettingsActivity : ComponentActivity() {
 }
 
 @Composable
-fun SettingsScreen(
-    isLoading: Boolean,
-    switchesOn: Boolean
-) {
+fun SettingsScreen(isLoading: Boolean, switchesOn: Boolean) {
     Box(Modifier.fillMaxSize()) {
         SettingsScreenContent(
             isLoading = isLoading,
             switchesOn = switchesOn,
-            openWebsiteLink = { url -> Log.d("IO", "Open $url") }
+            openWebsiteLink = { url -> Log.d("IO", "Open $url") },
         )
     }
 }
@@ -99,7 +92,7 @@ fun SettingsScreen(
 private fun SettingsScreenContent(
     isLoading: Boolean,
     switchesOn: Boolean,
-    openWebsiteLink: (String) -> Unit
+    openWebsiteLink: (String) -> Unit,
 ) {
     if (isLoading) {
         Box(Modifier.fillMaxWidth()) {}
@@ -118,90 +111,67 @@ private fun SettingsScreenContent(
 }
 
 @Composable
-private fun ColumnScope.SettingsSection(
-    switchesOn: Boolean
-) {
-    val switchModifier = Modifier
-        .padding(marginNormal)
-        .fillMaxWidth()
+private fun ColumnScope.SettingsSection(switchesOn: Boolean) {
+    val switchModifier = Modifier.padding(marginNormal).fillMaxWidth()
     SwitchSetting(
         text = stringResource(R.string.io_settings_time_zone_label),
         checked = switchesOn,
         onCheck = { Log.d("IO", "timezoneCheck") },
-        modifier = switchModifier
+        modifier = switchModifier,
     )
     SwitchSetting(
         text = stringResource(R.string.io_settings_enable_notifications),
         checked = switchesOn,
         onCheck = { Log.d("IO", "notifCheck") },
-        modifier = switchModifier
+        modifier = switchModifier,
     )
     SwitchSetting(
         text = stringResource(R.string.io_settings_send_anonymous_usage_statistics),
         checked = switchesOn,
         onCheck = { Log.d("IO", "usageCheck") },
-        modifier = switchModifier
+        modifier = switchModifier,
     )
 }
 
 @Composable
-private fun AboutSection(
-    openWebsiteLink: (String) -> Unit
-) {
+private fun AboutSection(openWebsiteLink: (String) -> Unit) {
     Text(
-        text = stringResource(R.string.io_about_title).uppercase(
-            LocaleListCompat.getDefault().get(0)!!
-        ),
+        text =
+            stringResource(R.string.io_about_title)
+                .uppercase(LocaleListCompat.getDefault().get(0)!!),
         style = MaterialTheme.typography.body2,
         fontWeight = FontWeight.SemiBold,
         color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-        modifier = Modifier.padding(marginNormal)
+        modifier = Modifier.padding(marginNormal),
     )
 
     val tosUrl = stringResource(R.string.io_tos_url)
-    TextButton(
-        modifier = Modifier.padding(marginSmall),
-        onClick = {
-            openWebsiteLink(tosUrl)
-        }
-    ) {
+    TextButton(modifier = Modifier.padding(marginSmall), onClick = { openWebsiteLink(tosUrl) }) {
         LinkText(stringResource(R.string.io_settings_tos))
     }
 
     val privacyPolicyUrl = stringResource(R.string.io_privacy_policy_url)
     TextButton(
         modifier = Modifier.padding(marginSmall),
-        onClick = {
-            openWebsiteLink(privacyPolicyUrl)
-        }
+        onClick = { openWebsiteLink(privacyPolicyUrl) },
     ) {
         LinkText(stringResource(R.string.io_settings_privacy_policy))
     }
 
-    TextButton(
-        modifier = Modifier.padding(marginSmall),
-        onClick = { Log.d("IO", "Click") }
-    ) {
+    TextButton(modifier = Modifier.padding(marginSmall), onClick = { Log.d("IO", "Click") }) {
         LinkText(stringResource(R.string.io_settings_oss_licenses))
     }
 
     Text(
         text = stringResource(R.string.io_version_name, "test"),
-        modifier = Modifier
-            .fillMaxWidth()
-            .sizeIn(minHeight = 48.dp)
-            .padding(marginNormal),
+        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp).padding(marginNormal),
         style = MaterialTheme.typography.body2,
     )
 }
 
 @Composable
 private fun LinkText(text: String) {
-    Text(
-        text = text,
-        modifier = Modifier.fillMaxWidth(),
-        style = MaterialTheme.typography.body1
-    )
+    Text(text = text, modifier = Modifier.fillMaxWidth(), style = MaterialTheme.typography.body1)
 }
 
 @Composable
@@ -209,22 +179,18 @@ private fun SwitchSetting(
     text: String,
     checked: Boolean,
     onCheck: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Row(modifier) {
         Text(
             text = text,
-            modifier = Modifier
-                .weight(1f)
-                .align(Alignment.CenterVertically),
-            style = MaterialTheme.typography.body2
+            modifier = Modifier.weight(1f).align(Alignment.CenterVertically),
+            style = MaterialTheme.typography.body2,
         )
         Switch(
             checked = checked,
             onCheckedChange = onCheck,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colors.primary
-            )
+            colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colors.primary),
         )
     }
 }

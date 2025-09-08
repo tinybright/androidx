@@ -24,44 +24,44 @@ import androidx.compose.ui.util.fastMapIndexed
 import androidx.compose.ui.util.fastMaxOfOrNull
 
 /**
- * A layout composable that places its children in an arc, rotating them as needed. This is
- * similar to a [Row] layout, but curved into a segment of an annulus.
+ * A layout composable that places its children in an arc, rotating them as needed. This is similar
+ * to a [Row] layout, but curved into a segment of an annulus.
  *
- * The thickness of the layout (the difference between the outer and inner radius) will be the
- * same as the thickest child, and the total angle taken is the sum of the children's angles.
+ * The thickness of the layout (the difference between the outer and inner radius) will be the same
+ * as the thickest child, and the total angle taken is the sum of the children's angles.
  *
  * Example usage:
- * @sample androidx.wear.compose.foundation.samples.CurvedRowAndColumn
  *
+ * @sample androidx.wear.compose.foundation.samples.CurvedRowAndColumn
  * @param modifier The [CurvedModifier] to apply to this curved row.
  * @param radialAlignment Radial alignment specifies where to lay down children that are thinner
- * than the CurvedRow, either closer to the center [CurvedAlignment.Radial.Inner], apart from
- * the center [CurvedAlignment.Radial.Outer] or in the
- * middle point [CurvedAlignment.Radial.Center]. If unspecified, they can choose for themselves.
- * @param angularDirection Specify if the children are laid out clockwise or anti-clockwise,
- * and if those needs to be reversed in a Rtl layout.
- * If not specified, it will be inherited from the enclosing [curvedRow] or [CurvedLayout]
- * See [CurvedDirection.Angular].
+ *   than the CurvedRow, either closer to the center [CurvedAlignment.Radial.Inner], apart from the
+ *   center [CurvedAlignment.Radial.Outer] or in the middle point [CurvedAlignment.Radial.Center].
+ *   If unspecified, they can choose for themselves.
+ * @param angularDirection Specify if the children are laid out clockwise or anti-clockwise, and if
+ *   those needs to be reversed in a Rtl layout. If not specified, it will be inherited from the
+ *   enclosing [curvedRow] or [CurvedLayout] See [CurvedDirection.Angular].
  * @param contentBuilder Scope used to provide the content for this row.
  */
 public fun CurvedScope.curvedRow(
     modifier: CurvedModifier = CurvedModifier,
     radialAlignment: CurvedAlignment.Radial? = null,
     angularDirection: CurvedDirection.Angular? = null,
-    contentBuilder: CurvedScope.() -> Unit
-) = add(
-    CurvedRowChild(
-        curvedLayoutDirection.copy(overrideAngular = angularDirection),
-        radialAlignment,
-        contentBuilder
-    ),
-    modifier
-)
+    contentBuilder: CurvedScope.() -> Unit,
+): Unit =
+    add(
+        CurvedRowChild(
+            curvedLayoutDirection.copy(overrideAngular = angularDirection),
+            radialAlignment,
+            contentBuilder,
+        ),
+        modifier,
+    )
 
 internal class CurvedRowChild(
     curvedLayoutDirection: CurvedLayoutDirection,
     val radialAlignment: CurvedAlignment.Radial? = null,
-    contentBuilder: CurvedScope.() -> Unit
+    contentBuilder: CurvedScope.() -> Unit,
 ) : ContainerChild(curvedLayoutDirection, !curvedLayoutDirection.clockwise(), contentBuilder) {
 
     override fun doEstimateThickness(maxRadius: Float) =
@@ -73,60 +73,61 @@ internal class CurvedRowChild(
     ): PartialLayoutInfo {
         // position children, sum angles.
         @Suppress("ListIterator")
-        var totalSweep = children.sumOf { child ->
-            var childRadialPosition = parentOuterRadius
-            var childThickness = parentThickness
-            if (radialAlignment != null) {
-                childRadialPosition = parentOuterRadius - radialAlignment.ratio *
-                    (parentThickness - child.estimatedThickness)
-                childThickness = child.estimatedThickness
-            }
+        var totalSweep =
+            children.sumOf { child ->
+                var childRadialPosition = parentOuterRadius
+                var childThickness = parentThickness
+                if (radialAlignment != null) {
+                    childRadialPosition =
+                        parentOuterRadius -
+                            radialAlignment.ratio * (parentThickness - child.estimatedThickness)
+                    childThickness = child.estimatedThickness
+                }
 
-            child.radialPosition(
-                childRadialPosition,
-                childThickness
-            )
-            child.sweepRadians
-        }
+                child.radialPosition(childRadialPosition, childThickness)
+                child.sweepRadians
+            }
 
         return PartialLayoutInfo(
             totalSweep,
             parentOuterRadius,
             parentThickness,
-            parentOuterRadius - parentThickness / 2
+            parentOuterRadius - parentThickness / 2,
         )
     }
 
     override fun doAngularPosition(
         parentStartAngleRadians: Float,
         parentSweepRadians: Float,
-        centerOffset: Offset
+        centerOffset: Offset,
     ): Float {
-        val weights = childrenInLayoutOrder.fastMap { node ->
-            (node.computeParentData() as? CurvedScopeParentData)?.weight ?: 0f
-        }
-        val sumWeights = weights.sum()
-        val extraSpace = parentSweepRadians - childrenInLayoutOrder.fastMapIndexed { ix, node ->
-            if (weights[ix] == 0f) {
-                node.sweepRadians
-            } else {
-                0f
+        val weights =
+            childrenInLayoutOrder.fastMap { node ->
+                (node.computeParentData() as? CurvedScopeParentData)?.weight ?: 0f
             }
-        }.sum()
+        val sumWeights = weights.sum()
+        val extraSpace =
+            parentSweepRadians -
+                childrenInLayoutOrder
+                    .fastMapIndexed { ix, node ->
+                        if (weights[ix] == 0f) {
+                            node.sweepRadians
+                        } else {
+                            0f
+                        }
+                    }
+                    .sum()
 
         var currentStartAngle = parentStartAngleRadians
         childrenInLayoutOrder.fastForEachIndexed { ix, node ->
-            val actualSweep = if (weights[ix] > 0f) {
+            val actualSweep =
+                if (weights[ix] > 0f) {
                     extraSpace * weights[ix] / sumWeights
                 } else {
                     node.sweepRadians
                 }
 
-            node.angularPosition(
-                currentStartAngle,
-                actualSweep,
-                centerOffset
-            )
+            node.angularPosition(currentStartAngle, actualSweep, centerOffset)
             currentStartAngle += actualSweep
         }
         return parentStartAngleRadians

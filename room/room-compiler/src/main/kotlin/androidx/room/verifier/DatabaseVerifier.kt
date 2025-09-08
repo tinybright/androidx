@@ -34,14 +34,15 @@ import org.sqlite.JDBC
 import org.sqlite.SQLiteJDBCLoader
 
 /**
- * Builds an in-memory version of the database and verifies the queries against it.
- * This class is also used to resolve the return types.
+ * Builds an in-memory version of the database and verifies the queries against it. This class is
+ * also used to resolve the return types.
  */
-class DatabaseVerifier private constructor(
+class DatabaseVerifier
+private constructor(
     val connection: Connection,
     val context: Context,
     entities: List<Entity>,
-    views: List<DatabaseView>
+    views: List<DatabaseView>,
 ) {
     val entitiesAndViews: List<EntityOrView> = entities + views
 
@@ -49,17 +50,15 @@ class DatabaseVerifier private constructor(
         private const val CONNECTION_URL = "jdbc:sqlite::memory:"
 
         /**
-         * Taken from:
-         * https://github.com/robolectric/robolectric/blob/master/shadows/framework/
+         * Taken from: https://github.com/robolectric/robolectric/blob/master/shadows/framework/
          * src/main/java/org/robolectric/shadows/ShadowSQLiteConnection.java#L94
          *
-         * This is actually not accurate because it might swap anything since it does not parse
-         * SQL. That being said, for the verification purposes, it does not matter and clearly
-         * much easier than parsing and rebuilding the query.
+         * This is actually not accurate because it might swap anything since it does not parse SQL.
+         * That being said, for the verification purposes, it does not matter and clearly much
+         * easier than parsing and rebuilding the query.
          */
-        private val COLLATE_LOCALIZED_UNICODE_PATTERN = Pattern.compile(
-            "\\s+COLLATE\\s+(LOCALIZED|UNICODE)", Pattern.CASE_INSENSITIVE
-        )
+        private val COLLATE_LOCALIZED_UNICODE_PATTERN =
+            Pattern.compile("\\s+COLLATE\\s+(LOCALIZED|UNICODE)", Pattern.CASE_INSENSITIVE)
 
         /**
          * Keep a reference to the SQLite JDBC driver so we can re-register it in the case that Room
@@ -94,10 +93,7 @@ class DatabaseVerifier private constructor(
             }
             File(tempDir).also {
                 check(
-                    it.isDirectory &&
-                        (it.exists() || it.mkdirs()) &&
-                        it.canRead() &&
-                        it.canWrite()
+                    it.isDirectory && (it.exists() || it.mkdirs()) && it.canRead() && it.canWrite()
                 ) {
                     "The temp dir [$tempDir] needs to be a directory, must be readable, writable " +
                         "and allow executables. Please, provide a temporary directory that " +
@@ -106,14 +102,12 @@ class DatabaseVerifier private constructor(
             }
         }
 
-        /**
-         * Tries to create a verifier but returns null if it cannot find the driver.
-         */
+        /** Tries to create a verifier but returns null if it cannot find the driver. */
         fun create(
             context: Context,
             element: XElement,
             entities: List<Entity>,
-            views: List<DatabaseView>
+            views: List<DatabaseView>,
         ): DatabaseVerifier? {
             try {
                 // Re-register driver in case it was unregistered, this is a no-op is already there.
@@ -122,8 +116,9 @@ class DatabaseVerifier private constructor(
                 return DatabaseVerifier(connection, context, entities, views)
             } catch (ex: Exception) {
                 context.logger.w(
-                    Warning.CANNOT_CREATE_VERIFICATION_DATABASE, element,
-                    DatabaseVerificationErrors.cannotCreateConnection(ex)
+                    Warning.CANNOT_CREATE_VERIFICATION_DATABASE,
+                    element,
+                    DatabaseVerificationErrors.cannotCreateConnection(ex),
                 )
                 return null
             }
@@ -147,23 +142,23 @@ class DatabaseVerifier private constructor(
     init {
         entities.forEach { entity ->
             val stmt = connection.createStatement()
-            val createTableQuery = if (entity is FtsEntity &&
-                !FtsOptions.defaultTokenizers.contains(entity.ftsOptions.tokenizer)
-            ) {
-                // Custom FTS tokenizer used, use create statement without custom tokenizer
-                // since the DB used for verification probably doesn't have the tokenizer.
-                entity.getCreateTableQueryWithoutTokenizer()
-            } else {
-                entity.createTableQuery
-            }
+            val createTableQuery =
+                if (
+                    entity is FtsEntity &&
+                        !FtsOptions.defaultTokenizers.contains(entity.ftsOptions.tokenizer)
+                ) {
+                    // Custom FTS tokenizer used, use create statement without custom tokenizer
+                    // since the DB used for verification probably doesn't have the tokenizer.
+                    entity.getCreateTableQueryWithoutTokenizer()
+                } else {
+                    entity.createTableQuery
+                }
             try {
                 stmt.executeUpdate(stripLocalizeCollations(createTableQuery))
             } catch (e: SQLException) {
                 context.logger.e(entity.element, "${e.message}")
             }
-            entity.indices.forEach {
-                stmt.executeUpdate(it.createQuery(entity.tableName))
-            }
+            entity.indices.forEach { stmt.executeUpdate(it.createQuery(entity.tableName)) }
         }
         views.forEach { view ->
             val stmt = connection.createStatement()

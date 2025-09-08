@@ -40,8 +40,7 @@ class SandboxedSdkCompatTest {
 
         val sandboxedSdkCompat = SandboxedSdkCompat(binder)
 
-        assertThat(sandboxedSdkCompat.getInterface())
-            .isSameInstanceAs(binder)
+        assertThat(sandboxedSdkCompat.getInterface()).isSameInstanceAs(binder)
     }
 
     @Test
@@ -51,8 +50,7 @@ class SandboxedSdkCompatTest {
 
         val toSandboxedSdkResult = SandboxedSdkCompat(binder).toSandboxedSdk()
 
-        assertThat(toSandboxedSdkResult.getInterface())
-            .isSameInstanceAs(binder)
+        assertThat(toSandboxedSdkResult.getInterface()).isSameInstanceAs(binder)
     }
 
     @Test
@@ -63,8 +61,7 @@ class SandboxedSdkCompatTest {
 
         val toSandboxedSdkResult = SandboxedSdkCompat(sandboxedSdk).toSandboxedSdk()
 
-        assertThat(toSandboxedSdkResult)
-            .isSameInstanceAs(sandboxedSdk)
+        assertThat(toSandboxedSdkResult).isSameInstanceAs(sandboxedSdk)
     }
 
     @Test
@@ -85,7 +82,9 @@ class SandboxedSdkCompatTest {
     }
 
     @Test
-    @SdkSuppress(minSdkVersion = 34)
+    // TODO(b/315321962) Migrate to Robolectric to remove usage of dexmakerMockito.
+    // maxSdkVersion due to b/430688215
+    @SdkSuppress(minSdkVersion = 34, maxSdkVersion = 34)
     fun getSdkInfo_whenCreatedFromSandboxedSdk_returnsSdkInfo() {
         val sdkName = "sdkName"
         val sdkVersion = 1L
@@ -95,20 +94,12 @@ class SandboxedSdkCompatTest {
         val sandboxedSdkCompat = SandboxedSdkCompat(sandboxedSdk)
         val sdkInfo = sandboxedSdkCompat.getSdkInfo()
 
-        assertThat(sdkInfo).isEqualTo(
-            SandboxedSdkInfo(
-                sdkName,
-                sdkVersion
-            )
-        )
+        assertThat(sdkInfo).isEqualTo(SandboxedSdkInfo(sdkName, sdkVersion))
     }
 
     private object Api34Impl {
         @RequiresApi(28)
-        fun mockSharedLibraryInfo(
-            sdkName: String,
-            sdkVersion: Long
-        ): SharedLibraryInfo {
+        fun mockSharedLibraryInfo(sdkName: String, sdkVersion: Long): SharedLibraryInfo {
             // No public constructor for SharedLibraryInfo available.
             val sharedLibraryInfo = Mockito.mock(SharedLibraryInfo::class.java)
             `when`(sharedLibraryInfo.name).thenReturn(sdkName)

@@ -16,7 +16,6 @@
 
 package androidx.tv.material3
 
-import android.os.Build
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -40,41 +39,29 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalTvMaterial3Api::class)
 @MediumTest
 @RunWith(AndroidJUnit4::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 class ButtonScreenshotTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(TV_GOLDEN_MATERIAL3)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(TV_GOLDEN_MATERIAL3)
 
     @Test
     fun default_button_light_theme() {
-        rule.setContent {
-            LightMaterialTheme {
-                Button(onClick = { }) {
-                    Text("Button")
-                }
-            }
-        }
+        rule.setContent { LightMaterialTheme { Button(onClick = {}) { Text("Button") } } }
 
-        rule.onNode(hasClickAction())
+        rule
+            .onNode(hasClickAction())
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "button_light_theme")
     }
 
     @Test
     fun default_button_dark_theme() {
-        rule.setContent {
-            DarkMaterialTheme {
-                Button(onClick = { }) {
-                    Text("Button")
-                }
-            }
-        }
+        rule.setContent { DarkMaterialTheme { Button(onClick = {}) { Text("Button") } } }
 
-        rule.onNode(hasClickAction())
+        rule
+            .onNode(hasClickAction())
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "button_dark_theme")
     }
@@ -82,14 +69,11 @@ class ButtonScreenshotTest {
     @Test
     fun disabled_button_light_theme() {
         rule.setContent {
-            LightMaterialTheme {
-                Button(onClick = { }, enabled = false) {
-                    Text("Button")
-                }
-            }
+            LightMaterialTheme { Button(onClick = {}, enabled = false) { Text("Button") } }
         }
 
-        rule.onNodeWithText("Button")
+        rule
+            .onNodeWithText("Button")
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "button_disabled_light_theme")
     }
@@ -97,14 +81,11 @@ class ButtonScreenshotTest {
     @Test
     fun disabled_button_dark_theme() {
         rule.setContent {
-            DarkMaterialTheme {
-                Button(onClick = { }, enabled = false) {
-                    Text("Button")
-                }
-            }
+            DarkMaterialTheme { Button(onClick = {}, enabled = false) { Text("Button") } }
         }
 
-        rule.onNodeWithText("Button")
+        rule
+            .onNodeWithText("Button")
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "button_disabled_dark_theme")
     }
@@ -112,14 +93,11 @@ class ButtonScreenshotTest {
     @Test
     fun outlined_button_lightTheme() {
         rule.setContent {
-            LightMaterialTheme {
-                OutlinedButton(onClick = {}) {
-                    Text("Outlined Button")
-                }
-            }
+            LightMaterialTheme { OutlinedButton(onClick = {}) { Text("Outlined Button") } }
         }
 
-        rule.onNode(hasClickAction())
+        rule
+            .onNode(hasClickAction())
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "outlined_button_light_theme")
     }
@@ -127,14 +105,11 @@ class ButtonScreenshotTest {
     @Test
     fun outlined_button_darkTheme() {
         rule.setContent {
-            DarkMaterialTheme {
-                OutlinedButton(onClick = {}) {
-                    Text("Outlined Button")
-                }
-            }
+            DarkMaterialTheme { OutlinedButton(onClick = {}) { Text("Outlined Button") } }
         }
 
-        rule.onNode(hasClickAction())
+        rule
+            .onNode(hasClickAction())
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "outlined_button_dark_theme")
     }
@@ -146,14 +121,15 @@ class ButtonScreenshotTest {
                 OutlinedButton(
                     onClick = {},
                     enabled = false,
-                    modifier = Modifier.testTag("button")
+                    modifier = Modifier.testTag("button"),
                 ) {
                     Text("Outlined Button")
                 }
             }
         }
 
-        rule.onNodeWithTag("button")
+        rule
+            .onNodeWithTag("button")
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "outlined_button_disabled_light_theme")
     }
@@ -165,14 +141,15 @@ class ButtonScreenshotTest {
                 OutlinedButton(
                     onClick = {},
                     enabled = false,
-                    modifier = Modifier.testTag("button")
+                    modifier = Modifier.testTag("button"),
                 ) {
                     Text("Outlined Button")
                 }
             }
         }
 
-        rule.onNodeWithTag("button")
+        rule
+            .onNodeWithTag("button")
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "outlined_button_disabled_dark_theme")
     }
@@ -183,12 +160,12 @@ class ButtonScreenshotTest {
             LightMaterialTheme {
                 Button(
                     onClick = { /* Do something! */ },
-                    contentPadding = ButtonDefaults.ButtonWithIconContentPadding
+                    contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
                 ) {
                     Icon(
                         Icons.Filled.Favorite,
                         contentDescription = "Localized description",
-                        modifier = Modifier.size(ButtonDefaults.IconSize)
+                        modifier = Modifier.size(ButtonDefaults.IconSize),
                     )
                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                     Text("Like")
@@ -196,7 +173,8 @@ class ButtonScreenshotTest {
             }
         }
 
-        rule.onNode(hasClickAction())
+        rule
+            .onNode(hasClickAction())
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "button_withIcon_lightTheme")
     }
@@ -207,12 +185,12 @@ class ButtonScreenshotTest {
             DarkMaterialTheme {
                 Button(
                     onClick = { /* Do something! */ },
-                    contentPadding = ButtonDefaults.ButtonWithIconContentPadding
+                    contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
                 ) {
                     Icon(
                         Icons.Filled.Favorite,
                         contentDescription = "Localized description",
-                        modifier = Modifier.size(ButtonDefaults.IconSize)
+                        modifier = Modifier.size(ButtonDefaults.IconSize),
                     )
                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                     Text("Like")
@@ -220,7 +198,8 @@ class ButtonScreenshotTest {
             }
         }
 
-        rule.onNode(hasClickAction())
+        rule
+            .onNode(hasClickAction())
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "button_withIcon_darkTheme")
     }
@@ -233,12 +212,12 @@ class ButtonScreenshotTest {
                     onClick = { /* Do something! */ },
                     contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
                     enabled = false,
-                    modifier = Modifier.testTag("button")
+                    modifier = Modifier.testTag("button"),
                 ) {
                     Icon(
                         Icons.Filled.Favorite,
                         contentDescription = "Localized description",
-                        modifier = Modifier.size(ButtonDefaults.IconSize)
+                        modifier = Modifier.size(ButtonDefaults.IconSize),
                     )
                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                     Text("Like")
@@ -246,7 +225,8 @@ class ButtonScreenshotTest {
             }
         }
 
-        rule.onNodeWithTag("button")
+        rule
+            .onNodeWithTag("button")
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "button_withIcon_disabled_lightTheme")
     }
@@ -259,12 +239,12 @@ class ButtonScreenshotTest {
                     onClick = { /* Do something! */ },
                     contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
                     enabled = false,
-                    modifier = Modifier.testTag("button")
+                    modifier = Modifier.testTag("button"),
                 ) {
                     Icon(
                         Icons.Filled.Favorite,
                         contentDescription = "Localized description",
-                        modifier = Modifier.size(ButtonDefaults.IconSize)
+                        modifier = Modifier.size(ButtonDefaults.IconSize),
                     )
                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                     Text("Like")
@@ -272,7 +252,8 @@ class ButtonScreenshotTest {
             }
         }
 
-        rule.onNodeWithTag("button")
+        rule
+            .onNodeWithTag("button")
             .captureToImage()
             .assertAgainstGolden(screenshotRule, "button_withIcon_disabled_darkTheme")
     }

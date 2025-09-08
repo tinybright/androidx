@@ -43,73 +43,67 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.SettableFuture
 import java.util.concurrent.Executor
 
-/**
- * [PassiveMonitoringClient] implementation that is backed by Health Services.
- */
+/** [PassiveMonitoringClient] implementation that is backed by Health Services. */
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 public class ServiceBackedPassiveMonitoringClient(
     private val applicationContext: Context,
     private val connectionManager: ConnectionManager =
-        HsConnectionManager.getInstance(applicationContext)
+        HsConnectionManager.getInstance(applicationContext),
 ) :
     PassiveMonitoringClient,
     Client<IPassiveMonitoringApiService>(
         CLIENT_CONFIGURATION,
         connectionManager,
         { binder -> IPassiveMonitoringApiService.Stub.asInterface(binder) },
-        { service -> service.apiVersion }
+        { service -> service.apiVersion },
     ) {
 
     private val packageName = applicationContext.packageName
 
     override fun setPassiveListenerServiceAsync(
         service: Class<out PassiveListenerService>,
-        config: PassiveListenerConfig
+        config: PassiveListenerConfig,
     ): ListenableFuture<Void> {
         if (!config.isValidPassiveGoal()) {
             return Futures.immediateFailedFuture(
                 HealthServicesException(
                     "Service registration failed: DataType for the requested " +
-                    "passive goal must be tracked"
+                        "passive goal must be tracked"
                 )
             )
         }
         return executeWithVersionCheck(
             { remoteService, resultFuture ->
                 remoteService.registerPassiveListenerService(
-                    PassiveListenerServiceRegistrationRequest(
-                        packageName,
-                        service.name,
-                        config
-                    ),
-                    StatusCallback(resultFuture)
+                    PassiveListenerServiceRegistrationRequest(packageName, service.name, config),
+                    StatusCallback(resultFuture),
                 )
             },
-            /* minApiVersion= */ 4
+            /* minApiVersion= */ 4,
         )
     }
 
     override fun setPassiveListenerCallback(
         config: PassiveListenerConfig,
-        callback: PassiveListenerCallback
+        callback: PassiveListenerCallback,
     ) {
         setPassiveListenerCallback(
             config,
             ContextCompat.getMainExecutor(applicationContext),
-            callback
+            callback,
         )
     }
 
     override fun setPassiveListenerCallback(
         config: PassiveListenerConfig,
         executor: Executor,
-        callback: PassiveListenerCallback
+        callback: PassiveListenerCallback,
     ) {
         if (!config.isValidPassiveGoal()) {
             callback.onRegistrationFailed(
                 HealthServicesException(
                     "Callback registration failed: DataType for the " +
-                    "requested passive goal must be tracked"
+                        "requested passive goal must be tracked"
                 )
             )
             return
@@ -121,7 +115,7 @@ public class ServiceBackedPassiveMonitoringClient(
                 service.registerPassiveListenerCallback(
                     PassiveListenerCallbackRegistrationRequest(packageName, config),
                     callbackStub,
-                    StatusCallback(result)
+                    StatusCallback(result),
                 )
             }
         Futures.addCallback(
@@ -135,7 +129,7 @@ public class ServiceBackedPassiveMonitoringClient(
                     callback.onRegistrationFailed(t)
                 }
             },
-            executor
+            executor,
         )
     }
 
@@ -144,14 +138,15 @@ public class ServiceBackedPassiveMonitoringClient(
             { service, resultFuture ->
                 service.unregisterPassiveListenerService(packageName, StatusCallback(resultFuture))
             },
-            /* minApiVersion= */ 4
+            /* minApiVersion= */ 4,
         )
     }
 
     @Suppress("UNCHECKED_CAST")
     override fun clearPassiveListenerCallbackAsync(): ListenableFuture<Void> {
-        val callbackStub = PassiveListenerCallbackCache.INSTANCE.clear()
-        ?: return Futures.immediateFuture(null) as ListenableFuture<Void>
+        val callbackStub =
+            PassiveListenerCallbackCache.INSTANCE.clear()
+                ?: return Futures.immediateFuture(null) as ListenableFuture<Void>
         return unregisterListener(callbackStub.listenerKey) { service, resultFuture ->
             service.unregisterPassiveListenerCallback(packageName, StatusCallback(resultFuture))
         }
@@ -168,7 +163,7 @@ public class ServiceBackedPassiveMonitoringClient(
         Futures.transform(
             execute { service -> service.getCapabilities(CapabilitiesRequest(packageName)) },
             { response -> response!!.passiveMonitoringCapabilities },
-            ContextCompat.getMainExecutor(applicationContext)
+            ContextCompat.getMainExecutor(applicationContext),
         )
 
     internal companion object {

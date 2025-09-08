@@ -16,7 +16,6 @@
 
 package androidx.navigation.testapp
 
-import android.os.Build
 import android.os.Bundle
 import android.transition.Fade
 import android.view.LayoutInflater
@@ -36,21 +35,19 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.navigation.NavigationView
 
 /**
- * Simple 'Help' activity that shows the data URI passed to it. In a real world app, it would
- * load the chosen help article, etc.
+ * Simple 'Help' activity that shows the data URI passed to it. In a real world app, it would load
+ * the chosen help article, etc.
  */
 class HelpActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_help)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val fade = Fade()
-            fade.excludeTarget(android.R.id.statusBarBackground, true)
-            fade.excludeTarget(android.R.id.navigationBarBackground, true)
-            window.exitTransition = fade
-            window.enterTransition = fade
-        }
+        val fade = Fade()
+        fade.excludeTarget(android.R.id.statusBarBackground, true)
+        fade.excludeTarget(android.R.id.navigationBarBackground, true)
+        window.exitTransition = fade
+        window.enterTransition = fade
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -84,20 +81,22 @@ class BottomSheetNavigationView : BottomSheetDialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
-        val navigationView = requireActivity().layoutInflater
-            .inflate(R.layout.bottom_bar_menu, container, false) as NavigationView
+        val navigationView =
+            requireActivity().layoutInflater.inflate(R.layout.bottom_bar_menu, container, false)
+                as NavigationView
 
         // Add a fake Navigation Graph just to test out the behavior but not
         // actually navigate anywhere
         navigationView.setupWithNavController(
             NavController(requireContext()).apply {
                 navigatorProvider.addNavigator(TestNavigator())
-                graph = createGraph(startDestination = R.id.launcher_home) {
-                    test(R.id.launcher_home)
-                    test(R.id.android)
-                }
+                graph =
+                    createGraph(startDestination = R.id.launcher_home) {
+                        test(R.id.launcher_home)
+                        test(R.id.android)
+                    }
             }
         )
         return navigationView

@@ -31,10 +31,7 @@ fun CustomSaverSample() {
 
     // this Saver implementation converts Holder object which we don't know how to save
     // to Int which we can save
-    val HolderSaver = Saver<Holder, Int>(
-        save = { it.value },
-        restore = { Holder(it) }
-    )
+    val HolderSaver = Saver<Holder, Int>(save = { it.value }, restore = { Holder(it) })
 }
 
 @Sampled
@@ -42,10 +39,8 @@ fun CustomSaverSample() {
 fun ListSaverSample() {
     data class Size(val x: Int, val y: Int)
 
-    val sizeSaver = listSaver<Size, Int>(
-        save = { listOf(it.x, it.y) },
-        restore = { Size(it[0], it[1]) }
-    )
+    val sizeSaver =
+        listSaver<Size, Int>(save = { listOf(it.x, it.y) }, restore = { Size(it[0], it[1]) })
 }
 
 @Sampled
@@ -58,7 +53,7 @@ fun MapSaverSample() {
         val ageKey = "Age"
         mapSaver(
             save = { mapOf(nameKey to it.name, ageKey to it.age) },
-            restore = { User(it[nameKey] as String, it[ageKey] as Int) }
+            restore = { User(it[nameKey] as String, it[ageKey] as Int) },
         )
     }
 }

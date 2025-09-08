@@ -25,10 +25,7 @@ import androidx.annotation.GuardedBy
 import androidx.annotation.RestrictTo
 import androidx.health.services.client.impl.ipc.internal.ConnectionManager
 
-/**
- * Utility to return an instance of connection manager.
- *
- */
+/** Utility to return an instance of connection manager. */
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 public object HsConnectionManager {
 
@@ -55,7 +52,7 @@ public object HsConnectionManager {
         val handlerThread =
             HandlerThread(
                 "HsConnectionManager",
-                Process.THREAD_PRIORITY_BACKGROUND + Process.THREAD_PRIORITY_MORE_FAVORABLE
+                Process.THREAD_PRIORITY_BACKGROUND + Process.THREAD_PRIORITY_MORE_FAVORABLE,
             )
         handlerThread.start()
         return handlerThread.looper

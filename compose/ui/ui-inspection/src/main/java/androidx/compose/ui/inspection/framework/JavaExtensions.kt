@@ -22,9 +22,7 @@ val Method.signature: String
     get() {
         val sb = StringBuilder()
         sb.append(name).append('(')
-        parameterTypes.forEach {
-            sb.append(it.signature)
-        }
+        parameterTypes.forEach { sb.append(it.signature) }
         sb.append(')').append(returnType.signature)
         return sb.toString()
     }
@@ -47,3 +45,10 @@ val <T> Class<T>.signature: String
         }
         return "L${name.replace('.', '/')};"
     }
+
+internal fun classNameFromSignature(signature: String): String {
+    if (signature.first() == 'L' && signature.last() == ';') {
+        return signature.substring(1, signature.length - 1).replace('/', '.')
+    }
+    error("Not an object $signature")
+}

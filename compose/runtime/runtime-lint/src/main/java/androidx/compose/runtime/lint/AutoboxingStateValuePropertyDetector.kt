@@ -30,9 +30,11 @@ import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
 import com.android.tools.lint.detector.api.UastLintUtils
 import java.util.EnumSet
+import org.jetbrains.kotlin.psi.KtExpression
 import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.USimpleNameReferenceExpression
+import org.jetbrains.uast.kotlin.readWriteAccess
 
 class AutoboxingStateValuePropertyDetector : Detector(), SourceCodeScanner {
 
@@ -53,21 +55,33 @@ class AutoboxingStateValuePropertyDetector : Detector(), SourceCodeScanner {
         return type == AnnotationUsageType.FIELD_REFERENCE
     }
 
+    // https://youtrack.jetbrains.com/issue/IDEA-374002
+    @Suppress("UnstableApiUsage")
     override fun visitAnnotationUsage(
         context: JavaContext,
         element: UElement,
         annotationInfo: AnnotationInfo,
-        usageInfo: AnnotationUsageInfo
+        usageInfo: AnnotationUsageInfo,
     ) {
         val resolvedPropertyName = element.identifier ?: "<unknown identifier>"
         val preferredPropertyName =
             annotationInfo.annotation.preferredPropertyName ?: "<unknown replacement>"
 
-        val accessKind = when (element.resolvedName?.takeWhile { it.isLowerCase() }) {
-            "get" -> "Reading"
-            "set" -> "Assigning"
-            else -> "Accessing"
-        }
+        val readWriteAccess = (element.sourcePsi as? KtExpression)?.readWriteAccess()
+        val accessKind =
+            when {
+                readWriteAccess?.isRead == true -> "Reading"
+                readWriteAccess?.isWrite == true -> "Assigning"
+                else -> {
+                    // We may (i.e., not necessary) go back to use this part only after
+                    // https://youtrack.jetbrains.com/issue/KT-78076 is fixed/available.
+                    when (element.resolvedName?.takeWhile { it.isLowerCase() }) {
+                        "get" -> "Reading"
+                        "set" -> "Assigning"
+                        else -> "Accessing"
+                    }
+                }
+            }
 
         context.report(
             AutoboxingStateValueProperty,
@@ -77,16 +91,17 @@ class AutoboxingStateValuePropertyDetector : Detector(), SourceCodeScanner {
                 "Use `$preferredPropertyName` to avoid unnecessary allocations.",
             createPropertyReplacementQuickFix(
                 resolvedPropertyName = resolvedPropertyName,
-                preferredPropertyName = preferredPropertyName
-            )
+                preferredPropertyName = preferredPropertyName,
+            ),
         )
     }
 
     private fun createPropertyReplacementQuickFix(
         resolvedPropertyName: String,
-        preferredPropertyName: String
+        preferredPropertyName: String,
     ): LintFix {
-        return fix().name("Replace with `$preferredPropertyName`")
+        return fix()
+            .name("Replace with `$preferredPropertyName`")
             .replace()
             .text(resolvedPropertyName)
             .with(preferredPropertyName)
@@ -95,19 +110,22 @@ class AutoboxingStateValuePropertyDetector : Detector(), SourceCodeScanner {
 
     companion object {
 
-        val AutoboxingStateValueProperty = Issue.create(
-            "AutoboxingStateValueProperty",
-            "State access causes value to be autoboxed",
-            "Avoid using the generic `value` property when using a specialized State type. " +
-                "Reading or writing to the state's generic `value` property will result in an " +
-                "unnecessary autoboxing operation. Prefer the specialized value property " +
-                "(e.g. `intValue` for `MutableIntState`), or use property delegation to " +
-                "avoid unnecessary allocations.",
-            Category.PERFORMANCE, 3, Severity.WARNING,
-            Implementation(
-                AutoboxingStateValuePropertyDetector::class.java,
-                EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES)
+        val AutoboxingStateValueProperty =
+            Issue.create(
+                "AutoboxingStateValueProperty",
+                "State access causes value to be autoboxed",
+                "Avoid using the generic `value` property when using a specialized State type. " +
+                    "Reading or writing to the state's generic `value` property will result in an " +
+                    "unnecessary autoboxing operation. Prefer the specialized value property " +
+                    "(e.g. `intValue` for `MutableIntState`), or use property delegation to " +
+                    "avoid unnecessary allocations.",
+                Category.PERFORMANCE,
+                3,
+                Severity.WARNING,
+                Implementation(
+                    AutoboxingStateValuePropertyDetector::class.java,
+                    EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES),
+                ),
             )
-        )
     }
 }

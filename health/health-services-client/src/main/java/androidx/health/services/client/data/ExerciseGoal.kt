@@ -44,7 +44,8 @@ internal constructor(
     internal val proto: DataProto.ExerciseGoal
         get() {
             val builder =
-                DataProto.ExerciseGoal.newBuilder().setExerciseGoalType(exerciseGoalType.toProto())
+                DataProto.ExerciseGoal.newBuilder()
+                    .setExerciseGoalType(exerciseGoalType.toProto())
                     .setDataTypeCondition(dataTypeCondition.proto)
             if (period != null) {
                 builder.period = dataTypeCondition.dataType.toProtoFromValue(period)
@@ -77,16 +78,17 @@ internal constructor(
                 exerciseGoalType,
                 dataTypeCondition.dataType,
                 dataTypeCondition.comparisonType,
-                period
+                period,
             )
         }
     }
 
-    override fun toString(): String = "ExerciseGoal(" +
-        "exerciseGoalType=$exerciseGoalType, " +
-        "dataTypeCondition=$dataTypeCondition, " +
-        "period=$period" +
-        ")"
+    override fun toString(): String =
+        "ExerciseGoal(" +
+            "exerciseGoalType=$exerciseGoalType, " +
+            "dataTypeCondition=$dataTypeCondition, " +
+            "period=$period" +
+            ")"
 
     companion object {
         @JvmField
@@ -103,13 +105,14 @@ internal constructor(
 
         @Suppress("UNCHECKED_CAST")
         internal fun fromProto(proto: DataProto.ExerciseGoal): ExerciseGoal<Number> {
-            val condition = DataTypeCondition.aggregateFromProto(proto.dataTypeCondition)
-                as DataTypeCondition<Number, AggregateDataType<Number, *>>
+            val condition =
+                DataTypeCondition.aggregateFromProto(proto.dataTypeCondition)
+                    as DataTypeCondition<Number, AggregateDataType<Number, *>>
             return ExerciseGoal(
                 ExerciseGoalType.fromProto(proto.exerciseGoalType)
                     ?: throw IllegalStateException("${proto.exerciseGoalType} not found"),
                 condition,
-                if (proto.hasPeriod()) condition.dataType.toValueFromProto(proto.period) else null
+                if (proto.hasPeriod()) condition.dataType.toValueFromProto(proto.period) else null,
             )
         }
 
@@ -132,14 +135,14 @@ internal constructor(
         @JvmStatic
         fun <T : Number> createMilestone(
             condition: DataTypeCondition<T, AggregateDataType<T, *>>,
-            period: T
+            period: T,
         ): ExerciseGoal<T> = ExerciseGoal(ExerciseGoalType.MILESTONE, condition, period)
 
         /** Creates a new goal that is the same as a given goal but with a new threshold value. */
         @JvmStatic
         fun <T : Number> createMilestoneGoalWithUpdatedThreshold(
             goal: ExerciseGoal<T>,
-            newThreshold: T
+            newThreshold: T,
         ): ExerciseGoal<T> {
             require(ExerciseGoalType.MILESTONE == goal.exerciseGoalType) {
                 "The goal to update should be of MILESTONE type."
@@ -150,7 +153,7 @@ internal constructor(
             return ExerciseGoal(
                 ExerciseGoalType.MILESTONE,
                 DataTypeCondition(dataType, newThreshold, comparisonType),
-                goal.period
+                goal.period,
             )
         }
     }

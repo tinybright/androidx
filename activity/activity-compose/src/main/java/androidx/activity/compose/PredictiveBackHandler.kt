@@ -16,9 +16,9 @@
 
 package androidx.activity.compose
 
+import android.annotation.SuppressLint
 import androidx.activity.BackEventCompat
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.OnBackPressedDispatcher
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -40,91 +40,75 @@ import kotlinx.coroutines.launch
 /**
  * An effect for handling predictive system back gestures.
  *
- * Calling this in your composable adds the given lambda to the [OnBackPressedDispatcher] of the
- * [LocalOnBackPressedDispatcherOwner]. The lambda passes in a Flow<BackEventCompat> where each
- * [BackEventCompat] reflects the progress of current gesture back. The lambda content should follow
- * this structure:
- * ```
+ * This effect registers a callback to receive updates on the progress of system back gestures as a
+ * [Flow] of [BackEventCompat].
+ *
+ * The [onBack] lambda should be structured to handle the start, progress, completion, and
+ * cancellation of the gesture:
+ * ```kotlin
  * PredictiveBackHandler { progress: Flow<BackEventCompat> ->
- *      // code for gesture back started
- *      try {
- *         progress.collect { backevent ->
- *              // code for progress
- *         }
- *         // code for completion
- *      } catch (e: CancellationException) {
- *         // code for cancellation
- *      }
+ *   // This block is executed when the back gesture begins.
+ *     try {
+ *       progress.collect { backEvent ->
+ *         // Handle gesture progress updates here.
+ *       }
+ *       // This block is executed if the gesture completes successfully.
+ *     } catch (e: CancellationException) {
+ *       // This block is executed if the gesture is cancelled.
+ *       throw e
+ *     } finally {
+ *       // This block is executed either the gesture is completed or cancelled.
+ *   }
  * }
  * ```
  *
- * If this is called by nested composables, if enabled, the inner most composable will consume the
- * call to system back and invoke its lambda. The call will continue to propagate up until it finds
- * an enabled BackHandler.
+ * ## Precedence
+ * If multiple [PredictiveBackHandler] are present in the composition, the one that is composed
+ * **last** among all enabled handlers will be invoked.
+ *
+ * ## Usage
+ * It is important to call this composable **unconditionally**. Use the `enabled` parameter to
+ * control whether the handler is active. This is preferable to conditionally calling
+ * [PredictiveBackHandler] (e.g., inside an `if` block), as conditional calls can change the order
+ * of composition, leading to unpredictable behavior where different handlers are invoked after
+ * recomposition.
+ *
+ * ## Timing Consideration
+ * There are cases where a predictive back gesture may be dispatched within a rendering frame before
+ * the [enabled] flag is updated, which can cause unexpected behavior (see b/375343407,
+ * b/384186542). For example, if `enabled` is set to `false`, a gesture initiated in the same frame
+ * may still trigger this handler because the system sees the stale `true` value.
  *
  * @sample androidx.activity.compose.samples.PredictiveBack
- *
- * @param enabled if this BackHandler should be enabled, true by default
- * @param onBack the action invoked by back gesture
+ * @param enabled Controls whether this handler is active. **Important**: Due to the timing issue
+ *   described above, a gesture starting immediately after `enabled` is set to `false` may still
+ *   trigger this handler.
+ * @param onBack The suspending lambda to be invoked by the back gesture. It receives a `Flow` that
+ *   can be collected to track the gesture's progress.
  */
+@SuppressLint("RememberReturnType") // TODO: b/372566999
 @Composable
 public fun PredictiveBackHandler(
     enabled: Boolean = true,
     onBack:
         suspend (progress: @JvmSuppressWildcards Flow<BackEventCompat>) -> @JvmSuppressWildcards
-            Unit
+            Unit,
 ) {
     // ensure we don't re-register callbacks when onBack changes
     val currentOnBack by rememberUpdatedState(onBack)
     val onBackScope = rememberCoroutineScope()
 
     val backCallBack = remember {
-        object : OnBackPressedCallback(enabled) {
-            var onBackInstance: OnBackInstance? = null
-
-            override fun handleOnBackStarted(backEvent: BackEventCompat) {
-                super.handleOnBackStarted(backEvent)
-                // in case the previous onBackInstance was started by a normal back gesture
-                // we want to make sure it's still cancelled before we start a predictive
-                // back gesture
-                onBackInstance?.cancel()
-                onBackInstance = OnBackInstance(onBackScope, true, currentOnBack)
-            }
-
-            override fun handleOnBackProgressed(backEvent: BackEventCompat) {
-                super.handleOnBackProgressed(backEvent)
-                onBackInstance?.send(backEvent)
-            }
-
-            override fun handleOnBackPressed() {
-                // handleOnBackPressed could be called by regular back to restart
-                // a new back instance. If this is the case (where current back instance
-                // was NOT started by handleOnBackStarted) then we need to reset the previous
-                // regular back.
-                onBackInstance?.apply {
-                    if (!isPredictiveBack) {
-                        cancel()
-                        onBackInstance = null
-                    }
-                }
-                if (onBackInstance == null) {
-                    onBackInstance = OnBackInstance(onBackScope, false, currentOnBack)
-                }
-
-                // finally, we close the channel to ensure no more events can be sent
-                // but let the job complete normally
-                onBackInstance?.close()
-            }
-
-            override fun handleOnBackCancelled() {
-                super.handleOnBackCancelled()
-                // cancel will purge the channel of any sent events that are yet to be received
-                onBackInstance?.cancel()
-            }
-        }
+        PredictiveBackHandlerCallback(enabled, onBackScope, currentOnBack)
     }
 
-    LaunchedEffect(enabled) { backCallBack.isEnabled = enabled }
+    // we want to use the same callback, but ensure we adjust the variable on recomposition
+    remember(currentOnBack, onBackScope) {
+        backCallBack.currentOnBack = currentOnBack
+        backCallBack.onBackScope = onBackScope
+    }
+
+    LaunchedEffect(enabled) { backCallBack.setIsEnabled(enabled) }
 
     val backDispatcher =
         checkNotNull(LocalOnBackPressedDispatcherOwner.current) {
@@ -144,15 +128,18 @@ public fun PredictiveBackHandler(
 
 private class OnBackInstance(
     scope: CoroutineScope,
-    val isPredictiveBack: Boolean,
+    var isPredictiveBack: Boolean,
     onBack: suspend (progress: Flow<BackEventCompat>) -> Unit,
+    callback: OnBackPressedCallback,
 ) {
     val channel = Channel<BackEventCompat>(capacity = BUFFERED, onBufferOverflow = SUSPEND)
     val job =
         scope.launch {
-            var completed = false
-            onBack(channel.consumeAsFlow().onCompletion { completed = true })
-            check(completed) { "You must collect the progress flow" }
+            if (callback.isEnabled) {
+                var completed = false
+                onBack(channel.consumeAsFlow().onCompletion { completed = true })
+                check(completed) { "You must collect the progress flow" }
+            }
         }
 
     fun send(backEvent: BackEventCompat) = channel.trySend(backEvent)
@@ -163,5 +150,69 @@ private class OnBackInstance(
     fun cancel() {
         channel.cancel(CancellationException("onBack cancelled"))
         job.cancel()
+    }
+}
+
+private class PredictiveBackHandlerCallback(
+    enabled: Boolean,
+    var onBackScope: CoroutineScope,
+    var currentOnBack: suspend (progress: Flow<BackEventCompat>) -> Unit,
+) : OnBackPressedCallback(enabled) {
+    private var onBackInstance: OnBackInstance? = null
+    private var isActive = false
+
+    fun setIsEnabled(enabled: Boolean) {
+        // We are disabling a callback that was enabled.
+        if (!enabled && !isActive && isEnabled) {
+            onBackInstance?.cancel()
+        }
+        isEnabled = enabled
+    }
+
+    override fun handleOnBackStarted(backEvent: BackEventCompat) {
+        super.handleOnBackStarted(backEvent)
+        // in case the previous onBackInstance was started by a normal back gesture
+        // we want to make sure it's still cancelled before we start a predictive
+        // back gesture
+        onBackInstance?.cancel()
+        if (isEnabled) {
+            onBackInstance = OnBackInstance(onBackScope, true, currentOnBack, this)
+        }
+        isActive = true
+    }
+
+    override fun handleOnBackProgressed(backEvent: BackEventCompat) {
+        super.handleOnBackProgressed(backEvent)
+        onBackInstance?.send(backEvent)
+    }
+
+    override fun handleOnBackPressed() {
+        // handleOnBackPressed could be called by regular back to restart
+        // a new back instance. If this is the case (where current back instance
+        // was NOT started by handleOnBackStarted) then we need to reset the previous
+        // regular back.
+        onBackInstance?.apply {
+            if (!isPredictiveBack) {
+                cancel()
+                onBackInstance = null
+            }
+        }
+        if (onBackInstance == null) {
+            onBackInstance = OnBackInstance(onBackScope, false, currentOnBack, this)
+        }
+
+        // finally, we close the channel to ensure no more events can be sent
+        // but let the job complete normally
+        onBackInstance?.close()
+        onBackInstance?.isPredictiveBack = false
+        isActive = false
+    }
+
+    override fun handleOnBackCancelled() {
+        super.handleOnBackCancelled()
+        // cancel will purge the channel of any sent events that are yet to be received
+        onBackInstance?.cancel()
+        onBackInstance?.isPredictiveBack = false
+        isActive = false
     }
 }

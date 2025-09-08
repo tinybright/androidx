@@ -17,7 +17,6 @@
 package androidx.compose.ui.inspection.proto
 
 import android.view.inspector.WindowInspector
-import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.inspection.ComposeLayoutInspector.CacheTree
 import androidx.compose.ui.inspection.LambdaLocation
 import androidx.compose.ui.inspection.inspector.InspectorNode
@@ -36,24 +35,18 @@ import layoutinspector.compose.inspection.LayoutInspectorComposeProtocol.Quad
 import layoutinspector.compose.inspection.LayoutInspectorComposeProtocol.Rect
 
 internal fun InspectorNode.toComposableNode(context: ConversionContext): ComposableNode {
-    return toNodeBuilder(context)
-        .resetSystemFlag()
-        .build()
+    return toNodeBuilder(context).build()
 }
 
-private val SELECTOR_EXPR = Regex("(\\\$(lambda-)?[0-9]+)+$")
-
 /**
- * Convert an [InspectorNode] to protobuf [ComposableNode].
- * If the reduceChildNesting option is set: store a subtree with single child nodes as children
- * of this node and mark the node with [ComposableNode.Flags.NESTED_SINGLE_CHILDREN].
+ * Convert an [InspectorNode] to protobuf [ComposableNode]. If the reduceChildNesting option is set:
+ * store a subtree with single child nodes as children of this node and mark the node with
+ * [ComposableNode.Flags.NESTED_SINGLE_CHILDREN].
  */
 private fun InspectorNode.toNodeBuilder(context: ConversionContext): ComposableNode.Builder {
     val builder = toFlatNode(context)
     if (!context.reduceChildNesting || children.size != 1) {
-        children.forEach { child ->
-            builder.addChildren(child.toNodeBuilder(context))
-        }
+        children.forEach { child -> builder.addChildren(child.toNodeBuilder(context)) }
     } else {
         var nested = children.single()
 
@@ -67,9 +60,7 @@ private fun InspectorNode.toNodeBuilder(context: ConversionContext): ComposableN
     return builder
 }
 
-/**
- * Convert an [InspectorNode] to protobuf [ComposableNode] without child nesting.
- */
+/** Convert an [InspectorNode] to protobuf [ComposableNode] without child nesting. */
 private fun InspectorNode.toFlatNode(context: ConversionContext): ComposableNode.Builder {
     val inspectorNode = this
     return ComposableNode.newBuilder().apply {
@@ -82,30 +73,39 @@ private fun InspectorNode.toFlatNode(context: ConversionContext): ComposableNode
 
         name = context.stringTable.put(inspectorNode.name)
 
-        bounds = Bounds.newBuilder().apply {
-            layout = Rect.newBuilder().apply {
-                x = inspectorNode.left + context.windowPos.x
-                y = inspectorNode.top + context.windowPos.y
-                w = inspectorNode.width
-                h = inspectorNode.height
-            }.build()
-            if (inspectorNode.bounds != null) {
-                render = Quad.newBuilder().apply {
-                    x0 = inspectorNode.bounds.x0
-                    y0 = inspectorNode.bounds.y0
-                    x1 = inspectorNode.bounds.x1
-                    y1 = inspectorNode.bounds.y1
-                    x2 = inspectorNode.bounds.x2
-                    y2 = inspectorNode.bounds.y2
-                    x3 = inspectorNode.bounds.x3
-                    y3 = inspectorNode.bounds.y3
-                }.build()
-            }
-        }.build()
+        bounds =
+            Bounds.newBuilder()
+                .apply {
+                    layout =
+                        Rect.newBuilder()
+                            .apply {
+                                x = inspectorNode.left + context.windowPos.x
+                                y = inspectorNode.top + context.windowPos.y
+                                w = inspectorNode.width
+                                h = inspectorNode.height
+                            }
+                            .build()
+                    if (inspectorNode.bounds != null) {
+                        render =
+                            Quad.newBuilder()
+                                .apply {
+                                    x0 = inspectorNode.bounds.x0
+                                    y0 = inspectorNode.bounds.y0
+                                    x1 = inspectorNode.bounds.x1
+                                    y1 = inspectorNode.bounds.y1
+                                    x2 = inspectorNode.bounds.x2
+                                    y2 = inspectorNode.bounds.y2
+                                    x3 = inspectorNode.bounds.x3
+                                    y3 = inspectorNode.bounds.y3
+                                }
+                                .build()
+                    }
+                }
+                .build()
 
         flags = flags()
         viewId = inspectorNode.viewId
-        context.recompositionHandler.getCounts(inspectorNode.key, inspectorNode.anchorId)?.let {
+        context.recompositionHandler.getCounts(inspectorNode.anchorId)?.let {
             recomposeCount = it.count
             recomposeSkips = it.skips
         }
@@ -128,11 +128,14 @@ private fun InspectorNode.flags(): Int {
     if (inlined) {
         flags = flags or ComposableNode.Flags.INLINED_VALUE
     }
+    if (hasDrawModifier) {
+        flags = flags or ComposableNode.Flags.HAS_DRAW_MODIFIER_VALUE
+    }
+    if (hasChildDrawModifier) {
+        flags = flags or ComposableNode.Flags.HAS_CHILD_DRAW_MODIFIER_VALUE
+    }
     return flags
 }
-
-private fun ComposableNode.Builder.resetSystemFlag(): ComposableNode.Builder =
-    apply { flags = flags and ComposableNode.Flags.SYSTEM_CREATED_VALUE.inv() }
 
 fun ParameterType.convert(): Parameter.Type {
     return when (this) {
@@ -205,10 +208,10 @@ private fun Parameter.Builder.setValue(stringTable: StringTable, value: Any?) {
 private fun Parameter.Builder.setResourceType(value: Any?, stringTable: StringTable) {
     // A Resource is passed by resource id for Compose
     val resourceId = (value as? Int) ?: return
-    resourceValue = WindowInspector.getGlobalWindowViews()
-        .firstOrNull()
-        ?.createResource(stringTable, resourceId)
-        ?: return
+    resourceValue =
+        WindowInspector.getGlobalWindowViews()
+            .firstOrNull()
+            ?.createResource(stringTable, resourceId) ?: return
 }
 
 private fun Parameter.Builder.setFunctionType(value: Any?, stringTable: StringTable) {
@@ -217,63 +220,57 @@ private fun Parameter.Builder.setFunctionType(value: Any?, stringTable: StringTa
     }
     val lambdaInstance = value[0] ?: return
     val location = LambdaLocation.resolve(lambdaInstance) ?: return
-    val lambdaClass = lambdaInstance::class.java
-    val lambdaClassName = lambdaClass.name
-    lambdaValue = LambdaValue.newBuilder().apply {
-        packageName = stringTable.put(lambdaClassName.substringBeforeLast("."))
-        functionName = if (value.size == 2 && value[1] != null && value[1] is String)
-            stringTable.put(value[1] as String) else 0
-        lambdaName = stringTable.put(findLambdaSelector(lambdaClassName))
-        fileName = stringTable.put(location.fileName)
-        startLineNumber = location.startLine
-        endLineNumber = location.endLine
-    }.build()
+    val function = value.getOrNull(1) as? String
+    lambdaValue =
+        LambdaValue.newBuilder()
+            .apply {
+                packageName = stringTable.put(location.packageName)
+                functionName = function?.let { stringTable.put(it) } ?: 0
+                lambdaName = stringTable.put(location.lambdaName)
+                fileName = stringTable.put(location.fileName)
+                startLineNumber = location.startLine
+                endLineNumber = location.endLine
+            }
+            .build()
 }
-
-/**
- * Return the lambda selector from the [lambdaClassName].
- *
- * Example:
- * - className: com.example.composealertdialog.ComposableSingletons$MainActivityKt$lambda-10$1$2$2$1
- * - selector:  lambda-10$1$2$2$1
- */
-@VisibleForTesting
-fun findLambdaSelector(lambdaClassName: String): String =
-    SELECTOR_EXPR.find(lambdaClassName)?.value?.substring(1) ?: ""
 
 fun NodeParameter.convert(stringTable: StringTable): Parameter {
     val nodeParam = this
-    return Parameter.newBuilder().apply {
-        name = stringTable.put(nodeParam.name)
-        type = nodeParam.type.convert()
-        setValue(stringTable, nodeParam.value)
-        index = nodeParam.index
-        nodeParam.reference?.let { reference = it.convert() }
-        if (nodeParam.elements.isNotEmpty()) {
-            addAllElements(nodeParam.elements.map { it.convert(stringTable) })
+    return Parameter.newBuilder()
+        .apply {
+            name = stringTable.put(nodeParam.name)
+            type = nodeParam.type.convert()
+            setValue(stringTable, nodeParam.value)
+            index = nodeParam.index
+            nodeParam.reference?.let { reference = it.convert() }
+            if (nodeParam.elements.isNotEmpty()) {
+                addAllElements(nodeParam.elements.map { it.convert(stringTable) })
+            }
         }
-    }.build()
+        .build()
 }
 
 fun NodeParameterReference.convert(): ParameterReference {
     val reference = this
-    return ParameterReference.newBuilder().apply {
-        kind = reference.kind.convert()
-        composableId = reference.nodeId
-        anchorHash = reference.anchorId
-        parameterIndex = reference.parameterIndex
-        reference.indices.forEach { addCompositeIndex(it) }
-    }.build()
+    return ParameterReference.newBuilder()
+        .apply {
+            kind = reference.kind.convert()
+            composableId = reference.nodeId
+            anchorHash = reference.anchorId
+            parameterIndex = reference.parameterIndex
+            reference.indices.forEach { addCompositeIndex(it) }
+        }
+        .build()
 }
 
 internal fun CacheTree.toComposableRoot(context: ConversionContext): ComposableRoot =
-    ComposableRoot.newBuilder().also { root ->
-        root.viewId = viewParent.uniqueDrawingId
-        root.addAllNodes(nodes.map {
-            it.toComposableNode(context)
-        })
-        viewsToSkip.forEach { root.addViewsToSkip(it) }
-    }.build()
+    ComposableRoot.newBuilder()
+        .also { root ->
+            root.viewId = viewParent.uniqueDrawingId
+            root.addAllNodes(nodes.map { it.toComposableNode(context) })
+            viewsToSkip.forEach { root.addViewsToSkip(it) }
+        }
+        .build()
 
 fun Iterable<NodeParameter>.convertAll(stringTable: StringTable): List<Parameter> {
     return this.map { it.convert(stringTable) }

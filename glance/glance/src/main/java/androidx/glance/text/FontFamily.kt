@@ -17,31 +17,23 @@
 package androidx.glance.text
 
 /**
- * Describes the family of the font.
- * Defaults are provided, but it is also possible to supply a custom family. If this is found on
- * the system it will be used, otherwise it will fallback to a system default.
+ * Describes the family of the font. Defaults are provided, but it is also possible to supply a
+ * custom family. If this is found on the system it will be used, otherwise it will fallback to a
+ * system default.
  */
-class FontFamily constructor(val family: String) {
-    companion object {
-        /**
-         * The formal text style for scripts.
-         */
-        val Serif = FontFamily("serif")
+public class FontFamily(public val family: String) {
+    public companion object {
+        /** The formal text style for scripts. */
+        public val Serif: FontFamily = FontFamily("serif")
 
-        /**
-         * Font family with low contrast and plain stroke endings.
-         */
-        val SansSerif = FontFamily("sans-serif")
+        /** Font family with low contrast and plain stroke endings. */
+        public val SansSerif: FontFamily = FontFamily("sans-serif")
 
-        /**
-         * Font family where glyphs have the same fixed width.
-         */
-        val Monospace = FontFamily("monospace")
+        /** Font family where glyphs have the same fixed width. */
+        public val Monospace: FontFamily = FontFamily("monospace")
 
-        /**
-         * Cursive, hand-written like font family.
-         */
-        val Cursive = FontFamily("cursive")
+        /** Cursive, hand-written like font family. */
+        public val Cursive: FontFamily = FontFamily("cursive")
     }
 
     override fun toString(): String {

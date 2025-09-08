@@ -21,26 +21,24 @@ import androidx.annotation.VisibleForTesting
 import androidx.work.Configuration
 import androidx.work.Data
 import androidx.work.impl.Scheduler
-import androidx.work.impl.Schedulers
 import androidx.work.impl.WorkContinuationImpl
 import androidx.work.impl.WorkDatabase
 import androidx.work.impl.WorkManagerImpl
-import androidx.work.impl.WorkManagerImpl.MAX_PRE_JOB_SCHEDULER_API_LEVEL
-import androidx.work.impl.WorkManagerImpl.MIN_JOB_SCHEDULER_API_LEVEL
 import androidx.work.impl.model.WorkSpec
 import androidx.work.impl.workers.ARGUMENT_CLASS_NAME
 import androidx.work.impl.workers.ConstraintTrackingWorker
+import kotlin.collections.removeLast as removeLastKt
 
 internal fun checkContentUriTriggerWorkerLimits(
     workDatabase: WorkDatabase,
     configuration: Configuration,
-    continuation: WorkContinuationImpl
+    continuation: WorkContinuationImpl,
 ) {
     if (Build.VERSION.SDK_INT < WorkManagerImpl.CONTENT_URI_TRIGGER_API_LEVEL) return
     val continuations = mutableListOf(continuation)
     var newCount = 0
     while (continuations.isNotEmpty()) {
-        val current = continuations.removeLast()
+        val current = continuations.removeLastKt()
         newCount += current.work.count { it.workSpec.constraints.hasContentUriTriggers() }
         (current.parents as List<WorkContinuationImpl>?)?.let { continuations.addAll(it) }
     }
@@ -50,20 +48,20 @@ internal fun checkContentUriTriggerWorkerLimits(
     if (alreadyEnqueuedCount + newCount > limit)
         throw IllegalArgumentException(
             "Too many workers with contentUriTriggers are enqueued:\n" +
-            "contentUriTrigger workers limit: $limit;\n" +
-            "already enqueued count: $alreadyEnqueuedCount;\n" +
-            "current enqueue operation count: $newCount.\n" +
-            "To address this issue you can: \n" +
-            "1. enqueue less workers or batch some of workers " +
-            "with content uri triggers together;\n" +
-            "2. increase limit via Configuration.Builder.setContentUriTriggerWorkersLimit;\n" +
-            "Please beware that workers with content uri triggers immediately occupy " +
-            "slots in JobScheduler so no updates to content uris are missed."
+                "contentUriTrigger workers limit: $limit;\n" +
+                "already enqueued count: $alreadyEnqueuedCount;\n" +
+                "current enqueue operation count: $newCount.\n" +
+                "To address this issue you can: \n" +
+                "1. enqueue less workers or batch some of workers " +
+                "with content uri triggers together;\n" +
+                "2. increase limit via Configuration.Builder.setContentUriTriggerWorkersLimit;\n" +
+                "Please beware that workers with content uri triggers immediately occupy " +
+                "slots in JobScheduler so no updates to content uris are missed."
         )
 }
 
 @VisibleForTesting
-fun tryDelegateRemoteListenableWorker(workSpec: WorkSpec): WorkSpec {
+public fun tryDelegateRemoteListenableWorker(workSpec: WorkSpec): WorkSpec {
     // Check for the arguments in the input data over checking for the workerClassName
     // directly. This is because, the workerClassName might get overridden given it could get
     // replaced by a ConstraintTrackingWorker.
@@ -72,13 +70,15 @@ fun tryDelegateRemoteListenableWorker(workSpec: WorkSpec): WorkSpec {
     val hasClassName = workSpec.input.hasKey<String>(ARGUMENT_SERVICE_CLASS_NAME)
     if (!hasDelegateWorker && hasPackageName && hasClassName) {
         val workerClassName = workSpec.workerClassName
-        val newInputData = Data.Builder().putAll(workSpec.input)
-            .putString(ARGUMENT_REMOTE_LISTENABLE_WORKER_NAME, workerClassName)
-            .build()
+        val newInputData =
+            Data.Builder()
+                .putAll(workSpec.input)
+                .putString(ARGUMENT_REMOTE_LISTENABLE_WORKER_NAME, workerClassName)
+                .build()
 
         return workSpec.copy(
             input = newInputData,
-            workerClassName = REMOTE_DELEGATING_LISTENABLE_WORKER_CLASS_NAME
+            workerClassName = REMOTE_DELEGATING_LISTENABLE_WORKER_CLASS_NAME,
         )
     }
     return workSpec
@@ -97,55 +97,32 @@ internal fun tryDelegateConstrainedWorkSpec(workSpec: WorkSpec): WorkSpec {
     // holding on to a reference of WorkSpec which got updated). We end up reusing the
     // WorkSpec, and get a ConstraintTrackingWorker (instead of the original Worker class).
     val isConstraintTrackingWorker = workerClassName == ConstraintTrackingWorker::class.java.name
-    if (!isConstraintTrackingWorker &&
-        (constraints.requiresBatteryNotLow() || constraints.requiresStorageNotLow())
+    if (
+        !isConstraintTrackingWorker &&
+            (constraints.requiresBatteryNotLow() || constraints.requiresStorageNotLow())
     ) {
-        val newInputData = Data.Builder().putAll(workSpec.input)
-            .putString(ARGUMENT_CLASS_NAME, workerClassName)
-            .build()
+        val newInputData =
+            Data.Builder()
+                .putAll(workSpec.input)
+                .putString(ARGUMENT_CLASS_NAME, workerClassName)
+                .build()
         return workSpec.copy(
             input = newInputData,
-            workerClassName = ConstraintTrackingWorker::class.java.name
+            workerClassName = ConstraintTrackingWorker::class.java.name,
         )
     }
     return workSpec
 }
 
-internal fun wrapWorkSpecIfNeeded(
-    schedulers: List<Scheduler>,
-    workSpec: WorkSpec,
-): WorkSpec {
+internal fun wrapWorkSpecIfNeeded(schedulers: List<Scheduler>, workSpec: WorkSpec): WorkSpec {
     // Use RemoteListenableWorker delegate if necessary.
     val delegated = tryDelegateRemoteListenableWorker(workSpec)
     // Use a ConstraintTrackingWorker when necessary.
     return when {
-        Build.VERSION.SDK_INT in MIN_JOB_SCHEDULER_API_LEVEL..25 ->
-            tryDelegateConstrainedWorkSpec(delegated)
-
-        Build.VERSION.SDK_INT <= MAX_PRE_JOB_SCHEDULER_API_LEVEL &&
-            usesScheduler(schedulers, Schedulers.GCM_SCHEDULER) ->
-            tryDelegateConstrainedWorkSpec(delegated)
-
+        Build.VERSION.SDK_INT <= 25 -> tryDelegateConstrainedWorkSpec(delegated)
         else -> delegated
     }
 }
-
-private fun usesScheduler(
-    schedulers: List<Scheduler>,
-    className: String
-): Boolean {
-    return try {
-        val klass = Class.forName(className)
-        return schedulers.any { scheduler -> klass.isAssignableFrom(scheduler.javaClass) }
-    } catch (ignore: ClassNotFoundException) {
-        false
-    }
-}
-
-// The name of the worker to delegate to when it's a Remote Listenable Worker
-
-internal const val REMOTE_DELEGATING_LISTENABLE_WORKER_CLASS_NAME =
-    "androidx.work.multiprocess.RemoteListenableDelegatingWorker"
 
 // Redefine the keys
 
@@ -155,8 +132,17 @@ internal const val ARGUMENT_SERVICE_PACKAGE_NAME =
 internal const val ARGUMENT_SERVICE_CLASS_NAME =
     "androidx.work.impl.workers.RemoteListenableWorker.ARGUMENT_CLASS_NAME"
 
+/**
+ * Originally defined in `RemoteListenableDelegatingWorker.kt`. This method is being re-defined here
+ * to avoid a circular dependency on the multiprocess library.
+ *
+ * The fully qualified name of the class that is used when running in the context of a remote
+ * process. This constant is useful when migrating remote workers between processes.
+ */
+internal const val REMOTE_DELEGATING_LISTENABLE_WORKER_CLASS_NAME =
+    "androidx.work.multiprocess.RemoteListenableDelegatingWorker"
+
 // The RemoteListenableWorker class to delegate to.
-/* ktlint-disable max-line-length */
+
 internal const val ARGUMENT_REMOTE_LISTENABLE_WORKER_NAME =
     "androidx.work.multiprocess.RemoteListenableDelegatingWorker.ARGUMENT_REMOTE_LISTENABLE_WORKER_NAME"
-/* ktlint-enable max-line-length */

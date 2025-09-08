@@ -16,7 +16,12 @@
 
 package androidx.compose.foundation.contextmenu
 
+import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
+import android.os.Build
 import androidx.compose.foundation.contextmenu.ContextMenuState.Status
+import androidx.compose.foundation.text.contextmenu.ProcessTextApi23Impl
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -46,6 +51,9 @@ import com.google.common.truth.Subject
 import com.google.common.truth.Subject.Factory
 import com.google.common.truth.Truth.assertAbout
 import com.google.common.truth.Truth.assertThat
+import org.junit.rules.TestRule
+import org.junit.runner.Description
+import org.junit.runners.model.Statement
 
 internal fun ContextMenuState.open(offset: Offset = Offset.Zero) {
     status = Status.Open(offset)
@@ -70,10 +78,9 @@ internal fun ContextMenuScope.testItem(
 internal fun assertThatContextMenuState(state: ContextMenuState): ContextMenuStateSubject =
     assertAbout(ContextMenuStateSubject.SUBJECT_FACTORY).that(state)!!
 
-internal class ContextMenuStateSubject internal constructor(
-    failureMetadata: FailureMetadata?,
-    private val subject: ContextMenuState
-) : Subject(failureMetadata, subject) {
+internal class ContextMenuStateSubject
+internal constructor(failureMetadata: FailureMetadata?, private val subject: ContextMenuState) :
+    Subject(failureMetadata, subject) {
     companion object {
         internal val SUBJECT_FACTORY: Factory<ContextMenuStateSubject?, ContextMenuState> =
             Factory { failureMetadata, subject ->
@@ -113,14 +120,13 @@ internal fun colorCorrespondence(tolerance: Double = 0.02): Correspondence<Color
 internal fun assertThatColor(actual: Color): ColorSubject =
     assertAbout(ColorSubject.INSTANCE).that(actual)
 
-internal class ColorSubject(
-    failureMetadata: FailureMetadata?,
-    private val subject: Color,
-) : Subject(failureMetadata, subject) {
+internal class ColorSubject(failureMetadata: FailureMetadata?, private val subject: Color) :
+    Subject(failureMetadata, subject) {
     companion object {
-        val INSTANCE = Factory<ColorSubject, Color> { failureMetadata, subject ->
-            ColorSubject(failureMetadata, subject)
-        }
+        val INSTANCE =
+            Factory<ColorSubject, Color> { failureMetadata, subject ->
+                ColorSubject(failureMetadata, subject)
+            }
     }
 
     fun isFuzzyEqualTo(expected: Color, tolerance: Float = 0.001f) {
@@ -140,8 +146,8 @@ internal class ColorSubject(
 }
 
 /**
- * In order to trigger `Popup.onDismiss`, the click has to come from above compose's test
- * framework. This method will send the click in this way.
+ * In order to trigger `Popup.onDismiss`, the click has to come from above compose's test framework.
+ * This method will send the click in this way.
  *
  * @param offsetPicker Given the root rect bounds, select an offset to click at.
  */
@@ -149,9 +155,8 @@ internal fun ComposeTestRule.clickOffPopup(offsetPicker: (IntRect) -> IntOffset)
     // Need the click to register above Compose's test framework,
     // else it won't be directed to the popup properly. So,
     // we use a different way of dispatching the click.
-    val rootRect = with(density) {
-        onAllNodes(isRoot()).onFirst().getBoundsInRoot().toRect().roundToIntRect()
-    }
+    val rootRect =
+        with(density) { onAllNodes(isRoot()).onFirst().getBoundsInRoot().toRect().roundToIntRect() }
     val offset = offsetPicker(rootRect)
     UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).click(offset.x, offset.y)
     waitForIdle()
@@ -162,24 +167,31 @@ internal object ContextMenuItemLabels {
     internal const val COPY = "Copy"
     internal const val PASTE = "Paste"
     internal const val SELECT_ALL = "Select all"
+    internal const val AUTOFILL = "Autofill"
+    internal const val PROCESS_TEXT_1 = "ProcessText1"
+    internal const val PROCESS_TEXT_2 = "ProcessText2"
 }
 
-internal fun ComposeTestRule.contextMenuItemInteraction(
-    label: String,
-): SemanticsNodeInteraction = onNode(matcher = hasAnyAncestor(isPopup()) and hasText(label))
+internal fun ComposeTestRule.contextMenuItemInteraction(label: String): SemanticsNodeInteraction =
+    onNode(matcher = hasAnyAncestor(isPopup()) and hasText(label))
 
-internal enum class ContextMenuItemState { ENABLED, DISABLED, DOES_NOT_EXIST }
+internal enum class ContextMenuItemState {
+    ENABLED,
+    DISABLED,
+    DOES_NOT_EXIST,
+}
 
 /**
- * Various asserts for checking enable/disable status of the context menu.
- * Always checks that the popup exists and that all the items exist.
- * Each boolean parameter represents whether the item is expected to be enabled or not.
+ * Various asserts for checking enable/disable status of the context menu. Always checks that the
+ * popup exists and that all the items exist. Each boolean parameter represents whether the item is
+ * expected to be enabled or not.
  */
 internal fun ComposeTestRule.assertContextMenuItems(
     cutState: ContextMenuItemState,
     copyState: ContextMenuItemState,
     pasteState: ContextMenuItemState,
     selectAllState: ContextMenuItemState,
+    autofillState: ContextMenuItemState,
 ) {
     val contextMenuInteraction = onNode(isPopup())
     contextMenuInteraction.assertExists("Context Menu should exist.")
@@ -188,9 +200,10 @@ internal fun ComposeTestRule.assertContextMenuItems(
     assertContextMenuItem(label = ContextMenuItemLabels.COPY, state = copyState)
     assertContextMenuItem(label = ContextMenuItemLabels.PASTE, state = pasteState)
     assertContextMenuItem(label = ContextMenuItemLabels.SELECT_ALL, state = selectAllState)
+    assertContextMenuItem(label = ContextMenuItemLabels.AUTOFILL, state = autofillState)
 }
 
-private fun ComposeTestRule.assertContextMenuItem(label: String, state: ContextMenuItemState) {
+internal fun ComposeTestRule.assertContextMenuItem(label: String, state: ContextMenuItemState) {
     // Note: this test assumes the text and the row have been merged in the semantics tree.
     contextMenuItemInteraction(label).run {
         if (state == ContextMenuItemState.DOES_NOT_EXIST) {
@@ -200,6 +213,42 @@ private fun ComposeTestRule.assertContextMenuItem(label: String, state: ContextM
             assertIsDisplayed()
             assertHasClickAction()
             if (state == ContextMenuItemState.ENABLED) assertIsEnabled() else assertIsNotEnabled()
+        }
+    }
+}
+
+/**
+ * The test rule that overrides the process text items in context menu.
+ *
+ * @param itemLabels the labels of the each process text item.
+ */
+class ProcessTextItemOverrideRule(private vararg val itemLabels: String) : TestRule {
+    override fun apply(base: Statement?, description: Description?): Statement? {
+
+        return if (Build.VERSION.SDK_INT >= 23) {
+            object : Statement() {
+                @SuppressLint("VisibleForTests")
+                override fun evaluate() {
+                    val oldQueryLambda = ProcessTextApi23Impl.processTextActivitiesQuery
+
+                    ProcessTextApi23Impl.processTextActivitiesQuery = {
+                        itemLabels.map { label -> createTestResolveInfo(label) }
+                    }
+                    base?.evaluate()
+
+                    ProcessTextApi23Impl.processTextActivitiesQuery = oldQueryLambda
+                }
+            }
+        } else {
+            base
+        }
+    }
+
+    private fun createTestResolveInfo(label: String): ResolveInfo {
+        return object : ResolveInfo() {
+            override fun loadLabel(pm: PackageManager): CharSequence {
+                return label
+            }
         }
     }
 }

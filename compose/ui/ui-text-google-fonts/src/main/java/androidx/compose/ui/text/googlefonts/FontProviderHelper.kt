@@ -29,7 +29,7 @@ import java.util.Arrays
 @WorkerThread
 internal fun GoogleFont.Provider.checkAvailable(
     packageManager: PackageManager,
-    resources: Resources
+    resources: Resources,
 ): Boolean {
     // check package is available (false return paths)
     @Suppress("DEPRECATION")
@@ -40,14 +40,15 @@ internal fun GoogleFont.Provider.checkAvailable(
     val signatures = packageManager.getSignatures(providerInfo.packageName)
     val sortedSignatures = signatures.sortedWith(ByteArrayComparator)
     val allExpectedCerts = loadCertsIfNeeded(resources)
-    val certsMatched = allExpectedCerts.any { certList ->
-        val expected = certList?.sortedWith(ByteArrayComparator)
-        if (expected?.size != sortedSignatures.size) return@any false
-        for (i in expected.indices) {
-            if (!Arrays.equals(expected[i], sortedSignatures[i])) return@any false
+    val certsMatched =
+        allExpectedCerts.any { certList ->
+            val expected = certList?.sortedWith(ByteArrayComparator)
+            if (expected?.size != sortedSignatures.size) return@any false
+            for (i in expected.indices) {
+                if (!Arrays.equals(expected[i], sortedSignatures[i])) return@any false
+            }
+            true
         }
-        true
-    }
     return if (certsMatched) {
         true
     } else {
@@ -57,11 +58,8 @@ internal fun GoogleFont.Provider.checkAvailable(
 
 @SuppressLint("ListIterator") // not a hot code path, not optimized
 private fun throwFormattedCertsMissError(signatures: List<ByteArray>): Nothing {
-    val fullDescription = signatures.joinToString(
-        ",",
-        prefix = "listOf(listOf(",
-        postfix = "))"
-    ) { repr(it) }
+    val fullDescription =
+        signatures.joinToString(",", prefix = "listOf(listOf(", postfix = "))") { repr(it) }
     throw IllegalStateException(
         "Provided signatures did not match. Actual signatures of package are:\n\n$fullDescription"
     )
@@ -84,7 +82,7 @@ private fun PackageManager.getSignatures(packageName: String): List<ByteArray> {
     @SuppressLint("PackageManagerGetSignatures")
     val packageInfo: PackageInfo = getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
     @Suppress("DEPRECATION")
-    return convertToByteArrayList(packageInfo.signatures)
+    return convertToByteArrayList(packageInfo.signatures!!)
 }
 
 private val ByteArrayComparator = Comparator { l: ByteArray, r: ByteArray ->

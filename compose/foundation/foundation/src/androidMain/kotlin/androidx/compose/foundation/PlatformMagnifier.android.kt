@@ -34,8 +34,8 @@ internal interface PlatformMagnifierFactory {
 
     /**
      * If true, passing a different zoom level to [PlatformMagnifier.update] on the
-     * [PlatformMagnifier] returned from [create] will actually update the magnifier.
-     * If false, a new [PlatformMagnifier] must be created to use a different zoom level.
+     * [PlatformMagnifier] returned from [create] will actually update the magnifier. If false, a
+     * new [PlatformMagnifier] must be created to use a different zoom level.
      */
     val canUpdateZoom: Boolean
 
@@ -47,7 +47,7 @@ internal interface PlatformMagnifierFactory {
         elevation: Dp,
         clippingEnabled: Boolean,
         density: Density,
-        initialZoom: Float
+        initialZoom: Float,
     ): PlatformMagnifier
 
     companion object {
@@ -65,9 +65,7 @@ internal interface PlatformMagnifierFactory {
     }
 }
 
-/**
- * Abstraction around the framework [Magnifier] class, for testing.
- */
+/** Abstraction around the framework [Magnifier] class, for testing. */
 internal interface PlatformMagnifier {
 
     /** Returns the actual size of the magnifier widget, even if not specified at creation. */
@@ -80,11 +78,7 @@ internal interface PlatformMagnifier {
      * Sets the properties on a [Magnifier] instance that can be updated without recreating the
      * magnifier (e.g. [Magnifier.setZoom]) and [shows][Magnifier.show] it.
      */
-    fun update(
-        sourceCenter: Offset,
-        magnifierCenter: Offset,
-        zoom: Float
-    )
+    fun update(sourceCenter: Offset, magnifierCenter: Offset, zoom: Float)
 
     /** Wraps [Magnifier.dismiss]. */
     fun dismiss()
@@ -103,7 +97,7 @@ internal object PlatformMagnifierFactoryApi28Impl : PlatformMagnifierFactory {
         elevation: Dp,
         clippingEnabled: Boolean,
         density: Density,
-        initialZoom: Float
+        initialZoom: Float,
     ): PlatformMagnifierImpl = PlatformMagnifierImpl(Magnifier(view))
 
     @RequiresApi(28)
@@ -116,11 +110,7 @@ internal object PlatformMagnifierFactoryApi28Impl : PlatformMagnifierFactory {
             magnifier.update()
         }
 
-        override fun update(
-            sourceCenter: Offset,
-            magnifierCenter: Offset,
-            zoom: Float
-        ) {
+        override fun update(sourceCenter: Offset, magnifierCenter: Offset, zoom: Float) {
             magnifier.show(sourceCenter.x, sourceCenter.y)
         }
 
@@ -142,7 +132,7 @@ internal object PlatformMagnifierFactoryApi29Impl : PlatformMagnifierFactory {
         elevation: Dp,
         clippingEnabled: Boolean,
         density: Density,
-        initialZoom: Float
+        initialZoom: Float,
     ): PlatformMagnifierImpl {
         with(density) {
             // TODO write test for this branch
@@ -159,22 +149,23 @@ internal object PlatformMagnifierFactoryApi29Impl : PlatformMagnifierFactory {
 
             // When Builder properties are not specified, the widget uses different defaults than it
             // does for the non-builder constructor above.
-            val magnifier = Magnifier.Builder(view).run {
-                if (pixelSize.isSpecified) {
-                    setSize(pixelSize.width.roundToInt(), pixelSize.height.roundToInt())
+            val magnifier =
+                Magnifier.Builder(view).run {
+                    if (pixelSize.isSpecified) {
+                        setSize(pixelSize.width.roundToInt(), pixelSize.height.roundToInt())
+                    }
+                    if (!pixelCornerRadius.isNaN()) {
+                        setCornerRadius(pixelCornerRadius)
+                    }
+                    if (!pixelElevation.isNaN()) {
+                        setElevation(pixelElevation)
+                    }
+                    if (!initialZoom.isNaN()) {
+                        setInitialZoom(initialZoom)
+                    }
+                    setClippingEnabled(clippingEnabled)
+                    build()
                 }
-                if (!pixelCornerRadius.isNaN()) {
-                    setCornerRadius(pixelCornerRadius)
-                }
-                if (!pixelElevation.isNaN()) {
-                    setElevation(pixelElevation)
-                }
-                if (!initialZoom.isNaN()) {
-                    setInitialZoom(initialZoom)
-                }
-                setClippingEnabled(clippingEnabled)
-                build()
-            }
 
             return PlatformMagnifierImpl(magnifier)
         }
@@ -188,10 +179,7 @@ internal object PlatformMagnifierFactoryApi29Impl : PlatformMagnifierFactory {
             if (!zoom.isNaN()) magnifier.zoom = zoom
 
             if (magnifierCenter.isSpecified) {
-                magnifier.show(
-                    sourceCenter.x, sourceCenter.y,
-                    magnifierCenter.x, magnifierCenter.y
-                )
+                magnifier.show(sourceCenter.x, sourceCenter.y, magnifierCenter.x, magnifierCenter.y)
             } else {
                 // This overload places the magnifier at a default offset relative to the source.
                 magnifier.show(sourceCenter.x, sourceCenter.y)

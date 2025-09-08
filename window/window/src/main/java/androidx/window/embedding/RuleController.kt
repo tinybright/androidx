@@ -34,14 +34,12 @@ import androidx.window.embedding.RuleController.Companion.parseRules
  * startup before any activities complete initialization. The rule updates only apply to future
  * [android.app.Activity] launches and do not apply to already running activities.
  */
-class RuleController internal constructor(private val embeddingBackend: EmbeddingBackend) {
+public class RuleController internal constructor(private val embeddingBackend: EmbeddingBackend) {
 
     // TODO(b/258356512): Make this API a make this a coroutine API that returns
     //  Flow<Set<EmbeddingRule>>.
-    /**
-     * Returns a copy of the currently registered rules.
-     */
-    fun getRules(): Set<EmbeddingRule> {
+    /** Returns a copy of the currently registered rules. */
+    public fun getRules(): Set<EmbeddingRule> {
         return embeddingBackend.getRules()
     }
 
@@ -49,10 +47,10 @@ class RuleController internal constructor(private val embeddingBackend: Embeddin
      * Registers a new rule, or updates an existing rule if the [tag][EmbeddingRule.tag] has been
      * registered with [RuleController]. Will be cleared automatically when the process is stopped.
      *
-     * Registering a `SplitRule` may fail if the [SplitController.splitSupportStatus]
-     * returns `false`. If not supported, it could be either because
-     * [androidx.window.WindowProperties.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED] not enabled
-     * in AndroidManifest or the feature not available on the device.
+     * Registering a `SplitRule` may fail if the [SplitController.splitSupportStatus] returns
+     * `false`. If not supported, it could be either because
+     * [androidx.window.WindowProperties.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED] not enabled in
+     * AndroidManifest or the feature not available on the device.
      *
      * Note that registering a new rule or updating the existing rule will **not** be applied to any
      * existing split activity container, and will only be used for new split containers created
@@ -60,7 +58,7 @@ class RuleController internal constructor(private val embeddingBackend: Embeddin
      *
      * @param rule new [EmbeddingRule] to register.
      */
-    fun addRule(rule: EmbeddingRule) {
+    public fun addRule(rule: EmbeddingRule) {
         embeddingBackend.addRule(rule)
     }
 
@@ -69,27 +67,27 @@ class RuleController internal constructor(private val embeddingBackend: Embeddin
      *
      * @param rule the previously registered [EmbeddingRule] to unregister.
      */
-    fun removeRule(rule: EmbeddingRule) {
+    public fun removeRule(rule: EmbeddingRule) {
         embeddingBackend.removeRule(rule)
     }
 
     /**
-     * Sets a set of [EmbeddingRule]s, which replace all rules registered by [addRule]
-     * or [setRules].
+     * Sets a set of [EmbeddingRule]s, which replace all rules registered by [addRule] or
+     * [setRules].
      *
      * It's recommended to set the rules via an [androidx.startup.Initializer], or
-     * [android.app.Application.onCreate], so that they are applied early in the application
-     * startup before any activities appear.
+     * [android.app.Application.onCreate], so that they are applied early in the application startup
+     * before any activities appear.
      *
      * The [EmbeddingRule]s can be parsed from [parseRules] or built with rule Builders, which are:
      * - [SplitPairRule.Builder]
      * - [SplitPlaceholderRule.Builder]
      * - [ActivityRule.Builder]
      *
-     * Registering `SplitRule`s may fail if the [SplitController.splitSupportStatus]
-     * returns `false`. If not supported, it could be either because
-     * [androidx.window.WindowProperties.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED] not enabled
-     * in AndroidManifest or the feature not available on the device.
+     * Registering `SplitRule`s may fail if the [SplitController.splitSupportStatus] returns
+     * `false`. If not supported, it could be either because
+     * [androidx.window.WindowProperties.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED] not enabled in
+     * AndroidManifest or the feature not available on the device.
      *
      * Note that updating the existing rules will **not** be applied to any existing split activity
      * container, and will only be used for new split containers created with future activity
@@ -97,25 +95,25 @@ class RuleController internal constructor(private val embeddingBackend: Embeddin
      *
      * @param rules The [EmbeddingRule]s to set
      * @throws IllegalArgumentException if [rules] contains two [EmbeddingRule]s with the same
-     * [EmbeddingRule.tag].
+     *   [EmbeddingRule.tag].
      */
-    fun setRules(rules: Set<EmbeddingRule>) {
+    public fun setRules(rules: Set<EmbeddingRule>) {
         embeddingBackend.setRules(rules)
     }
 
     /** Clears the rules previously registered by [addRule] or [setRules]. */
-    fun clearRules() {
+    public fun clearRules() {
         embeddingBackend.setRules(emptySet())
     }
 
-    companion object {
+    public companion object {
         /**
          * Obtains an instance of [RuleController].
          *
          * @param context the [Context] to initialize the controller with
          */
         @JvmStatic
-        fun getInstance(context: Context): RuleController {
+        public fun getInstance(context: Context): RuleController {
             val applicationContext = context.applicationContext
             val backend = EmbeddingBackend.getInstance(applicationContext)
             return RuleController(backend)
@@ -131,7 +129,10 @@ class RuleController internal constructor(private val embeddingBackend: Embeddin
          * @throws IllegalArgumentException if any of the rules in the XML are malformed.
          */
         @JvmStatic
-        fun parseRules(context: Context, @XmlRes staticRuleResourceId: Int): Set<EmbeddingRule> =
+        public fun parseRules(
+            context: Context,
+            @XmlRes staticRuleResourceId: Int,
+        ): Set<EmbeddingRule> =
             RuleParser.parseRules(context.applicationContext, staticRuleResourceId) ?: emptySet()
     }
 }

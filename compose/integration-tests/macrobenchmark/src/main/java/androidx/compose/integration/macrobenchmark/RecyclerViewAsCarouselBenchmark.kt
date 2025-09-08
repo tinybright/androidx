@@ -31,11 +31,8 @@ import org.junit.runners.Parameterized
 
 @LargeTest
 @RunWith(Parameterized::class)
-class RecyclerViewAsCarouselBenchmark(
-    private val compilationMode: CompilationMode
-) {
-    @get:Rule
-    val benchmarkRule = MacrobenchmarkRule()
+class RecyclerViewAsCarouselBenchmark(private val compilationMode: CompilationMode) {
+    @get:Rule val benchmarkRule = MacrobenchmarkRule()
 
     @Test
     fun scroll() {
@@ -48,15 +45,10 @@ class RecyclerViewAsCarouselBenchmark(
                 val intent = Intent()
                 intent.action = Action
                 startActivityAndWait(intent)
-            }
+            },
         ) {
             // Setting a gesture margin is important otherwise gesture nav is triggered.
-            val pager = device.findObject(
-                By.res(
-                    PackageName,
-                    ResourceId
-                )
-            )
+            val pager = device.findObject(By.res(PackageName, ResourceId))
             pager.setGestureMargin(device.displayWidth / 5)
             for (i in 1..10) {
                 pager.swipe(Direction.LEFT, 1.0f)

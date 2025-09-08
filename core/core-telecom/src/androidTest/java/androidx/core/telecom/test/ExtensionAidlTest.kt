@@ -18,8 +18,11 @@ package androidx.core.telecom.test
 
 import androidx.core.telecom.extensions.Capability
 import androidx.core.telecom.extensions.ICallDetailsListener
+import androidx.core.telecom.extensions.ICallIconStateListener
 import androidx.core.telecom.extensions.ICapabilityExchange
 import androidx.core.telecom.extensions.ICapabilityExchangeListener
+import androidx.core.telecom.extensions.ILocalSilenceStateListener
+import androidx.core.telecom.extensions.IMeetingSummaryStateListener
 import androidx.core.telecom.extensions.IParticipantStateListener
 import androidx.core.telecom.util.ExperimentalAppActions
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -31,8 +34,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Not very useful for now, but tests the visibility of the AIDL files and ensures that they can
- * be used as described.
+ * Not very useful for now, but tests the visibility of the AIDL files and ensures that they can be
+ * used as described.
  */
 @OptIn(ExperimentalAppActions::class)
 @RunWith(AndroidJUnit4::class)
@@ -40,33 +43,32 @@ class ExtensionAidlTest {
 
     class CapabilityExchangeImpl(
         val onBeginExchange: (MutableList<Capability>?, ICapabilityExchangeListener?) -> Unit =
-            { _: MutableList<Capability>?, _: ICapabilityExchangeListener? -> }
+            { _: MutableList<Capability>?, _: ICapabilityExchangeListener? ->
+            }
     ) : ICapabilityExchange.Stub() {
 
         override fun beginExchange(
             capabilities: MutableList<Capability>?,
-            l: ICapabilityExchangeListener?
+            l: ICapabilityExchangeListener?,
         ) {
-            capabilities?.let {
-                l?.let {
-                    onBeginExchange(capabilities, l)
-                }
-            }
+            capabilities?.let { l?.let { onBeginExchange(capabilities, l) } }
         }
     }
 
     class CapabilityExchangeListenerImpl(
         val createParticipantExtension: (Int, IntArray?, IParticipantStateListener?) -> Unit =
-            { _: Int, _: IntArray?, _: IParticipantStateListener? -> },
+            { _: Int, _: IntArray?, _: IParticipantStateListener? ->
+            },
         val createCallDetailsExtension: (Int, IntArray?, ICallDetailsListener?, String) -> Unit =
-            { _: Int, _: IntArray?, _: ICallDetailsListener?, _: String -> },
+            { _: Int, _: IntArray?, _: ICallDetailsListener?, _: String ->
+            },
         val unsubscribeFromParticipantExtensionUpdatse: () -> Unit = {},
-        val unsubscribeFromCallDetailsExtensionUpdates: () -> Unit = {}
+        val unsubscribeFromCallDetailsExtensionUpdates: () -> Unit = {},
     ) : ICapabilityExchangeListener.Stub() {
         override fun onCreateParticipantExtension(
             version: Int,
             actions: IntArray?,
-            l: IParticipantStateListener?
+            l: IParticipantStateListener?,
         ) {
             createParticipantExtension(version, actions, l)
         }
@@ -75,9 +77,33 @@ class ExtensionAidlTest {
             version: Int,
             actions: IntArray?,
             l: ICallDetailsListener?,
-            packageName: String
+            packageName: String,
         ) {
             createCallDetailsExtension(version, actions, l, packageName)
+        }
+
+        override fun onCreateLocalCallSilenceExtension(
+            version: Int,
+            actions: IntArray?,
+            l: ILocalSilenceStateListener?,
+        ) {
+            TODO("Not yet implemented")
+        }
+
+        override fun onCreateCallIconExtension(
+            version: Int,
+            actions: IntArray?,
+            remoteName: String,
+            l: ICallIconStateListener?,
+        ) {
+            TODO("Not yet implemented")
+        }
+
+        override fun onCreateMeetingSummaryExtension(
+            version: Int,
+            l: IMeetingSummaryStateListener?,
+        ) {
+            TODO("Not yet implemented")
         }
 
         override fun onRemoveExtensions() {
@@ -95,23 +121,31 @@ class ExtensionAidlTest {
         var supportedParticipantActions: IntArray? = null
         var participantStateListener: IParticipantStateListener? = null
         var versionNumber = -1
-        val capExchange = CapabilityExchangeImpl(onBeginExchange = { caps: MutableList<Capability>?,
-            iCapabilityExchangeListener: ICapabilityExchangeListener? ->
-            listener = iCapabilityExchangeListener
-            capabilities = caps
-        })
+        val capExchange =
+            CapabilityExchangeImpl(
+                onBeginExchange = {
+                    caps: MutableList<Capability>?,
+                    iCapabilityExchangeListener: ICapabilityExchangeListener? ->
+                    listener = iCapabilityExchangeListener
+                    capabilities = caps
+                }
+            )
         val testCapability = Capability()
         testCapability.featureVersion = 2
         testCapability.featureId = 1
         testCapability.supportedActions = intArrayOf(1, 2)
         val testCapabilities = mutableListOf(testCapability)
-        val capExchangeListener = CapabilityExchangeListenerImpl(
-            createParticipantExtension = { version: Int,
-                actions: IntArray?, iParticipantStateListener: IParticipantStateListener? ->
-            versionNumber = version
-            supportedParticipantActions = actions
-            participantStateListener = iParticipantStateListener
-        })
+        val capExchangeListener =
+            CapabilityExchangeListenerImpl(
+                createParticipantExtension = {
+                    version: Int,
+                    actions: IntArray?,
+                    iParticipantStateListener: IParticipantStateListener? ->
+                    versionNumber = version
+                    supportedParticipantActions = actions
+                    participantStateListener = iParticipantStateListener
+                }
+            )
 
         // Send caps
         capExchange.beginExchange(testCapabilities, capExchangeListener)

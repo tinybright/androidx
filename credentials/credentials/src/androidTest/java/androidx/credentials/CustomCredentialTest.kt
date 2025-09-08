@@ -17,7 +17,9 @@
 package androidx.credentials
 
 import android.os.Bundle
+import androidx.credentials.Credential.Companion.createFrom
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SdkSuppress
 import androidx.test.filters.SmallTest
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert
@@ -31,8 +33,10 @@ class CustomCredentialTest {
     fun constructor_emptyType_throws() {
         Assert.assertThrows(
             "Expected empty type to throw IAE",
-            IllegalArgumentException::class.java
-        ) { CustomCredential("", Bundle()) }
+            IllegalArgumentException::class.java,
+        ) {
+            CustomCredential("", Bundle())
+        }
     }
 
     @Test
@@ -45,11 +49,22 @@ class CustomCredentialTest {
         val expectedType = "TYPE"
         val expectedBundle = Bundle()
         expectedBundle.putString("Test", "Test")
-        val option = CustomCredential(
-            expectedType,
-            expectedBundle
-        )
+        val option = CustomCredential(expectedType, expectedBundle)
         assertThat(option.type).isEqualTo(expectedType)
         assertThat(equals(option.data, expectedBundle)).isTrue()
+    }
+
+    @SdkSuppress(minSdkVersion = 34)
+    @Test
+    fun frameworkConversion_frameworkClass_success() {
+        val expectedType = "TYPE"
+        val expectedBundle = Bundle()
+        expectedBundle.putString("Test", "Test")
+        val credential = CustomCredential(expectedType, expectedBundle)
+
+        val convertedCredential =
+            createFrom(android.credentials.Credential(credential.type, credential.data))
+
+        equals(convertedCredential, credential)
     }
 }

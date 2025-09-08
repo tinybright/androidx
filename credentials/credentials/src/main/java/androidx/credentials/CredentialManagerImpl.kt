@@ -20,15 +20,22 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.CancellationSignal
 import androidx.annotation.RequiresApi
 import androidx.credentials.exceptions.ClearCredentialException
 import androidx.credentials.exceptions.ClearCredentialProviderConfigurationException
 import androidx.credentials.exceptions.CreateCredentialException
 import androidx.credentials.exceptions.CreateCredentialProviderConfigurationException
+import androidx.credentials.exceptions.CreateCredentialUnsupportedException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.GetCredentialProviderConfigurationException
+import androidx.credentials.exceptions.publickeycredential.SignalCredentialSecurityException
+import androidx.credentials.exceptions.publickeycredential.SignalCredentialStateException
+import androidx.credentials.exceptions.publickeycredential.SignalCredentialStateProviderConfigurationException
+import androidx.credentials.internal.FormFactorHelper
 import java.util.concurrent.Executor
 
 /**
@@ -38,11 +45,11 @@ import java.util.concurrent.Executor
  * register a new credential or to consent to a saved credential from supported credential
  * providers, which can then be used to authenticate to the app.
  *
- * This class contains its own exception types.
- * They represent unique failures during the Credential Manager flow. As required, they
- * can be extended for unique types containing new and unique versions of the exception - either
- * with new 'exception types' (same credential class, different exceptions), or inner subclasses
- * and their exception types (a subclass credential class and all their exception types).
+ * This class contains its own exception types. They represent unique failures during the Credential
+ * Manager flow. As required, they can be extended for unique types containing new and unique
+ * versions of the exception - either with new 'exception types' (same credential class, different
+ * exceptions), or inner subclasses and their exception types (a subclass credential class and all
+ * their exception types).
  *
  * For example, if there is an UNKNOWN exception type, assuming the base Exception is
  * [ClearCredentialException], we can add an 'exception type' class for it as follows:
@@ -58,9 +65,9 @@ import java.util.concurrent.Executor
  * }
  * ```
  *
- * Furthermore, the base class can be subclassed to a new more specific credential type, which
- * then can further be subclassed into individual exception types. The first is an example of a
- * 'inner credential type exception', and the next is a 'exception type' of this subclass exception.
+ * Furthermore, the base class can be subclassed to a new more specific credential type, which then
+ * can further be subclassed into individual exception types. The first is an example of a 'inner
+ * credential type exception', and the next is a 'exception type' of this subclass exception.
  *
  * ```
  * class UniqueCredentialBasedOnClearCredentialException(
@@ -82,20 +89,17 @@ import java.util.concurrent.Executor
  *   }
  * }
  * ```
- *
- *
  */
 @SuppressLint("ObsoleteSdkInt") // Accommodate dependencies with a lower min sdk requirement
-internal class CredentialManagerImpl internal constructor(
-    private val context: Context
-) : CredentialManager {
+internal class CredentialManagerImpl internal constructor(private val context: Context) :
+    CredentialManager {
     companion object {
+        private const val ORIGIN_PERMISSION = "android.permission.CREDENTIAL_MANAGER_SET_ORIGIN"
         /**
          * An intent action that shows a screen that let user enable a Credential Manager provider.
          */
-        private const val
-        INTENT_ACTION_FOR_CREDENTIAL_PROVIDER_SETTINGS: String =
-        "android.settings.CREDENTIAL_PROVIDER"
+        private const val INTENT_ACTION_FOR_CREDENTIAL_PROVIDER_SETTINGS: String =
+            "android.settings.CREDENTIAL_PROVIDER"
     }
 
     /**
@@ -106,8 +110,8 @@ internal class CredentialManagerImpl internal constructor(
      * The execution potentially launches framework UI flows for a user to view available
      * credentials, consent to using one of them, etc.
      *
-     * @param context the context used to launch any UI needed; use an activity context to make
-     * sure the UI will be launched within the same task stack
+     * @param context the context used to launch any UI needed; use an activity context to make sure
+     *   the UI will be launched within the same task stack
      * @param request the request for getting the credential
      * @param cancellationSignal an optional signal that allows for cancelling this call
      * @param executor the callback will take place on this executor
@@ -120,13 +124,14 @@ internal class CredentialManagerImpl internal constructor(
         executor: Executor,
         callback: CredentialManagerCallback<GetCredentialResponse, GetCredentialException>,
     ) {
-        val provider: CredentialProvider? = CredentialProviderFactory(context)
-            .getBestAvailableProvider()
+        val provider: CredentialProvider? =
+            CredentialProviderFactory(context).getBestAvailableProvider(request)
         if (provider == null) {
             callback.onError(
                 GetCredentialProviderConfigurationException(
                     "getCredentialAsync no provider dependencies found - please ensure " +
-                        "the desired provider dependencies are added")
+                        "the desired provider dependencies are added"
+                )
             )
             return
         }
@@ -139,16 +144,16 @@ internal class CredentialManagerImpl internal constructor(
      * This API uses callbacks instead of Kotlin coroutines.
      *
      * Different from the other `getCredentialAsync(GetCredentialRequest, Activity)` API, this API
-     * launches the remaining flows to retrieve an app credential from the user, after the
-     * completed prefetch work corresponding to the given `pendingGetCredentialHandle`. Use this
-     * API to complete the full credential retrieval operation after you initiated a request through
-     * the [prepareGetCredentialAsync] API.
+     * launches the remaining flows to retrieve an app credential from the user, after the completed
+     * prefetch work corresponding to the given `pendingGetCredentialHandle`. Use this API to
+     * complete the full credential retrieval operation after you initiated a request through the
+     * [prepareGetCredentialAsync] API.
      *
-     * The execution can potentially launch UI flows to collect user consent to using a
-     * credential, display a picker when multiple credentials exist, etc.
+     * The execution can potentially launch UI flows to collect user consent to using a credential,
+     * display a picker when multiple credentials exist, etc.
      *
-     * @param context the context used to launch any UI needed; use an activity context to make
-     * sure the UI will be launched within the same task stack
+     * @param context the context used to launch any UI needed; use an activity context to make sure
+     *   the UI will be launched within the same task stack
      * @param pendingGetCredentialHandle the handle representing the pending operation to resume
      * @param cancellationSignal an optional signal that allows for cancelling this call
      * @param executor the callback will take place on this executor
@@ -162,8 +167,9 @@ internal class CredentialManagerImpl internal constructor(
         executor: Executor,
         callback: CredentialManagerCallback<GetCredentialResponse, GetCredentialException>,
     ) {
-        val provider: CredentialProvider? = CredentialProviderFactory(context)
-            .getBestAvailableProvider(shouldFallbackToPreU = false)
+        val provider: CredentialProvider? =
+            CredentialProviderFactory(context)
+                .getBestAvailableProvider(shouldFallbackToPreU = false)
         if (provider == null) {
             callback.onError(
                 GetCredentialProviderConfigurationException("No Credential Manager provider found")
@@ -171,20 +177,24 @@ internal class CredentialManagerImpl internal constructor(
             return
         }
         provider.onGetCredential(
-            context, pendingGetCredentialHandle, cancellationSignal, executor, callback)
+            context,
+            pendingGetCredentialHandle,
+            cancellationSignal,
+            executor,
+            callback,
+        )
     }
 
     /**
-     * Prepares for a get-credential operation. Returns a [PrepareGetCredentialResponse]
-     * that can later be used to launch the credential retrieval UI flow to finalize a user
-     * credential for your app.
+     * Prepares for a get-credential operation. Returns a [PrepareGetCredentialResponse] that can
+     * later be used to launch the credential retrieval UI flow to finalize a user credential for
+     * your app.
      *
      * This API uses callbacks instead of Kotlin coroutines.
      *
-     * This API doesn't invoke any UI. It only performs the preparation work so that you can
-     * later launch the remaining get-credential operation (involves UIs) through the
-     * [getCredentialAsync] API which incurs less latency than executing the whole operation in one
-     * call.
+     * This API doesn't invoke any UI. It only performs the preparation work so that you can later
+     * launch the remaining get-credential operation (involves UIs) through the [getCredentialAsync]
+     * API which incurs less latency than executing the whole operation in one call.
      *
      * @param request the request for getting the credential
      * @param cancellationSignal an optional signal that allows for cancelling this call
@@ -198,27 +208,29 @@ internal class CredentialManagerImpl internal constructor(
         executor: Executor,
         callback: CredentialManagerCallback<PrepareGetCredentialResponse, GetCredentialException>,
     ) {
-        val provider: CredentialProvider? = CredentialProviderFactory(context)
-            .getBestAvailableProvider(shouldFallbackToPreU = false)
+        val provider: CredentialProvider? =
+            CredentialProviderFactory(context)
+                .getBestAvailableProvider(shouldFallbackToPreU = false)
         if (provider == null) {
             callback.onError(
-                GetCredentialProviderConfigurationException("No Credential Manager provider found"))
+                GetCredentialProviderConfigurationException("No Credential Manager provider found")
+            )
             return
         }
         provider.onPrepareCredential(request, cancellationSignal, executor, callback)
     }
 
     /**
-     * Registers a user credential that can be used to authenticate the user to
-     * the app in the future.
+     * Registers a user credential that can be used to authenticate the user to the app in the
+     * future.
      *
      * This API uses callbacks instead of Kotlin coroutines.
      *
      * The execution potentially launches framework UI flows for a user to view their registration
      * options, grant consent, etc.
      *
-     * @param context the context used to launch any UI needed; use an activity context to make
-     * sure the UI will be launched within the same task stack
+     * @param context the context used to launch any UI needed; use an activity context to make sure
+     *   the UI will be launched within the same task stack
      * @param request the request for creating the credential
      * @param cancellationSignal an optional signal that allows for cancelling this call
      * @param executor the callback will take place on this executor
@@ -231,14 +243,28 @@ internal class CredentialManagerImpl internal constructor(
         executor: Executor,
         callback: CredentialManagerCallback<CreateCredentialResponse, CreateCredentialException>,
     ) {
-        val provider: CredentialProvider? = CredentialProviderFactory(this.context)
-            .getBestAvailableProvider()
+        val provider: CredentialProvider? =
+            CredentialProviderFactory(this.context).getBestAvailableProvider(request)
         if (provider == null) {
-            callback.onError(CreateCredentialProviderConfigurationException(
-                "createCredentialAsync no provider dependencies found - please ensure the " +
-                    "desired provider dependencies are added"))
+            callback.onError(
+                CreateCredentialProviderConfigurationException(
+                    "createCredentialAsync no provider dependencies found - please ensure the " +
+                        "desired provider dependencies are added"
+                )
+            )
             return
         }
+
+        // Check if this is a Wearable device, creation is not supported.
+        if (FormFactorHelper.isWear(context)) {
+            callback.onError(
+                CreateCredentialUnsupportedException(
+                    "createCredential is not supported on this device"
+                )
+            )
+            return
+        }
+
         provider.onCreateCredential(context, request, cancellationSignal, executor, callback)
     }
 
@@ -256,6 +282,9 @@ internal class CredentialManagerImpl internal constructor(
      * app and in order to get the holistic sign-in options the next time, you should call this API
      * to let the provider clear any stored credential session.
      *
+     * If the API is called with [ClearCredentialStateRequest.TYPE_CLEAR_RESTORE_CREDENTIAL] then
+     * any restore credential stored on device will be cleared.
+     *
      * @param request the request for clearing the app user's credential state
      * @param cancellationSignal an optional signal that allows for cancelling this call
      * @param executor the callback will take place on this executor
@@ -267,19 +296,68 @@ internal class CredentialManagerImpl internal constructor(
         executor: Executor,
         callback: CredentialManagerCallback<Void?, ClearCredentialException>,
     ) {
-        val provider: CredentialProvider? = CredentialProviderFactory(context)
-            .getBestAvailableProvider()
+        val provider: CredentialProvider? =
+            CredentialProviderFactory(context).getBestAvailableProvider(request.requestType)
         if (provider == null) {
-            callback.onError(ClearCredentialProviderConfigurationException(
-                "clearCredentialStateAsync no provider dependencies found - please ensure the " +
-                    "desired provider dependencies are added"))
+            callback.onError(
+                ClearCredentialProviderConfigurationException(
+                    "clearCredentialStateAsync no provider dependencies found - please ensure the " +
+                        "desired provider dependencies are added"
+                )
+            )
             return
         }
         provider.onClearCredential(request, cancellationSignal, executor, callback)
     }
 
     /**
-     * Returns a pending intent that shows a screen that lets a user enable a Credential Manager provider.
+     * Signals a user's public key credential/credentials state to all credential providers.
+     *
+     * This API uses callbacks instead of Kotlin coroutines.
+     *
+     * The execution does not invoke any UI but simply informs credential providers about the state
+     * of a user's credential. Supported signal types are [SignalAllAcceptedCredentialIdsRequest],
+     * [SignalCurrentUserDetailsRequest], [SignalUnknownCredentialRequest].
+     *
+     * @param request the request for signaling the credential state
+     * @param executor the callback will take place on this executor
+     * @param callback the callback invoked when the request succeeds or fails
+     */
+    override fun signalCredentialStateAsync(
+        request: SignalCredentialStateRequest,
+        executor: Executor,
+        callback:
+            CredentialManagerCallback<SignalCredentialStateResponse, SignalCredentialStateException>,
+    ) {
+        if (request.origin != null && !isOriginAllowed(context)) {
+            callback.onError(
+                SignalCredentialSecurityException(
+                    "Must have android.permissions.CREDENTIAL_MANAGER_SET_ORIGIN " + "permission"
+                )
+            )
+        }
+        val provider: CredentialProvider? =
+            CredentialProviderFactory(context).getBestAvailableProvider(request)
+        if (provider == null) {
+            callback.onError(
+                SignalCredentialStateProviderConfigurationException(
+                    "No Credential Manager provider found"
+                )
+            )
+            return
+        }
+        provider.onSignalCredentialState(request, executor, callback)
+    }
+
+    private fun isOriginAllowed(context: Context): Boolean {
+        return !(Build.VERSION.SDK_INT >= 34 &&
+            context.checkSelfPermission(ORIGIN_PERMISSION) != PackageManager.PERMISSION_GRANTED)
+    }
+
+    /**
+     * Returns a pending intent that shows a screen that lets a user enable a Credential Manager
+     * provider.
+     *
      * @return the pending intent that can be launched
      */
     @RequiresApi(34)

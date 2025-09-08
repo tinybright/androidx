@@ -42,8 +42,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class CheckboxBenchmark {
 
-    @get:Rule
-    val benchmarkRule = ComposeBenchmarkRule()
+    @get:Rule val benchmarkRule = ComposeBenchmarkRule()
 
     private val checkboxTestCaseFactory = { CheckboxTestCase() }
 
@@ -80,7 +79,7 @@ class CheckboxBenchmark {
     fun toggle_recomposeMeasureLayout() {
         benchmarkRule.toggleStateBenchmarkComposeMeasureLayout(
             caseFactory = checkboxTestCaseFactory,
-            assertOneRecomposition = false
+            assertOneRecomposition = false,
         )
     }
 }
@@ -100,8 +99,6 @@ internal class CheckboxTestCase : LayeredComposeTestCase(), ToggleableTestCase {
 
     @Composable
     override fun ContentWrappers(content: @Composable () -> Unit) {
-        MaterialTheme {
-            content()
-        }
+        MaterialTheme { content() }
     }
 }

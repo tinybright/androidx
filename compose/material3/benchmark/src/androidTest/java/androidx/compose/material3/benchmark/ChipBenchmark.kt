@@ -55,13 +55,10 @@ import org.junit.runners.Parameterized
 class ChipBenchmark(private val type: ChipType) {
 
     companion object {
-        @Parameterized.Parameters(name = "{0}")
-        @JvmStatic
-        fun parameters() = ChipType.values()
+        @Parameterized.Parameters(name = "{0}") @JvmStatic fun parameters() = ChipType.values()
     }
 
-    @get:Rule
-    val benchmarkRule = ComposeBenchmarkRule()
+    @get:Rule val benchmarkRule = ComposeBenchmarkRule()
 
     private val chipTestCaseFactory = { ChipTestCase(type) }
 
@@ -95,11 +92,10 @@ class ChipBenchmark(private val type: ChipType) {
     }
 }
 
-internal class ChipTestCase(
-    private val type: ChipType
-) : LayeredComposeTestCase() {
+internal class ChipTestCase(private val type: ChipType) : LayeredComposeTestCase() {
 
     private var selected by mutableStateOf(false)
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun MeasuredContent() {
@@ -112,11 +108,10 @@ internal class ChipTestCase(
                         Icon(
                             Icons.Filled.Settings,
                             contentDescription = "Localized description",
-                            Modifier.size(AssistChipDefaults.IconSize)
+                            Modifier.size(AssistChipDefaults.IconSize),
                         )
-                    }
+                    },
                 )
-
             ChipType.ElevatedAssist ->
                 ElevatedAssistChip(
                     onClick = { /* Do something! */ },
@@ -125,36 +120,34 @@ internal class ChipTestCase(
                         Icon(
                             Icons.Filled.Settings,
                             contentDescription = "Localized description",
-                            Modifier.size(AssistChipDefaults.IconSize)
+                            Modifier.size(AssistChipDefaults.IconSize),
                         )
-                    }
+                    },
                 )
-
             ChipType.Filter ->
-            FilterChip(
-                selected = selected,
-                onClick = { selected = !selected },
-                label = { Text("Filter chip") },
-                leadingIcon = if (selected) {
-                    {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Localized Description",
-                            modifier = Modifier.size(FilterChipDefaults.IconSize)
-                        )
-                    }
-                } else {
-                    null
-                }
-            )
-
+                FilterChip(
+                    selected = selected,
+                    onClick = { selected = !selected },
+                    label = { Text("Filter chip") },
+                    leadingIcon =
+                        if (selected) {
+                            {
+                                Icon(
+                                    imageVector = Icons.Filled.Done,
+                                    contentDescription = "Localized Description",
+                                    modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                )
+                            }
+                        } else {
+                            null
+                        },
+                )
             ChipType.Input ->
                 InputChip(
                     selected = selected,
                     onClick = { selected = !selected },
                     label = { Text("Input Chip") },
                 )
-
             ChipType.Suggestion ->
                 SuggestionChip(
                     onClick = { /* Do something! */ },
@@ -163,21 +156,23 @@ internal class ChipTestCase(
                         Icon(
                             Icons.Filled.Settings,
                             contentDescription = "Localized description",
-                            Modifier.size(AssistChipDefaults.IconSize)
+                            Modifier.size(AssistChipDefaults.IconSize),
                         )
-                    }
+                    },
                 )
         }
     }
 
     @Composable
     override fun ContentWrappers(content: @Composable () -> Unit) {
-        MaterialTheme {
-            content()
-        }
+        MaterialTheme { content() }
     }
 }
 
 enum class ChipType {
-    Assist, ElevatedAssist, Filter, Input, Suggestion,
+    Assist,
+    ElevatedAssist,
+    Filter,
+    Input,
+    Suggestion,
 }

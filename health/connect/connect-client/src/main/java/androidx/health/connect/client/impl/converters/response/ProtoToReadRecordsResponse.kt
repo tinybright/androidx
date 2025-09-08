@@ -23,14 +23,12 @@ import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.response.ReadRecordsResponse
 import androidx.health.platform.client.proto.ResponseProto
 
-/**
- * Converts public API object into internal proto for ipc.
- */
+/** Converts public API object into internal proto for ipc. */
 @Suppress("UNCHECKED_CAST") // Safe to cast as the type should match
 fun <T : Record> toReadRecordsResponse(
     proto: ResponseProto.ReadDataRangeResponse
 ): ReadRecordsResponse<T> =
     ReadRecordsResponse(
         records = proto.dataPointList.map { toRecord(it) as T },
-        pageToken = proto.pageToken
+        pageToken = proto.pageToken,
     )

@@ -18,16 +18,18 @@ package androidx.compose.animation.tooling
 
 /**
  * Represents a transition of the Compose animation.
+ *
  * @property label The label of the animation.
  * @property specType The java class name of the spec.
  * @property startTimeMillis The animation delay if it has one.
  * @property endTimeMillis The animation duration including the delay.
- * @property values Animation values at given times from [startTimeMillis] to [endTimeMillis] with a step.
+ * @property values Animation values at given times from [startTimeMillis] to [endTimeMillis] with a
+ *   step.
  */
 public class TransitionInfo(
     public val label: String,
     public val specType: String,
     public val startTimeMillis: Long,
     public val endTimeMillis: Long,
-    public val values: Map<Long, Any?>
+    public val values: Map<Long, Any?>,
 )

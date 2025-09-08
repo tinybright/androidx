@@ -18,12 +18,9 @@
 
 package androidx.room
 
-import androidx.annotation.RequiresApi
 import kotlin.jvm.JvmName
 
-/**
- * Available option values that can be used with [Fts3] & [Fts4].
- */
+/** Available option values that can be used with [Fts3] & [Fts4]. */
 public object FtsOptions {
     public enum class MatchInfo {
         /**
@@ -38,7 +35,7 @@ public object FtsOptions {
          *
          * @see Fts4.matchInfo
          */
-        FTS4
+        FTS4,
     }
 
     public enum class Order {
@@ -54,7 +51,7 @@ public object FtsOptions {
          *
          * @see Fts4.order
          */
-        DESC
+        DESC,
     }
 
     /**
@@ -84,12 +81,11 @@ public object FtsOptions {
     public const val TOKENIZER_ICU: String = "icu"
 
     /**
-     * The name of the tokenizer that extends the [TOKENIZER_SIMPLE] tokenizer
-     * according to rules in Unicode Version 6.1.
+     * The name of the tokenizer that extends the [TOKENIZER_SIMPLE] tokenizer according to rules in
+     * Unicode Version 6.1.
      *
      * @see Fts4.tokenizer
      * @see Fts4.tokenizerArgs
      */
-    @RequiresApi(21)
     public const val TOKENIZER_UNICODE61: String = "unicode61"
 }

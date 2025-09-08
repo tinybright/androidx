@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+@file:Suppress("DEPRECATION") // b/420551535
+
 package androidx.compose.foundation.lazy
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.layout.LazyLayoutPrefetchState
 import androidx.compose.foundation.lazy.layout.NestedPrefetchScope
 import androidx.compose.foundation.lazy.layout.PrefetchScheduler
+import androidx.compose.foundation.lazy.layout.UnspecifiedNestedPrefetchCount
 import androidx.compose.runtime.Stable
 
 /**
@@ -39,6 +42,10 @@ interface LazyListPrefetchStrategy {
      * strategy implementation. If null, the default [PrefetchScheduler] for the platform will be
      * used.
      */
+    @Deprecated(
+        "Customization of PrefetchScheduler is no longer supported. LazyLayout will attach " +
+            "an appropriate scheduler internally."
+    )
     val prefetchScheduler: PrefetchScheduler?
         get() = null
 
@@ -47,8 +54,8 @@ interface LazyListPrefetchStrategy {
      * If the visible items have also changed, then this will be invoked in the same frame *after*
      * [onVisibleItemsUpdated].
      *
-     * @param delta the change in scroll direction. Delta < 0 indicates scrolling down while
-     * delta > 0 indicates scrolling up.
+     * @param delta the change in scroll direction. Delta < 0 indicates scrolling down while delta >
+     *   0 indicates scrolling up.
      * @param layoutInfo the current [LazyListLayoutInfo]
      */
     fun LazyListPrefetchScope.onScroll(delta: Float, layoutInfo: LazyListLayoutInfo)
@@ -57,7 +64,7 @@ interface LazyListPrefetchStrategy {
      * onVisibleItemsUpdated is invoked when the LazyList scrolls if the visible items have changed.
      *
      * @param layoutInfo the current [LazyListLayoutInfo]. Info about the updated visible items can
-     * be found in [LazyListLayoutInfo.visibleItemsInfo].
+     *   be found in [LazyListLayoutInfo.visibleItemsInfo].
      */
     fun LazyListPrefetchScope.onVisibleItemsUpdated(layoutInfo: LazyListLayoutInfo)
 
@@ -66,24 +73,22 @@ interface LazyListPrefetchStrategy {
      * this LazyList. It gives this LazyList a chance to request prefetch for some of its own
      * children before coming onto screen.
      *
-     * Implementations can use [NestedPrefetchScope.schedulePrefetch] to schedule child
-     * prefetches. For example, this is useful if this LazyList is a LazyRow that is a child of a
-     * LazyColumn: in that case, [onNestedPrefetch] can schedule the children it expects to be
-     * visible when it comes onto screen, giving the LazyLayout infra a chance to compose these
-     * children ahead of time and reduce jank.
+     * Implementations can use [NestedPrefetchScope.schedulePrefetch] to schedule child prefetches.
+     * For example, this is useful if this LazyList is a LazyRow that is a child of a LazyColumn: in
+     * that case, [onNestedPrefetch] can schedule the children it expects to be visible when it
+     * comes onto screen, giving the LazyLayout infra a chance to compose these children ahead of
+     * time and reduce jank.
      *
      * Generally speaking, [onNestedPrefetch] should only request prefetch for children that it
      * expects to actually be visible when this list is scrolled into view.
      *
      * @param firstVisibleItemIndex the index of the first visible item. It should be used to start
-     * prefetching from the correct index in case the list has been created at a non-zero offset.
+     *   prefetching from the correct index in case the list has been created at a non-zero offset.
      */
     fun NestedPrefetchScope.onNestedPrefetch(firstVisibleItemIndex: Int)
 }
 
-/**
- * Scope for callbacks in [LazyListPrefetchStrategy] which allows prefetches to be requested.
- */
+/** Scope for callbacks in [LazyListPrefetchStrategy] which allows prefetches to be requested. */
 @ExperimentalFoundationApi
 interface LazyListPrefetchScope {
 
@@ -96,8 +101,16 @@ interface LazyListPrefetchScope {
      * See [PrefetchScheduler].
      *
      * @param index the index of the child to prefetch
+     * @param onPrefetchFinished A callback that will be invoked when the prefetching of this item
+     *   is completed. This means precomposition and premeasuring. If the request is canceled before
+     *   either phases can complete, this callback won't be called. The item index and the main axis
+     *   size in pixels of the prefetched item is available as a parameter of this callback. See
+     *   [LazyListPrefetchResultScope] for additional information about the prefetched item.
      */
-    fun schedulePrefetch(index: Int): LazyLayoutPrefetchState.PrefetchHandle
+    fun schedulePrefetch(
+        index: Int,
+        onPrefetchFinished: (LazyListPrefetchResultScope.() -> Unit)? = null,
+    ): LazyLayoutPrefetchState.PrefetchHandle
 }
 
 /**
@@ -105,14 +118,15 @@ interface LazyListPrefetchScope {
  * nested prefetch count.
  *
  * @param nestedPrefetchItemCount specifies how many inner items should be prefetched when this
- * LazyList is nested inside another LazyLayout. For example, if this is the state for a horizontal
- * LazyList nested in a vertical LazyList, you might want to set this to the number of items that
- * will be visible when this list is scrolled into view.
+ *   LazyList is nested inside another LazyLayout. For example, if this is the state for a
+ *   horizontal LazyList nested in a vertical LazyList, you might want to set this to the number of
+ *   items that will be visible when this list is scrolled into view. If automatic nested prefetch
+ *   is enabled, this value will be used as the initial count and the strategy will adapt the count
+ *   automatically.
  */
 @ExperimentalFoundationApi
-fun LazyListPrefetchStrategy(
-    nestedPrefetchItemCount: Int = 2
-): LazyListPrefetchStrategy = DefaultLazyListPrefetchStrategy(nestedPrefetchItemCount)
+fun LazyListPrefetchStrategy(nestedPrefetchItemCount: Int = 2): LazyListPrefetchStrategy =
+    DefaultLazyListPrefetchStrategy(nestedPrefetchItemCount)
 
 /**
  * The default prefetching strategy for LazyLists - this will be used automatically if no other
@@ -120,7 +134,7 @@ fun LazyListPrefetchStrategy(
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Stable
-private class DefaultLazyListPrefetchStrategy(private val nestedPrefetchItemCount: Int = 2) :
+private class DefaultLazyListPrefetchStrategy(private val initialNestedPrefetchItemCount: Int = 2) :
     LazyListPrefetchStrategy {
 
     /**
@@ -128,25 +142,22 @@ private class DefaultLazyListPrefetchStrategy(private val nestedPrefetchItemCoun
      */
     private var indexToPrefetch = -1
 
-    /**
-     * The handle associated with the current index from [indexToPrefetch].
-     */
+    /** The handle associated with the current index from [indexToPrefetch]. */
     private var currentPrefetchHandle: LazyLayoutPrefetchState.PrefetchHandle? = null
 
     /**
-     * Keeps the scrolling direction during the previous calculation in order to be able to
-     * detect the scrolling direction change.
+     * Keeps the scrolling direction during the previous calculation in order to be able to detect
+     * the scrolling direction change.
      */
     private var wasScrollingForward = false
+
+    private var previousPassItemCount = UnsetItemCount
+    private var previousPassDelta = 0f
 
     override fun LazyListPrefetchScope.onScroll(delta: Float, layoutInfo: LazyListLayoutInfo) {
         if (layoutInfo.visibleItemsInfo.isNotEmpty()) {
             val scrollingForward = delta < 0
-            val indexToPrefetch = if (scrollingForward) {
-                layoutInfo.visibleItemsInfo.last().index + 1
-            } else {
-                layoutInfo.visibleItemsInfo.first().index - 1
-            }
+            val indexToPrefetch = layoutInfo.calculateIndexToPrefetch(scrollingForward)
             if (indexToPrefetch in 0 until layoutInfo.totalItemsCount) {
                 if (indexToPrefetch != this@DefaultLazyListPrefetchStrategy.indexToPrefetch) {
                     if (wasScrollingForward != scrollingForward) {
@@ -154,13 +165,11 @@ private class DefaultLazyListPrefetchStrategy(private val nestedPrefetchItemCoun
                         // is not going to be reached anytime soon so it is safer to dispose it.
                         // if this item is already visible it is safe to call the method anyway
                         // as it will be no-op
-                        currentPrefetchHandle?.cancel()
+                        resetPrefetchState()
                     }
                     this@DefaultLazyListPrefetchStrategy.wasScrollingForward = scrollingForward
                     this@DefaultLazyListPrefetchStrategy.indexToPrefetch = indexToPrefetch
-                    currentPrefetchHandle = schedulePrefetch(
-                        indexToPrefetch
-                    )
+                    currentPrefetchHandle = schedulePrefetch(indexToPrefetch)
                 }
                 if (scrollingForward) {
                     val lastItem = layoutInfo.visibleItemsInfo.last()
@@ -181,26 +190,88 @@ private class DefaultLazyListPrefetchStrategy(private val nestedPrefetchItemCoun
                 }
             }
         }
+        previousPassDelta = delta
     }
 
     override fun LazyListPrefetchScope.onVisibleItemsUpdated(layoutInfo: LazyListLayoutInfo) {
-        if (indexToPrefetch != -1 && layoutInfo.visibleItemsInfo.isNotEmpty()) {
-            val expectedPrefetchIndex = if (wasScrollingForward) {
-                layoutInfo.visibleItemsInfo.last().index + 1
-            } else {
-                layoutInfo.visibleItemsInfo.first().index - 1
-            }
-            if (indexToPrefetch != expectedPrefetchIndex) {
-                indexToPrefetch = -1
-                currentPrefetchHandle?.cancel()
-                currentPrefetchHandle = null
+
+        layoutInfo.evaluatePrefetchForCancellation(indexToPrefetch, wasScrollingForward)
+
+        val currentPassItemCount = layoutInfo.totalItemsCount
+        // total item count changed, re-trigger prefetch.
+        if (
+            previousPassItemCount != UnsetItemCount && // we already have info about the item count
+                previousPassDelta != 0.0f && // and scroll direction
+                previousPassItemCount != currentPassItemCount && // and the item count changed
+                layoutInfo.visibleItemsInfo.isNotEmpty()
+        ) {
+            val indexToPrefetch = layoutInfo.calculateIndexToPrefetch(previousPassDelta < 0)
+            if (indexToPrefetch in 0 until currentPassItemCount) {
+                this@DefaultLazyListPrefetchStrategy.indexToPrefetch = indexToPrefetch
+                currentPrefetchHandle = schedulePrefetch(indexToPrefetch)
             }
         }
+
+        previousPassItemCount = currentPassItemCount
     }
 
     override fun NestedPrefetchScope.onNestedPrefetch(firstVisibleItemIndex: Int) {
-        repeat(nestedPrefetchItemCount) { i ->
-            schedulePrefetch(firstVisibleItemIndex + i)
+        val resolvedNestedPrefetchItemCount =
+            if (nestedPrefetchItemCount == UnspecifiedNestedPrefetchCount) {
+                initialNestedPrefetchItemCount
+            } else {
+                nestedPrefetchItemCount
+            }
+        repeat(resolvedNestedPrefetchItemCount) { i ->
+            schedulePrecomposition(firstVisibleItemIndex + i)
+        }
+    }
+
+    private fun resetPrefetchState() {
+        indexToPrefetch = -1
+        currentPrefetchHandle?.cancel()
+        currentPrefetchHandle = null
+    }
+
+    private fun LazyListLayoutInfo.calculateIndexToPrefetch(scrollingForward: Boolean): Int {
+        return if (scrollingForward) {
+            visibleItemsInfo.last().index + 1
+        } else {
+            visibleItemsInfo.first().index - 1
+        }
+    }
+
+    private fun LazyListLayoutInfo.evaluatePrefetchForCancellation(
+        currentPrefetchingIndex: Int,
+        scrollingForward: Boolean,
+    ) {
+        if (currentPrefetchingIndex != -1 && visibleItemsInfo.isNotEmpty()) {
+            val expectedPrefetchIndex = calculateIndexToPrefetch(scrollingForward)
+            if (currentPrefetchingIndex != expectedPrefetchIndex) {
+                resetPrefetchState()
+            }
         }
     }
 }
+
+/**
+ * A scope for [LazyListPrefetchScope.schedulePrefetch] callbacks. The scope provides additional
+ * information about a prefetched item.
+ */
+@ExperimentalFoundationApi
+sealed interface LazyListPrefetchResultScope {
+
+    /** The index of the prefetched item */
+    val index: Int
+
+    /** The main axis size in pixels of the prefetched item */
+    val mainAxisSize: Int
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+internal class LazyListPrefetchResultScopeImpl(
+    override val index: Int,
+    override val mainAxisSize: Int,
+) : LazyListPrefetchResultScope
+
+private const val UnsetItemCount = -1

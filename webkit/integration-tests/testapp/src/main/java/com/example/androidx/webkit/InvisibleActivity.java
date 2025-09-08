@@ -22,10 +22,11 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.webkit.WebSettingsCompat;
 import androidx.webkit.WebViewFeature;
+
+import org.jspecify.annotations.Nullable;
 
 /**
  * An {@link android.app.Activity} to demonstrate Safe Browsing behavior with a {@link WebView}
@@ -44,6 +45,7 @@ public class InvisibleActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_invisible);
         setTitle(R.string.invisible_activity_title);
+        WebkitHelpers.enableEdgeToEdge(this);
         WebkitHelpers.appendWebViewVersionToTitle(this);
 
         WebView invisibleWebView = findViewById(R.id.invisible_webview);

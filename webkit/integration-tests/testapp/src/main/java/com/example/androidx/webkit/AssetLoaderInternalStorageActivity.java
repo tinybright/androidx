@@ -28,11 +28,12 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.webkit.WebViewAssetLoader;
 import androidx.webkit.WebViewAssetLoader.InternalStoragePathHandler;
+
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -47,9 +48,9 @@ public class AssetLoaderInternalStorageActivity extends AppCompatActivity {
     private static final String DEMO_HTML_CONTENT =
             "<h3 id=\"data_success_msg\">Successfully loaded html from app files dir!</h3>";
 
-    @NonNull private File mPublicDir;
-    @NonNull private File mDemoFile;
-    @NonNull private WebView mWebView;
+    private @NonNull File mPublicDir;
+    private @NonNull File mDemoFile;
+    private @NonNull WebView mWebView;
 
     private static class MyWebViewClient extends WebViewClient {
         private final WebViewAssetLoader mAssetLoader;
@@ -85,6 +86,7 @@ public class AssetLoaderInternalStorageActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_asset_loader);
         setTitle(R.string.asset_loader_internal_storage_activity_title);
+        WebkitHelpers.enableEdgeToEdge(this);
         WebkitHelpers.appendWebViewVersionToTitle(this);
 
         mWebView = findViewById(R.id.webview_asset_loader_webview);

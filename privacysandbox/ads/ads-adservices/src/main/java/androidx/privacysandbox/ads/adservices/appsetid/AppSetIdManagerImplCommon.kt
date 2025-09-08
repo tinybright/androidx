@@ -26,10 +26,10 @@ import androidx.core.os.asOutcomeReceiver
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 @RestrictTo(RestrictTo.Scope.LIBRARY)
-@SuppressLint("ClassVerificationFailure", "NewApi")
+@SuppressLint("NewApi")
 @RequiresExtension(extension = SdkExtensions.AD_SERVICES, version = 4)
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 9)
-open class AppSetIdManagerImplCommon(
+public open class AppSetIdManagerImplCommon(
     private val mAppSetIdManager: android.adservices.appsetid.AppSetIdManager
 ) : AppSetIdManager() {
 
@@ -39,12 +39,8 @@ open class AppSetIdManagerImplCommon(
     }
 
     private suspend fun getAppSetIdAsyncInternal(): android.adservices.appsetid.AppSetId =
-        suspendCancellableCoroutine {
-                continuation ->
-            mAppSetIdManager.getAppSetId(
-                Runnable::run,
-                continuation.asOutcomeReceiver()
-            )
+        suspendCancellableCoroutine { continuation ->
+            mAppSetIdManager.getAppSetId(Runnable::run, continuation.asOutcomeReceiver())
         }
 
     private fun convertResponse(response: android.adservices.appsetid.AppSetId): AppSetId {

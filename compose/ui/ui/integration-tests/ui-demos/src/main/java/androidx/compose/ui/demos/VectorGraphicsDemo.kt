@@ -45,14 +45,14 @@ fun VectorGraphicsDemo() {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceEvenly,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val imageVector = painterResource(R.drawable.ic_crane)
         Image(
             painter = imageVector,
             contentDescription = "Crane",
             modifier = Modifier.size(200.dp, 200.dp),
-            contentScale = ContentScale.Inside
+            contentScale = ContentScale.Inside,
         )
 
         val complexImageVector = painterResource(R.drawable.ic_hourglass)
@@ -60,13 +60,13 @@ fun VectorGraphicsDemo() {
             painter = complexImageVector,
             contentDescription = "Hourglass",
             modifier = Modifier.size(64.dp, 64.dp),
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Fit,
         )
 
         Image(
             painter = vectorShape(120.dp, 120.dp),
             contentDescription = null,
-            modifier = Modifier.size(200.dp, 150.dp)
+            modifier = Modifier.size(200.dp, 150.dp),
         )
     }
 }
@@ -77,14 +77,14 @@ private fun vectorShape(width: Dp, height: Dp): Painter =
         name = "vectorShape",
         defaultWidth = width,
         defaultHeight = height,
-        autoMirror = false
+        autoMirror = false,
     ) { viewportWidth, viewportHeight ->
         Group(
             scaleX = 0.75f,
             scaleY = 0.75f,
             rotation = 45.0f,
             pivotX = (viewportWidth / 2),
-            pivotY = (viewportHeight / 2)
+            pivotY = (viewportHeight / 2),
         ) {
             BackgroundPath(viewportWidth, viewportHeight)
             StripePath(viewportWidth, viewportHeight)
@@ -93,7 +93,7 @@ private fun vectorShape(width: Dp, height: Dp): Painter =
                 translationY = 50.0f,
                 pivotX = (viewportWidth / 2),
                 pivotY = (viewportHeight / 2),
-                rotation = 25.0f
+                rotation = 25.0f,
             ) {
                 val pathData = PathData {
                     moveTo(viewportWidth / 2 - 100, viewportHeight / 2 - 100)
@@ -103,15 +103,13 @@ private fun vectorShape(width: Dp, height: Dp): Painter =
                     close()
                 }
                 Path(
-                    fill = Brush.horizontalGradient(
-                        listOf(
-                            Color.Red,
-                            Color.Blue
+                    fill =
+                        Brush.horizontalGradient(
+                            listOf(Color.Red, Color.Blue),
+                            startX = 0.0f,
+                            endX = viewportWidth / 2 + 100.0f,
                         ),
-                        startX = 0.0f,
-                        endX = viewportWidth / 2 + 100.0f
-                    ),
-                    pathData = pathData
+                    pathData = pathData,
                 )
             }
             Triangle()
@@ -129,15 +127,16 @@ private fun BackgroundPath(vectorWidth: Float, vectorHeight: Float) {
     }
 
     Path(
-        fill = Brush.verticalGradient(
-            0.0f to Color.Cyan,
-            0.3f to Color.Green,
-            1.0f to Color.Magenta,
-            startY = 0.0f,
-            endY = vectorHeight,
-            tileMode = TileMode.Clamp
-        ),
-        pathData = background
+        fill =
+            Brush.verticalGradient(
+                0.0f to Color.Cyan,
+                0.3f to Color.Green,
+                1.0f to Color.Magenta,
+                startY = 0.0f,
+                endY = vectorHeight,
+                tileMode = TileMode.Clamp,
+            ),
+        pathData = background,
     )
 }
 
@@ -145,21 +144,19 @@ private fun BackgroundPath(vectorWidth: Float, vectorHeight: Float) {
 private fun Triangle() {
     val length = 150.0f
     Path(
-        fill = Brush.radialGradient(
-            listOf(
-                Color(0xFF000080),
-                Color(0xFF808000),
-                Color(0xFF008080)
+        fill =
+            Brush.radialGradient(
+                listOf(Color(0xFF000080), Color(0xFF808000), Color(0xFF008080)),
+                Offset(length / 2.0f, length / 2.0f),
+                radius = length / 2.0f,
+                tileMode = TileMode.Repeated,
             ),
-            Offset(length / 2.0f, length / 2.0f),
-            radius = length / 2.0f,
-            tileMode = TileMode.Repeated
-        ),
-        pathData = PathData {
-            verticalLineTo(length)
-            horizontalLineTo(length)
-            close()
-        }
+        pathData =
+            PathData {
+                verticalLineTo(length)
+                horizontalLineTo(length)
+                close()
+            },
     )
 }
 
@@ -169,27 +166,27 @@ private fun TriangleWithOffsets() {
     val side1 = 150.0f
     val side2 = 150.0f
     Path(
-        fill = Brush.radialGradient(
-            0.0f to Color(0xFF800000),
-            0.3f to Color.Cyan,
-            0.8f to Color.Yellow,
-            center = Offset(side1 / 2.0f, side2 / 2.0f),
-            radius = side1 / 2.0f,
-            tileMode = TileMode.Clamp
-        ),
-        pathData = PathData {
-            horizontalLineToRelative(side1)
-            verticalLineToRelative(side2)
-            close()
-        }
+        fill =
+            Brush.radialGradient(
+                0.0f to Color(0xFF800000),
+                0.3f to Color.Cyan,
+                0.8f to Color.Yellow,
+                center = Offset(side1 / 2.0f, side2 / 2.0f),
+                radius = side1 / 2.0f,
+                tileMode = TileMode.Clamp,
+            ),
+        pathData =
+            PathData {
+                horizontalLineToRelative(side1)
+                verticalLineToRelative(side2)
+                close()
+            },
     )
 }
 
 @Composable
 private fun StripePath(vectorWidth: Float, vectorHeight: Float) {
-    val stripeDelegate = PathData {
-        stripe(vectorWidth, vectorHeight, 10)
-    }
+    val stripeDelegate = PathData { stripe(vectorWidth, vectorHeight, 10) }
 
     Path(stroke = SolidColor(Color.Blue), pathData = stripeDelegate)
 }

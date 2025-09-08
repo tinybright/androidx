@@ -36,19 +36,20 @@ import kotlin.math.sign
 internal suspend fun AwaitPointerEventScope.awaitHorizontalPointerSlopOrCancellation(
     pointerId: PointerId,
     pointerType: PointerType,
-    onPointerSlopReached: (change: PointerInputChange, overSlop: Float) -> Unit
-) = awaitPointerSlopOrCancellation(
-    pointerId = pointerId,
-    pointerType = pointerType,
-    onPointerSlopReached = onPointerSlopReached,
-    getDragDirectionValue = { it.x }
-)
+    onPointerSlopReached: (change: PointerInputChange, overSlop: Float) -> Unit,
+) =
+    awaitPointerSlopOrCancellation(
+        pointerId = pointerId,
+        pointerType = pointerType,
+        onPointerSlopReached = onPointerSlopReached,
+        getDragDirectionValue = { it.x },
+    )
 
 private suspend inline fun AwaitPointerEventScope.awaitPointerSlopOrCancellation(
     pointerId: PointerId,
     pointerType: PointerType,
     onPointerSlopReached: (PointerInputChange, Float) -> Unit,
-    getDragDirectionValue: (Offset) -> Float
+    getDragDirectionValue: (Offset) -> Float,
 ): PointerInputChange? {
     if (currentEvent.isPointerUp(pointerId)) {
         return null // The pointer has already been lifted, so the gesture is canceled
@@ -73,8 +74,8 @@ private suspend inline fun AwaitPointerEventScope.awaitPointerSlopOrCancellation
         } else {
             val currentPosition = dragEvent.position
             val previousPosition = dragEvent.previousPosition
-            val positionChange = getDragDirectionValue(currentPosition) -
-                getDragDirectionValue(previousPosition)
+            val positionChange =
+                getDragDirectionValue(currentPosition) - getDragDirectionValue(previousPosition)
             totalPositionChange += positionChange
 
             val inDirection = abs(totalPositionChange)
@@ -87,7 +88,7 @@ private suspend inline fun AwaitPointerEventScope.awaitPointerSlopOrCancellation
             } else {
                 onPointerSlopReached(
                     dragEvent,
-                    totalPositionChange - (sign(totalPositionChange) * touchSlop)
+                    totalPositionChange - (sign(totalPositionChange) * touchSlop),
                 )
                 if (dragEvent.isConsumed) {
                     return dragEvent

@@ -18,22 +18,16 @@ package androidx.room.solver.query.parameter
 
 import androidx.room.solver.CodeGenScope
 
-/**
- * Knows how to convert a query parameter into query arguments.
- */
+/** Knows how to convert a query parameter into query arguments. */
 abstract class QueryParameterAdapter(val isMultiple: Boolean) {
-    /**
-     * Must bind the value into the statement at the given index.
-     */
+    /** Must bind the value into the statement at the given index. */
     abstract fun bindToStmt(
         inputVarName: String,
         stmtVarName: String,
         startIndexVarName: String,
-        scope: CodeGenScope
+        scope: CodeGenScope,
     )
 
-    /**
-     * Should declare and set the given value with the count
-     */
+    /** Should declare and set the given value with the count */
     abstract fun getArgCount(inputVarName: String, outputVarName: String, scope: CodeGenScope)
 }

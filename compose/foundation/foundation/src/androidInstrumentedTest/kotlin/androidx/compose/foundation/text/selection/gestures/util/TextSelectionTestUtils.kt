@@ -18,9 +18,13 @@
 
 package androidx.compose.foundation.text.selection.gestures.util
 
+import androidx.compose.foundation.ComposeFoundationFlags
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MagnifierPositionInRoot
 import androidx.compose.foundation.isPlatformMagnifierSupported
 import androidx.compose.foundation.text.Handle
+import androidx.compose.foundation.text.contextmenu.test.SpyTextActionModeCallback
+import androidx.compose.foundation.text.contextmenu.test.assertShown
 import androidx.compose.foundation.text.selection.Selection
 import androidx.compose.foundation.text.selection.getSelectionHandleInfo
 import androidx.compose.foundation.text.selection.isSelectionHandle
@@ -48,14 +52,14 @@ import kotlin.math.roundToInt
 import kotlin.test.fail
 
 internal fun ComposeTestRule.assertSelectionHandlesShown(startShown: Boolean, endShown: Boolean) {
-    listOf(Handle.SelectionStart to startShown, Handle.SelectionEnd to endShown)
-        .forEach { (handle, shown) ->
-            if (shown) {
-                assertHandleShown(handle)
-            } else {
-                assertHandleNotShown(handle)
-            }
+    listOf(Handle.SelectionStart to startShown, Handle.SelectionEnd to endShown).forEach {
+        (handle, shown) ->
+        if (shown) {
+            assertHandleShown(handle)
+        } else {
+            assertHandleNotShown(handle)
         }
+    }
 }
 
 private fun ComposeTestRule.assertHandleShown(handle: Handle) {
@@ -72,14 +76,12 @@ private fun ComposeTestRule.assertHandleNotShown(handle: Handle) {
         0 -> {
             // There are no handles, so this passes
         }
-
         1 -> {
             // verify the single handle is not visible
             val info = nodes.single().getSelectionHandleInfo()
             val message = "Handle exists and is visible."
             assertWithMessage(message).that(info.visible).isFalse()
         }
-
         else -> {
             fail("Found multiple $handle handles.")
         }
@@ -89,14 +91,11 @@ private fun ComposeTestRule.assertHandleNotShown(handle: Handle) {
 private fun ComposeTestRule.assertMagnifierShown(shown: Boolean) {
     if (!isPlatformMagnifierSupported()) return
 
-    val magShown = onAllNodes(SemanticsMatcher.keyIsDefined(MagnifierPositionInRoot))
-        .fetchSemanticsNodes(atLeastOneRootRequired = false)
-        .also { waitForIdle() }
-        .any {
-            it.config[MagnifierPositionInRoot]
-                .invoke()
-                .isSpecified
-        }
+    val magShown =
+        onAllNodes(SemanticsMatcher.keyIsDefined(MagnifierPositionInRoot))
+            .fetchSemanticsNodes(atLeastOneRootRequired = false)
+            .also { waitForIdle() }
+            .any { it.config[MagnifierPositionInRoot].invoke().isSpecified }
 
     assertWithMessage("Magnifier should${if (shown) " " else " not "}be shown.")
         .that(magShown)
@@ -116,6 +115,7 @@ private fun FakeHapticFeedback.assertPerformedAtLeastThenClear(times: Int) {
 
 internal class FakeHapticFeedback : HapticFeedback {
     val invocationCountMap = mutableMapOf<HapticFeedbackType, Int>().withDefault { 0 }
+
     override fun performHapticFeedback(hapticFeedbackType: HapticFeedbackType) {
         invocationCountMap[hapticFeedbackType] = 1 + (invocationCountMap[hapticFeedbackType] ?: 0)
     }
@@ -125,6 +125,7 @@ internal abstract class SelectionAsserter<S>(
     var textContent: String,
     private val rule: ComposeTestRule,
     private val textToolbar: TextToolbar,
+    private val spyTextActionModeCallback: SpyTextActionModeCallback?,
     private val hapticFeedback: FakeHapticFeedback,
     protected val getActual: () -> S,
 ) {
@@ -154,13 +155,24 @@ internal abstract class SelectionAsserter<S>(
     var startLayoutDirection = ResolvedTextDirection.Ltr
     var endLayoutDirection = ResolvedTextDirection.Ltr
 
+    @OptIn(ExperimentalFoundationApi::class)
     open fun assert() {
         subAssert()
         rule.assertSelectionHandlesShown(
             startShown = startSelectionHandleShown ?: selectionHandlesShown,
-            endShown = endSelectionHandleShown ?: selectionHandlesShown
+            endShown = endSelectionHandleShown ?: selectionHandlesShown,
         )
-        textToolbar.assertShown(textToolbarShown)
+
+        if (ComposeFoundationFlags.isNewContextMenuEnabled) {
+            val spyCallback =
+                checkNotNull(spyTextActionModeCallback) {
+                    "spyTextActionModeCallback was never initialized."
+                }
+            spyCallback.assertShown(textToolbarShown)
+        } else {
+            textToolbar.assertShown(textToolbarShown)
+        }
+
         rule.assertMagnifierShown(magnifierShown)
         // reset haptics every assert.
         // with gestures, we could get multiple haptics per tested move
@@ -174,9 +186,18 @@ internal abstract class TextSelectionAsserter(
     textContent: String,
     rule: ComposeTestRule,
     textToolbar: TextToolbar,
+    spyTextActionModeCallback: SpyTextActionModeCallback?,
     hapticFeedback: FakeHapticFeedback,
     getActual: () -> Selection?,
-) : SelectionAsserter<Selection?>(textContent, rule, textToolbar, hapticFeedback, getActual) {
+) :
+    SelectionAsserter<Selection?>(
+        textContent,
+        rule,
+        textToolbar,
+        spyTextActionModeCallback,
+        hapticFeedback,
+        getActual,
+    ) {
     var selection: TextRange? = null
 }
 
@@ -191,7 +212,9 @@ internal fun TouchInjectionScope.longPress(offset: Offset) {
 }
 
 internal infix fun Int.to(other: Int): TextRange = TextRange(this, other)
-internal val Int.collapsed: TextRange get() = TextRange(this, this)
+
+internal val Int.collapsed: TextRange
+    get() = TextRange(this, this)
 
 internal fun SemanticsNodeInteraction.touchDragNodeTo(
     position: Offset,
@@ -218,17 +241,12 @@ internal fun SemanticsNodeInteraction.touchDragNodeTo(
         val progress = step / steps.toFloat()
         val nextTime = lerp(0, stop = durationMillis, fraction = progress)
         val nextPosition = lerp(start, position, nextTime / durationMillis.toFloat())
-        performTouchInput {
-            moveTo(nextPosition, delayMillis = nextTime - previousTime)
-        }
+        performTouchInput { moveTo(nextPosition, delayMillis = nextTime - previousTime) }
         previousTime = nextTime
     }
 }
 
-internal fun SemanticsNodeInteraction.touchDragNodeBy(
-    delta: Offset,
-    durationMillis: Long = 100L
-) {
+internal fun SemanticsNodeInteraction.touchDragNodeBy(delta: Offset, durationMillis: Long = 100L) {
     var startVar: Offset? = null
     performTouchInput {
         startVar = requireNotNull(currentPosition()) { "No pointer is down to animate." }
@@ -261,21 +279,14 @@ internal fun SemanticsNodeInteraction.mouseDragNodeTo(
         val progress = step / steps.toFloat()
         val nextTime = lerp(0, stop = durationMillis, fraction = progress)
         val nextPosition = lerp(start, position, nextTime / durationMillis.toFloat())
-        performMouseInput {
-            moveTo(nextPosition, delayMillis = nextTime - previousTime)
-        }
+        performMouseInput { moveTo(nextPosition, delayMillis = nextTime - previousTime) }
         previousTime = nextTime
     }
 }
 
-internal fun SemanticsNodeInteraction.mouseDragNodeBy(
-    delta: Offset,
-    durationMillis: Long = 100L
-) {
+internal fun SemanticsNodeInteraction.mouseDragNodeBy(delta: Offset, durationMillis: Long = 100L) {
     var startVar: Offset? = null
-    performMouseInput {
-        startVar = currentPosition
-    }
+    performMouseInput { startVar = currentPosition }
     val start = startVar!!
     mouseDragNodeTo(start + delta, durationMillis)
 }

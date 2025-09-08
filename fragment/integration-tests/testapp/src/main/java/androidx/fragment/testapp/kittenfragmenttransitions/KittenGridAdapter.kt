@@ -21,12 +21,10 @@ import androidx.core.view.ViewCompat
 import androidx.fragment.testapp.R
 import androidx.recyclerview.widget.RecyclerView
 
-/**
- * Adapts Views containing kittens to RecyclerView cells
- */
+/** Adapts Views containing kittens to RecyclerView cells */
 class KittenGridAdapter(
     private val listener: (holder: KittenViewHolder, position: Int) -> Unit,
-    private val size: Int = 6
+    private val size: Int = 6,
 ) : RecyclerView.Adapter<KittenViewHolder>() {
 
     override fun onCreateViewHolder(container: ViewGroup, position: Int): KittenViewHolder {

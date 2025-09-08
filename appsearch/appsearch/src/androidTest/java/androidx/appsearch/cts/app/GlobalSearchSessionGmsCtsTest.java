@@ -18,23 +18,19 @@
 package androidx.appsearch.cts.app;
 
 import android.content.Context;
-import android.os.Build;
 
-import androidx.annotation.NonNull;
 import androidx.appsearch.app.AppSearchSession;
 import androidx.appsearch.app.GlobalSearchSession;
 import androidx.appsearch.playservicesstorage.PlayServicesStorage;
 import androidx.test.core.app.ApplicationProvider;
-import androidx.test.filters.SdkSuppress;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import org.jspecify.annotations.NonNull;
 import org.junit.Assume;
 import org.junit.Ignore;
+import org.junit.Test;
 
-// TODO(b/237116468): Remove SdkSuppress once AppSearchAttributionSource available for lower API
-//  levels.
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.S)
 public class GlobalSearchSessionGmsCtsTest extends GlobalSearchSessionCtsTestBase {
     private final Context mContext = ApplicationProvider.getApplicationContext();
     private boolean mIsGmsAvailable;
@@ -77,6 +73,7 @@ public class GlobalSearchSessionGmsCtsTest extends GlobalSearchSessionCtsTestBas
 
     @Override
     @Ignore
+    @Test
     public void testReportSystemUsage_ForbiddenFromNonSystem() {
         // TODO(b/208654892) : ReportSystemUsage is not yet needed by any clients of GMSCore
         //  AppSearch, once there is a requirement by any of the clients this will be added.

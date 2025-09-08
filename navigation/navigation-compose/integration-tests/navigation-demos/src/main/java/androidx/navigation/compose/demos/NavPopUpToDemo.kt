@@ -34,8 +34,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
 
-@Serializable
-class NumberedDestination(val number: Int)
+@Serializable class NumberedDestination(val number: Int)
 
 @Composable
 fun NavPopUpToDemo() {
@@ -55,7 +54,7 @@ fun NumberedScreen(navController: NavController, number: Int) {
             Button(
                 onClick = { navController.navigate(NumberedDestination(next)) },
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(text = "Navigate to Screen $next")
             }
@@ -64,11 +63,13 @@ fun NumberedScreen(navController: NavController, number: Int) {
         if (navController.previousBackStackEntry != null) {
             val firstScreen = NumberedDestination(1)
             Button(
-                onClick = { navController.navigate(firstScreen) {
-                    popUpTo(firstScreen) { inclusive = true }
-                } },
+                onClick = {
+                    navController.navigate(firstScreen) {
+                        popUpTo(firstScreen) { inclusive = true }
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color.LightGray),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(text = "PopUpTo Screen 1")
             }

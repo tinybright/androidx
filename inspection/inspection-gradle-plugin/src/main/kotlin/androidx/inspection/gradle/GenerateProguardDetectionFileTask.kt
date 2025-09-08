@@ -16,6 +16,7 @@
 
 package androidx.inspection.gradle
 
+import com.android.build.api.variant.Variant
 import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -26,22 +27,19 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
+
 /**
  * Task purposely empty, unused class that would be removed by proguard. See javadoc below for more
  * information.
  */
-@Suppress("UnstableApiUsage")
 @DisableCachingByDefault(because = "Simply generates a small file and doesn't benefit from caching")
 abstract class GenerateProguardDetectionFileTask : DefaultTask() {
 
-    @get:Input
-    abstract val mavenGroup: Property<String>
+    @get:Input abstract val mavenGroup: Property<String>
 
-    @get:Input
-    abstract val mavenArtifactId: Property<String>
+    @get:Input abstract val mavenArtifactId: Property<String>
 
-    @get:OutputDirectory
-    abstract val outputDir: DirectoryProperty
+    @get:OutputDirectory abstract val outputDir: DirectoryProperty
 
     @TaskAction
     fun generateProguardDetectionFile() {
@@ -52,11 +50,12 @@ abstract class GenerateProguardDetectionFileTask : DefaultTask() {
             throw GradleException("Failed to create directory $dir")
         }
         val file = File(dir, "ProguardDetection.kt")
-        logger.debug("Generating ProguardDetection in $dir")
+        logger.debug("Generating ProguardDetection in {}", dir)
 
-        val text = """
+        val text =
+            """
             package $packageName;
-            
+
             /**
              * Purposely empty, unused class that would be removed by proguard.
              *
@@ -67,43 +66,43 @@ abstract class GenerateProguardDetectionFileTask : DefaultTask() {
              * again without proguarding to continue.
              */
              private class ProguardDetection {}
-        """.trimIndent()
+        """
+                .trimIndent()
 
         file.writeText(text)
     }
 }
 
-@ExperimentalStdlibApi
-@Suppress("DEPRECATION") // BaseVariant
-fun Project.registerGenerateProguardDetectionFileTask(
-    variant: com.android.build.gradle.api.BaseVariant
-) {
+fun Project.registerGenerateProguardDetectionFileTask(variant: Variant) {
     val outputDir = taskWorkingDir(variant, "generateProguardDetection")
     val taskName = variant.taskName("generateProguardDetection")
-    val mavenGroup = project.group as? String
-        ?: throw GradleException("MavenGroup must be specified")
+    val mavenGroup =
+        project.group as? String ?: throw GradleException("MavenGroup must be specified")
     val mavenArtifactId = project.name
-    val task = tasks.register(taskName, GenerateProguardDetectionFileTask::class.java) {
-        it.outputDir.set(outputDir)
-        it.mavenGroup.set(mavenGroup)
-        it.mavenArtifactId.set(mavenArtifactId)
-    }
-    variant.registerJavaGeneratingTask(task, outputDir)
+    val task =
+        tasks.register(taskName, GenerateProguardDetectionFileTask::class.java) {
+            it.outputDir.set(outputDir)
+            it.mavenGroup.set(mavenGroup)
+            it.mavenArtifactId.set(mavenArtifactId)
+        }
+    variant.sources.java!!.addGeneratedSourceDirectory(
+        task,
+        GenerateProguardDetectionFileTask::outputDir,
+    )
 }
 
 /**
- * Produces package name for `ProguardDetection` class, e.g for following params:
- * mavenGroup: androidx.work, mavenArtifact: work-runtime, result will be:
- * androidx.inspection.work.runtime.
+ * Produces package name for `ProguardDetection` class, e.g. for following params: mavenGroup:
+ * androidx.work, mavenArtifact: work-runtime, result will be: androidx.inspection.work.runtime.
  *
  * The file is specifically generated in package androidx.inspection, so keep rules like
- * "androidx.work.*" won't keep this file, because keeping library itself is not enough.
- * Inspectors could use API dependencies of the inspected library, so if those API
- * dependencies are renamed / minified that can break an inspector.
+ * "androidx.work.*" won't keep this file, because keeping library itself is not enough. Inspectors
+ * could use API dependencies of the inspected library, so if those API dependencies are renamed /
+ * minified that can break an inspector.
  */
 internal fun generatePackageName(mavenGroup: String, mavenArtifact: String): String {
-    val strippedArtifact = mavenArtifact.removePrefix(mavenGroup.split('.').last())
-        .removePrefix("-").replace('-', '.')
+    val strippedArtifact =
+        mavenArtifact.removePrefix(mavenGroup.split('.').last()).removePrefix("-").replace('-', '.')
     val group = mavenGroup.removePrefix("androidx.")
     // It's possible for strippedArtifact to be empty, e.g. "compose.ui/ui" has no hyphen
     return "androidx.inspection.$group" +

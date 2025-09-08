@@ -43,8 +43,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
 /** Enable to print logs during debugging, see [logDebug]. */
-@VisibleForTesting
-internal const val TIA_DEBUG = false
+@VisibleForTesting internal const val TIA_DEBUG = false
 private const val TIA_TAG = "AndroidTextInputSession"
 
 internal actual suspend fun PlatformTextInputSession.platformSpecificTextInputSession(
@@ -53,8 +52,9 @@ internal actual suspend fun PlatformTextInputSession.platformSpecificTextInputSe
     imeOptions: ImeOptions,
     receiveContentConfiguration: ReceiveContentConfiguration?,
     onImeAction: ((ImeAction) -> Unit)?,
+    updateSelectionState: (() -> Unit)?,
     stylusHandwritingTrigger: MutableSharedFlow<Unit>?,
-    viewConfiguration: ViewConfiguration?
+    viewConfiguration: ViewConfiguration?,
 ): Nothing {
     platformSpecificTextInputSession(
         state = state,
@@ -62,9 +62,10 @@ internal actual suspend fun PlatformTextInputSession.platformSpecificTextInputSe
         imeOptions = imeOptions,
         receiveContentConfiguration = receiveContentConfiguration,
         onImeAction = onImeAction,
+        updateSelectionState = updateSelectionState,
         composeImm = ComposeInputMethodManager(view),
         stylusHandwritingTrigger = stylusHandwritingTrigger,
-        viewConfiguration = viewConfiguration
+        viewConfiguration = viewConfiguration,
     )
 }
 
@@ -75,32 +76,27 @@ internal suspend fun PlatformTextInputSession.platformSpecificTextInputSession(
     imeOptions: ImeOptions,
     receiveContentConfiguration: ReceiveContentConfiguration?,
     onImeAction: ((ImeAction) -> Unit)?,
+    updateSelectionState: (() -> Unit)?,
     composeImm: ComposeInputMethodManager,
     stylusHandwritingTrigger: MutableSharedFlow<Unit>?,
-    viewConfiguration: ViewConfiguration?
+    viewConfiguration: ViewConfiguration?,
 ): Nothing {
     coroutineScope {
         launch(start = CoroutineStart.UNDISPATCHED) {
-            state.collectImeNotifications { oldValue, newValue, restartImeIfContentChanges ->
+            state.collectImeNotifications { oldValue, newValue, restartIme ->
                 val oldSelection = oldValue.selection
-                val newSelection = newValue.selection
                 val oldComposition = oldValue.composition
+                val newSelection = newValue.selection
                 val newComposition = newValue.composition
 
-                // No need to restart the IME if there wasn't a composing region. This is useful
-                // to not unnecessarily restart filtered digit only, or password fields.
-                if (restartImeIfContentChanges &&
-                    oldValue.composition != null &&
-                    !oldValue.contentEquals(newValue)
-                ) {
+                if (restartIme) {
                     composeImm.restartInput()
                 } else if (oldSelection != newSelection || oldComposition != newComposition) {
-                    // Don't call updateSelection if input is going to be restarted anyway
                     composeImm.updateSelection(
                         selectionStart = newSelection.min,
                         selectionEnd = newSelection.max,
                         compositionStart = newComposition?.min ?: -1,
-                        compositionEnd = newComposition?.max ?: -1
+                        compositionEnd = newComposition?.max ?: -1,
                     )
                 }
             }
@@ -112,90 +108,93 @@ internal suspend fun PlatformTextInputSession.platformSpecificTextInputSession(
                 // before calling startStylusHandwriting. We need to wait for one frame
                 // because TextInputService.startInput also waits for one frame before
                 // actually calling imm.restartInput.
-                withFrameMillis { }
-                it.collect {
-                    composeImm.startStylusHandwriting()
-                }
+                withFrameMillis {}
+                it.collect { composeImm.startStylusHandwriting() }
             }
         }
 
-        val cursorUpdatesController = CursorAnchorInfoController(
-            composeImm = composeImm,
-            textFieldState = state,
-            textLayoutState = layoutState,
-            monitorScope = this,
-        )
+        val cursorUpdatesController =
+            CursorAnchorInfoController(
+                composeImm = composeImm,
+                textFieldState = state,
+                textLayoutState = layoutState,
+                monitorScope = this,
+            )
 
         startInputMethod { outAttrs ->
             logDebug { "createInputConnection(value=\"${state.visualText}\")" }
 
-            val textInputSession = object : TextInputSession {
-                override val text: TextFieldCharSequence
-                    get() = state.visualText
+            val imeEditCommandScope = DefaultImeEditCommandScope(state)
+            val textInputSession =
+                object : TextInputSession, ImeEditCommandScope by imeEditCommandScope {
+                    override val text: TextFieldCharSequence
+                        get() = state.visualText
 
-                override fun requestEdit(block: EditingBuffer.() -> Unit) {
-                    state.editUntransformedTextAsUser(
-                        restartImeIfContentChanges = false,
-                        block = block
-                    )
-                }
-
-                override fun sendKeyEvent(keyEvent: KeyEvent) {
-                    composeImm.sendKeyEvent(keyEvent)
-                }
-
-                override fun onImeAction(imeAction: ImeAction) {
-                    onImeAction?.invoke(imeAction)
-                }
-
-                override fun onCommitContent(transferableContent: TransferableContent): Boolean {
-                    return receiveContentConfiguration?.onCommitContent(transferableContent)
-                        ?: false
-                }
-
-                override fun requestCursorUpdates(cursorUpdateMode: Int) {
-                    cursorUpdatesController.requestUpdates(cursorUpdateMode)
-                }
-
-                override fun performHandwritingGesture(gesture: HandwritingGesture): Int {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                        return state.performHandwritingGesture(
-                            gesture,
-                            layoutState,
-                            viewConfiguration
-                        )
+                    override fun sendKeyEvent(keyEvent: KeyEvent) {
+                        composeImm.sendKeyEvent(keyEvent)
                     }
-                    return InputConnection.HANDWRITING_GESTURE_RESULT_UNSUPPORTED
-                }
 
-                override fun previewHandwritingGesture(
-                    gesture: PreviewableHandwritingGesture,
-                    cancellationSignal: CancellationSignal?
-                ): Boolean {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                        return state.previewHandwritingGesture(
-                            gesture,
-                            layoutState,
-                            cancellationSignal
-                        )
+                    override fun onImeAction(imeAction: ImeAction) {
+                        onImeAction?.invoke(imeAction)
                     }
-                    return false
+
+                    override fun onCommitContent(
+                        transferableContent: TransferableContent
+                    ): Boolean {
+                        return receiveContentConfiguration?.onCommitContent(transferableContent)
+                            ?: false
+                    }
+
+                    override fun requestCursorUpdates(cursorUpdateMode: Int) {
+                        cursorUpdatesController.requestUpdates(cursorUpdateMode)
+                    }
+
+                    override fun performHandwritingGesture(gesture: HandwritingGesture): Int {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                            return state.performHandwritingGesture(
+                                gesture,
+                                layoutState,
+                                updateSelectionState,
+                                viewConfiguration,
+                            )
+                        }
+                        return InputConnection.HANDWRITING_GESTURE_RESULT_UNSUPPORTED
+                    }
+
+                    override fun previewHandwritingGesture(
+                        gesture: PreviewableHandwritingGesture,
+                        cancellationSignal: CancellationSignal?,
+                    ): Boolean {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                            return state.previewHandwritingGesture(
+                                gesture,
+                                layoutState,
+                                cancellationSignal,
+                            )
+                        }
+                        return false
+                    }
                 }
-            }
 
             outAttrs.update(
                 text = state.visualText,
                 selection = state.visualText.selection,
                 imeOptions = imeOptions,
                 // only pass AllMimeTypes if we have a ReceiveContentConfiguration.
-                contentMimeTypes = receiveContentConfiguration?.let { ALL_MIME_TYPES }
+                contentMimeTypes = receiveContentConfiguration?.let { ALL_MIME_TYPES },
             )
             StatelessInputConnection(textInputSession, outAttrs)
         }
     }
 }
 
-private val ALL_MIME_TYPES = arrayOf("*/*")
+/**
+ * Even though [star/star] should be enough to cover all cases, some IMEs do not like when it's the
+ * only mime type that's declared as supported. IMEs claim that they do not have the necessary
+ * explicit information that the editor will support image or video content. Instead we also add
+ * those types specifically to make sure that IMEs can send everything.
+ */
+private val ALL_MIME_TYPES = arrayOf("*/*", "image/*", "video/*")
 
 private fun logDebug(tag: String = TIA_TAG, content: () -> String) {
     if (TIA_DEBUG) {

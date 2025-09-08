@@ -24,52 +24,53 @@ import androidx.credentials.internal.RequestValidationHelper
 /**
  * A request to get passkeys from the user's public key credential provider.
  *
- * @property requestJson the request in JSON format in the standard webauthn web json
- * shown [here](https://w3c.github.io/webauthn/#dictdef-publickeycredentialrequestoptionsjson).
+ * @property requestJson the request in JSON format in the standard webauthn web json shown
+ *   [here](https://w3c.github.io/webauthn/#dictdef-publickeycredentialrequestoptionsjson).
  * @property clientDataHash a clientDataHash value to sign over in place of assembling and hashing
- * clientDataJSON during the signature request; meaningful only if you have set the
- * [GetCredentialRequest.origin]
+ *   clientDataJSON during the signature request; meaningful only if you have set the
+ *   [GetCredentialRequest.origin]
  * @property typePriorityHint always sets the priority of this entry to
- * [CredentialOption.PRIORITY_PASSKEY_OR_SIMILAR], which defines how it appears in the credential
- * selector, with less precedence than account ordering but more precedence than last used time;
- * see [CredentialOption] for more information
+ *   [CredentialOption.PRIORITY_PASSKEY_OR_SIMILAR], which defines how it appears in the credential
+ *   selector, with less precedence than account ordering but more precedence than last used time;
+ *   see [CredentialOption] for more information
  */
-class GetPublicKeyCredentialOption private constructor(
+class GetPublicKeyCredentialOption
+private constructor(
     val requestJson: String,
     val clientDataHash: ByteArray?,
     allowedProviders: Set<ComponentName>,
     requestData: Bundle,
     candidateQueryData: Bundle,
-    typePriorityCategory: @PriorityHints Int =
-        PRIORITY_PASSKEY_OR_SIMILAR,
-) : CredentialOption(
-    type = PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL,
-    requestData = requestData,
-    candidateQueryData = candidateQueryData,
-    isSystemProviderRequired = false,
-    isAutoSelectAllowed = true,
-    allowedProviders = allowedProviders,
-    typePriorityHint = typePriorityCategory,
-) {
+    typePriorityCategory: @PriorityHints Int = PRIORITY_PASSKEY_OR_SIMILAR,
+) :
+    CredentialOption(
+        type = PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL,
+        requestData = requestData,
+        candidateQueryData = candidateQueryData,
+        isSystemProviderRequired = false,
+        isAutoSelectAllowed = true,
+        allowedProviders = allowedProviders,
+        typePriorityHint = typePriorityCategory,
+    ) {
 
     /**
      * Constructs a [GetPublicKeyCredentialOption].
      *
-     * @param requestJson the request in JSON format in the standard webauthn web json
-     * shown [here](https://w3c.github.io/webauthn/#dictdef-publickeycredentialrequestoptionsjson).
+     * @param requestJson the request in JSON format in the standard webauthn web json shown
+     *   [here](https://w3c.github.io/webauthn/#dictdef-publickeycredentialrequestoptionsjson).
      * @param clientDataHash a clientDataHash value to sign over in place of assembling and hashing
-     * clientDataJSON during the signature request; set only if you have set the
-     * [GetCredentialRequest.origin]
+     *   clientDataJSON during the signature request; set only if you have set the
+     *   [GetCredentialRequest.origin]
      * @param allowedProviders a set of provider service [ComponentName] allowed to receive this
-     * option (Note: a [SecurityException] will be thrown if it is set as non-empty but your app does
-     * not have android.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS; for API level < 34,
-     * this property will not take effect and you should control the allowed provider via
-     * [library dependencies](https://developer.android.com/training/sign-in/passkeys#add-dependencies))
+     *   option (Note: a [SecurityException] will be thrown if it is set as non-empty but your app
+     *   does not have android.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS; for API level <
+     *   34, this property will not take effect and you should control the allowed provider via
+     *   [library dependencies](https://developer.android.com/training/sign-in/passkeys#add-dependencies))
      * @throws NullPointerException If [requestJson] is null
-     * @throws IllegalArgumentException If [requestJson] is empty, or if it
-     * is not a valid JSON
+     * @throws IllegalArgumentException If [requestJson] is empty, or if it is not a valid JSON
      */
-    @JvmOverloads constructor(
+    @JvmOverloads
+    constructor(
         requestJson: String,
         clientDataHash: ByteArray? = null,
         allowedProviders: Set<ComponentName> = emptySet(),
@@ -83,7 +84,8 @@ class GetPublicKeyCredentialOption private constructor(
 
     init {
         require(RequestValidationHelper.isValidJSON(requestJson)) {
-            "requestJson must not be empty, and must be a valid JSON" }
+            "requestJson must not be empty, and must be a valid JSON"
+        }
     }
 
     internal companion object {
@@ -94,14 +96,11 @@ class GetPublicKeyCredentialOption private constructor(
             "androidx.credentials.BUNDLE_VALUE_SUBTYPE_GET_PUBLIC_KEY_CREDENTIAL_OPTION"
 
         @JvmStatic
-        internal fun toRequestDataBundle(
-            requestJson: String,
-            clientDataHash: ByteArray?,
-        ): Bundle {
+        internal fun toRequestDataBundle(requestJson: String, clientDataHash: ByteArray?): Bundle {
             val bundle = Bundle()
             bundle.putString(
                 PublicKeyCredential.BUNDLE_KEY_SUBTYPE,
-                BUNDLE_VALUE_SUBTYPE_GET_PUBLIC_KEY_CREDENTIAL_OPTION
+                BUNDLE_VALUE_SUBTYPE_GET_PUBLIC_KEY_CREDENTIAL_OPTION,
             )
             bundle.putString(BUNDLE_KEY_REQUEST_JSON, requestJson)
             bundle.putByteArray(BUNDLE_KEY_CLIENT_DATA_HASH, clientDataHash)
@@ -109,7 +108,7 @@ class GetPublicKeyCredentialOption private constructor(
         }
 
         @Suppress("deprecation") // bundle.get() used for boolean value to prevent default
-                                         // boolean value from being returned.
+        // boolean value from being returned.
         @JvmStatic
         internal fun createFrom(
             data: Bundle,
@@ -125,8 +124,8 @@ class GetPublicKeyCredentialOption private constructor(
                     allowedProviders,
                     requestData = data,
                     candidateQueryData = candidateQueryData,
-                    typePriorityCategory = data.getInt(BUNDLE_KEY_TYPE_PRIORITY_VALUE,
-                        PRIORITY_PASSKEY_OR_SIMILAR),
+                    typePriorityCategory =
+                        data.getInt(BUNDLE_KEY_TYPE_PRIORITY_VALUE, PRIORITY_PASSKEY_OR_SIMILAR),
                 )
             } catch (e: Exception) {
                 throw FrameworkClassParsingException()

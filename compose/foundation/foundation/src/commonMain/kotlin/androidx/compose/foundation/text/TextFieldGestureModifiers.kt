@@ -29,8 +29,8 @@ internal fun Modifier.textFieldFocusModifier(
     enabled: Boolean,
     focusRequester: FocusRequester,
     interactionSource: MutableInteractionSource?,
-    onFocusChanged: (FocusState) -> Unit
-) = this
-    .focusRequester(focusRequester)
-    .onFocusChanged(onFocusChanged)
-    .focusable(interactionSource = interactionSource, enabled = enabled)
+    onFocusChanged: (FocusState) -> Unit,
+) =
+    this.focusRequester(focusRequester)
+        .onFocusChanged(onFocusChanged)
+        .focusable(interactionSource = interactionSource, enabled = enabled)

@@ -32,6 +32,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import android.app.Instrumentation;
 import android.app.job.JobParameters;
 import android.content.Context;
 import android.net.Network;
@@ -39,7 +40,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.PersistableBundle;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.arch.core.executor.ArchTaskExecutor;
 import androidx.arch.core.executor.TaskExecutor;
@@ -47,6 +47,7 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import androidx.test.filters.SdkSuppress;
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.work.Configuration;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
@@ -64,6 +65,7 @@ import androidx.work.impl.utils.taskexecutor.InstantWorkTaskExecutor;
 import androidx.work.worker.InfiniteTestWorker;
 import androidx.work.worker.NeverResolvedWorker;
 
+import org.jspecify.annotations.NonNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,9 +75,9 @@ import java.util.List;
 import java.util.concurrent.Executors;
 
 @RunWith(AndroidJUnit4.class)
-@SdkSuppress(minSdkVersion = WorkManagerImpl.MIN_JOB_SCHEDULER_API_LEVEL)
 public class SystemJobServiceTest extends WorkManagerTest {
 
+    private Instrumentation mInstrumentation = InstrumentationRegistry.getInstrumentation();
     private WorkManagerImpl mWorkManagerImpl;
     private Processor mProcessor;
     private WorkDatabase mDatabase;
@@ -84,11 +86,6 @@ public class SystemJobServiceTest extends WorkManagerTest {
 
     @Before
     public void setUp() {
-        // TODO: Remove after we figure out why these tests execute on API 17 emulators.
-        if (Build.VERSION.SDK_INT < WorkManagerImpl.MIN_JOB_SCHEDULER_API_LEVEL) {
-            return;
-        }
-
         ArchTaskExecutor.getInstance().setDelegate(new TaskExecutor() {
             @Override
             public void executeOnDiskIO(@NonNull Runnable runnable) {
@@ -131,11 +128,6 @@ public class SystemJobServiceTest extends WorkManagerTest {
 
     @After
     public void tearDown() {
-        // TODO: Remove after we figure out why these tests execute on API 17 emulators.
-        if (Build.VERSION.SDK_INT < WorkManagerImpl.MIN_JOB_SCHEDULER_API_LEVEL) {
-            return;
-        }
-
         mSystemJobServiceSpy.onDestroy();
         mWorkManagerImpl.closeDatabase();
         WorkManagerImpl.setDelegate(null);
@@ -145,17 +137,12 @@ public class SystemJobServiceTest extends WorkManagerTest {
     @Test
     @LargeTest
     public void testOnStopJob_ResetsWorkStatus() throws InterruptedException {
-        // TODO: Remove after we figure out why these tests execute on API 17 emulators.
-        if (Build.VERSION.SDK_INT < WorkManagerImpl.MIN_JOB_SCHEDULER_API_LEVEL) {
-            return;
-        }
-
         OneTimeWorkRequest work = new OneTimeWorkRequest
                 .Builder(StopReasonLoggingWorker.class).build();
         insertWork(work);
 
         JobParameters mockParams = createMockJobParameters(work.getStringId());
-        mSystemJobServiceSpy.onStartJob(mockParams);
+        mInstrumentation.runOnMainSync(() -> mSystemJobServiceSpy.onStartJob(mockParams));
 
         // TODO(sumir): Remove later.  Put here because WorkerWrapper sets state to RUNNING.
         Thread.sleep(5000L);
@@ -163,7 +150,7 @@ public class SystemJobServiceTest extends WorkManagerTest {
         WorkSpecDao workSpecDao = mDatabase.workSpecDao();
         assertThat(workSpecDao.getState(work.getStringId()), is(WorkInfo.State.RUNNING));
 
-        mSystemJobServiceSpy.onStopJob(mockParams);
+        mInstrumentation.runOnMainSync(() -> mSystemJobServiceSpy.onStopJob(mockParams));
         // TODO(rahulrav): Figure out why this test is flaky.
         Thread.sleep(5000L);
         assertThat(workSpecDao.getState(work.getStringId()), is(WorkInfo.State.ENQUEUED));
@@ -175,61 +162,47 @@ public class SystemJobServiceTest extends WorkManagerTest {
     @Test
     @LargeTest
     public void testOnStopJob_ReschedulesWhenNotCancelled() {
-        // TODO: Remove after we figure out why these tests execute on API 17 emulators.
-        if (Build.VERSION.SDK_INT < WorkManagerImpl.MIN_JOB_SCHEDULER_API_LEVEL) {
-            return;
-        }
-
         OneTimeWorkRequest work = new OneTimeWorkRequest.Builder(InfiniteTestWorker.class).build();
         insertWork(work);
 
-        JobParameters mockParams = createMockJobParameters(work.getStringId());
-        assertThat(mSystemJobServiceSpy.onStartJob(mockParams), is(true));
-        assertThat(mSystemJobServiceSpy.onStopJob(mockParams), is(true));
+        mInstrumentation.runOnMainSync(() -> {
+            JobParameters mockParams = createMockJobParameters(work.getStringId());
+            assertThat(mSystemJobServiceSpy.onStartJob(mockParams), is(true));
+            assertThat(mSystemJobServiceSpy.onStopJob(mockParams), is(true));
+        });
     }
 
     @Test
     @LargeTest
     public void testOnStopJob_DoesNotRescheduleWhenCancelled() {
-        // TODO: Remove after we figure out why these tests execute on API 17 emulators.
-        if (Build.VERSION.SDK_INT < WorkManagerImpl.MIN_JOB_SCHEDULER_API_LEVEL) {
-            return;
-        }
-
         OneTimeWorkRequest work = new OneTimeWorkRequest.Builder(InfiniteTestWorker.class).build();
         insertWork(work);
 
-        JobParameters mockParams = createMockJobParameters(work.getStringId());
-        assertThat(mSystemJobServiceSpy.onStartJob(mockParams), is(true));
-        mWorkManagerImpl.cancelWorkById(work.getId());
-        assertThat(mSystemJobServiceSpy.onStopJob(mockParams), is(false));
+        mInstrumentation.runOnMainSync(() -> {
+            JobParameters mockParams = createMockJobParameters(work.getStringId());
+            assertThat(mSystemJobServiceSpy.onStartJob(mockParams), is(true));
+            mWorkManagerImpl.cancelWorkById(work.getId());
+            assertThat(mSystemJobServiceSpy.onStopJob(mockParams), is(false));
+        });
     }
 
     @Test
     @LargeTest
     public void testStartJob_ReturnsFalseWithDuplicateJob() {
-        // TODO: Remove after we figure out why these tests execute on API 17 emulators.
-        if (Build.VERSION.SDK_INT < WorkManagerImpl.MIN_JOB_SCHEDULER_API_LEVEL) {
-            return;
-        }
-
         OneTimeWorkRequest work = new OneTimeWorkRequest.Builder(InfiniteTestWorker.class).build();
         insertWork(work);
 
-        JobParameters mockParams = createMockJobParameters(work.getStringId());
-        assertThat(mSystemJobServiceSpy.onStartJob(mockParams), is(true));
-        assertThat(mSystemJobServiceSpy.onStartJob(mockParams), is(false));
+        mInstrumentation.runOnMainSync(() -> {
+            JobParameters mockParams = createMockJobParameters(work.getStringId());
+            assertThat(mSystemJobServiceSpy.onStartJob(mockParams), is(true));
+            assertThat(mSystemJobServiceSpy.onStartJob(mockParams), is(false));
+        });
     }
 
     @Test
     @LargeTest
     @SdkSuppress(minSdkVersion = 24)
     public void testStartJob_PassesContentUriTriggers() throws InterruptedException {
-        // TODO: Remove after we figure out why these tests execute on API 17 emulators.
-        if (Build.VERSION.SDK_INT < WorkManagerImpl.MIN_JOB_SCHEDULER_API_LEVEL) {
-            return;
-        }
-
         OneTimeWorkRequest work =
                 new OneTimeWorkRequest.Builder(ContentUriTriggerLoggingWorker.class).build();
         insertWork(work);
@@ -249,7 +222,8 @@ public class SystemJobServiceTest extends WorkManagerTest {
         when(mockParams.getTriggeredContentUris()).thenReturn(testContentUris);
 
         assertThat(ContentUriTriggerLoggingWorker.sTimesUpdated, is(0));
-        assertThat(mSystemJobServiceSpy.onStartJob(mockParams), is(true));
+        mInstrumentation.runOnMainSync(() ->
+                assertThat(mSystemJobServiceSpy.onStartJob(mockParams), is(true)));
 
         Thread.sleep(1000L);
 
@@ -273,7 +247,8 @@ public class SystemJobServiceTest extends WorkManagerTest {
         when(mockParams.getNetwork()).thenReturn(mockNetwork);
 
         assertThat(NetworkLoggingWorker.sTimesUpdated, is(0));
-        assertThat(mSystemJobServiceSpy.onStartJob(mockParams), is(true));
+        mInstrumentation.runOnMainSync(() ->
+                assertThat(mSystemJobServiceSpy.onStartJob(mockParams), is(true)));
 
         Thread.sleep(1000L);
 

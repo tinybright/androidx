@@ -28,8 +28,8 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 /**
- * An inspector for test purposes, it echoes on commands and sends events once
- * [TickleManager] is tickled.
+ * An inspector for test purposes, it echoes on commands and sends events once [TickleManager] is
+ * tickled.
  */
 class EchoInspector(connection: Connection) : Inspector(connection) {
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -50,7 +50,7 @@ class EchoInspector(connection: Connection) : Inspector(connection) {
                 DirectExecutor,
                 Runnable {
                     connection.sendEvent("cancellation: successfully cancelled".toByteArray())
-                }
+                },
             )
             connection.sendEvent("cancellation: listener added".toByteArray())
         } else {

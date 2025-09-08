@@ -23,11 +23,7 @@ import androidx.annotation.RestrictTo
  *
  * @property nextChangesToken Continuation token to access the next changes.
  * @property changes List of changes required to sync.
- *
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 class ChangesEvent
-internal constructor(
-    public val nextChangesToken: String,
-    public val changes: List<Change>,
-)
+internal constructor(public val nextChangesToken: String, public val changes: List<Change>)

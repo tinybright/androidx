@@ -49,17 +49,19 @@ fun NavigationWithSharedToolBarDemo() {
     val navController = rememberNavController()
     SharedTransitionLayout {
         NavHost(navController, startDestination = "first") {
-            composable("first",
+            composable(
+                "first",
                 enterTransition = { slideInHorizontally(initialOffsetX = { -it }) },
-                exitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
+                exitTransition = { slideOutHorizontally(targetOffsetX = { it }) },
             ) {
                 Column {
                     TopAppBar(
                         title = { Text("Text") },
-                        modifier = Modifier.sharedElement(
-                            rememberSharedContentState(key = "appBar"),
-                            this@composable,
-                        )
+                        modifier =
+                            Modifier.sharedElement(
+                                rememberSharedContentState(key = "appBar"),
+                                this@composable,
+                            ),
                     )
                     Text(
                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent" +
@@ -67,41 +69,42 @@ fun NavigationWithSharedToolBarDemo() {
                             " suscipit efficitur eget mauris. Nullam eget aliquet ligula. Nunc" +
                             "id euismod elit. Morbi aliquam enim eros, eget consequat" +
                             " dolor consequat id. Quisque elementum faucibus congue. Curabitur" +
-                            " mollis aliquet turpis, ut pellentesque justo eleifend nec.\n",
+                            " mollis aliquet turpis, ut pellentesque justo eleifend nec.\n"
                     )
                     Button(onClick = { navController.navigate("second") }) {
                         Text("Navigate to Cat")
                     }
                 }
             }
-            composable("second",
+            composable(
+                "second",
                 enterTransition = { slideInHorizontally(initialOffsetX = { -it }) },
-                exitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
+                exitTransition = { slideOutHorizontally(targetOffsetX = { it }) },
             ) {
                 Column {
                     TopAppBar(
                         title = { Text("Cat") },
-                        modifier = Modifier.sharedElement(
-                            rememberSharedContentState(key = "appBar"),
-                            this@composable,
-                        )
+                        modifier =
+                            Modifier.sharedElement(
+                                rememberSharedContentState(key = "appBar"),
+                                this@composable,
+                            ),
                     )
                     Image(
                         painterResource(id = R.drawable.yt_profile),
                         contentDescription = "cute cat",
                         contentScale = ContentScale.FillHeight,
-                        modifier = Modifier.clip(shape = RoundedCornerShape(20.dp))
+                        modifier = Modifier.clip(shape = RoundedCornerShape(20.dp)),
                     )
-                    Button(onClick = {
-                        navController.navigate("third")
-                    }) {
+                    Button(onClick = { navController.navigate("third") }) {
                         Text("Navigate to Empty Page")
                     }
                 }
             }
-            composable("third",
+            composable(
+                "third",
                 enterTransition = { slideInHorizontally(initialOffsetX = { -it }) },
-                exitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
+                exitTransition = { slideOutHorizontally(targetOffsetX = { it }) },
             ) {
                 Column(Modifier.fillMaxWidth()) {
                     Text("Nothing to see here. Move on.")

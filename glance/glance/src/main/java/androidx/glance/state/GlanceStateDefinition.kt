@@ -30,48 +30,48 @@ import kotlinx.coroutines.sync.withLock
 
 /**
  * Configuration definition for [GlanceState]. This defines where the data is stored and how the
- * underlying data store is created. Use a unique [GlanceStateDefinition] to get a [GlanceState], once
- * defined, the data should be updated using the state directly, this definition should not change.
+ * underlying data store is created. Use a unique [GlanceStateDefinition] to get a [GlanceState],
+ * once defined, the data should be updated using the state directly, this definition should not
+ * change.
  */
-interface GlanceStateDefinition<T> {
+public interface GlanceStateDefinition<T> {
 
     /**
      * This file indicates the location of the persisted data.
      *
      * @param context The context used to create the file directory
      * @param fileKey The unique string key used to name and identify the data file corresponding to
-     * a remote UI. Each remote UI has a unique UI key, used to key the data for that UI.
+     *   a remote UI. Each remote UI has a unique UI key, used to key the data for that UI.
      */
-    fun getLocation(context: Context, fileKey: String): File
+    public fun getLocation(context: Context, fileKey: String): File
 
     /**
      * Creates the underlying data store.
      *
      * @param context The context used to create locate the file directory
      * @param fileKey The unique string key used to name and identify the data file corresponding to
-     * a remote UI. Each remote UI has a unique UI key, used to key the data for that UI.
+     *   a remote UI. Each remote UI has a unique UI key, used to key the data for that UI.
      */
-    suspend fun getDataStore(context: Context, fileKey: String): DataStore<T>
+    public suspend fun getDataStore(context: Context, fileKey: String): DataStore<T>
 }
 
 /**
  * Interface for an object that manages configuration for glanceables using the given
  * GlanceStateDefinition.
- *
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface ConfigManager {
+public interface ConfigManager {
     /**
      * Returns the stored data associated with the given UI key string.
      *
      * @param definition the configuration that defines this state.
      * @param fileKey identifies the data file associated with the store, must be unique for any
-     * remote UI in the app.
+     *   remote UI in the app.
      */
-    suspend fun <T> getValue(
+    public suspend fun <T> getValue(
         context: Context,
         definition: GlanceStateDefinition<T>,
-        fileKey: String
+        fileKey: String,
     ): T
 
     /**
@@ -79,22 +79,22 @@ interface ConfigManager {
      *
      * @param definition the configuration that defines this state.
      * @param fileKey identifies the date file associated with the store, must be unique for any
-     * remote UI in the app.
+     *   remote UI in the app.
      */
-    suspend fun <T> updateValue(
+    public suspend fun <T> updateValue(
         context: Context,
         definition: GlanceStateDefinition<T>,
         fileKey: String,
-        updateBlock: suspend (T) -> T
+        updateBlock: suspend (T) -> T,
     ): T
 
     /**
      * Delete the file underlying the [DataStore] and remove local references to the [DataStore].
      */
-    suspend fun deleteStore(
+    public suspend fun deleteStore(
         context: Context,
         definition: GlanceStateDefinition<*>,
-        fileKey: String
+        fileKey: String,
     )
 }
 
@@ -102,27 +102,26 @@ interface ConfigManager {
  * Data store for data specific to the glanceable view. Stored data should include information
  * relevant to the representation of views, but not surface specific view data. For example, the
  * month displayed on a calendar rather than actual calendar entries.
- *
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-object GlanceState : ConfigManager {
+public object GlanceState : ConfigManager {
     override suspend fun <T> getValue(
         context: Context,
         definition: GlanceStateDefinition<T>,
-        fileKey: String
+        fileKey: String,
     ): T = getDataStore(context, definition, fileKey).data.first()
 
     override suspend fun <T> updateValue(
         context: Context,
         definition: GlanceStateDefinition<T>,
         fileKey: String,
-        updateBlock: suspend (T) -> T
+        updateBlock: suspend (T) -> T,
     ): T = getDataStore(context, definition, fileKey).updateData(updateBlock)
 
     override suspend fun deleteStore(
         context: Context,
         definition: GlanceStateDefinition<*>,
-        fileKey: String
+        fileKey: String,
     ) {
         mutex.withLock {
             dataStores.remove(fileKey)
@@ -135,12 +134,11 @@ object GlanceState : ConfigManager {
     private suspend fun <T> getDataStore(
         context: Context,
         definition: GlanceStateDefinition<T>,
-        fileKey: String
+        fileKey: String,
     ): DataStore<T> =
         mutex.withLock {
-            dataStores.getOrPut(fileKey) {
-                definition.getDataStore(context, fileKey)
-            } as DataStore<T>
+            dataStores.getOrPut(fileKey) { definition.getDataStore(context, fileKey) }
+                as DataStore<T>
         }
 
     private val mutex = Mutex()
@@ -149,26 +147,23 @@ object GlanceState : ConfigManager {
     private val dataStores: MutableMap<String, DataStore<*>> = mutableMapOf()
 }
 
-/**
- * Base class helping the creation of a state using DataStore's [Preferences].
- */
-object PreferencesGlanceStateDefinition : GlanceStateDefinition<Preferences> {
+/** Base class helping the creation of a state using DataStore's [Preferences]. */
+public object PreferencesGlanceStateDefinition : GlanceStateDefinition<Preferences> {
     private var coroutineScope: CoroutineScope? = null
+
     override fun getLocation(context: Context, fileKey: String): File =
         context.preferencesDataStoreFile(fileKey)
 
     override suspend fun getDataStore(context: Context, fileKey: String): DataStore<Preferences> {
         return coroutineScope?.let {
             PreferenceDataStoreFactory.create(scope = it) {
-                context.preferencesDataStoreFile(
-                    fileKey
-                )
+                context.preferencesDataStoreFile(fileKey)
             }
         } ?: PreferenceDataStoreFactory.create { context.preferencesDataStoreFile(fileKey) }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun setCoroutineScope(scope: CoroutineScope) {
+    public fun setCoroutineScope(scope: CoroutineScope) {
         coroutineScope = scope
     }
 }

@@ -37,26 +37,23 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
- * Common Ripple implementation that directly animates and draws to the underlying canvas
- * provided by [ContentDrawScope].
+ * Common Ripple implementation that directly animates and draws to the underlying canvas provided
+ * by [ContentDrawScope].
  *
  * @see Ripple
  */
 @Suppress("DEPRECATION")
 @Deprecated("Replaced by the new RippleNode implementation")
 @Stable
-internal class CommonRipple(
-    bounded: Boolean,
-    radius: Dp,
-    color: State<Color>
-) : Ripple(bounded, radius, color) {
+internal class CommonRipple(bounded: Boolean, radius: Dp, color: State<Color>) :
+    Ripple(bounded, radius, color) {
     @Composable
     override fun rememberUpdatedRippleInstance(
         interactionSource: InteractionSource,
         bounded: Boolean,
         radius: Dp,
         color: State<Color>,
-        rippleAlpha: State<RippleAlpha>
+        rippleAlpha: State<RippleAlpha>,
     ): RippleIndicationInstance {
         return remember(interactionSource, this) {
             CommonRippleIndicationInstance(bounded, radius, color, rippleAlpha)
@@ -69,7 +66,7 @@ internal class CommonRippleNode(
     bounded: Boolean,
     radius: Dp,
     color: ColorProducer,
-    rippleAlpha: () -> RippleAlpha
+    rippleAlpha: () -> RippleAlpha,
 ) : RippleNode(interactionSource, bounded, radius, color, rippleAlpha) {
     private val ripples = MutableScatterMap<PressInteraction.Press, RippleAnimation>()
 
@@ -77,11 +74,8 @@ internal class CommonRippleNode(
         // Finish existing ripples
         ripples.forEach { _, ripple -> ripple.finish() }
         val origin = if (bounded) interaction.pressPosition else null
-        val rippleAnimation = RippleAnimation(
-            origin = origin,
-            radius = targetRadius,
-            bounded = bounded
-        )
+        val rippleAnimation =
+            RippleAnimation(origin = origin, radius = targetRadius, bounded = bounded)
         ripples[interaction] = rippleAnimation
         coroutineScope.launch {
             try {
@@ -101,11 +95,7 @@ internal class CommonRippleNode(
     override fun DrawScope.drawRipples() {
         val alpha = rippleAlpha().pressedAlpha
         if (alpha != 0f) {
-            ripples.forEach { _, ripple ->
-                with(ripple) {
-                    draw(rippleColor.copy(alpha = alpha))
-                }
-            }
+            ripples.forEach { _, ripple -> with(ripple) { draw(rippleColor.copy(alpha = alpha)) } }
         }
     }
 
@@ -120,18 +110,19 @@ private class CommonRippleIndicationInstance(
     private val bounded: Boolean,
     private val radius: Dp,
     private val color: State<Color>,
-    private val rippleAlpha: State<RippleAlpha>
+    private val rippleAlpha: State<RippleAlpha>,
 ) : RippleIndicationInstance(bounded, rippleAlpha), RememberObserver {
     private val ripples = mutableStateMapOf<PressInteraction.Press, RippleAnimation>()
 
     private var targetRadius = Float.NaN
 
     override fun ContentDrawScope.drawIndication() {
-        targetRadius = if (radius.isUnspecified) {
-            getRippleEndRadius(bounded, size)
-        } else {
-            radius.toPx()
-        }
+        targetRadius =
+            if (radius.isUnspecified) {
+                getRippleEndRadius(bounded, size)
+            } else {
+                radius.toPx()
+            }
         val color = color.value
         drawContent()
         drawStateLayer(radius, color)
@@ -142,11 +133,8 @@ private class CommonRippleIndicationInstance(
         // Finish existing ripples
         ripples.forEach { (_, ripple) -> ripple.finish() }
         val origin = if (bounded) interaction.pressPosition else null
-        val rippleAnimation = RippleAnimation(
-            origin = origin,
-            radius = targetRadius,
-            bounded = bounded
-        )
+        val rippleAnimation =
+            RippleAnimation(origin = origin, radius = targetRadius, bounded = bounded)
         ripples[interaction] = rippleAnimation
         scope.launch {
             try {

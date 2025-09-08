@@ -34,14 +34,15 @@ import androidx.glance.appwidget.unit.ResourceCheckableColorProvider
 
 internal fun RemoteViews.translateEmittableSwitch(
     translationContext: TranslationContext,
-    element: EmittableSwitch
+    element: EmittableSwitch,
 ) {
 
-    val layoutType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        LayoutType.Swtch
-    } else {
-        LayoutType.SwtchBackport
-    }
+    val layoutType =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            LayoutType.Swtch
+        } else {
+            LayoutType.SwtchBackport
+        }
 
     val context = translationContext.context
     val viewDef = insertView(translationContext, layoutType, element.modifier)
@@ -49,11 +50,7 @@ internal fun RemoteViews.translateEmittableSwitch(
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         textViewId = viewDef.mainViewId
-        CompoundButtonApi31Impl.setCompoundButtonChecked(
-            this,
-            viewDef.mainViewId,
-            element.checked
-        )
+        CompoundButtonApi31Impl.setCompoundButtonChecked(this, viewDef.mainViewId, element.checked)
         when (val thumbColors = element.colors.thumb) {
             is CheckedUncheckedColorProvider -> {
                 val (day, night) = thumbColors.toDayNightColorStateList(context)

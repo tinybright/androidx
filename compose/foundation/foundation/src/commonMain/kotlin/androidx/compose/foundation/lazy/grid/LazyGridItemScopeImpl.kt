@@ -25,15 +25,11 @@ internal object LazyGridItemScopeImpl : LazyGridItemScope {
     override fun Modifier.animateItem(
         fadeInSpec: FiniteAnimationSpec<Float>?,
         placementSpec: FiniteAnimationSpec<IntOffset>?,
-        fadeOutSpec: FiniteAnimationSpec<Float>?
+        fadeOutSpec: FiniteAnimationSpec<Float>?,
     ): Modifier =
         if (fadeInSpec == null && placementSpec == null && fadeOutSpec == null) {
             this
         } else {
-            this then LazyLayoutAnimateItemElement(
-                fadeInSpec,
-                placementSpec,
-                fadeOutSpec
-            )
+            this then LazyLayoutAnimateItemElement(fadeInSpec, placementSpec, fadeOutSpec)
         }
 }

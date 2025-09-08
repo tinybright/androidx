@@ -66,13 +66,8 @@ class DrawScopeTest {
     private fun createTestDstImage(): ImageBitmap {
         val dst = ImageBitmap(width, height)
         val dstCanvas = Canvas(dst)
-        val dstPaint = Paint().apply {
-            this.color = Color.White
-        }
-        dstCanvas.drawRect(
-            Rect(Offset.Zero, Size(200.0f, 200.0f)),
-            dstPaint
-        )
+        val dstPaint = Paint().apply { this.color = Color.White }
+        dstCanvas.drawRect(Rect(Offset.Zero, Size(200.0f, 200.0f)), dstPaint)
         return dst
     }
 
@@ -123,7 +118,7 @@ class DrawScopeTest {
                 drawOval(
                     brush = Brush.linearGradient(listOf(Color.Red, Color.Blue)),
                     topLeft = Offset(10f, 10f),
-                    size = Size(width - 20f, height - 20f)
+                    size = Size(width - 20f, height - 20f),
                 )
             },
             { canvas ->
@@ -137,11 +132,11 @@ class DrawScopeTest {
                             LinearGradientShader(
                                 Offset.Zero,
                                 Offset(width.toFloat(), height.toFloat()),
-                                listOf(Color.Red, Color.Blue)
+                                listOf(Color.Red, Color.Blue),
                             )
-                    }
+                    },
                 )
-            }
+            },
         )
     }
 
@@ -158,7 +153,7 @@ class DrawScopeTest {
                 drawOval(
                     color = Color.Cyan,
                     topLeft = Offset(10f, 10f),
-                    size = Size(width - 20f, height - 20f)
+                    size = Size(width - 20f, height - 20f),
                 )
             },
             { canvas ->
@@ -167,9 +162,9 @@ class DrawScopeTest {
                     10f,
                     width - 10f,
                     height - 10f,
-                    Paint().apply { color = Color.Cyan }
+                    Paint().apply { color = Color.Cyan },
                 )
-            }
+            },
         )
     }
 
@@ -182,12 +177,9 @@ class DrawScopeTest {
             drawRect(color = Color.Red, alpha = 0.5f)
         }
 
-        val expected = Color(
-            alpha = 0.5f,
-            red = Color.Red.red,
-            green = Color.Red.green,
-            blue = Color.Red.blue
-        ).compositeOver(Color.White)
+        val expected =
+            Color(alpha = 0.5f, red = Color.Red.red, green = Color.Red.green, blue = Color.Red.blue)
+                .compositeOver(Color.White)
 
         val pixelMap = img.toPixelMap()
         for (i in 0 until pixelMap.width) {
@@ -210,12 +202,9 @@ class DrawScopeTest {
             drawRect(brush = SolidColor(Color.Red), alpha = 0.5f)
         }
 
-        val expected = Color(
-            alpha = 0.5f,
-            red = Color.Red.red,
-            green = Color.Red.green,
-            blue = Color.Red.blue
-        ).compositeOver(Color.White)
+        val expected =
+            Color(alpha = 0.5f, red = Color.Red.red, green = Color.Red.green, blue = Color.Red.blue)
+                .compositeOver(Color.White)
 
         val pixelMap = img.toPixelMap()
         for (i in 0 until pixelMap.width) {
@@ -241,17 +230,14 @@ class DrawScopeTest {
                         alpha = 0.5f,
                         red = Color.Red.red,
                         green = Color.Red.green,
-                        blue = Color.Red.blue
+                        blue = Color.Red.blue,
                     )
             )
         }
 
-        val expected = Color(
-            alpha = 0.5f,
-            red = Color.Red.red,
-            green = Color.Red.green,
-            blue = Color.Red.blue
-        ).compositeOver(Color.White)
+        val expected =
+            Color(alpha = 0.5f, red = Color.Red.red, green = Color.Red.green, blue = Color.Red.blue)
+                .compositeOver(Color.White)
 
         val pixelMap = img.toPixelMap()
         for (i in 0 until pixelMap.width) {
@@ -278,18 +264,15 @@ class DrawScopeTest {
                             alpha = 0.5f,
                             red = Color.Red.red,
                             green = Color.Red.green,
-                            blue = Color.Red.blue
+                            blue = Color.Red.blue,
                         )
                     )
             )
         }
 
-        val expected = Color(
-            alpha = 0.5f,
-            red = Color.Red.red,
-            green = Color.Red.green,
-            blue = Color.Red.blue
-        ).compositeOver(Color.White)
+        val expected =
+            Color(alpha = 0.5f, red = Color.Red.red, green = Color.Red.green, blue = Color.Red.blue)
+                .compositeOver(Color.White)
 
         val pixelMap = img.toPixelMap()
         for (i in 0 until pixelMap.width) {
@@ -309,9 +292,7 @@ class DrawScopeTest {
         val insetLeft = 10.0f
         val insetTop = 12.0f
         CanvasDrawScope().draw(Canvas(img), dstSize) {
-            translate(insetLeft, insetTop) {
-                drawRect(color = Color.Red)
-            }
+            translate(insetLeft, insetTop) { drawRect(color = Color.Red) }
         }
 
         val pixelMap = img.toPixelMap()
@@ -336,17 +317,18 @@ class DrawScopeTest {
         val insetRight = 11.0f
         val insetBottom = 13.0f
         CanvasDrawScope().draw(Canvas(img), dstSize) {
-            inset(insetLeft, insetTop, insetRight, insetBottom) {
-                drawRect(color = Color.Red)
-            }
+            inset(insetLeft, insetTop, insetRight, insetBottom) { drawRect(color = Color.Red) }
         }
 
         val pixelMap = img.toPixelMap()
         for (i in 0 until pixelMap.width) {
             for (j in 0 until pixelMap.height) {
                 val expectedColor =
-                    if (i >= insetLeft && i < pixelMap.width - insetRight &&
-                        j >= insetTop && j < pixelMap.height - insetBottom
+                    if (
+                        i >= insetLeft &&
+                            i < pixelMap.width - insetRight &&
+                            j >= insetTop &&
+                            j < pixelMap.height - insetBottom
                     ) {
                         Color.Red
                     } else {
@@ -372,8 +354,11 @@ class DrawScopeTest {
         for (i in 0 until pixelMap.width) {
             for (j in 0 until pixelMap.height) {
                 val expectedColor =
-                    if (i >= insetHorizontal && i < pixelMap.width - insetHorizontal &&
-                        j >= insetVertical && j < pixelMap.height - insetVertical
+                    if (
+                        i >= insetHorizontal &&
+                            i < pixelMap.width - insetHorizontal &&
+                            j >= insetVertical &&
+                            j < pixelMap.height - insetVertical
                     ) {
                         Color.Red
                     } else {
@@ -389,17 +374,18 @@ class DrawScopeTest {
         val img = createTestDstImage()
         val insetAll = 10.0f
         CanvasDrawScope().draw(Canvas(img), dstSize) {
-            inset(insetAll) {
-                drawRect(color = Color.Red)
-            }
+            inset(insetAll) { drawRect(color = Color.Red) }
         }
 
         val pixelMap = img.toPixelMap()
         for (i in 0 until pixelMap.width) {
             for (j in 0 until pixelMap.height) {
                 val expectedColor =
-                    if (i >= insetAll && i < pixelMap.width - insetAll &&
-                        j >= insetAll && j < pixelMap.height - insetAll
+                    if (
+                        i >= insetAll &&
+                            i < pixelMap.width - insetAll &&
+                            j >= insetAll &&
+                            j < pixelMap.height - insetAll
                     ) {
                         Color.Red
                     } else {
@@ -479,9 +465,7 @@ class DrawScopeTest {
 
         canvasScope.draw(Canvas(imageBitmap), size) {
             drawRect(color = Color.Red)
-            scale(0.5f, pivot = Offset.Zero) {
-                drawRect(color = Color.Blue)
-            }
+            scale(0.5f, pivot = Offset.Zero) { drawRect(color = Color.Blue) }
         }
 
         val pixelMap = imageBitmap.toPixelMap()
@@ -508,9 +492,7 @@ class DrawScopeTest {
 
         canvasScope.draw(Canvas(imageBitmap), size) {
             drawRect(color = Color.Red)
-            scale(0.5f) {
-                drawRect(color = Color.Blue)
-            }
+            scale(0.5f) { drawRect(color = Color.Blue) }
         }
 
         val pixelMap = imageBitmap.toPixelMap()
@@ -551,9 +533,7 @@ class DrawScopeTest {
 
         try {
             canvasScope.draw(Canvas(imageBitmap), size) {
-                inset(100.0f, 0.0f, 101.0f, 0.0f) {
-                    drawRect(color = Color.Red)
-                }
+                inset(100.0f, 0.0f, 101.0f, 0.0f) { drawRect(color = Color.Red) }
             }
             fail("Width must be greater than or equal to zero after applying inset")
         } catch (e: IllegalArgumentException) {
@@ -572,9 +552,7 @@ class DrawScopeTest {
 
         try {
             canvasScope.draw(Canvas(imageBitmap), size) {
-                inset(0.0f, 100.0f, 0.0f, 101.0f) {
-                    drawRect(color = Color.Red)
-                }
+                inset(0.0f, 100.0f, 0.0f, 101.0f) { drawRect(color = Color.Red) }
             }
             fail("Height must be greater than or equal to zero after applying inset")
         } catch (e: IllegalArgumentException) {
@@ -598,9 +576,7 @@ class DrawScopeTest {
 
         try {
             canvasScope.draw(Canvas(imageBitmap), size) {
-                inset(0.0f, 100.0f, 0.0f, 100.0f) {
-                    drawRect(color = Color.Red)
-                }
+                inset(0.0f, 100.0f, 0.0f, 100.0f) { drawRect(color = Color.Red) }
             }
         } catch (e: IllegalArgumentException) {
             fail("Zero height after applying inset is allowed")
@@ -623,9 +599,7 @@ class DrawScopeTest {
 
         try {
             canvasScope.draw(Canvas(imageBitmap), size) {
-                inset(100.0f, 0.0f, 100.0f, 0.0f) {
-                    drawRect(color = Color.Red)
-                }
+                inset(100.0f, 0.0f, 100.0f, 0.0f) { drawRect(color = Color.Red) }
             }
         } catch (e: IllegalArgumentException) {
             fail("Zero width after applying inset is allowed")
@@ -679,7 +653,7 @@ class DrawScopeTest {
                 drawRect(
                     topLeft = Offset(100.0f, 100.0f),
                     size = Size(100.0f, 100.0f),
-                    color = Color.Blue
+                    color = Color.Blue,
                 )
             }
         }
@@ -709,7 +683,7 @@ class DrawScopeTest {
                 drawRect(
                     topLeft = Offset(100.0f, 100.0f),
                     size = Size(100.0f, 100.0f),
-                    color = Color.Blue
+                    color = Color.Blue,
                 )
             }
         }
@@ -736,10 +710,7 @@ class DrawScopeTest {
         CanvasDrawScope().draw(Canvas(imageBitmap), size) {
             drawRect(color = Color.Red)
             rotate(-45.0f, Offset.Zero) {
-                drawRect(
-                    size = Size(100.0f, 100.0f),
-                    color = Color.Blue
-                )
+                drawRect(size = Size(100.0f, 100.0f), color = Color.Blue)
             }
         }
 
@@ -766,10 +737,7 @@ class DrawScopeTest {
                 scale(2.0f, 0.5f) {
                     rotate(-45.0f, Offset.Zero) {
                         translate(7.0f, 9.0f) {
-                            drawRect(
-                                size = Size(100.0f, 100.0f),
-                                color = Color.Blue
-                            )
+                            drawRect(size = Size(100.0f, 100.0f), color = Color.Blue)
                         }
                     }
                 }
@@ -789,10 +757,7 @@ class DrawScopeTest {
                 // 2 saves at this point, the initial draw call does a save
                 // as well as the withTransform call
                 assertEquals(2, saveCountCanvas.saveCount)
-                drawRect(
-                    size = Size(100.0f, 100.0f),
-                    color = Color.Blue
-                )
+                drawRect(size = Size(100.0f, 100.0f), color = Color.Blue)
             }
 
             // Restore to the save count of the initial CanvasScope.draw call
@@ -808,10 +773,16 @@ class DrawScopeTest {
         for (x in 0 until pixelMap1.width) {
             for (y in 0 until pixelMap1.height) {
                 assertEquals(
-                    "coordinate: " + x + ", " + y + " expected: " +
-                        pixelMap1[x, y] + " actual: " + pixelMap2[x, y],
+                    "coordinate: " +
+                        x +
+                        ", " +
+                        y +
+                        " expected: " +
+                        pixelMap1[x, y] +
+                        " actual: " +
+                        pixelMap2[x, y],
                     pixelMap1[x, y],
-                    pixelMap2[x, y]
+                    pixelMap2[x, y],
                 )
             }
         }
@@ -829,50 +800,36 @@ class DrawScopeTest {
         testDrawScopeAndCanvasAreEquivalent(
             width,
             height,
-            {
-                drawLine(
-                    Color.Cyan,
-                    start,
-                    end,
-                    strokeWidth,
-                    StrokeCap.Round
-                )
-            },
+            { drawLine(Color.Cyan, start, end, strokeWidth, StrokeCap.Round) },
             { canvas ->
                 canvas.drawLine(
-                    start, end,
+                    start,
+                    end,
                     Paint().apply {
                         this.color = Color.Cyan
                         this.strokeWidth = strokeWidth
                         this.strokeCap = StrokeCap.Round
-                    }
+                    },
                 )
-            }
+            },
         )
 
         // ... now test that Brush parameters are also rendered with the correct stroke parameters
         testDrawScopeAndCanvasAreEquivalent(
             width,
             height,
-            {
-                drawLine(
-                    SolidColor(Color.Cyan),
-                    start,
-                    end,
-                    strokeWidth,
-                    StrokeCap.Round
-                )
-            },
+            { drawLine(SolidColor(Color.Cyan), start, end, strokeWidth, StrokeCap.Round) },
             { canvas ->
                 canvas.drawLine(
-                    start, end,
+                    start,
+                    end,
                     Paint().apply {
                         this.color = Color.Cyan
                         this.strokeWidth = strokeWidth
                         this.strokeCap = StrokeCap.Round
-                    }
+                    },
                 )
-            }
+            },
         )
     }
 
@@ -881,15 +838,16 @@ class DrawScopeTest {
     fun testDrawPointStrokeParametersAreApplied() {
         val width = 200
         val height = 200
-        val points = listOf(
-            Offset.Zero,
-            Offset(10f, 10f),
-            Offset(25f, 25f),
-            Offset(40f, 40f),
-            Offset(50f, 50f),
-            Offset(75f, 75f),
-            Offset(150f, 150f)
-        )
+        val points =
+            listOf(
+                Offset.Zero,
+                Offset(10f, 10f),
+                Offset(25f, 25f),
+                Offset(40f, 40f),
+                Offset(50f, 50f),
+                Offset(75f, 75f),
+                Offset(150f, 150f),
+            )
         // Test first that colors are rendered with the correct stroke parameters
         testDrawScopeAndCanvasAreEquivalent(
             width,
@@ -900,7 +858,7 @@ class DrawScopeTest {
                     PointMode.Points,
                     Color.Magenta,
                     strokeWidth = 15.0f,
-                    cap = StrokeCap.Butt
+                    cap = StrokeCap.Butt,
                 )
             },
             { canvas ->
@@ -911,9 +869,9 @@ class DrawScopeTest {
                         this.color = Color.Magenta
                         this.strokeWidth = 15.0f
                         this.strokeCap = StrokeCap.Butt
-                    }
+                    },
                 )
-            }
+            },
         )
 
         // ... now verify that Brush parameters are also rendered with the correct stroke parameters
@@ -926,7 +884,7 @@ class DrawScopeTest {
                     PointMode.Points,
                     SolidColor(Color.Magenta),
                     strokeWidth = 15.0f,
-                    cap = StrokeCap.Butt
+                    cap = StrokeCap.Butt,
                 )
             },
             { canvas ->
@@ -937,9 +895,9 @@ class DrawScopeTest {
                         this.color = Color.Magenta
                         this.strokeWidth = 15.0f
                         this.strokeCap = StrokeCap.Butt
-                    }
+                    },
                 )
-            }
+            },
         )
     }
 
@@ -950,7 +908,7 @@ class DrawScopeTest {
             Density(density = 2.0f, fontScale = 3.0f),
             LayoutDirection.Rtl,
             canvas,
-            Size(1f, 1f)
+            Size(1f, 1f),
         ) {
             assertEquals(2.0f, density)
             assertEquals(3.0f, fontScale)
@@ -974,23 +932,13 @@ class DrawScopeTest {
         val density2 = Density(5.0f, 7.0f)
 
         val canvasDrawScope = CanvasDrawScope()
-        canvasDrawScope.draw(
-            density1,
-            layoutDirection1,
-            canvas1,
-            size1
-        ) {
+        canvasDrawScope.draw(density1, layoutDirection1, canvas1, size1) {
             assertEquals(size1, size)
             assertEquals(density1, Density(density, fontScale))
             assertTrue(canvas1 === drawContext.canvas)
             assertEquals(LayoutDirection.Ltr, layoutDirection)
 
-            canvasDrawScope.draw(
-                density2,
-                layoutDirection2,
-                canvas2,
-                size2
-            ) {
+            canvasDrawScope.draw(density2, layoutDirection2, canvas2, size2) {
                 assertEquals(size2, size)
                 assertTrue(canvas2 === drawContext.canvas)
                 assertEquals(density2, Density(density, fontScale))
@@ -1054,19 +1002,19 @@ class DrawScopeTest {
         testDrawScopeAndCanvasAreEquivalent(
             100,
             100,
-            {
-                drawRect(Brush.linearGradient(listOf(Color.Red, Color.Green, Color.Blue)))
-            },
+            { drawRect(Brush.linearGradient(listOf(Color.Red, Color.Green, Color.Blue))) },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = LinearGradientShader(
-                        Offset.Zero,
-                        Offset(100f, 100f),
-                        listOf(Color.Red, Color.Green, Color.Blue)
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            LinearGradientShader(
+                                Offset.Zero,
+                                Offset(100f, 100f),
+                                listOf(Color.Red, Color.Green, Color.Blue),
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1079,20 +1027,22 @@ class DrawScopeTest {
                 drawRect(
                     Brush.linearGradient(
                         listOf(Color.Red, Color.Green, Color.Blue),
-                        end = Offset(0f, Float.POSITIVE_INFINITY)
+                        end = Offset(0f, Float.POSITIVE_INFINITY),
                     )
                 )
             },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = LinearGradientShader(
-                        Offset.Zero,
-                        Offset(0f, 100f),
-                        listOf(Color.Red, Color.Green, Color.Blue)
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            LinearGradientShader(
+                                Offset.Zero,
+                                Offset(0f, 100f),
+                                listOf(Color.Red, Color.Green, Color.Blue),
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1105,20 +1055,22 @@ class DrawScopeTest {
                 drawRect(
                     Brush.linearGradient(
                         listOf(Color.Red, Color.Green, Color.Blue),
-                        end = Offset(Float.POSITIVE_INFINITY, 0f)
+                        end = Offset(Float.POSITIVE_INFINITY, 0f),
                     )
                 )
             },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = LinearGradientShader(
-                        Offset.Zero,
-                        Offset(100f, 0f),
-                        listOf(Color.Red, Color.Green, Color.Blue)
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            LinearGradientShader(
+                                Offset.Zero,
+                                Offset(100f, 0f),
+                                listOf(Color.Red, Color.Green, Color.Blue),
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1131,20 +1083,22 @@ class DrawScopeTest {
                 drawRect(
                     Brush.linearGradient(
                         listOf(Color.Red, Color.Green, Color.Blue),
-                        start = Offset(0f, Float.POSITIVE_INFINITY)
+                        start = Offset(0f, Float.POSITIVE_INFINITY),
                     )
                 )
             },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = LinearGradientShader(
-                        Offset(0f, 100f),
-                        Offset(100f, 100f),
-                        listOf(Color.Red, Color.Green, Color.Blue)
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            LinearGradientShader(
+                                Offset(0f, 100f),
+                                Offset(100f, 100f),
+                                listOf(Color.Red, Color.Green, Color.Blue),
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1157,20 +1111,22 @@ class DrawScopeTest {
                 drawRect(
                     Brush.linearGradient(
                         listOf(Color.Red, Color.Green, Color.Blue),
-                        start = Offset(Float.POSITIVE_INFINITY, 0f)
+                        start = Offset(Float.POSITIVE_INFINITY, 0f),
                     )
                 )
             },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = LinearGradientShader(
-                        Offset(100f, 0f),
-                        Offset(100f, 100f),
-                        listOf(Color.Red, Color.Green, Color.Blue)
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            LinearGradientShader(
+                                Offset(100f, 0f),
+                                Offset(100f, 100f),
+                                listOf(Color.Red, Color.Green, Color.Blue),
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1186,22 +1142,24 @@ class DrawScopeTest {
                         0.1f to Color.Green,
                         0.8f to Color.Blue,
                         start = Offset(10.0f, 10f),
-                        tileMode = TileMode.Repeated
+                        tileMode = TileMode.Repeated,
                     )
                 )
             },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = LinearGradientShader(
-                        Offset(10f, 10f),
-                        Offset(100f, 100f),
-                        colors = listOf(Color.Red, Color.Green, Color.Blue),
-                        colorStops = listOf(0.0f, 0.1f, 0.8f),
-                        tileMode = TileMode.Repeated
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            LinearGradientShader(
+                                Offset(10f, 10f),
+                                Offset(100f, 100f),
+                                colors = listOf(Color.Red, Color.Green, Color.Blue),
+                                colorStops = listOf(0.0f, 0.1f, 0.8f),
+                                tileMode = TileMode.Repeated,
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1210,19 +1168,19 @@ class DrawScopeTest {
         testDrawScopeAndCanvasAreEquivalent(
             100,
             100,
-            {
-                drawRect(Brush.horizontalGradient(listOf(Color.Red, Color.Green, Color.Blue)))
-            },
+            { drawRect(Brush.horizontalGradient(listOf(Color.Red, Color.Green, Color.Blue))) },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = LinearGradientShader(
-                        Offset.Zero,
-                        Offset(100f, 0f),
-                        listOf(Color.Red, Color.Green, Color.Blue)
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            LinearGradientShader(
+                                Offset.Zero,
+                                Offset(100f, 0f),
+                                listOf(Color.Red, Color.Green, Color.Blue),
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1238,22 +1196,24 @@ class DrawScopeTest {
                         0.1f to Color.Green,
                         0.8f to Color.Blue,
                         startX = 10f,
-                        tileMode = TileMode.Repeated
+                        tileMode = TileMode.Repeated,
                     )
                 )
             },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = LinearGradientShader(
-                        Offset(10f, 0f),
-                        Offset(100f, 0f),
-                        colors = listOf(Color.Red, Color.Green, Color.Blue),
-                        colorStops = listOf(0.0f, 0.1f, 0.8f),
-                        tileMode = TileMode.Repeated
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            LinearGradientShader(
+                                Offset(10f, 0f),
+                                Offset(100f, 0f),
+                                colors = listOf(Color.Red, Color.Green, Color.Blue),
+                                colorStops = listOf(0.0f, 0.1f, 0.8f),
+                                tileMode = TileMode.Repeated,
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1262,19 +1222,19 @@ class DrawScopeTest {
         testDrawScopeAndCanvasAreEquivalent(
             100,
             100,
-            {
-                drawRect(Brush.verticalGradient(listOf(Color.Red, Color.Green, Color.Blue)))
-            },
+            { drawRect(Brush.verticalGradient(listOf(Color.Red, Color.Green, Color.Blue))) },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = LinearGradientShader(
-                        Offset.Zero,
-                        Offset(0f, 100f),
-                        listOf(Color.Red, Color.Green, Color.Blue)
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            LinearGradientShader(
+                                Offset.Zero,
+                                Offset(0f, 100f),
+                                listOf(Color.Red, Color.Green, Color.Blue),
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1290,22 +1250,24 @@ class DrawScopeTest {
                         0.1f to Color.Green,
                         0.8f to Color.Blue,
                         startY = 10f,
-                        tileMode = TileMode.Repeated
+                        tileMode = TileMode.Repeated,
                     )
                 )
             },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = LinearGradientShader(
-                        Offset(0f, 10f),
-                        Offset(0f, 100f),
-                        colors = listOf(Color.Red, Color.Green, Color.Blue),
-                        colorStops = listOf(0.0f, 0.1f, 0.8f),
-                        tileMode = TileMode.Repeated
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            LinearGradientShader(
+                                Offset(0f, 10f),
+                                Offset(0f, 100f),
+                                colors = listOf(Color.Red, Color.Green, Color.Blue),
+                                colorStops = listOf(0.0f, 0.1f, 0.8f),
+                                tileMode = TileMode.Repeated,
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1314,21 +1276,19 @@ class DrawScopeTest {
         testDrawScopeAndCanvasAreEquivalent(
             100,
             100,
-            {
-                drawRect(
-                    Brush.radialGradient(listOf(Color.Red, Color.Green, Color.Blue))
-                )
-            },
+            { drawRect(Brush.radialGradient(listOf(Color.Red, Color.Green, Color.Blue))) },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = RadialGradientShader(
-                        Offset(50f, 50f),
-                        50f,
-                        colors = listOf(Color.Red, Color.Green, Color.Blue)
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            RadialGradientShader(
+                                Offset(50f, 50f),
+                                50f,
+                                colors = listOf(Color.Red, Color.Green, Color.Blue),
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1338,23 +1298,26 @@ class DrawScopeTest {
             100,
             100,
             {
-                val offsetRadialGradient = Brush.radialGradient(
-                    listOf(Color.Red, Color.Blue),
-                    center = Offset(150f, 150f),
-                    radius = 50f
-                )
+                val offsetRadialGradient =
+                    Brush.radialGradient(
+                        listOf(Color.Red, Color.Blue),
+                        center = Offset(150f, 150f),
+                        radius = 50f,
+                    )
                 drawRect(offsetRadialGradient)
             },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = RadialGradientShader(
-                        Offset(150f, 150f),
-                        radius = 50f,
-                        colors = listOf(Color.Red, Color.Blue)
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            RadialGradientShader(
+                                Offset(150f, 150f),
+                                radius = 50f,
+                                colors = listOf(Color.Red, Color.Blue),
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1364,22 +1327,22 @@ class DrawScopeTest {
             100,
             100,
             {
-                val offsetRadialGradient = Brush.radialGradient(
-                    listOf(Color.Red, Color.Blue),
-                    center = Offset.Infinite
-                )
+                val offsetRadialGradient =
+                    Brush.radialGradient(listOf(Color.Red, Color.Blue), center = Offset.Infinite)
                 drawRect(offsetRadialGradient)
             },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = RadialGradientShader(
-                        Offset(100f, 100f),
-                        radius = 50f,
-                        colors = listOf(Color.Red, Color.Blue)
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            RadialGradientShader(
+                                Offset(100f, 100f),
+                                radius = 50f,
+                                colors = listOf(Color.Red, Color.Blue),
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1389,22 +1352,25 @@ class DrawScopeTest {
             100,
             100,
             {
-                val offsetRadialGradient = Brush.radialGradient(
-                    listOf(Color.Red, Color.Blue),
-                    center = Offset(Float.POSITIVE_INFINITY, 0f)
-                )
+                val offsetRadialGradient =
+                    Brush.radialGradient(
+                        listOf(Color.Red, Color.Blue),
+                        center = Offset(Float.POSITIVE_INFINITY, 0f),
+                    )
                 drawRect(offsetRadialGradient)
             },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = RadialGradientShader(
-                        Offset(100f, 0f),
-                        radius = 50f,
-                        colors = listOf(Color.Red, Color.Blue)
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            RadialGradientShader(
+                                Offset(100f, 0f),
+                                radius = 50f,
+                                colors = listOf(Color.Red, Color.Blue),
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1414,22 +1380,25 @@ class DrawScopeTest {
             100,
             100,
             {
-                val offsetRadialGradient = Brush.radialGradient(
-                    listOf(Color.Red, Color.Blue),
-                    center = Offset(0f, Float.POSITIVE_INFINITY)
-                )
+                val offsetRadialGradient =
+                    Brush.radialGradient(
+                        listOf(Color.Red, Color.Blue),
+                        center = Offset(0f, Float.POSITIVE_INFINITY),
+                    )
                 drawRect(offsetRadialGradient)
             },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = RadialGradientShader(
-                        Offset(0f, 100f),
-                        radius = 50f,
-                        colors = listOf(Color.Red, Color.Blue)
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            RadialGradientShader(
+                                Offset(0f, 100f),
+                                radius = 50f,
+                                colors = listOf(Color.Red, Color.Blue),
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1445,22 +1414,24 @@ class DrawScopeTest {
                         0.1f to Color.Green,
                         0.8f to Color.Blue,
                         radius = 10f,
-                        tileMode = TileMode.Mirror
+                        tileMode = TileMode.Mirror,
                     )
                 )
             },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = RadialGradientShader(
-                        Offset(50f, 50f),
-                        10f,
-                        colors = listOf(Color.Red, Color.Green, Color.Blue),
-                        colorStops = listOf(0.0f, 0.1f, 0.8f),
-                        tileMode = TileMode.Mirror
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            RadialGradientShader(
+                                Offset(50f, 50f),
+                                10f,
+                                colors = listOf(Color.Red, Color.Green, Color.Blue),
+                                colorStops = listOf(0.0f, 0.1f, 0.8f),
+                                tileMode = TileMode.Mirror,
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1469,20 +1440,18 @@ class DrawScopeTest {
         testDrawScopeAndCanvasAreEquivalent(
             100,
             100,
-            {
-                drawRect(
-                    Brush.sweepGradient(listOf(Color.Red, Color.Green, Color.Blue))
-                )
-            },
+            { drawRect(Brush.sweepGradient(listOf(Color.Red, Color.Green, Color.Blue))) },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = SweepGradientShader(
-                        Offset(50f, 50f),
-                        colors = listOf(Color.Red, Color.Green, Color.Blue)
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            SweepGradientShader(
+                                Offset(50f, 50f),
+                                colors = listOf(Color.Red, Color.Green, Color.Blue),
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1495,19 +1464,21 @@ class DrawScopeTest {
                 drawRect(
                     Brush.sweepGradient(
                         listOf(Color.Red, Color.Green, Color.Blue),
-                        center = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
+                        center = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY),
                     )
                 )
             },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = SweepGradientShader(
-                        Offset(100f, 100f),
-                        colors = listOf(Color.Red, Color.Green, Color.Blue)
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            SweepGradientShader(
+                                Offset(100f, 100f),
+                                colors = listOf(Color.Red, Color.Green, Color.Blue),
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1520,19 +1491,21 @@ class DrawScopeTest {
                 drawRect(
                     Brush.sweepGradient(
                         listOf(Color.Red, Color.Green, Color.Blue),
-                        center = Offset(0f, Float.POSITIVE_INFINITY)
+                        center = Offset(0f, Float.POSITIVE_INFINITY),
                     )
                 )
             },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = SweepGradientShader(
-                        Offset(0f, 100f),
-                        colors = listOf(Color.Red, Color.Green, Color.Blue)
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            SweepGradientShader(
+                                Offset(0f, 100f),
+                                colors = listOf(Color.Red, Color.Green, Color.Blue),
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1545,19 +1518,21 @@ class DrawScopeTest {
                 drawRect(
                     Brush.sweepGradient(
                         listOf(Color.Red, Color.Green, Color.Blue),
-                        center = Offset(Float.POSITIVE_INFINITY, 0f)
+                        center = Offset(Float.POSITIVE_INFINITY, 0f),
                     )
                 )
             },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = SweepGradientShader(
-                        Offset(100f, 0f),
-                        colors = listOf(Color.Red, Color.Green, Color.Blue)
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            SweepGradientShader(
+                                Offset(100f, 0f),
+                                colors = listOf(Color.Red, Color.Green, Color.Blue),
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1568,23 +1543,21 @@ class DrawScopeTest {
             100,
             {
                 drawRect(
-                    Brush.sweepGradient(
-                        0.0f to Color.Red,
-                        0.1f to Color.Green,
-                        0.8f to Color.Blue
-                    )
+                    Brush.sweepGradient(0.0f to Color.Red, 0.1f to Color.Green, 0.8f to Color.Blue)
                 )
             },
             { canvas ->
-                val paint = Paint().apply {
-                    shader = SweepGradientShader(
-                        Offset(50f, 50f),
-                        colors = listOf(Color.Red, Color.Green, Color.Blue),
-                        colorStops = listOf(0.0f, 0.1f, 0.8f)
-                    )
-                }
+                val paint =
+                    Paint().apply {
+                        shader =
+                            SweepGradientShader(
+                                Offset(50f, 50f),
+                                colors = listOf(Color.Red, Color.Green, Color.Blue),
+                                colorStops = listOf(0.0f, 0.1f, 0.8f),
+                            )
+                    }
                 canvas.drawRect(0f, 0f, 100f, 100f, paint)
-            }
+            },
         )
     }
 
@@ -1603,16 +1576,13 @@ class DrawScopeTest {
             {
                 drawCircle(
                     strokeColor,
-                    style = Stroke(
-                        width = strokeWidth,
-                        pathEffect = pathEffect
-                    )
+                    style = Stroke(width = strokeWidth, pathEffect = pathEffect),
                 )
                 drawLine(
                     color = strokeColor,
                     start = Offset(size.width / 2, size.height / 2),
                     end = Offset(size.width, size.height / 2),
-                    strokeWidth = strokeWidth
+                    strokeWidth = strokeWidth,
                 )
             },
             { canvas ->
@@ -1624,7 +1594,7 @@ class DrawScopeTest {
                         this.style = PaintingStyle.Stroke
                         this.strokeWidth = strokeWidth
                         this.pathEffect = pathEffect
-                    }
+                    },
                 )
 
                 canvas.drawLine(
@@ -1634,9 +1604,9 @@ class DrawScopeTest {
                         this.color = strokeColor
                         this.style = PaintingStyle.Stroke
                         this.strokeWidth = strokeWidth
-                    }
+                    },
                 )
-            }
+            },
         )
     }
 
@@ -1650,9 +1620,7 @@ class DrawScopeTest {
         val height = 90f
         val sampleBitmap = ImageBitmap(3, 3)
         val canvas = androidx.compose.ui.graphics.Canvas(sampleBitmap)
-        val samplePaint = Paint().apply {
-            color = Color.White
-        }
+        val samplePaint = Paint().apply { color = Color.White }
 
         canvas.drawRect(0f, 0f, 3f, 3f, samplePaint)
 
@@ -1673,7 +1641,7 @@ class DrawScopeTest {
                 drawImage(
                     sampleBitmap,
                     dstSize = IntSize(size.width.roundToInt(), size.height.roundToInt()),
-                    filterQuality = FilterQuality.None
+                    filterQuality = FilterQuality.None,
                 )
             },
             {
@@ -1691,7 +1659,7 @@ class DrawScopeTest {
 
                 canvasPaint.color = Color.Green
                 it.drawRect(60f, 60f, 90f, 90f, canvasPaint)
-            }
+            },
         )
     }
 
@@ -1711,7 +1679,7 @@ class DrawScopeTest {
             density,
             LayoutDirection.Ltr,
             bitmapCanvas,
-            Size(width.toFloat(), height.toFloat())
+            Size(width.toFloat(), height.toFloat()),
         ) {
             assertEquals(density.density, this.density)
             assertEquals(density.fontScale, this.fontScale)
@@ -1729,7 +1697,7 @@ class DrawScopeTest {
                 pictureDensity,
                 LayoutDirection.Rtl,
                 pictureCanvas,
-                Size(pictureWidth.toFloat(), pictureHeight.toFloat())
+                Size(pictureWidth.toFloat(), pictureHeight.toFloat()),
             ) {
                 // Verify that while retargeting the draw scope, the parameters match that of the
                 // new configuration
@@ -1777,14 +1745,13 @@ class DrawScopeTest {
     fun testBrushResetOnSubsequentDrawWithAlphaBitmap() {
         val width = 200
         val height = 200
-        val brush = Brush.horizontalGradient(
-            listOf(Color.Transparent, Color.Blue, Color.Transparent)
-        )
+        val brush =
+            Brush.horizontalGradient(listOf(Color.Transparent, Color.Blue, Color.Transparent))
         val maskBitmap = ImageBitmap(width / 2, height / 2, ImageBitmapConfig.Alpha8)
         val maskCanvas = Canvas(maskBitmap)
         maskCanvas.drawRect(
             Rect(0f, 0f, width.toFloat(), height.toFloat()),
-            Paint().apply { color = Color.Green }
+            Paint().apply { color = Color.Green },
         )
         val colorFilter = ColorFilter.tint(Color.Red)
         testDrawScopeAndCanvasAreEquivalent(
@@ -1794,14 +1761,13 @@ class DrawScopeTest {
                 // Drawing an ImageBitmap after drawing a brush should unset the
                 // previously configured brush
                 drawRect(brush)
-                inset(width / 4f, height / 4f) {
-                    drawImage(maskBitmap, colorFilter = colorFilter)
-                }
+                inset(width / 4f, height / 4f) { drawImage(maskBitmap, colorFilter = colorFilter) }
             },
             { canvas ->
-                val paint = Paint().apply {
-                    brush.applyTo(Size(width.toFloat(), height.toFloat()), this, 1f)
-                }
+                val paint =
+                    Paint().apply {
+                        brush.applyTo(Size(width.toFloat(), height.toFloat()), this, 1f)
+                    }
                 canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
                 canvas.save()
                 canvas.translate(width / 4f, height / 4f)
@@ -1811,11 +1777,10 @@ class DrawScopeTest {
                     srcSize = IntSize(width, height),
                     dstOffset = IntOffset.Zero,
                     dstSize = IntSize(width, height),
-                    Paint().apply {
-                        this.colorFilter = colorFilter
-                    })
+                    Paint().apply { this.colorFilter = colorFilter },
+                )
                 canvas.restore()
-            }
+            },
         )
     }
 
@@ -1824,29 +1789,25 @@ class DrawScopeTest {
         val height = 150
         TestDrawScopeTransform().draw(
             Canvas(ImageBitmap(width, height)),
-            Size(width.toFloat(), height.toFloat())
+            Size(width.toFloat(), height.toFloat()),
         ) {
-            withWrappedTransform({
-                block(this)
-            }) { /* no-op */ }
+            withWrappedTransform({ block(this) }) { /* no-op */ }
         }
     }
 
     /**
-     * Helper method used  to confirm both DrawScope rendered content and Canvas drawn
-     * content are identical
+     * Helper method used to confirm both DrawScope rendered content and Canvas drawn content are
+     * identical
      */
     private fun testDrawScopeAndCanvasAreEquivalent(
         width: Int,
         height: Int,
         drawScopeBlock: DrawScope.() -> Unit,
-        canvasBlock: (Canvas) -> Unit
+        canvasBlock: (Canvas) -> Unit,
     ) {
         val size = Size(width.toFloat(), height.toFloat())
         val imageBitmap1 = ImageBitmap(width, height)
-        CanvasDrawScope().draw(Canvas(imageBitmap1), size) {
-            drawScopeBlock()
-        }
+        CanvasDrawScope().draw(Canvas(imageBitmap1), size) { drawScopeBlock() }
 
         val imageBitmap2 = ImageBitmap(width, height)
         canvasBlock(Canvas(imageBitmap2))
@@ -1860,10 +1821,16 @@ class DrawScopeTest {
         for (x in 0 until pixelMap1.width) {
             for (y in 0 until pixelMap1.height) {
                 assertEquals(
-                    "coordinate: " + x + ", " + y + " expected: " +
-                        pixelMap1[x, y] + " actual: " + pixelMap2[x, y],
+                    "coordinate: " +
+                        x +
+                        ", " +
+                        y +
+                        " expected: " +
+                        pixelMap1[x, y] +
+                        " actual: " +
+                        pixelMap2[x, y],
                     pixelMap1[x, y],
-                    pixelMap2[x, y]
+                    pixelMap2[x, y],
                 )
             }
         }
@@ -1882,67 +1849,63 @@ class DrawScopeTest {
         }
     }
 
-    /**
-     * Helper test method with defaults for density and layout direction
-     */
+    /** Helper test method with defaults for density and layout direction */
     private inline fun CanvasDrawScope.draw(
         canvas: Canvas,
         size: Size,
-        block: DrawScope.() -> Unit
+        block: DrawScope.() -> Unit,
     ) = this.draw(Density(1.0f, 1.0f), LayoutDirection.Ltr, canvas, size, block)
 
     private inline fun DrawScope.withWrappedTransform(
         transformBlock: WrappedDrawTransform.() -> Unit,
-        drawBlock: DrawScope.() -> Unit
+        drawBlock: DrawScope.() -> Unit,
     ) {
-        withTransform(
-            { transformBlock((this as WrappedDrawTransform)) },
-            drawBlock
-        )
+        withTransform({ transformBlock((this as WrappedDrawTransform)) }, drawBlock)
     }
 
-    private class TestDrawScopeTransform(
-        val drawScope: CanvasDrawScope = CanvasDrawScope()
-    ) : DrawScope by drawScope {
+    private class TestDrawScopeTransform(val drawScope: CanvasDrawScope = CanvasDrawScope()) :
+        DrawScope by drawScope {
 
-        override val drawContext = object : DrawContext {
-            override var size: Size
-                get() = drawScope.drawContext.size
-                set(value) {
-                    drawScope.drawContext.size = value
-                }
-            override var canvas: Canvas
-                get() = drawScope.drawContext.canvas
-                set(value) {
-                    drawScope.drawContext.canvas = value
-                }
+        override val drawContext =
+            object : DrawContext {
+                override var size: Size
+                    get() = drawScope.drawContext.size
+                    set(value) {
+                        drawScope.drawContext.size = value
+                    }
 
-            override var layoutDirection: LayoutDirection
-                get() = drawScope.drawContext.layoutDirection
-                set(value) { drawScope.drawContext.layoutDirection = value }
-            override var density: Density
-                get() = drawScope.drawContext.density
-                set(value) { drawScope.drawContext.density = value }
+                override var canvas: Canvas
+                    get() = drawScope.drawContext.canvas
+                    set(value) {
+                        drawScope.drawContext.canvas = value
+                    }
 
-            override val transform: DrawTransform =
-                WrappedDrawTransform(drawScope.drawContext.transform)
-        }
+                override var layoutDirection: LayoutDirection
+                    get() = drawScope.drawContext.layoutDirection
+                    set(value) {
+                        drawScope.drawContext.layoutDirection = value
+                    }
+
+                override var density: Density
+                    get() = drawScope.drawContext.density
+                    set(value) {
+                        drawScope.drawContext.density = value
+                    }
+
+                override val transform: DrawTransform =
+                    WrappedDrawTransform(drawScope.drawContext.transform)
+            }
 
         inline fun draw(canvas: Canvas, size: Size, block: DrawScope.() -> Unit) {
-            drawScope.draw(
-                Density(1.0f, 1.0f),
-                LayoutDirection.Ltr,
-                canvas,
-                size
-            ) {
+            drawScope.draw(Density(1.0f, 1.0f), LayoutDirection.Ltr, canvas, size) {
                 this@TestDrawScopeTransform.block()
             }
         }
     }
 
     /**
-     * DrawTransform implementation that caches its parameter values to ensure proper defaults
-     * are being provided.
+     * DrawTransform implementation that caches its parameter values to ensure proper defaults are
+     * being provided.
      */
     class WrappedDrawTransform(val drawTransform: DrawTransform) : DrawTransform by drawTransform {
 
@@ -1962,7 +1925,7 @@ class DrawScopeTest {
             top: Float,
             right: Float,
             bottom: Float,
-            clipOp: ClipOp
+            clipOp: ClipOp,
         ) {
             clipLeft = left
             clipTop = top

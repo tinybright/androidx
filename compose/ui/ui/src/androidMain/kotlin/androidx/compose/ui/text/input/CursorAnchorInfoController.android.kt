@@ -20,7 +20,7 @@ import android.view.inputmethod.CursorAnchorInfo
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.setFrom
-import androidx.compose.ui.input.pointer.PositionCalculator
+import androidx.compose.ui.input.pointer.MatrixPositionCalculator
 import androidx.compose.ui.text.TextLayoutResult
 
 @Deprecated(
@@ -28,9 +28,8 @@ import androidx.compose.ui.text.TextLayoutResult
         "code. A copy of this class in foundation is used by the legacy BasicTextField."
 )
 internal class CursorAnchorInfoController(
-    private val rootPositionCalculator: PositionCalculator,
-    @Suppress("DEPRECATION")
-    private val inputMethodManager: InputMethodManager
+    private val rootPositionCalculator: MatrixPositionCalculator,
+    @Suppress("DEPRECATION") private val inputMethodManager: InputMethodManager,
 ) {
     private val lock = Any()
 
@@ -45,7 +44,7 @@ internal class CursorAnchorInfoController(
     private var textFieldValue: TextFieldValue? = null
     private var textLayoutResult: TextLayoutResult? = null
     private var offsetMapping: OffsetMapping? = null
-    private var textFieldToRootTransform: (Matrix) -> Unit = { }
+    private var textFieldToRootTransform: (Matrix) -> Unit = {}
     private var innerTextFieldBounds: Rect? = null
     private var decorationBoxBounds: Rect? = null
 
@@ -76,21 +75,22 @@ internal class CursorAnchorInfoController(
         includeInsertionMarker: Boolean,
         includeCharacterBounds: Boolean,
         includeEditorBounds: Boolean,
-        includeLineBounds: Boolean
-    ) = synchronized(lock) {
-        this.includeInsertionMarker = includeInsertionMarker
-        this.includeCharacterBounds = includeCharacterBounds
-        this.includeEditorBounds = includeEditorBounds
-        this.includeLineBounds = includeLineBounds
+        includeLineBounds: Boolean,
+    ) =
+        synchronized(lock) {
+            this.includeInsertionMarker = includeInsertionMarker
+            this.includeCharacterBounds = includeCharacterBounds
+            this.includeEditorBounds = includeEditorBounds
+            this.includeLineBounds = includeLineBounds
 
-        if (immediate) {
-            hasPendingImmediateRequest = true
-            if (textFieldValue != null) {
-                updateCursorAnchorInfo()
+            if (immediate) {
+                hasPendingImmediateRequest = true
+                if (textFieldValue != null) {
+                    updateCursorAnchorInfo()
+                }
             }
+            monitorEnabled = monitor
         }
-        monitorEnabled = monitor
-    }
 
     /**
      * Notify the controller of layout and position changes.
@@ -111,19 +111,20 @@ internal class CursorAnchorInfoController(
         textLayoutResult: TextLayoutResult,
         textFieldToRootTransform: (Matrix) -> Unit,
         innerTextFieldBounds: Rect,
-        decorationBoxBounds: Rect
-    ) = synchronized(lock) {
-        this.textFieldValue = textFieldValue
-        this.offsetMapping = offsetMapping
-        this.textLayoutResult = textLayoutResult
-        this.textFieldToRootTransform = textFieldToRootTransform
-        this.innerTextFieldBounds = innerTextFieldBounds
-        this.decorationBoxBounds = decorationBoxBounds
+        decorationBoxBounds: Rect,
+    ) =
+        synchronized(lock) {
+            this.textFieldValue = textFieldValue
+            this.offsetMapping = offsetMapping
+            this.textLayoutResult = textLayoutResult
+            this.textFieldToRootTransform = textFieldToRootTransform
+            this.innerTextFieldBounds = innerTextFieldBounds
+            this.decorationBoxBounds = decorationBoxBounds
 
-        if (hasPendingImmediateRequest || monitorEnabled) {
-            updateCursorAnchorInfo()
+            if (hasPendingImmediateRequest || monitorEnabled) {
+                updateCursorAnchorInfo()
+            }
         }
-    }
 
     /**
      * Invalidate the last received layout and position data.
@@ -132,14 +133,15 @@ internal class CursorAnchorInfoController(
      * position data is no longer valid. [CursorAnchorInfo] updates will not be sent until new
      * layout and position data is received.
      */
-    fun invalidate() = synchronized(lock) {
-        textFieldValue = null
-        offsetMapping = null
-        textLayoutResult = null
-        textFieldToRootTransform = { }
-        innerTextFieldBounds = null
-        decorationBoxBounds = null
-    }
+    fun invalidate() =
+        synchronized(lock) {
+            textFieldValue = null
+            offsetMapping = null
+            textLayoutResult = null
+            textFieldToRootTransform = {}
+            innerTextFieldBounds = null
+            decorationBoxBounds = null
+        }
 
     private fun updateCursorAnchorInfo() {
         if (!inputMethodManager.isActive()) return
@@ -162,7 +164,7 @@ internal class CursorAnchorInfoController(
                 includeInsertionMarker,
                 includeCharacterBounds,
                 includeEditorBounds,
-                includeLineBounds
+                includeLineBounds,
             )
         )
 

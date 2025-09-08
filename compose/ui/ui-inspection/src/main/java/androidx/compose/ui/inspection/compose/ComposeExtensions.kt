@@ -28,34 +28,52 @@ import androidx.compose.ui.inspection.proto.convertAll
 import androidx.compose.ui.inspection.util.ThreadUtils
 import layoutinspector.compose.inspection.LayoutInspectorComposeProtocol.ParameterGroup
 
-/**
- * Convert parameters and semantics from [InspectorNode] into a [ParameterGroup].
- */
+/** Convert parameters and semantics from [InspectorNode] into a [ParameterGroup]. */
 fun InspectorNode.convertToParameterGroup(
     semanticsNode: InspectorNode,
     layoutInspectorTree: LayoutInspectorTree,
     rootId: Long,
     maxRecursions: Int,
     maxInitialIterableSize: Int,
-    stringTable: StringTable
-): ParameterGroup = ParameterGroup.newBuilder().apply {
-    composableId = id
-    addAllParameter(
-        convertParameters(
-            layoutInspectorTree, Normal, rootId, maxRecursions, maxInitialIterableSize
-        ).convertAll(stringTable)
-    )
-    addAllMergedSemantics(
-        semanticsNode.convertParameters(
-            layoutInspectorTree, MergedSemantics, rootId, maxRecursions, maxInitialIterableSize
-        ).convertAll(stringTable)
-    )
-    addAllUnmergedSemantics(
-        semanticsNode.convertParameters(
-            layoutInspectorTree, UnmergedSemantics, rootId, maxRecursions, maxInitialIterableSize
-        ).convertAll(stringTable)
-    )
-}.build()
+    stringTable: StringTable,
+): ParameterGroup =
+    ParameterGroup.newBuilder()
+        .apply {
+            composableId = id
+            addAllParameter(
+                convertParameters(
+                        layoutInspectorTree,
+                        Normal,
+                        rootId,
+                        maxRecursions,
+                        maxInitialIterableSize,
+                    )
+                    .convertAll(stringTable)
+            )
+            addAllMergedSemantics(
+                semanticsNode
+                    .convertParameters(
+                        layoutInspectorTree,
+                        MergedSemantics,
+                        rootId,
+                        maxRecursions,
+                        maxInitialIterableSize,
+                    )
+                    .convertAll(stringTable)
+            )
+            addAllUnmergedSemantics(
+                semanticsNode
+                    .convertParameters(
+                        layoutInspectorTree,
+                        UnmergedSemantics,
+                        rootId,
+                        maxRecursions,
+                        maxInitialIterableSize,
+                    )
+                    .convertAll(stringTable)
+            )
+        }
+        .build()
 
 /**
  * Convert [InspectorNode] into [NodeParameter]s.
@@ -68,7 +86,7 @@ fun InspectorNode.convertParameters(
     kind: ParameterKind,
     rootId: Long,
     maxRecursions: Int,
-    maxInitialIterableSize: Int
+    maxInitialIterableSize: Int,
 ): List<NodeParameter> {
     ThreadUtils.assertOffMainThread()
     return layoutInspectorTree.convertParameters(
@@ -76,13 +94,11 @@ fun InspectorNode.convertParameters(
         this,
         kind,
         maxRecursions,
-        maxInitialIterableSize
+        maxInitialIterableSize,
     )
 }
 
-/**
- * Flatten an inspector node into a list containing itself and all its children.
- */
+/** Flatten an inspector node into a list containing itself and all its children. */
 fun InspectorNode.flatten(): Sequence<InspectorNode> {
     val remaining = mutableListOf(this)
     return generateSequence {

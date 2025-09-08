@@ -20,10 +20,10 @@ import androidx.annotation.RestrictTo
 
 /**
  * Constants shared between Activity library artifacts to establish an IPC protocol across library
- * versions. Adding new constants is allowed, but **never change the value of a constant** or
- * you'll break compatibility between library versions.
+ * versions. Adding new constants is allowed, but **never change the value of a constant** or you'll
+ * break compatibility between library versions.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-object ProtocolConstants {
-    const val SDK_ACTIVITY_LAUNCHER_BINDER_KEY = "sdkActivityLauncherBinderKey"
+public object ProtocolConstants {
+    public const val SDK_ACTIVITY_LAUNCHER_BINDER_KEY: String = "sdkActivityLauncherBinderKey"
 }

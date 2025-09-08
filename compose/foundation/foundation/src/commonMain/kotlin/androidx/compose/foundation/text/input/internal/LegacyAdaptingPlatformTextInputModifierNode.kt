@@ -47,25 +47,26 @@ import kotlinx.coroutines.launch
 internal fun Modifier.legacyTextInputAdapter(
     serviceAdapter: LegacyPlatformTextInputServiceAdapter,
     legacyTextFieldState: LegacyTextFieldState,
-    textFieldSelectionManager: TextFieldSelectionManager
+    textFieldSelectionManager: TextFieldSelectionManager,
 ): Modifier =
-    this then LegacyAdaptingPlatformTextInputModifier(
-        serviceAdapter,
-        legacyTextFieldState,
-        textFieldSelectionManager
-    )
+    this then
+        LegacyAdaptingPlatformTextInputModifier(
+            serviceAdapter,
+            legacyTextFieldState,
+            textFieldSelectionManager,
+        )
 
 private data class LegacyAdaptingPlatformTextInputModifier(
     val serviceAdapter: LegacyPlatformTextInputServiceAdapter,
     val legacyTextFieldState: LegacyTextFieldState,
-    val textFieldSelectionManager: TextFieldSelectionManager
+    val textFieldSelectionManager: TextFieldSelectionManager,
 ) : ModifierNodeElement<LegacyAdaptingPlatformTextInputModifierNode>() {
 
     override fun create(): LegacyAdaptingPlatformTextInputModifierNode {
         return LegacyAdaptingPlatformTextInputModifierNode(
             serviceAdapter,
             legacyTextFieldState,
-            textFieldSelectionManager
+            textFieldSelectionManager,
         )
     }
 
@@ -88,8 +89,9 @@ private data class LegacyAdaptingPlatformTextInputModifier(
 internal class LegacyAdaptingPlatformTextInputModifierNode(
     private var serviceAdapter: LegacyPlatformTextInputServiceAdapter,
     override var legacyTextFieldState: LegacyTextFieldState,
-    override var textFieldSelectionManager: TextFieldSelectionManager
-) : Modifier.Node(),
+    override var textFieldSelectionManager: TextFieldSelectionManager,
+) :
+    Modifier.Node(),
     PlatformTextInputModifierNode,
     CompositionLocalConsumerModifierNode,
     GlobalPositionAwareModifierNode,

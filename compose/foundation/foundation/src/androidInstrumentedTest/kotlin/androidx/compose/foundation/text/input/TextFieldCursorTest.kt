@@ -64,6 +64,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasPerformImeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -90,19 +91,20 @@ import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalTestApi::class)
 @LargeTest
 class TextFieldCursorTest : FocusedWindowTest {
 
-    private val motionDurationScale = object : MotionDurationScale {
-        override var scaleFactor: Float by mutableStateOf(1f)
-    }
+    private val motionDurationScale =
+        object : MotionDurationScale {
+            override var scaleFactor: Float by mutableStateOf(1f)
+        }
 
     @OptIn(ExperimentalTestApi::class)
     @get:Rule
-    val rule = createComposeRule(effectContext = motionDurationScale).also {
-        it.mainClock.autoAdvance = false
-    }
+    val rule =
+        createComposeRule(effectContext = motionDurationScale).also {
+            it.mainClock.autoAdvance = false
+        }
 
     private lateinit var state: TextFieldState
 
@@ -113,29 +115,25 @@ class TextFieldCursorTest : FocusedWindowTest {
     private val contentColor = Color.White
     private val cursorColor = Color.Red
     private val fontSize = 10.sp
-    private val textStyle = TextStyle(
-        color = contentColor,
-        background = contentColor,
-        fontSize = fontSize,
-        fontFamily = TEST_FONT_FAMILY
-    )
+    private val textStyle =
+        TextStyle(
+            color = contentColor,
+            background = contentColor,
+            fontSize = fontSize,
+            fontFamily = TEST_FONT_FAMILY,
+        )
 
     private var isFocused = false
     private var textLayoutResult: (() -> TextLayoutResult?)? = null
     private val cursorRect: Rect
         // assume selection is collapsed
-        get() = textLayoutResult?.invoke()?.getCursorRect(state.selection.start)
-            ?: Rect.Zero
+        get() = textLayoutResult?.invoke()?.getCursorRect(state.selection.start) ?: Rect.Zero
 
     private val cursorSize: DpSize by lazy {
-        with(rule.density) {
-            DpSize(DefaultCursorThickness, fontSize.toDp())
-        }
+        with(rule.density) { DpSize(DefaultCursorThickness, fontSize.toDp()) }
     }
 
-    private val cursorSizePx: Size by lazy {
-        with(rule.density) { cursorSize.toSize() }
-    }
+    private val cursorSizePx: Size by lazy { with(rule.density) { cursorSize.toSize() } }
 
     private val cursorTopCenterInLtr: Offset
         // assume selection is collapsed
@@ -149,23 +147,17 @@ class TextFieldCursorTest : FocusedWindowTest {
     private val focusModifier = Modifier.onFocusChanged { if (it.isFocused) isFocused = true }
 
     // default TextFieldModifier
-    private val textFieldModifier = Modifier
-        .then(backgroundModifier)
-        .then(focusModifier)
+    private val textFieldModifier = Modifier.then(backgroundModifier).then(focusModifier)
 
     // default onTextLayout to capture cursor boundaries.
     private val onTextLayout: Density.(() -> TextLayoutResult?) -> Unit = { textLayoutResult = it }
 
-    private fun ComposeContentTestRule.setTestContent(
-        content: @Composable () -> Unit
-    ) {
+    private fun ComposeContentTestRule.setTestContent(content: @Composable () -> Unit) {
         this.setTextFieldTestContent {
             // The padding helps if the test is run accidentally in landscape. Landscape makes
             // the cursor to be next to the navigation bar which affects the red color to be a
             // bit different - possibly anti-aliasing.
-            Box(Modifier.padding(boxPadding)) {
-                content()
-            }
+            Box(Modifier.padding(boxPadding)) { content() }
         }
     }
 
@@ -179,7 +171,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                 textStyle = textStyle,
                 modifier = textFieldModifier,
                 cursorBrush = SolidColor(cursorColor),
-                onTextLayout = onTextLayout
+                onTextLayout = onTextLayout,
             )
         }
 
@@ -187,9 +179,7 @@ class TextFieldCursorTest : FocusedWindowTest {
 
         rule.mainClock.advanceTimeBy(100)
 
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertCursor(cursorTopCenterInLtr)
+        rule.onNode(hasSetTextAction()).captureToImage().assertCursor(cursorTopCenterInLtr)
     }
 
     @Test
@@ -203,7 +193,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                     textStyle = textStyle,
                     modifier = textFieldModifier.width(30.dp),
                     cursorBrush = SolidColor(cursorColor),
-                    onTextLayout = onTextLayout
+                    onTextLayout = onTextLayout,
                 )
             }
         }
@@ -214,9 +204,7 @@ class TextFieldCursorTest : FocusedWindowTest {
 
         // an empty text layout will be placed on the right side of 30.dp-width area
         // cursor will be at the most right side
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertCursor(cursorTopCenterInRtl)
+        rule.onNode(hasSetTextAction()).captureToImage().assertCursor(cursorTopCenterInRtl)
     }
 
     @Test
@@ -229,7 +217,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                 textStyle = textStyle,
                 modifier = textFieldModifier,
                 cursorBrush = SolidColor(cursorColor),
-                onTextLayout = onTextLayout
+                onTextLayout = onTextLayout,
             )
         }
 
@@ -237,9 +225,7 @@ class TextFieldCursorTest : FocusedWindowTest {
 
         rule.mainClock.advanceTimeBy(100)
 
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertCursor(cursorTopCenterInLtr)
+        rule.onNode(hasSetTextAction()).captureToImage().assertCursor(cursorTopCenterInLtr)
     }
 
     @Test
@@ -253,7 +239,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                     textStyle = textStyle,
                     modifier = textFieldModifier.width(50.dp),
                     cursorBrush = SolidColor(cursorColor),
-                    onTextLayout = onTextLayout
+                    onTextLayout = onTextLayout,
                 )
             }
         }
@@ -262,7 +248,8 @@ class TextFieldCursorTest : FocusedWindowTest {
 
         rule.mainClock.advanceTimeBy(100)
 
-        rule.onNode(hasSetTextAction())
+        rule
+            .onNode(hasSetTextAction())
             .captureToImage()
             // 20 - 2(cursor)
             .assertCursor(cursorTopCenterInRtl)
@@ -278,7 +265,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                 textStyle = textStyle,
                 modifier = textFieldModifier.width(50.dp),
                 cursorBrush = SolidColor(cursorColor),
-                onTextLayout = onTextLayout
+                onTextLayout = onTextLayout,
             )
         }
 
@@ -286,7 +273,8 @@ class TextFieldCursorTest : FocusedWindowTest {
 
         rule.mainClock.advanceTimeBy(100)
 
-        rule.onNode(hasSetTextAction())
+        rule
+            .onNode(hasSetTextAction())
             .captureToImage()
             .assertCursor(cursorTopCenterInLtr - Offset(cursorSizePx.width, 0f))
     }
@@ -302,7 +290,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                     textStyle = textStyle,
                     modifier = textFieldModifier.width(30.dp),
                     cursorBrush = SolidColor(cursorColor),
-                    onTextLayout = onTextLayout
+                    onTextLayout = onTextLayout,
                 )
             }
         }
@@ -311,7 +299,8 @@ class TextFieldCursorTest : FocusedWindowTest {
 
         rule.mainClock.advanceTimeBy(100)
 
-        rule.onNode(hasSetTextAction())
+        rule
+            .onNode(hasSetTextAction())
             .captureToImage()
             .assertCursor(cursorTopCenterInRtl + Offset(cursorSizePx.width, 0f))
     }
@@ -324,22 +313,15 @@ class TextFieldCursorTest : FocusedWindowTest {
             BasicTextField(
                 state = state,
                 textStyle = textStyle.copy(fontSize = textStyle.fontSize * 2),
-                modifier = Modifier
-                    .then(backgroundModifier)
-                    .then(focusModifier),
-                cursorBrush = Brush.verticalGradient(
-                    // make a brush double/triple color at the beginning and end so we have
-                    // stable colors at the ends.
-                    // Without triple bottom, the bottom color never hits to the provided color.
-                    listOf(
-                        Color.Blue,
-                        Color.Blue,
-                        Color.Green,
-                        Color.Green,
-                        Color.Green
-                    )
-                ),
-                onTextLayout = onTextLayout
+                modifier = Modifier.then(backgroundModifier).then(focusModifier),
+                cursorBrush =
+                    Brush.verticalGradient(
+                        // make a brush double/triple color at the beginning and end so we have
+                        // stable colors at the ends.
+                        // Without triple bottom, the bottom color never hits to the provided color.
+                        listOf(Color.Blue, Color.Blue, Color.Green, Color.Green, Color.Green)
+                    ),
+                onTextLayout = onTextLayout,
             )
         }
 
@@ -347,8 +329,7 @@ class TextFieldCursorTest : FocusedWindowTest {
 
         rule.mainClock.advanceTimeBy(100)
 
-        val bitmap = rule.onNode(hasSetTextAction())
-            .captureToImage().toPixelMap()
+        val bitmap = rule.onNode(hasSetTextAction()).captureToImage().toPixelMap()
 
         val cursorLeft = ceil(cursorRect.left).toInt() + 1
         val cursorTop = ceil(cursorRect.top).toInt() + 1
@@ -367,7 +348,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                 textStyle = textStyle,
                 modifier = textFieldModifier,
                 cursorBrush = SolidColor(cursorColor),
-                onTextLayout = onTextLayout
+                onTextLayout = onTextLayout,
             )
         }
 
@@ -375,25 +356,22 @@ class TextFieldCursorTest : FocusedWindowTest {
 
         // cursor visible first 500 ms
         rule.mainClock.advanceTimeBy(100)
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertCursor(cursorTopCenterInLtr)
+        rule.onNode(hasSetTextAction()).captureToImage().assertCursor(cursorTopCenterInLtr)
 
         // cursor invisible during next 500 ms
         rule.mainClock.advanceTimeBy(700)
-        rule.onNode(hasSetTextAction())
+        rule
+            .onNode(hasSetTextAction())
             .captureToImage()
             .assertShape(
                 density = rule.density,
                 shape = RectangleShape,
                 shapeColor = contentColor,
                 backgroundColor = contentColor,
-                shapeOverlapPixelCount = 0.0f
+                antiAliasingGap = 0.0f,
             )
     }
 
-    @Suppress("UnnecessaryOptInAnnotation")
-    @OptIn(ExperimentalTestApi::class)
     @Test
     @SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
     fun cursorBlinkingAnimation_whenSystemDisablesAnimations() {
@@ -406,7 +384,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                 textStyle = textStyle,
                 modifier = textFieldModifier,
                 cursorBrush = SolidColor(cursorColor),
-                onTextLayout = onTextLayout
+                onTextLayout = onTextLayout,
             )
         }
 
@@ -414,20 +392,19 @@ class TextFieldCursorTest : FocusedWindowTest {
 
         // cursor visible first 500 ms
         rule.mainClock.advanceTimeBy(100)
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertCursor(cursorTopCenterInLtr)
+        rule.onNode(hasSetTextAction()).captureToImage().assertCursor(cursorTopCenterInLtr)
 
         // cursor invisible during next 500 ms
         rule.mainClock.advanceTimeBy(700)
-        rule.onNode(hasSetTextAction())
+        rule
+            .onNode(hasSetTextAction())
             .captureToImage()
             .assertShape(
                 density = rule.density,
                 shape = RectangleShape,
                 shapeColor = contentColor,
                 backgroundColor = contentColor,
-                shapeOverlapPixelCount = 0.0f
+                antiAliasingGap = 0.0f,
             )
     }
 
@@ -440,33 +417,35 @@ class TextFieldCursorTest : FocusedWindowTest {
                 state = state,
                 textStyle = textStyle,
                 modifier = textFieldModifier,
-                cursorBrush = SolidColor(Color.Unspecified)
+                cursorBrush = SolidColor(Color.Unspecified),
             )
         }
 
         focusAndWait()
 
         // no cursor when usually shown
-        rule.onNode(hasSetTextAction())
+        rule
+            .onNode(hasSetTextAction())
             .captureToImage()
             .assertShape(
                 density = rule.density,
                 shape = RectangleShape,
                 shapeColor = contentColor,
                 backgroundColor = contentColor,
-                shapeOverlapPixelCount = 0.0f
+                antiAliasingGap = 0.0f,
             )
 
         // no cursor when should be no cursor
         rule.mainClock.advanceTimeBy(700)
-        rule.onNode(hasSetTextAction())
+        rule
+            .onNode(hasSetTextAction())
             .captureToImage()
             .assertShape(
                 density = rule.density,
                 shape = RectangleShape,
                 shapeColor = contentColor,
                 backgroundColor = contentColor,
-                shapeOverlapPixelCount = 0.0f
+                antiAliasingGap = 0.0f,
             )
     }
 
@@ -480,7 +459,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                 textStyle = textStyle,
                 modifier = textFieldModifier.width(100.dp),
                 cursorBrush = SolidColor(cursorColor),
-                onTextLayout = onTextLayout
+                onTextLayout = onTextLayout,
             )
         }
 
@@ -490,15 +469,12 @@ class TextFieldCursorTest : FocusedWindowTest {
         rule.mainClock.advanceTimeBy(500)
 
         // change text field value
-        rule.onNode(hasSetTextAction())
-            .performTextInput("s")
+        rule.onNode(hasSetTextAction()).performTextInput("s")
 
         // cursor would have been invisible during next 500 ms if cursor blinks while typing.
         // To prevent blinking while typing we restart animation when new symbol is typed.
         rule.mainClock.advanceTimeBy(300)
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertCursor(cursorTopCenterInLtr)
+        rule.onNode(hasSetTextAction()).captureToImage().assertCursor(cursorTopCenterInLtr)
     }
 
     @Test
@@ -511,7 +487,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                 textStyle = textStyle,
                 modifier = textFieldModifier,
                 cursorBrush = SolidColor(cursorColor),
-                onTextLayout = onTextLayout
+                onTextLayout = onTextLayout,
             )
         }
 
@@ -521,15 +497,12 @@ class TextFieldCursorTest : FocusedWindowTest {
         rule.mainClock.advanceTimeBy(500)
         rule.mainClock.advanceTimeByFrame()
 
-        rule.onNode(hasSetTextAction())
-            .performTextInputSelection(TextRange(0))
+        rule.onNode(hasSetTextAction()).performTextInputSelection(TextRange(0))
 
         // necessary for animation to start (shows cursor again)
         rule.mainClock.advanceTimeByFrame()
 
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertCursor(cursorTopCenterInLtr)
+        rule.onNode(hasSetTextAction()).captureToImage().assertCursor(cursorTopCenterInLtr)
     }
 
     @Ignore // b/327235206
@@ -547,15 +520,11 @@ class TextFieldCursorTest : FocusedWindowTest {
                 onTextLayout = onTextLayout,
                 decorator = {
                     if (toggle) {
-                        Row {
-                            it()
-                        }
+                        Row { it() }
                     } else {
-                        Column {
-                            it()
-                        }
+                        Column { it() }
                     }
-                }
+                },
             )
         }
 
@@ -566,23 +535,22 @@ class TextFieldCursorTest : FocusedWindowTest {
         rule.mainClock.advanceTimeByFrame()
 
         // assert no cursor visible
-        rule.onNode(hasSetTextAction())
+        rule
+            .onNode(hasSetTextAction())
             .captureToImage()
             .assertShape(
                 density = rule.density,
                 shape = RectangleShape,
                 shapeColor = contentColor,
                 backgroundColor = contentColor,
-                shapeOverlapPixelCount = 0.0f
+                antiAliasingGap = 0.0f,
             )
 
         toggle = !toggle
         // necessary for animation to start (shows cursor again)
         rule.mainClock.advanceTimeByFrame()
 
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertCursor(cursorTopCenterInLtr)
+        rule.onNode(hasSetTextAction()).captureToImage().assertCursor(cursorTopCenterInLtr)
 
         toggle = !toggle
 
@@ -590,14 +558,15 @@ class TextFieldCursorTest : FocusedWindowTest {
         rule.mainClock.advanceTimeByFrame()
 
         // assert no cursor visible
-        rule.onNode(hasSetTextAction())
+        rule
+            .onNode(hasSetTextAction())
             .captureToImage()
             .assertShape(
                 density = rule.density,
                 shape = RectangleShape,
                 shapeColor = contentColor,
                 backgroundColor = contentColor,
-                shapeOverlapPixelCount = 0.0f
+                antiAliasingGap = 0.0f,
             )
     }
 
@@ -613,7 +582,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                     textStyle = textStyle,
                     modifier = textFieldModifier,
                     cursorBrush = cursorBrush,
-                    onTextLayout = onTextLayout
+                    onTextLayout = onTextLayout,
                 )
             }
         }
@@ -624,14 +593,15 @@ class TextFieldCursorTest : FocusedWindowTest {
         cursorBrush = SolidColor(Color.Green)
         rule.mainClock.advanceTimeByFrame()
 
-        rule.onNode(hasSetTextAction())
+        rule
+            .onNode(hasSetTextAction())
             .captureToImage()
             .assertShape(
                 density = rule.density,
                 shape = RectangleShape,
                 shapeColor = contentColor,
                 backgroundColor = contentColor,
-                shapeOverlapPixelCount = 0.0f
+                antiAliasingGap = 0.0f,
             )
     }
 
@@ -647,12 +617,10 @@ class TextFieldCursorTest : FocusedWindowTest {
                 BasicTextField(
                     state = state,
                     // make sure that background is not obstructing selection
-                    textStyle = textStyle.copy(
-                        background = Color.Unspecified
-                    ),
+                    textStyle = textStyle.copy(background = Color.Unspecified),
                     modifier = textFieldModifier,
                     cursorBrush = SolidColor(cursorColor),
-                    onTextLayout = onTextLayout
+                    onTextLayout = onTextLayout,
                 )
             }
         }
@@ -663,9 +631,7 @@ class TextFieldCursorTest : FocusedWindowTest {
         rule.mainClock.advanceTimeBy(300)
         rule.mainClock.advanceTimeByFrame()
 
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertDoesNotContainColor(cursorColor)
+        rule.onNode(hasSetTextAction()).captureToImage().assertDoesNotContainColor(cursorColor)
     }
 
     @Test
@@ -680,13 +646,9 @@ class TextFieldCursorTest : FocusedWindowTest {
                     textStyle = textStyle,
                     modifier = textFieldModifier,
                     cursorBrush = SolidColor(cursorColor),
-                    onTextLayout = onTextLayout
+                    onTextLayout = onTextLayout,
                 )
-                Box(
-                    modifier = Modifier
-                        .focusable(true)
-                        .testTag("box")
-                )
+                Box(modifier = Modifier.focusable(true).testTag("box"))
             }
         }
 
@@ -695,22 +657,21 @@ class TextFieldCursorTest : FocusedWindowTest {
         rule.mainClock.advanceTimeBy(100)
         rule.mainClock.advanceTimeByFrame()
 
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertCursor(cursorTopCenterInLtr)
+        rule.onNode(hasSetTextAction()).captureToImage().assertCursor(cursorTopCenterInLtr)
 
         rule.onNodeWithTag("box").requestFocus()
         rule.mainClock.advanceTimeByFrame()
 
         // cursor should hide immediately.
-        rule.onNode(hasSetTextAction())
+        rule
+            .onNode(hasSetTextAction())
             .captureToImage()
             .assertShape(
                 density = rule.density,
                 shape = RectangleShape,
                 shapeColor = contentColor,
                 backgroundColor = contentColor,
-                shapeOverlapPixelCount = 0.0f
+                antiAliasingGap = 0.0f,
             )
     }
 
@@ -725,7 +686,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                 modifier = textFieldModifier,
                 readOnly = true,
                 cursorBrush = SolidColor(cursorColor),
-                onTextLayout = onTextLayout
+                onTextLayout = onTextLayout,
             )
         }
 
@@ -734,9 +695,8 @@ class TextFieldCursorTest : FocusedWindowTest {
         rule.mainClock.advanceTimeBy(100)
         rule.mainClock.advanceTimeByFrame()
 
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertDoesNotContainColor(cursorColor)
+        // readonly fields do not have setText action
+        rule.onNode(hasPerformImeAction()).captureToImage().assertDoesNotContainColor(cursorColor)
     }
 
     @Test
@@ -751,7 +711,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                 modifier = textFieldModifier,
                 readOnly = readOnly,
                 cursorBrush = SolidColor(cursorColor),
-                onTextLayout = onTextLayout
+                onTextLayout = onTextLayout,
             )
         }
 
@@ -760,16 +720,13 @@ class TextFieldCursorTest : FocusedWindowTest {
         rule.mainClock.advanceTimeBy(100)
         rule.mainClock.advanceTimeByFrame()
 
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertDoesNotContainColor(cursorColor)
+        // readonly fields do not have setText action
+        rule.onNode(hasPerformImeAction()).captureToImage().assertDoesNotContainColor(cursorColor)
 
         readOnly = false
         rule.mainClock.advanceTimeByFrame()
 
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertCursor(cursorTopCenterInLtr)
+        rule.onNode(hasPerformImeAction()).captureToImage().assertCursor(cursorTopCenterInLtr)
     }
 
     @Test
@@ -777,10 +734,11 @@ class TextFieldCursorTest : FocusedWindowTest {
     fun cursorNotBlinking_whenWindowLostFocus() {
         state = TextFieldState()
         val focusWindow = mutableStateOf(true)
-        fun createWindowInfo(focused: Boolean) = object : WindowInfo {
-            override val isWindowFocused: Boolean
-                get() = focused
-        }
+        fun createWindowInfo(focused: Boolean) =
+            object : WindowInfo {
+                override val isWindowFocused: Boolean
+                    get() = focused
+            }
 
         rule.setTestContent {
             CompositionLocalProvider(LocalWindowInfo provides createWindowInfo(focusWindow.value)) {
@@ -790,7 +748,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                         textStyle = textStyle,
                         modifier = textFieldModifier,
                         cursorBrush = SolidColor(cursorColor),
-                        onTextLayout = onTextLayout
+                        onTextLayout = onTextLayout,
                     )
                 }
             }
@@ -800,9 +758,7 @@ class TextFieldCursorTest : FocusedWindowTest {
 
         // cursor visible first 500ms
         rule.mainClock.advanceTimeBy(100)
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertContainsColor(cursorColor)
+        rule.onNode(hasSetTextAction()).captureToImage().assertContainsColor(cursorColor)
 
         // window loses focus
         focusWindow.value = false
@@ -810,9 +766,7 @@ class TextFieldCursorTest : FocusedWindowTest {
 
         // check that text field cursor disappeared even within visible 500ms
         rule.mainClock.advanceTimeBy(300)
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertDoesNotContainColor(cursorColor)
+        rule.onNode(hasSetTextAction()).captureToImage().assertDoesNotContainColor(cursorColor)
     }
 
     @Test
@@ -820,10 +774,11 @@ class TextFieldCursorTest : FocusedWindowTest {
     fun focusedTextField_resumeBlinking_whenWindowRegainsFocus() {
         state = TextFieldState()
         val focusWindow = mutableStateOf(true)
-        fun createWindowInfo(focused: Boolean) = object : WindowInfo {
-            override val isWindowFocused: Boolean
-                get() = focused
-        }
+        fun createWindowInfo(focused: Boolean) =
+            object : WindowInfo {
+                override val isWindowFocused: Boolean
+                    get() = focused
+            }
 
         rule.setTestContent {
             CompositionLocalProvider(LocalWindowInfo provides createWindowInfo(focusWindow.value)) {
@@ -833,7 +788,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                         textStyle = textStyle,
                         modifier = textFieldModifier,
                         cursorBrush = SolidColor(cursorColor),
-                        onTextLayout = onTextLayout
+                        onTextLayout = onTextLayout,
                     )
                 }
             }
@@ -847,16 +802,15 @@ class TextFieldCursorTest : FocusedWindowTest {
 
         // check that text field cursor disappeared even within visible 500ms
         rule.mainClock.advanceTimeBy(100)
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertDoesNotContainColor(cursorColor)
+        rule.onNode(hasSetTextAction()).captureToImage().assertDoesNotContainColor(cursorColor)
 
         // window regains focus within 500ms
         focusWindow.value = true
         rule.waitForIdle()
 
         rule.mainClock.advanceTimeBy(100)
-        rule.onNode(hasSetTextAction())
+        rule
+            .onNode(hasSetTextAction())
             .captureToImage()
             .assertContainsColor(cursorColor)
             .assertCursor(cursorTopCenterInLtr)
@@ -868,18 +822,17 @@ class TextFieldCursorTest : FocusedWindowTest {
         state = TextFieldState("hello", initialSelection = TextRange(0, 5))
         val selectionColor = Color.Blue
         val focusWindow = mutableStateOf(true)
-        val windowInfo = object : WindowInfo {
-            override val isWindowFocused: Boolean
-                get() = focusWindow.value
-        }
+        val windowInfo =
+            object : WindowInfo {
+                override val isWindowFocused: Boolean
+                    get() = focusWindow.value
+            }
 
         rule.setTestContent {
             CompositionLocalProvider(
                 LocalWindowInfo provides windowInfo,
-                LocalTextSelectionColors provides TextSelectionColors(
-                    selectionColor,
-                    selectionColor
-                )
+                LocalTextSelectionColors provides
+                    TextSelectionColors(selectionColor, selectionColor),
             ) {
                 BasicTextField(
                     state = state,
@@ -887,22 +840,18 @@ class TextFieldCursorTest : FocusedWindowTest {
                     textStyle = textStyle.copy(background = Color.Unspecified),
                     modifier = textFieldModifier,
                     cursorBrush = SolidColor(cursorColor),
-                    onTextLayout = onTextLayout
+                    onTextLayout = onTextLayout,
                 )
             }
         }
 
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertContainsColor(selectionColor)
+        rule.onNode(hasSetTextAction()).captureToImage().assertContainsColor(selectionColor)
 
         // window lost focus, make sure selection still drawn
         focusWindow.value = false
         rule.waitForIdle()
 
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertContainsColor(selectionColor)
+        rule.onNode(hasSetTextAction()).captureToImage().assertContainsColor(selectionColor)
     }
 
     @Test
@@ -917,7 +866,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                 textStyle = textStyle,
                 modifier = textFieldModifier,
                 cursorBrush = SolidColor(cursorColor),
-                onTextLayout = onTextLayout
+                onTextLayout = onTextLayout,
             )
         }
 
@@ -926,10 +875,11 @@ class TextFieldCursorTest : FocusedWindowTest {
         rule.runOnIdle {
             val startEvent = makeTextDragEvent(DragEvent.ACTION_DRAG_STARTED)
             val enterEvent = makeTextDragEvent(DragEvent.ACTION_DRAG_ENTERED)
-            val moveEvent = makeTextDragEvent(
-                action = DragEvent.ACTION_DRAG_LOCATION,
-                offset = Offset(with(rule.density) { fontSize.toPx() * 3 }, 5f)
-            )
+            val moveEvent =
+                makeTextDragEvent(
+                    action = DragEvent.ACTION_DRAG_LOCATION,
+                    position = Offset(with(rule.density) { fontSize.toPx() * 3 }, 5f),
+                )
 
             view?.dispatchDragEvent(startEvent)
             view?.dispatchDragEvent(enterEvent)
@@ -938,9 +888,7 @@ class TextFieldCursorTest : FocusedWindowTest {
 
         rule.mainClock.advanceTimeBy(100)
 
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertCursor(cursorTopCenterInLtr)
+        rule.onNode(hasSetTextAction()).captureToImage().assertCursor(cursorTopCenterInLtr)
     }
 
     @Test
@@ -955,7 +903,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                 textStyle = textStyle,
                 modifier = textFieldModifier,
                 cursorBrush = SolidColor(cursorColor),
-                onTextLayout = onTextLayout
+                onTextLayout = onTextLayout,
             )
         }
 
@@ -964,10 +912,11 @@ class TextFieldCursorTest : FocusedWindowTest {
         rule.runOnIdle {
             val startEvent = makeTextDragEvent(DragEvent.ACTION_DRAG_STARTED)
             val enterEvent = makeTextDragEvent(DragEvent.ACTION_DRAG_ENTERED)
-            val moveEvent = makeTextDragEvent(
-                action = DragEvent.ACTION_DRAG_LOCATION,
-                offset = Offset(with(rule.density) { fontSize.toPx() * 3 }, 5f)
-            )
+            val moveEvent =
+                makeTextDragEvent(
+                    action = DragEvent.ACTION_DRAG_LOCATION,
+                    position = Offset(with(rule.density) { fontSize.toPx() * 3 }, 5f),
+                )
 
             view?.dispatchDragEvent(startEvent)
             view?.dispatchDragEvent(enterEvent)
@@ -976,14 +925,15 @@ class TextFieldCursorTest : FocusedWindowTest {
 
         rule.mainClock.advanceTimeBy(500)
 
-        rule.onNode(hasSetTextAction())
+        rule
+            .onNode(hasSetTextAction())
             .captureToImage()
             .assertShape(
                 density = rule.density,
                 shape = RectangleShape,
                 shapeColor = contentColor,
                 backgroundColor = contentColor,
-                shapeOverlapPixelCount = 0.0f
+                antiAliasingGap = 0.0f,
             )
     }
 
@@ -999,7 +949,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                 textStyle = textStyle,
                 modifier = textFieldModifier,
                 cursorBrush = SolidColor(cursorColor),
-                onTextLayout = onTextLayout
+                onTextLayout = onTextLayout,
             )
         }
 
@@ -1008,10 +958,11 @@ class TextFieldCursorTest : FocusedWindowTest {
         rule.runOnIdle {
             val startEvent = makeTextDragEvent(DragEvent.ACTION_DRAG_STARTED)
             val enterEvent = makeTextDragEvent(DragEvent.ACTION_DRAG_ENTERED)
-            val moveEvent = makeTextDragEvent(
-                action = DragEvent.ACTION_DRAG_LOCATION,
-                offset = Offset(with(rule.density) { fontSize.toPx() * 3 }, 5f)
-            )
+            val moveEvent =
+                makeTextDragEvent(
+                    action = DragEvent.ACTION_DRAG_LOCATION,
+                    position = Offset(with(rule.density) { fontSize.toPx() * 3 }, 5f),
+                )
 
             view?.dispatchDragEvent(startEvent)
             view?.dispatchDragEvent(enterEvent)
@@ -1020,20 +971,17 @@ class TextFieldCursorTest : FocusedWindowTest {
 
         rule.mainClock.advanceTimeBy(300)
 
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertCursor(cursorTopCenterInLtr)
+        rule.onNode(hasSetTextAction()).captureToImage().assertCursor(cursorTopCenterInLtr)
 
-        val moveEvent2 = makeTextDragEvent(
-            action = DragEvent.ACTION_DRAG_LOCATION,
-            offset = Offset(with(rule.density) { fontSize.toPx() * 4 }, 5f)
-        )
+        val moveEvent2 =
+            makeTextDragEvent(
+                action = DragEvent.ACTION_DRAG_LOCATION,
+                position = Offset(with(rule.density) { fontSize.toPx() * 4 }, 5f),
+            )
         view?.dispatchDragEvent(moveEvent2)
         rule.mainClock.advanceTimeBy(400)
 
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertCursor(cursorTopCenterInLtr)
+        rule.onNode(hasSetTextAction()).captureToImage().assertCursor(cursorTopCenterInLtr)
     }
 
     @Test
@@ -1049,7 +997,7 @@ class TextFieldCursorTest : FocusedWindowTest {
                     textStyle = textStyle,
                     modifier = textFieldModifier,
                     cursorBrush = SolidColor(cursorColor),
-                    onTextLayout = onTextLayout
+                    onTextLayout = onTextLayout,
                 )
             }
         }
@@ -1059,10 +1007,11 @@ class TextFieldCursorTest : FocusedWindowTest {
         rule.runOnIdle {
             val startEvent = makeTextDragEvent(DragEvent.ACTION_DRAG_STARTED)
             val enterEvent = makeTextDragEvent(DragEvent.ACTION_DRAG_ENTERED)
-            val moveEvent = makeTextDragEvent(
-                action = DragEvent.ACTION_DRAG_LOCATION,
-                offset = Offset(with(rule.density) { fontSize.toPx() * 3 }, 5f)
-            )
+            val moveEvent =
+                makeTextDragEvent(
+                    action = DragEvent.ACTION_DRAG_LOCATION,
+                    position = Offset(with(rule.density) { fontSize.toPx() * 3 }, 5f),
+                )
 
             view?.dispatchDragEvent(startEvent)
             view?.dispatchDragEvent(enterEvent)
@@ -1071,19 +1020,15 @@ class TextFieldCursorTest : FocusedWindowTest {
 
         rule.mainClock.advanceTimeBy(100)
 
-        rule.onNode(hasSetTextAction())
-            .captureToImage()
-            .assertCursor(cursorTopCenterInLtr)
+        rule.onNode(hasSetTextAction()).captureToImage().assertCursor(cursorTopCenterInLtr)
     }
 
     private fun focusAndWait() {
-        rule.onNode(hasSetTextAction()).requestFocus()
+        rule.onNode(hasPerformImeAction()).requestFocus()
         rule.mainClock.advanceTimeUntil { isFocused }
     }
 
-    /**
-     * @param cursorPosition Top center of cursor rectangle
-     */
+    /** @param cursorPosition Top center of cursor rectangle */
     private fun ImageBitmap.assertCursor(cursorPosition: Offset) {
         assertThat(cursorPosition.x).isAtLeast(0f)
         assertThat(cursorPosition.y).isAtLeast(0f)
@@ -1093,26 +1038,26 @@ class TextFieldCursorTest : FocusedWindowTest {
         assertThat(cursorSizePx.width).isGreaterThan(2)
 
         // shrink the check are by 1px for left, top, right, bottom
-        val checkRect = Rect(
-            ceil(cursorPosition.x - cursorSizePx.width / 2) + 1,
-            ceil(cursorPosition.y) + 1,
-            floor(cursorPosition.x + cursorSizePx.width / 2) - 1,
-            floor(cursorPosition.y + cursorSizePx.height) - 1
-        )
+        val checkRect =
+            Rect(
+                ceil(cursorPosition.x - cursorSizePx.width / 2) + 1,
+                ceil(cursorPosition.y) + 1,
+                floor(cursorPosition.x + cursorSizePx.width / 2) - 1,
+                floor(cursorPosition.y + cursorSizePx.height) - 1,
+            )
 
         // skip an expanded rectangle that is 1px larger than cursor rectangle due to antialiasing
-        val skipRect = Rect(
-            floor(cursorPosition.x - cursorSizePx.width / 2) - 1,
-            floor(cursorPosition.y) - 1,
-            ceil(cursorPosition.x + cursorSizePx.width / 2) + 1,
-            ceil(cursorPosition.y + cursorSizePx.height) + 1
-        )
+        val skipRect =
+            Rect(
+                floor(cursorPosition.x - cursorSizePx.width / 2) - 1,
+                floor(cursorPosition.y) - 1,
+                ceil(cursorPosition.x + cursorSizePx.width / 2) + 1,
+                ceil(cursorPosition.y + cursorSizePx.height) + 1,
+            )
 
         val width = width
         val height = height
-        this.assertPixels(
-            IntSize(width, height)
-        ) { position ->
+        this.assertPixels(IntSize(width, height)) { position ->
             if (checkRect.contains(position.toOffset())) {
                 // cursor
                 cursorColor
@@ -1134,21 +1079,20 @@ class TextFieldCursorTest : FocusedWindowTest {
                 BasicTextField(
                     state = state,
                     textStyle = textStyle,
-                    modifier = textFieldModifier.layout { measurable, constraints ->
-                        // change the state during layout so draw can read the new state
-                        val currValue = state.text
-                        if (currValue.isNotEmpty()) {
-                            val newText = currValue.dropLast(1)
-                            state.setTextAndPlaceCursorAtEnd(newText.toString())
-                        }
+                    modifier =
+                        textFieldModifier.layout { measurable, constraints ->
+                            // change the state during layout so draw can read the new state
+                            val currValue = state.text
+                            if (currValue.isNotEmpty()) {
+                                val newText = currValue.dropLast(1)
+                                state.setTextAndPlaceCursorAtEnd(newText.toString())
+                            }
 
-                        val p = measurable.measure(constraints)
-                        layout(p.width, p.height) {
-                            p.place(0, 0)
-                        }
-                    },
+                            val p = measurable.measure(constraints)
+                            layout(p.width, p.height) { p.place(0, 0) }
+                        },
                     cursorBrush = SolidColor(cursorColor),
-                    onTextLayout = onTextLayout
+                    onTextLayout = onTextLayout,
                 )
             }
         }

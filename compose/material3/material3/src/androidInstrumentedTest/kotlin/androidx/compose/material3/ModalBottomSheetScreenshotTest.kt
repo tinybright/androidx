@@ -16,7 +16,6 @@
 
 package androidx.compose.material3
 
-import android.os.Build
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,14 +41,12 @@ import org.junit.runner.RunWith
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalMaterial3Api::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 class ModalBottomSheetScreenshotTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL3)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL3)
 
     private val testTag = "ModalBottomSheet"
 
@@ -94,9 +91,7 @@ class ModalBottomSheetScreenshotTest {
     }
 
     private fun assertAgainstGolden(goldenName: String) {
-        rule.onNodeWithTag(testTag)
-            .captureToImage()
-            .assertAgainstGolden(screenshotRule, goldenName)
+        rule.onNodeWithTag(testTag).captureToImage().assertAgainstGolden(screenshotRule, goldenName)
     }
 
     @Composable
@@ -108,11 +103,11 @@ class ModalBottomSheetScreenshotTest {
                 scope = rememberCoroutineScope(),
                 sheetState = rememberSheetState(initialValue = SheetValue.Expanded),
                 animateToDismiss = {},
-                settleToDismiss = {}
+                settleToDismiss = {},
             ) {
                 Text(
                     "Modal Bottom Sheet Predictive Back\nProgress: $progress",
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(16.dp),
                 )
             }
         }

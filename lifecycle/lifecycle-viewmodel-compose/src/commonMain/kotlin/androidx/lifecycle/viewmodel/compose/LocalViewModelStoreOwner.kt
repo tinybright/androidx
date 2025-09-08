@@ -22,31 +22,28 @@ import androidx.compose.runtime.ProvidedValue
 import androidx.compose.runtime.compositionLocalOf
 import androidx.lifecycle.ViewModelStoreOwner
 
-/**
- * The CompositionLocal containing the current [ViewModelStoreOwner].
- */
+/** The CompositionLocal containing the current [ViewModelStoreOwner]. */
 public object LocalViewModelStoreOwner {
-    private val LocalViewModelStoreOwner =
-        compositionLocalOf<ViewModelStoreOwner?> { null }
+    private val LocalViewModelStoreOwner = compositionLocalOf<ViewModelStoreOwner?> { null }
 
     /**
-     * Returns current composition local value for the owner or `null` if one has not
-     * been provided nor is one available via [findViewTreeViewModelStoreOwner] on the
-     * current [androidx.compose.ui.platform.LocalView].
+     * Returns current composition local value for the owner or `null` if one has not been provided.
+     * On Android it will also try to get it via
+     * [androidx.lifecycle.findViewTreeViewModelStoreOwner] on the current
+     * [androidx.compose.ui.platform.LocalView].
      */
     public val current: ViewModelStoreOwner?
-        @Composable
-        get() = LocalViewModelStoreOwner.current ?: findViewTreeViewModelStoreOwner()
+        @Composable get() = LocalViewModelStoreOwner.current ?: findDefaultViewModelStoreOwner()
 
     /**
      * Associates a [LocalViewModelStoreOwner] key to a value in a call to
      * [CompositionLocalProvider].
      */
-    public infix fun provides(viewModelStoreOwner: ViewModelStoreOwner):
-        ProvidedValue<ViewModelStoreOwner?> {
+    public infix fun provides(
+        viewModelStoreOwner: ViewModelStoreOwner
+    ): ProvidedValue<ViewModelStoreOwner?> {
         return LocalViewModelStoreOwner.provides(viewModelStoreOwner)
     }
 }
 
-@Composable
-internal expect fun findViewTreeViewModelStoreOwner(): ViewModelStoreOwner?
+@Composable internal expect fun findDefaultViewModelStoreOwner(): ViewModelStoreOwner?

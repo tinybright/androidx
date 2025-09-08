@@ -24,12 +24,10 @@ import kotlinx.coroutines.flow.Flow
 
 internal fun <T> cancelableChannelFlow(
     controller: Job,
-    block: suspend SimpleProducerScope<T>.() -> Unit
+    block: suspend SimpleProducerScope<T>.() -> Unit,
 ): Flow<T> {
     return simpleChannelFlow<T> {
-        controller.invokeOnCompletion {
-            close()
-        }
+        controller.invokeOnCompletion { close() }
         this.block()
     }
 }

@@ -21,7 +21,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.provider.Property
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
@@ -30,7 +30,7 @@ import org.gradle.api.tasks.TaskAction
 /** Finds the outputs of every task and saves this mapping into a file */
 @CacheableTask
 abstract class ListTaskOutputsTask : DefaultTask() {
-    @OutputFile val outputFile: Property<File> = project.objects.property(File::class.java)
+    @OutputFile val outputFile: RegularFileProperty = project.objects.fileProperty()
     @Input val removePrefixes: MutableList<String> = mutableListOf()
     @Input val tasks: MutableList<Task> = mutableListOf()
 
@@ -41,11 +41,6 @@ abstract class ListTaskOutputsTask : DefaultTask() {
         // compute the output text when the taskgraph is ready so that the output text can be
         // saved in the configuration cache and not generate a configuration cache violation
         project.gradle.taskGraph.whenReady { outputText }
-    }
-
-    fun setOutput(f: File) {
-        outputFile.set(f)
-        description = "Finds the outputs of every task and saves the resulting mapping into $f"
     }
 
     fun removePrefix(prefix: String) {
@@ -99,7 +94,7 @@ abstract class ListTaskOutputsTask : DefaultTask() {
     @TaskAction
     fun exec() {
         val outputFile = outputFile.get()
-        outputFile.writeText(outputText)
+        outputFile.asFile.writeText(outputText)
     }
 }
 
@@ -110,6 +105,8 @@ val taskNamesKnownToDuplicateOutputs =
 
         // b/308798582
         "transformNonJvmMainCInteropDependenciesMetadataForIde",
+        "transformAppleMainCInteropDependenciesMetadataForIde",
+        "transformAppleTestCInteropDependenciesMetadataForIde",
         "transformDarwinTestCInteropDependenciesMetadataForIde",
         "transformDarwinMainCInteropDependenciesMetadataForIde",
         "transformCommonMainCInteropDependenciesMetadataForIde",
@@ -118,10 +115,62 @@ val taskNamesKnownToDuplicateOutputs =
         "transformIosTestCInteropDependenciesMetadataForIde",
         "transformNativeTestCInteropDependenciesMetadataForIde",
         "transformNativeMainCInteropDependenciesMetadataForIde",
+        "transformUnixMainCInteropDependenciesMetadataForIde",
+        "transformUnixTestCInteropDependenciesMetadataForIde",
+        "transformLinuxMainCInteropDependenciesMetadataForIde",
+        "transformLinuxTestCInteropDependenciesMetadataForIde",
+        "transformNonIosNativeTestCInteropDependenciesMetadataForIde",
+        "transformNonJvmCommonMainCInteropDependenciesMetadataForIde",
 
         // The following tests intentionally have the same output of golden images
         "updateGoldenDesktopTest",
-        "updateGoldenDebugUnitTest"
+        "updateGoldenDebugUnitTest",
+
+        // The following tasks have the same output file:
+        // ../../prebuilts/androidx/javascript-for-kotlin/yarn.lock
+        "kotlinRestoreYarnLock",
+        "kotlinWasmRestoreYarnLock",
+        "kotlinNpmInstall",
+        "kotlinWasmNpmInstall",
+        "kotlinUpgradePackageLock",
+        "kotlinWasmUpgradePackageLock",
+        "kotlinUpgradeYarnLock",
+        "kotlinWasmUpgradeYarnLock",
+        "kotlinStorePackageLock",
+        "kotlinWasmStorePackageLock",
+        "kotlinStoreYarnLock",
+        "kotlinWasmStoreYarnLock",
+
+        // The following tasks have the same output file:
+        // $OUT_DIR/androidx/build/wasm/yarn.lock
+        "wasmKotlinRestoreYarnLock",
+        "wasmKotlinNpmInstall",
+        "wasmKotlinUpgradePackageLock",
+        "wasmKotlinStorePackageLock",
+        "wasmKotlinUpgradeYarnLock",
+        "wasmKotlinStoreYarnLock",
+
+        // The following tasks have the same output configFile file:
+        // projectBuildDir/js/packages/projectName-wasm-js/webpack.config.js
+        // Remove when https://youtrack.jetbrains.com/issue/KT-70029 / b/361319689 is resolved
+        // and set configFile location for each task
+        "wasmJsBrowserDevelopmentWebpack",
+        "wasmJsBrowserDevelopmentRun",
+        "wasmJsBrowserProductionWebpack",
+        "wasmJsBrowserProductionRun",
+        "jsTestTestDevelopmentExecutableCompileSync",
+
+        // https://youtrack.jetbrains.com/issue/KT-79936
+        // $OUT_DIR/.gradle/nodejs/node-v22.13.0-darwin-arm64.hash
+        "kotlinNodeJsSetup",
+        "kotlinWasmNodeJsSetup",
+        // $OUT_DIR/.gradle/yarn/yarn-v1.22.17.hash
+        "wasmKotlinYarnSetup",
+        "kotlinYarnSetup",
+
+        // $OUT_DIR/.gradle/binaryen/binaryen-version_122.hash
+        "kotlinBinaryenSetup",
+        "kotlinWasmBinaryenSetup",
     )
 
 fun shouldValidateTaskOutput(task: Task): Boolean {

@@ -37,10 +37,7 @@ fun SimpleFab() {
 
 @Composable
 fun SimpleExtendedFabNoIcon() {
-    ExtendedFloatingActionButton(
-        text = { Text("EXTENDED") },
-        onClick = {}
-    )
+    ExtendedFloatingActionButton(text = { Text("EXTENDED") }, onClick = {})
 }
 
 @Sampled
@@ -49,7 +46,7 @@ fun SimpleExtendedFabWithIcon() {
     ExtendedFloatingActionButton(
         icon = { Icon(Icons.Filled.Favorite, contentDescription = null) },
         text = { Text("ADD TO BASKET") },
-        onClick = { /*do something*/ }
+        onClick = { /*do something*/ },
     )
 }
 
@@ -60,6 +57,6 @@ fun FluidExtendedFab() {
         icon = { Icon(Icons.Filled.Favorite, contentDescription = null) },
         text = { Text("FLUID FAB") },
         onClick = { /*do something*/ },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     )
 }

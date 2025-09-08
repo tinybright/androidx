@@ -31,9 +31,10 @@ class WorkerStepTest {
 
     @Test
     fun verifyEnclosingElementExtendsWorker() {
-        val myWorker = Source.java(
-            "androidx.hilt.work.test.MyWorker",
-            """
+        val myWorker =
+            Source.java(
+                "androidx.hilt.work.test.MyWorker",
+                """
             package androidx.hilt.work.test;
 
             import android.content.Context;
@@ -47,14 +48,18 @@ class WorkerStepTest {
                 @AssistedInject
                 MyWorker(@Assisted Context context, @Assisted WorkerParameters params) { }
             }
-            """
-        )
+            """,
+            )
 
         runProcessorTest(
-            sources = listOf(
-                myWorker, Sources.LISTENABLE_WORKER, Sources.WORKER, Sources.WORKER_PARAMETERS
-            ),
-            createProcessingSteps = { listOf(WorkerStep()) }
+            sources =
+                listOf(
+                    myWorker,
+                    Sources.LISTENABLE_WORKER,
+                    Sources.WORKER,
+                    Sources.WORKER_PARAMETERS,
+                ),
+            createProcessingSteps = { listOf(WorkerStep()) },
         ) {
             it.hasErrorCount(1)
             it.hasErrorContaining(
@@ -66,9 +71,10 @@ class WorkerStepTest {
 
     @Test
     fun verifySingleAnnotatedConstructor() {
-        val myWorker = Source.java(
-            "androidx.hilt.work.test.MyWorker",
-            """
+        val myWorker =
+            Source.java(
+                "androidx.hilt.work.test.MyWorker",
+                """
             package androidx.hilt.work.test;
 
             import android.content.Context;
@@ -91,14 +97,18 @@ class WorkerStepTest {
                     super(context, params);
                 }
             }
-            """
-        )
+            """,
+            )
 
         runProcessorTest(
-            sources = listOf(
-                myWorker, Sources.LISTENABLE_WORKER, Sources.WORKER, Sources.WORKER_PARAMETERS
-            ),
-            createProcessingSteps = { listOf(WorkerStep()) }
+            sources =
+                listOf(
+                    myWorker,
+                    Sources.LISTENABLE_WORKER,
+                    Sources.WORKER,
+                    Sources.WORKER_PARAMETERS,
+                ),
+            createProcessingSteps = { listOf(WorkerStep()) },
         ) {
             it.hasErrorCount(1)
             it.hasErrorContaining(
@@ -110,9 +120,10 @@ class WorkerStepTest {
 
     @Test
     fun verifyNonPrivateConstructor() {
-        val myWorker = Source.java(
-            "androidx.hilt.work.test.MyWorker",
-            """
+        val myWorker =
+            Source.java(
+                "androidx.hilt.work.test.MyWorker",
+                """
             package androidx.hilt.work.test;
 
             import android.content.Context;
@@ -129,27 +140,30 @@ class WorkerStepTest {
                     super(context, params);
                 }
             }
-            """
-        )
+            """,
+            )
 
         runProcessorTest(
-            sources = listOf(
-                myWorker, Sources.LISTENABLE_WORKER, Sources.WORKER, Sources.WORKER_PARAMETERS
-            ),
-            createProcessingSteps = { listOf(WorkerStep()) }
+            sources =
+                listOf(
+                    myWorker,
+                    Sources.LISTENABLE_WORKER,
+                    Sources.WORKER,
+                    Sources.WORKER_PARAMETERS,
+                ),
+            createProcessingSteps = { listOf(WorkerStep()) },
         ) {
             it.hasErrorCount(1)
-            it.hasErrorContaining(
-                "@AssistedInject annotated constructors must not be private."
-            )
+            it.hasErrorContaining("@AssistedInject annotated constructors must not be private.")
         }
     }
 
     @Test
     fun verifyInnerClassIsStatic() {
-        val myWorker = Source.java(
-            "androidx.hilt.work.test.Outer",
-            """
+        val myWorker =
+            Source.java(
+                "androidx.hilt.work.test.Outer",
+                """
             package androidx.hilt.work.test;
 
             import android.content.Context;
@@ -168,28 +182,32 @@ class WorkerStepTest {
                     }
                 }
             }
-            """
-        )
+            """,
+            )
 
         runProcessorTest(
-            sources = listOf(
-                myWorker, Sources.LISTENABLE_WORKER, Sources.WORKER, Sources.WORKER_PARAMETERS
-            ),
-            createProcessingSteps = { listOf(WorkerStep()) }
+            sources =
+                listOf(
+                    myWorker,
+                    Sources.LISTENABLE_WORKER,
+                    Sources.WORKER,
+                    Sources.WORKER_PARAMETERS,
+                ),
+            createProcessingSteps = { listOf(WorkerStep()) },
         ) {
             it.hasErrorCount(1)
             it.hasErrorContaining(
-                "@HiltWorker may only be used on inner classes " +
-                    "if they are static."
+                "@HiltWorker may only be used on inner classes " + "if they are static."
             )
         }
     }
 
     @Test
     fun verifyConstructorAnnotation() {
-        val myWorker = Source.java(
-            "androidx.hilt.work.test.MyWorker",
-            """
+        val myWorker =
+            Source.java(
+                "androidx.hilt.work.test.MyWorker",
+                """
             package androidx.hilt.work.test;
 
             import android.content.Context;
@@ -208,14 +226,18 @@ class WorkerStepTest {
                     super(context, params);
                 }
             }
-            """
-        )
+            """,
+            )
 
         runProcessorTest(
-            sources = listOf(
-                myWorker, Sources.LISTENABLE_WORKER, Sources.WORKER, Sources.WORKER_PARAMETERS
-            ),
-            createProcessingSteps = { listOf(WorkerStep()) }
+            sources =
+                listOf(
+                    myWorker,
+                    Sources.LISTENABLE_WORKER,
+                    Sources.WORKER,
+                    Sources.WORKER_PARAMETERS,
+                ),
+            createProcessingSteps = { listOf(WorkerStep()) },
         ) {
             it.hasErrorContaining(
                 "Worker constructor should be annotated with @AssistedInject instead of @Inject."
@@ -225,9 +247,10 @@ class WorkerStepTest {
 
     @Test
     fun verifyAssistedParamOrder() {
-        val myWorker = Source.java(
-            "androidx.hilt.work.test.MyWorker",
-            """
+        val myWorker =
+            Source.java(
+                "androidx.hilt.work.test.MyWorker",
+                """
             package androidx.hilt.work.test;
 
             import android.content.Context;
@@ -245,18 +268,22 @@ class WorkerStepTest {
                     super(context, params);
                 }
             }
-            """
-        )
+            """,
+            )
 
         runProcessorTest(
-            sources = listOf(
-                myWorker, Sources.LISTENABLE_WORKER, Sources.WORKER, Sources.WORKER_PARAMETERS
-            ),
-            createProcessingSteps = { listOf(WorkerStep()) }
+            sources =
+                listOf(
+                    myWorker,
+                    Sources.LISTENABLE_WORKER,
+                    Sources.WORKER,
+                    Sources.WORKER_PARAMETERS,
+                ),
+            createProcessingSteps = { listOf(WorkerStep()) },
         ) {
             it.hasErrorContaining(
                 "The 'Context' parameter must be declared before the 'WorkerParameters' in the " +
-                    "@AssistedInject constructor of a @HiltWorker annotated class.",
+                    "@AssistedInject constructor of a @HiltWorker annotated class."
             )
         }
     }

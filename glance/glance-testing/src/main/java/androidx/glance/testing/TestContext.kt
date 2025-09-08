@@ -18,13 +18,13 @@ package androidx.glance.testing
 import androidx.annotation.RestrictTo
 
 /**
- * A context object that holds glance node tree being inspected as well as any state cached
- * across the chain of assertions.
+ * A context object that holds glance node tree being inspected as well as any state cached across
+ * the chain of assertions.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class TestContext<R, T : GlanceNode<R>> {
+public class TestContext<R, T : GlanceNode<R>> {
     // e.g. RemoteViewsRoot
-    var rootGlanceNode: T? = null
+    public var rootGlanceNode: T? = null
     private var allNodes: List<GlanceNode<R>> = emptyList()
 
     /**
@@ -32,8 +32,7 @@ class TestContext<R, T : GlanceNode<R>> {
      * root glance node).
      */
     private fun getAllNodes(): List<GlanceNode<R>> {
-        val rootGlanceNode =
-            checkNotNull(rootGlanceNode) { "No root GlanceNode found." }
+        val rootGlanceNode = checkNotNull(rootGlanceNode) { "No root GlanceNode found." }
         if (this.allNodes.isEmpty()) {
             val allNodes = mutableListOf<GlanceNode<R>>()
 
@@ -57,9 +56,9 @@ class TestContext<R, T : GlanceNode<R>> {
      *
      * @throws AssertionError if provided selector results in an error due to no match.
      */
-    fun findMatchingNodes(
+    public fun findMatchingNodes(
         selector: GlanceNodeSelector<R>,
-        errorMessageOnFail: String
+        errorMessageOnFail: String,
     ): List<GlanceNode<R>> {
         val allNodes = getAllNodes()
         val selectionResult = selector.map(allNodes)
@@ -68,7 +67,7 @@ class TestContext<R, T : GlanceNode<R>> {
             throw AssertionError(
                 buildErrorMessageWithReason(
                     errorMessageOnFail = errorMessageOnFail,
-                    reason = selectionResult.errorMessageOnNoMatch
+                    reason = selectionResult.errorMessageOnNoMatch,
                 )
             )
         }
@@ -82,7 +81,7 @@ class TestContext<R, T : GlanceNode<R>> {
      * Can be false if either composable function produced no glance elements or composable function
      * was not provided..
      */
-    fun hasNodes(): Boolean {
+    public fun hasNodes(): Boolean {
         return rootGlanceNode?.children()?.isNotEmpty() ?: false
     }
 }

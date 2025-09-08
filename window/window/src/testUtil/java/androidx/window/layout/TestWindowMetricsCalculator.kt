@@ -34,33 +34,27 @@ internal class TestWindowMetricsCalculator : WindowMetricsCalculator {
     /**
      * Sets the bounds returned from this helper for the given context.
      *
-     * Note: An override set via [setOverrideBounds] takes precedence over the values set with
-     * this method.
+     * Note: An override set via [setOverrideBounds] takes precedence over the values set with this
+     * method.
      */
     fun setBounds(@UiContext context: Context, currentBounds: Rect, maxBounds: Rect) {
         this.currentBounds[context] = currentBounds
         this.maxBounds[context] = maxBounds
     }
 
-    /**
-     * Clears the bounds that were set via [setBounds] for the given context.
-     */
+    /** Clears the bounds that were set via [setBounds] for the given context. */
     fun clearBounds(@UiContext context: Context) {
         currentBounds.remove(context)
         maxBounds.remove(context)
     }
 
-    /**
-     * Overrides the bounds returned from this helper for all supplied contexts.
-     */
+    /** Overrides the bounds returned from this helper for all supplied contexts. */
     fun setOverrideBounds(currentBounds: Rect, maxBounds: Rect) {
         overrideBounds = currentBounds
         overrideMaxBounds = maxBounds
     }
 
-    /**
-     * Clears the overrides that were set in [setOverrideBounds].
-     */
+    /** Clears the overrides that were set in [setOverrideBounds]. */
     fun clearOverrideBounds() {
         overrideBounds = null
         overrideMaxBounds = null
@@ -70,24 +64,21 @@ internal class TestWindowMetricsCalculator : WindowMetricsCalculator {
         return computeCurrentWindowMetrics(activity as Context)
     }
 
-    override fun computeCurrentWindowMetrics(@UiContext context: Context): WindowMetrics {
+    override fun computeCurrentWindowMetrics(context: Context): WindowMetrics {
         val bounds = overrideBounds ?: currentBounds[context] ?: Rect()
-        return WindowMetrics(bounds)
+        return WindowMetrics(bounds, density = 1f)
     }
 
     override fun computeMaximumWindowMetrics(activity: Activity): WindowMetrics {
         return computeMaximumWindowMetrics(activity as Context)
     }
 
-    override fun computeMaximumWindowMetrics(@UiContext context: Context): WindowMetrics {
+    override fun computeMaximumWindowMetrics(context: Context): WindowMetrics {
         val bounds = overrideMaxBounds ?: maxBounds[context] ?: Rect()
-        return WindowMetrics(bounds)
+        return WindowMetrics(bounds, density = 1f)
     }
 
-    /**
-     * Clears any overrides set with [.setCurrentBounds] or
-     * [.setCurrentBoundsForActivity].
-     */
+    /** Clears any overrides set with [.setCurrentBounds] or [.setCurrentBoundsForActivity]. */
     fun reset() {
         overrideBounds = null
         overrideMaxBounds = null

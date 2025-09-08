@@ -39,11 +39,10 @@ import androidx.compose.ui.Modifier
  * default values and/or *one* parameter annotated with `@PreviewParameter`.
  *
  * The `@Composable` fully qualified name must be passed to this Activity through intent parameters,
- * using `composable` as the key. When deploying Compose Previews with `@PreviewParameter`
- * annotated parameters, the provider should be specified as an intent parameter as well, using
- * the key `parameterProviderClassName`. Optionally, `parameterProviderIndex` can also be set to
- * display a specific provider value instead of all of them.
- *
+ * using `composable` as the key. When deploying Compose Previews with `@PreviewParameter` annotated
+ * parameters, the provider should be specified as an intent parameter as well, using the key
+ * `parameterProviderClassName`. Optionally, `parameterProviderIndex` can also be set to display a
+ * specific provider value instead of all of them.
  */
 @Suppress("ForbiddenSuperClass")
 class PreviewActivity : ComponentActivity() {
@@ -73,13 +72,7 @@ class PreviewActivity : ComponentActivity() {
             return@setComposableContent
         }
         Log.d(TAG, "Previewing '$methodName' without a parameter provider.")
-        setContent {
-            ComposableInvoker.invokeComposable(
-                className,
-                methodName,
-                currentComposer
-            )
-        }
+        setContent { ComposableInvoker.invokeComposable(className, methodName, currentComposer) }
     }
 
     /**
@@ -94,13 +87,14 @@ class PreviewActivity : ComponentActivity() {
     private fun setParameterizedContent(
         className: String,
         methodName: String,
-        parameterProvider: String
+        parameterProvider: String,
     ) {
         Log.d(TAG, "Previewing '$methodName' with parameter provider: '$parameterProvider'")
-        val previewParameters = getPreviewProviderParameters(
-            parameterProvider.asPreviewProviderClass(),
-            intent.getIntExtra("parameterProviderIndex", -1)
-        )
+        val previewParameters =
+            getPreviewProviderParameters(
+                parameterProvider.asPreviewProviderClass(),
+                intent.getIntExtra("parameterProviderIndex", -1),
+            )
 
         // Handle the case where parameterProviderIndex is not provided. In this case, instead of
         // showing an arbitrary value (e.g. the first one), we display a FAB that can be used to
@@ -116,7 +110,7 @@ class PreviewActivity : ComponentActivity() {
                                 className,
                                 methodName,
                                 currentComposer,
-                                previewParameters[index.intValue]
+                                previewParameters[index.intValue],
                             )
                         }
                     },
@@ -125,9 +119,9 @@ class PreviewActivity : ComponentActivity() {
                             text = { Text("Next") },
                             onClick = {
                                 index.intValue = (index.intValue + 1) % previewParameters.size
-                            }
+                            },
                         )
-                    }
+                    },
                 )
             }
         } else {
@@ -136,7 +130,7 @@ class PreviewActivity : ComponentActivity() {
                     className,
                     methodName,
                     currentComposer,
-                    *previewParameters
+                    *previewParameters,
                 )
             }
         }

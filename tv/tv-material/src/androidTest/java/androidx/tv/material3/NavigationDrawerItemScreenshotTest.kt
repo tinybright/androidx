@@ -16,7 +16,6 @@
 
 package androidx.tv.material3
 
-import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -44,19 +43,17 @@ import org.junit.runners.Parameterized
 
 @LargeTest
 @RunWith(Parameterized::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 @OptIn(ExperimentalTvMaterial3Api::class)
 class NavigationDrawerItemScreenshotTest(private val scheme: ColorSchemeWrapper) {
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(TV_GOLDEN_MATERIAL3)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(TV_GOLDEN_MATERIAL3)
 
-    val wrapperModifier = Modifier
-        .testTag(NavigationDrawerItemWrapperTag)
-        .background(scheme.colorScheme.surface)
-        .padding(20.dp)
+    val wrapperModifier =
+        Modifier.testTag(NavigationDrawerItemWrapperTag)
+            .background(scheme.colorScheme.surface)
+            .padding(20.dp)
 
     @Test
     fun navigationDrawerItem_customColor() {
@@ -69,10 +66,10 @@ class NavigationDrawerItemScreenshotTest(private val scheme: ColorSchemeWrapper)
                         Icon(
                             imageVector = Icons.Filled.Favorite,
                             contentDescription = null,
-                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize)
+                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize),
                         )
                     },
-                    colors = NavigationDrawerItemDefaults.colors(containerColor = Color.Red)
+                    colors = NavigationDrawerItemDefaults.colors(containerColor = Color.Red),
                 ) {
                     Text("Favourite")
                 }
@@ -93,9 +90,9 @@ class NavigationDrawerItemScreenshotTest(private val scheme: ColorSchemeWrapper)
                         Icon(
                             imageVector = Icons.Filled.Favorite,
                             contentDescription = null,
-                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize)
+                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize),
                         )
-                    }
+                    },
                 ) {
                     Text("Favourite")
                 }
@@ -116,10 +113,10 @@ class NavigationDrawerItemScreenshotTest(private val scheme: ColorSchemeWrapper)
                         Icon(
                             imageVector = Icons.Filled.Favorite,
                             contentDescription = null,
-                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize)
+                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize),
                         )
                     },
-                    supportingContent = { Text("You like this") }
+                    supportingContent = { Text("You like this") },
                 ) {
                     Text("Favourite")
                 }
@@ -140,19 +137,17 @@ class NavigationDrawerItemScreenshotTest(private val scheme: ColorSchemeWrapper)
                         Icon(
                             imageVector = Icons.Filled.Favorite,
                             contentDescription = null,
-                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize)
+                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize),
                         )
                     },
-                    supportingContent = { Text("You like this") }
+                    supportingContent = { Text("You like this") },
                 ) {
                     Text("Favourite")
                 }
             }
         }
 
-        rule.onNodeWithTag(NavigationDrawerItemWrapperTag)
-            .onChild()
-            .requestFocus()
+        rule.onNodeWithTag(NavigationDrawerItemWrapperTag).onChild().requestFocus()
         rule.waitForIdle()
 
         assertAgainstGolden("navigationDrawerItem_${scheme.name}_twoLine_focused")
@@ -170,10 +165,10 @@ class NavigationDrawerItemScreenshotTest(private val scheme: ColorSchemeWrapper)
                         Icon(
                             imageVector = Icons.Filled.Favorite,
                             contentDescription = null,
-                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize)
+                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize),
                         )
                     },
-                    supportingContent = { Text("You like this") }
+                    supportingContent = { Text("You like this") },
                 ) {
                     Text("Favourite")
                 }
@@ -195,19 +190,17 @@ class NavigationDrawerItemScreenshotTest(private val scheme: ColorSchemeWrapper)
                         Icon(
                             imageVector = Icons.Filled.Favorite,
                             contentDescription = null,
-                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize)
+                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize),
                         )
                     },
-                    supportingContent = { Text("You like this") }
+                    supportingContent = { Text("You like this") },
                 ) {
                     Text("Favourite")
                 }
             }
         }
 
-        rule.onNodeWithTag(NavigationDrawerItemWrapperTag)
-            .onChild()
-            .requestFocus()
+        rule.onNodeWithTag(NavigationDrawerItemWrapperTag).onChild().requestFocus()
         rule.waitForIdle()
 
         assertAgainstGolden("navigationDrawerItem_${scheme.name}_twoLine_focusedDisabled")
@@ -224,10 +217,10 @@ class NavigationDrawerItemScreenshotTest(private val scheme: ColorSchemeWrapper)
                         Icon(
                             imageVector = Icons.Filled.Favorite,
                             contentDescription = null,
-                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize)
+                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize),
                         )
                     },
-                    supportingContent = { Text("You like this") }
+                    supportingContent = { Text("You like this") },
                 ) {
                     Text("Favourite")
                 }
@@ -248,19 +241,17 @@ class NavigationDrawerItemScreenshotTest(private val scheme: ColorSchemeWrapper)
                         Icon(
                             imageVector = Icons.Filled.Favorite,
                             contentDescription = null,
-                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize)
+                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize),
                         )
                     },
-                    supportingContent = { Text("You like this") }
+                    supportingContent = { Text("You like this") },
                 ) {
                     Text("Favourite")
                 }
             }
         }
 
-        rule.onNodeWithTag(NavigationDrawerItemWrapperTag)
-            .onChild()
-            .requestFocus()
+        rule.onNodeWithTag(NavigationDrawerItemWrapperTag).onChild().requestFocus()
         rule.waitForIdle()
 
         assertAgainstGolden("navigationDrawerItem_${scheme.name}_twoLine_focusedSelected")
@@ -277,7 +268,7 @@ class NavigationDrawerItemScreenshotTest(private val scheme: ColorSchemeWrapper)
                         Icon(
                             imageVector = Icons.Filled.Favorite,
                             contentDescription = null,
-                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize)
+                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize),
                         )
                     },
                 ) {
@@ -300,7 +291,7 @@ class NavigationDrawerItemScreenshotTest(private val scheme: ColorSchemeWrapper)
                         Icon(
                             imageVector = Icons.Filled.Favorite,
                             contentDescription = null,
-                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize)
+                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize),
                         )
                     },
                 ) {
@@ -323,13 +314,11 @@ class NavigationDrawerItemScreenshotTest(private val scheme: ColorSchemeWrapper)
                         Icon(
                             imageVector = Icons.Filled.Favorite,
                             contentDescription = null,
-                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize)
+                            modifier = Modifier.size(NavigationDrawerItemDefaults.IconSize),
                         )
                     },
                     supportingContent = { Text("You like this") },
-                    trailingContent = {
-                        NavigationDrawerItemDefaults.TrailingBadge("NEW")
-                    }
+                    trailingContent = { NavigationDrawerItemDefaults.TrailingBadge("NEW") },
                 ) {
                     Text("Favourite")
                 }
@@ -340,7 +329,8 @@ class NavigationDrawerItemScreenshotTest(private val scheme: ColorSchemeWrapper)
     }
 
     private fun assertAgainstGolden(goldenName: String) {
-        rule.onNodeWithTag(NavigationDrawerItemWrapperTag)
+        rule
+            .onNodeWithTag(NavigationDrawerItemWrapperTag)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, goldenName)
     }
@@ -351,10 +341,11 @@ class NavigationDrawerItemScreenshotTest(private val scheme: ColorSchemeWrapper)
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun parameters() = arrayOf(
-            ColorSchemeWrapper("lightTheme", lightColorScheme()),
-            ColorSchemeWrapper("darkTheme", darkColorScheme()),
-        )
+        fun parameters() =
+            arrayOf(
+                ColorSchemeWrapper("lightTheme", lightColorScheme()),
+                ColorSchemeWrapper("darkTheme", darkColorScheme()),
+            )
     }
 
     class ColorSchemeWrapper constructor(val name: String, val colorScheme: ColorScheme) {
@@ -366,12 +357,10 @@ class NavigationDrawerItemScreenshotTest(private val scheme: ColorSchemeWrapper)
     @Composable
     private fun DrawerScope(
         doesNavigationDrawerHaveFocus: Boolean = true,
-        content: @Composable NavigationDrawerScope.() -> Unit
+        content: @Composable NavigationDrawerScope.() -> Unit,
     ) {
         Box(wrapperModifier) {
-            NavigationDrawerScopeImpl(doesNavigationDrawerHaveFocus).apply {
-                content()
-            }
+            NavigationDrawerScopeImpl(doesNavigationDrawerHaveFocus).apply { content() }
         }
     }
 }

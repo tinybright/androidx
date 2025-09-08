@@ -41,6 +41,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
@@ -54,28 +55,27 @@ import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
 
-/**
- * Extension of AidlCompile that allows specifying extra command-line arguments.
- */
+/** Extension of AidlCompile that allows specifying extra command-line arguments. */
 @CacheableTask
 abstract class StableAidlCompile : DefaultTask() {
 
-    @get:Internal
-    abstract var variantName: String
+    @get:Internal abstract var variantName: String
 
-    /**
-     * List of directories containing AIDL sources to be compiled.
-     */
+    /** List of directories containing AIDL sources to be compiled. */
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val sourceDirs: ListProperty<Directory>
 
-    /**
-     * List of directories containing AIDL sources available as imports.
-     */
+    /** List of directories containing AIDL sources available as imports. */
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val importDirs: ListProperty<Directory>
+
+    /** Directory containing shadows of framework AIDL sources available as imports. */
+    @get:Optional
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val shadowFrameworkDir: DirectoryProperty
 
     /**
      * List of file system locations containing AIDL sources available as imports from dependencies.
@@ -84,6 +84,7 @@ abstract class StableAidlCompile : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val dependencyImportDirs: SetProperty<FileSystemLocation>
 
+    @get:Optional
     @get:InputFile
     @get:PathSensitive(PathSensitivity.NONE)
     abstract val aidlFrameworkProvider: RegularFileProperty
@@ -92,8 +93,7 @@ abstract class StableAidlCompile : DefaultTask() {
     @get:PathSensitive(PathSensitivity.NONE)
     abstract val aidlExecutable: RegularFileProperty
 
-    @get:Input
-    abstract val aidlVersion: Property<String>
+    @get:Input abstract val aidlVersion: Property<String>
 
     /**
      * Variant's minimum SDK version.
@@ -101,29 +101,17 @@ abstract class StableAidlCompile : DefaultTask() {
      * This should only be specified when generating code. Do not specify this when dumping the API
      * surface, e.g. passing `--dumpapi` as an extra argument.
      */
-    @get:Input
-    @get:Optional
-    abstract val minSdkVersion: Property<AndroidVersion>
+    @get:Input @get:Optional abstract val minSdkVersion: Property<AndroidVersion>
 
-    /**
-     * Directory for storing AIDL-generated Java sources.
-     */
-    @get:OutputDirectory
-    abstract val sourceOutputDir: DirectoryProperty
+    /** Directory for storing AIDL-generated Java sources. */
+    @get:OutputDirectory abstract val sourceOutputDir: DirectoryProperty
 
-    /**
-     * Directory for storing Parcelable headers for consumers.
-     */
-    @get:OutputDirectory
-    @get:Optional
-    abstract val packagedDir: DirectoryProperty
+    /** Directory for storing Parcelable headers for consumers. */
+    @get:OutputDirectory @get:Optional abstract val packagedDir: DirectoryProperty
 
-    @get:Input
-    @get:Optional
-    abstract val extraArgs: ListProperty<String>
+    @get:Input @get:Optional abstract val extraArgs: ListProperty<String>
 
-    @get:Inject
-    abstract val workerExecutor: WorkerExecutor
+    @get:Inject abstract val workerExecutor: WorkerExecutor
 
     private class DepFileProcessor : DependencyFileProcessor {
         override fun processFile(dependencyFile: File): DependencyData? {
@@ -146,28 +134,30 @@ abstract class StableAidlCompile : DefaultTask() {
             FileUtils.cleanOutputDir(parcelableDir.asFile)
         }
 
-        val fullImportList = sourceDirs.get() + importDirs.get()
+        val projectImportList =
+            sourceDirs.get().plus(importDirs.get()).plusNotNull(shadowFrameworkDir.orNull)
         val sourceDirsAsFiles = sourceDirs.get().map { it.asFile }
 
         // When using AIDL from build tools version 33 and later, pass the variant's minimum SDK
         // version. If it's a pre-release SDK, pass the most recently stabilized SDK version.
         val aidlMajorVersion = aidlVersion.get().substringBefore('.').toIntOrNull() ?: 0
-        val extraArgsWithSdk = if (minSdkVersion.isPresent && aidlMajorVersion >= 33) {
-            extraArgs.get() + listOf("--min_sdk_version", "${minSdkVersion.get().apiLevel}")
-        } else {
-            extraArgs.get()
-        }
+        val extraArgsWithSdk =
+            if (minSdkVersion.isPresent && aidlMajorVersion >= 33) {
+                extraArgs.get() + listOf("--min_sdk_version", "${minSdkVersion.get().apiLevel}")
+            } else {
+                extraArgs.get()
+            }
 
         aidlCompileDelegate(
             workerExecutor,
             aidlExecutable.get().asFile,
-            aidlFrameworkProvider.get().asFile,
+            aidlFrameworkProvider.orNull?.asFile,
             destinationDir,
             parcelableDir?.asFile,
             extraArgsWithSdk,
             sourceDirsAsFiles,
-            fullImportList,
-            dependencyImportDirs.get().map { it.asFile }
+            projectImportList,
+            dependencyImportDirs.get().map { it.asFile },
         )
     }
 
@@ -181,12 +171,11 @@ abstract class StableAidlCompile : DefaultTask() {
             abstract val importFolders: ConfigurableFileCollection
             abstract val sourceOutputDir: DirectoryProperty
             abstract val packagedOutputDir: DirectoryProperty
-            abstract val dir: Property<File>
+            abstract val dir: RegularFileProperty
             abstract val extraArgs: ListProperty<String>
         }
 
-        @get:Inject
-        abstract val execOperations: ExecOperations
+        @get:Inject abstract val execOperations: ExecOperations
 
         override fun execute() {
             // Collect all aidl files in the directory then process them
@@ -199,7 +188,7 @@ abstract class StableAidlCompile : DefaultTask() {
 
             try {
                 DirectoryWalker.builder()
-                    .root(parameters.dir.get().toPath())
+                    .root(parameters.dir.get().asFile.toPath())
                     .extensions("aidl")
                     .action(collector)
                     .build()
@@ -209,17 +198,16 @@ abstract class StableAidlCompile : DefaultTask() {
             }
 
             val depFileProcessor = DepFileProcessor()
-            val executor =
-                GradleProcessExecutor(
-                    execOperations::exec
+            val executor = GradleProcessExecutor(execOperations::exec)
+            val logger =
+                LoggedProcessOutputHandler(
+                    LoggerWrapper.getLogger(StableAidlCompileRunnable::class.java)
                 )
-            val logger = LoggedProcessOutputHandler(
-                LoggerWrapper.getLogger(StableAidlCompileRunnable::class.java))
 
             for (request in processingRequests) {
                 callStableAidlProcessor(
                     parameters.aidlExecutable.get().asFile.canonicalPath,
-                    parameters.frameworkLocation.get().asFile.canonicalPath,
+                    parameters.frameworkLocation.orNull?.asFile?.canonicalPath,
                     parameters.importFolders.asIterable(),
                     parameters.extraArgs.get(),
                     executor,
@@ -228,7 +216,7 @@ abstract class StableAidlCompile : DefaultTask() {
                     parameters.packagedOutputDir.orNull?.asFile,
                     depFileProcessor,
                     request.root.toPath(),
-                    request.file.toPath()
+                    request.file.toPath(),
                 )
             }
         }
@@ -239,13 +227,13 @@ abstract class StableAidlCompile : DefaultTask() {
         fun aidlCompileDelegate(
             workerExecutor: WorkerExecutor,
             aidlExecutable: File,
-            frameworkLocation: File,
+            frameworkLocation: File?,
             destinationDir: File,
             parcelableDir: File?,
             extraArgs: List<String>,
             sourceFolders: Collection<File>,
             projectImportList: Collection<Directory>,
-            dependencyImportList: Collection<File>
+            dependencyImportList: Collection<File>,
         ) {
             for (dir in sourceFolders) {
                 workerExecutor.noIsolation().submit(StableAidlCompileRunnable::class.java) {

@@ -18,14 +18,14 @@ package androidx.compose.runtime
 
 /**
  * This annotation is used to indicate to the Compose Compiler to not attempt to generate live
- * literals inside the scope of the declaration it is applied to, even when the live literals
- * code generation is turned on.
+ * literals inside the scope of the declaration it is applied to, even when the live literals code
+ * generation is turned on.
  */
 @Target(
     AnnotationTarget.PROPERTY,
     AnnotationTarget.FUNCTION,
     AnnotationTarget.CLASS,
-    AnnotationTarget.FILE
+    AnnotationTarget.FILE,
 )
 @Retention(AnnotationRetention.SOURCE)
-annotation class NoLiveLiterals
+public annotation class NoLiveLiterals

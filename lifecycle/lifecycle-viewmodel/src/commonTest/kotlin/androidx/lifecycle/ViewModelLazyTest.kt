@@ -18,19 +18,22 @@ package androidx.lifecycle
 
 import androidx.kruth.assertThat
 import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.IgnoreWebTarget
 import kotlin.reflect.KClass
 import kotlin.test.Test
 
+@IgnoreWebTarget
 class ViewModelLazyTest {
 
     @Test
     fun test() {
         val store = ViewModelStore()
-        val viewModel by ViewModelLazy(
-            viewModelClass = TestViewModel::class,
-            storeProducer = { store },
-            factoryProducer = { TestFactory() },
-        )
+        val viewModel by
+            ViewModelLazy(
+                viewModelClass = TestViewModel::class,
+                storeProducer = { store },
+                factoryProducer = { TestFactory() },
+            )
         assertThat(viewModel.prop).isEqualTo(expected = "spb")
         assertThat(store.keys()).isNotEmpty()
     }

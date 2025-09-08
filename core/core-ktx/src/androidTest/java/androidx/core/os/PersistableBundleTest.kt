@@ -19,7 +19,6 @@ package androidx.core.os
 import android.content.Context
 import android.view.View
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.filters.SdkSuppress
 import androidx.test.filters.SmallTest
 import androidx.testutils.assertThrows
 import com.google.common.truth.Truth.assertThat
@@ -29,27 +28,24 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-@SdkSuppress(minSdkVersion = 21)
 @SmallTest
 class PersistableBundleTest {
     @Suppress("DEPRECATION")
-    @Test fun persistableBundleOfValid() {
-        val bundle = persistableBundleOf(
-            "null" to null,
-
-            "double" to 1.0,
-            "int" to 1,
-            "long" to 1L,
-
-            "string" to "hey",
-            "persistableBundle" to persistableBundleOf(),
-
-            "doubleArray" to doubleArrayOf(1.0, 2.0, 3.0),
-            "intArray" to intArrayOf(1, 2, 3),
-            "longArray" to longArrayOf(1L, 2L, 3L),
-
-            "stringArray" to arrayOf("hey")
-        )
+    @Test
+    fun persistableBundleOfValid() {
+        val bundle =
+            persistableBundleOf(
+                "null" to null,
+                "double" to 1.0,
+                "int" to 1,
+                "long" to 1L,
+                "string" to "hey",
+                "persistableBundle" to persistableBundleOf(),
+                "doubleArray" to doubleArrayOf(1.0, 2.0, 3.0),
+                "intArray" to intArrayOf(1, 2, 3),
+                "longArray" to longArrayOf(1L, 2L, 3L),
+                "stringArray" to arrayOf("hey"),
+            )
 
         assertEquals(10, bundle.size())
 
@@ -68,58 +64,55 @@ class PersistableBundleTest {
         assertThat(bundle["stringArray"] as Array<*>).asList().containsExactly("hey")
     }
 
-    @SdkSuppress(minSdkVersion = 22)
     @Suppress("DEPRECATION")
-    @Test fun persistableBundleOfValidApi22() {
-        val bundle = persistableBundleOf(
-            "boolean" to true,
-            "booleanArray" to booleanArrayOf()
-        )
+    @Test
+    fun persistableBundleOfValidApi22() {
+        val bundle = persistableBundleOf("boolean" to true, "booleanArray" to booleanArrayOf())
 
         assertEquals(true, bundle["boolean"])
         assertArrayEquals(booleanArrayOf(), bundle["booleanArray"] as BooleanArray)
     }
 
-    @Test fun persistableBundleOfInvalid() {
+    @Test
+    fun persistableBundleOfInvalid() {
         assertThrows<IllegalArgumentException> {
-            persistableBundleOf(
-                "nope" to View(ApplicationProvider.getApplicationContext() as Context)
-            )
-        }.hasMessageThat().isEqualTo(
-            "Unsupported value type android.view.View for key \"nope\""
-        )
+                persistableBundleOf(
+                    "nope" to View(ApplicationProvider.getApplicationContext() as Context)
+                )
+            }
+            .hasMessageThat()
+            .isEqualTo("Unsupported value type android.view.View for key \"nope\"")
 
         assertThrows<IllegalArgumentException> {
-            persistableBundleOf(
-                "nopes" to arrayOf(View(ApplicationProvider.getApplicationContext() as Context))
-            )
-        }.hasMessageThat().isEqualTo(
-            "Unsupported value array type android.view.View for key \"nopes\""
-        )
+                persistableBundleOf(
+                    "nopes" to arrayOf(View(ApplicationProvider.getApplicationContext() as Context))
+                )
+            }
+            .hasMessageThat()
+            .isEqualTo("Unsupported value array type android.view.View for key \"nopes\"")
     }
 
-    @Test fun persistableBundleOfEmpty() {
+    @Test
+    fun persistableBundleOfEmpty() {
         val bundle = persistableBundleOf()
         assertTrue(bundle.isEmpty)
     }
 
     @Suppress("DEPRECATION")
-    @Test fun mapToPersistableBundle() {
-        val map = mapOf(
-            "null" to null,
-
-            "double" to 1.0,
-            "int" to 1,
-            "long" to 1L,
-
-            "string" to "hey",
-
-            "doubleArray" to doubleArrayOf(1.0, 2.0, 3.0),
-            "intArray" to intArrayOf(1, 2, 3),
-            "longArray" to longArrayOf(1L, 2L, 3L),
-
-            "stringArray" to arrayOf("hey")
-        )
+    @Test
+    fun mapToPersistableBundle() {
+        val map =
+            mapOf(
+                "null" to null,
+                "double" to 1.0,
+                "int" to 1,
+                "long" to 1L,
+                "string" to "hey",
+                "doubleArray" to doubleArrayOf(1.0, 2.0, 3.0),
+                "intArray" to intArrayOf(1, 2, 3),
+                "longArray" to longArrayOf(1L, 2L, 3L),
+                "stringArray" to arrayOf("hey"),
+            )
         val bundle = map.toPersistableBundle()
 
         assertEquals(9, bundle.size())

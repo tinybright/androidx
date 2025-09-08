@@ -59,47 +59,46 @@ fun SimpleInteractionSourceSample() {
 
     // Provide the MutableInteractionSource instances to the interactions we want to observe state
     // changes for
-    val draggable = Modifier.draggable(
-        interactionSource = interactionSource,
-        orientation = Orientation.Horizontal,
-        state = rememberDraggableState { /* update some business state here */ }
-    )
+    val draggable =
+        Modifier.draggable(
+            interactionSource = interactionSource,
+            orientation = Orientation.Horizontal,
+            state = rememberDraggableState { /* update some business state here */ },
+        )
 
-    val clickable = Modifier.clickable(
-        interactionSource = interactionSource,
-        indication = LocalIndication.current
-    ) { /* update some business state here */ }
+    val clickable =
+        Modifier.clickable(
+            interactionSource = interactionSource,
+            indication = LocalIndication.current,
+        ) { /* update some business state here */
+        }
 
     // Observe changes to the binary state for these interactions
     val isDragged by interactionSource.collectIsDraggedAsState()
     val isPressed by interactionSource.collectIsPressedAsState()
 
     // Use the state to change our UI
-    val (text, color) = when {
-        isDragged && isPressed -> "Dragged and pressed" to Color.Red
-        isDragged -> "Dragged" to Color.Green
-        isPressed -> "Pressed" to Color.Blue
-        // Default / baseline state
-        else -> "Drag me horizontally, or press me!" to Color.Black
-    }
+    val (text, color) =
+        when {
+            isDragged && isPressed -> "Dragged and pressed" to Color.Red
+            isDragged -> "Dragged" to Color.Green
+            isPressed -> "Pressed" to Color.Blue
+            // Default / baseline state
+            else -> "Drag me horizontally, or press me!" to Color.Black
+        }
 
-    Box(
-        Modifier
-            .fillMaxSize()
-            .wrapContentSize()
-            .size(width = 240.dp, height = 80.dp)
-    ) {
+    Box(Modifier.fillMaxSize().wrapContentSize().size(width = 240.dp, height = 80.dp)) {
         Box(
-            Modifier
-                .fillMaxSize()
+            Modifier.fillMaxSize()
                 .then(clickable)
                 .then(draggable)
                 .border(BorderStroke(3.dp, color))
                 .padding(3.dp)
         ) {
             Text(
-                text, style = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-                modifier = Modifier.fillMaxSize().wrapContentSize()
+                text,
+                style = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+                modifier = Modifier.fillMaxSize().wrapContentSize(),
             )
         }
     }
@@ -113,20 +112,24 @@ fun InteractionSourceFlowSample() {
 
     // Provide the MutableInteractionSource instances to the interactions we want to observe state
     // changes for
-    val draggable = Modifier.draggable(
-        interactionSource = interactionSource,
-        orientation = Orientation.Horizontal,
-        state = rememberDraggableState { /* update some business state here */ }
-    )
+    val draggable =
+        Modifier.draggable(
+            interactionSource = interactionSource,
+            orientation = Orientation.Horizontal,
+            state = rememberDraggableState { /* update some business state here */ },
+        )
 
-    val clickable = Modifier.clickable(
-        interactionSource = interactionSource,
-        // This component is a compound component where part of it is clickable and part of it is
-        // draggable. As a result we want to show indication for the _whole_ component, and not
-        // just for clickable area. We set `null` indication here and provide an explicit
-        // Modifier.indication instance later that will draw indication for the whole component.
-        indication = null
-    ) { /* update some business state here */ }
+    val clickable =
+        Modifier.clickable(
+            interactionSource = interactionSource,
+            // This component is a compound component where part of it is clickable and part of it
+            // is
+            // draggable. As a result we want to show indication for the _whole_ component, and not
+            // just for clickable area. We set `null` indication here and provide an explicit
+            // Modifier.indication instance later that will draw indication for the whole component.
+            indication = null,
+        ) { /* update some business state here */
+        }
 
     // SnapshotStateList we will use to track incoming Interactions in the order they are emitted
     val interactions = remember { mutableStateListOf<Interaction>() }
@@ -148,28 +151,24 @@ fun InteractionSourceFlowSample() {
     }
 
     // Display some text based on the most recent Interaction stored in `interactions`
-    val text = when (interactions.lastOrNull()) {
-        is DragInteraction.Start -> "Dragged"
-        is PressInteraction.Press -> "Pressed"
-        else -> "No state"
-    }
+    val text =
+        when (interactions.lastOrNull()) {
+            is DragInteraction.Start -> "Dragged"
+            is PressInteraction.Press -> "Pressed"
+            else -> "No state"
+        }
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .wrapContentSize()
-    ) {
+    Column(Modifier.fillMaxSize().wrapContentSize()) {
         Row(
             // Draw indication for the whole component, based on the Interactions dispatched by
             // our hoisted MutableInteractionSource
             Modifier.indication(
                 interactionSource = interactionSource,
-                indication = LocalIndication.current
+                indication = LocalIndication.current,
             )
         ) {
             Box(
-                Modifier
-                    .size(width = 240.dp, height = 80.dp)
+                Modifier.size(width = 240.dp, height = 80.dp)
                     .then(clickable)
                     .border(BorderStroke(3.dp, Color.Blue))
                     .padding(3.dp)
@@ -178,12 +177,11 @@ fun InteractionSourceFlowSample() {
                 Text(
                     text = if (pressed) "Pressed" else "Not pressed",
                     style = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-                    modifier = Modifier.fillMaxSize().wrapContentSize()
+                    modifier = Modifier.fillMaxSize().wrapContentSize(),
                 )
             }
             Box(
-                Modifier
-                    .size(width = 240.dp, height = 80.dp)
+                Modifier.size(width = 240.dp, height = 80.dp)
                     .then(draggable)
                     .border(BorderStroke(3.dp, Color.Red))
                     .padding(3.dp)
@@ -192,14 +190,14 @@ fun InteractionSourceFlowSample() {
                 Text(
                     text = if (dragged) "Dragged" else "Not dragged",
                     style = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-                    modifier = Modifier.fillMaxSize().wrapContentSize()
+                    modifier = Modifier.fillMaxSize().wrapContentSize(),
                 )
             }
         }
         Text(
             text = text,
             style = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-            modifier = Modifier.fillMaxSize().wrapContentSize()
+            modifier = Modifier.fillMaxSize().wrapContentSize(),
         )
     }
 }

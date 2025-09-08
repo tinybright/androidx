@@ -16,7 +16,6 @@
 
 package androidx.tv.material3
 
-import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -47,20 +46,18 @@ import org.junit.runners.Parameterized
 
 @LargeTest
 @RunWith(Parameterized::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 @OptIn(ExperimentalTvMaterial3Api::class)
 class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(TV_GOLDEN_MATERIAL3)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(TV_GOLDEN_MATERIAL3)
     private val wrapperTestTag = "tabRowWrapper"
 
-    private val wrapperModifier = Modifier
-        .testTag(wrapperTestTag)
-        .background(if (scheme.name == lightThemeName) Color.White else Color.Black)
-        .padding(20.dp)
+    private val wrapperModifier =
+        Modifier.testTag(wrapperTestTag)
+            .background(if (scheme.name == lightThemeName) Color.White else Color.Black)
+            .padding(20.dp)
 
     @Test
     fun tabRow_withPillIndicator_inactive() {
@@ -70,10 +67,8 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
 
             Surface(
                 modifier = wrapperModifier,
-                colors = SurfaceDefaults.colors(
-                    containerColor = Color.Transparent
-                ),
-                shape = RectangleShape
+                colors = SurfaceDefaults.colors(containerColor = Color.Transparent),
+                shape = RectangleShape,
             ) {
                 TabRow(selectedTabIndex = selectedTabIndex, containerColor = Color.Transparent) {
                     tabs.forEachIndexed { index, text ->
@@ -84,11 +79,7 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
                             Text(
                                 text = text,
                                 fontSize = 12.sp,
-                                modifier = Modifier
-                                    .padding(
-                                        horizontal = 16.dp,
-                                        vertical = 6.dp
-                                    )
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                             )
                         }
                     }
@@ -108,10 +99,8 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
 
             Surface(
                 modifier = wrapperModifier.focusRequester(focusRequester),
-                colors = SurfaceDefaults.colors(
-                    containerColor = Color.Transparent
-                ),
-                shape = RectangleShape
+                colors = SurfaceDefaults.colors(containerColor = Color.Transparent),
+                shape = RectangleShape,
             ) {
                 TabRow(selectedTabIndex = selectedTabIndex) {
                     tabs.forEachIndexed { index, text ->
@@ -122,11 +111,7 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
                             Text(
                                 text = text,
                                 fontSize = 12.sp,
-                                modifier = Modifier
-                                    .padding(
-                                        horizontal = 16.dp,
-                                        vertical = 6.dp
-                                    )
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                             )
                         }
                     }
@@ -134,9 +119,7 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
             }
         }
 
-        rule.runOnIdle {
-            focusRequester.requestFocus()
-        }
+        rule.runOnIdle { focusRequester.requestFocus() }
         rule.waitForIdle()
 
         assertAgainstGolden("tabRow_withPillIndicator_active_${scheme.name}")
@@ -152,10 +135,8 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
 
             Surface(
                 modifier = wrapperModifier.focusRequester(focusRequester),
-                colors = SurfaceDefaults.colors(
-                    containerColor = Color.Transparent
-                ),
-                shape = RectangleShape
+                colors = SurfaceDefaults.colors(containerColor = Color.Transparent),
+                shape = RectangleShape,
             ) {
                 TabRow(selectedTabIndex = selectedTabIndex, containerColor = Color.Transparent) {
                     tabs.forEachIndexed { index, text ->
@@ -167,11 +148,7 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
                             Text(
                                 text = text,
                                 fontSize = 12.sp,
-                                modifier = Modifier
-                                    .padding(
-                                        horizontal = 16.dp,
-                                        vertical = 6.dp
-                                    )
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                             )
                         }
                     }
@@ -179,9 +156,7 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
             }
         }
 
-        rule.runOnIdle {
-            focusRequester.requestFocus()
-        }
+        rule.runOnIdle { focusRequester.requestFocus() }
         rule.waitForIdle()
 
         assertAgainstGolden("tabRow_withPillIndicator_disabledTabs_${scheme.name}")
@@ -195,10 +170,8 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
 
             Surface(
                 modifier = wrapperModifier,
-                colors = SurfaceDefaults.colors(
-                    containerColor = Color.Transparent
-                ),
-                shape = RectangleShape
+                colors = SurfaceDefaults.colors(containerColor = Color.Transparent),
+                shape = RectangleShape,
             ) {
                 TabRow(
                     selectedTabIndex = selectedTabIndex,
@@ -208,7 +181,7 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
                             currentTabPosition = tabPositions[selectedTabIndex],
                             doesTabRowHaveFocus = doesTabRowHaveFocus,
                         )
-                    }
+                    },
                 ) {
                     tabs.forEachIndexed { index, tab ->
                         Tab(
@@ -219,7 +192,7 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
                             Text(
                                 text = tab,
                                 fontSize = 12.sp,
-                                modifier = Modifier.padding(bottom = 4.dp)
+                                modifier = Modifier.padding(bottom = 4.dp),
                             )
                         }
                     }
@@ -239,10 +212,8 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
 
             Surface(
                 modifier = wrapperModifier.focusRequester(focusRequester),
-                colors = SurfaceDefaults.colors(
-                    containerColor = Color.Transparent
-                ),
-                shape = RectangleShape
+                colors = SurfaceDefaults.colors(containerColor = Color.Transparent),
+                shape = RectangleShape,
             ) {
                 TabRow(
                     selectedTabIndex = selectedTabIndex,
@@ -252,7 +223,7 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
                             currentTabPosition = tabPositions[selectedTabIndex],
                             doesTabRowHaveFocus = doesTabRowHaveFocus,
                         )
-                    }
+                    },
                 ) {
                     tabs.forEachIndexed { index, tab ->
                         Tab(
@@ -263,7 +234,7 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
                             Text(
                                 text = tab,
                                 fontSize = 12.sp,
-                                modifier = Modifier.padding(bottom = 4.dp)
+                                modifier = Modifier.padding(bottom = 4.dp),
                             )
                         }
                     }
@@ -271,9 +242,7 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
             }
         }
 
-        rule.runOnIdle {
-            focusRequester.requestFocus()
-        }
+        rule.runOnIdle { focusRequester.requestFocus() }
         rule.waitForIdle()
 
         assertAgainstGolden("tabRow_withUnderlinedIndicator_active_${scheme.name}")
@@ -289,10 +258,8 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
 
             Surface(
                 modifier = wrapperModifier.focusRequester(focusRequester),
-                colors = SurfaceDefaults.colors(
-                    containerColor = Color.Transparent
-                ),
-                shape = RectangleShape
+                colors = SurfaceDefaults.colors(containerColor = Color.Transparent),
+                shape = RectangleShape,
             ) {
                 TabRow(
                     selectedTabIndex = selectedTabIndex,
@@ -314,7 +281,7 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
                             Text(
                                 text = tab,
                                 fontSize = 12.sp,
-                                modifier = Modifier.padding(bottom = 4.dp)
+                                modifier = Modifier.padding(bottom = 4.dp),
                             )
                         }
                     }
@@ -322,16 +289,15 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
             }
         }
 
-        rule.runOnIdle {
-            focusRequester.requestFocus()
-        }
+        rule.runOnIdle { focusRequester.requestFocus() }
         rule.waitForIdle()
 
         assertAgainstGolden("tabRow_withUnderlinedIndicator_disabledTabs_${scheme.name}")
     }
 
     private fun assertAgainstGolden(goldenName: String) {
-        rule.onNodeWithTag(wrapperTestTag)
+        rule
+            .onNodeWithTag(wrapperTestTag)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, goldenName)
     }
@@ -343,10 +309,11 @@ class TabRowScreenshotTest(private val scheme: ColorSchemeWrapper) {
         @OptIn(ExperimentalTvMaterial3Api::class)
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun parameters() = arrayOf(
-            ColorSchemeWrapper(lightThemeName, lightColorScheme()),
-            ColorSchemeWrapper(darkThemeName, darkColorScheme()),
-        )
+        fun parameters() =
+            arrayOf(
+                ColorSchemeWrapper(lightThemeName, lightColorScheme()),
+                ColorSchemeWrapper(darkThemeName, darkColorScheme()),
+            )
     }
 
     @OptIn(ExperimentalTvMaterial3Api::class)

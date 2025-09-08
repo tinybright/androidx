@@ -27,12 +27,10 @@ data class InputModel(
     // info about all lifecycle observers including classes from classpath
     val observersInfo: Map<TypeElement, LifecycleObserverInfo>,
     // info about generated adapters from class path
-    val generatedAdapters: Map<TypeElement, List<ExecutableElement>>
+    val generatedAdapters: Map<TypeElement, List<ExecutableElement>>,
 ) {
 
-    /**
-     *  Root class is class defined in currently processed module, not in classpath
-     */
+    /** Root class is class defined in currently processed module, not in classpath */
     fun isRootType(type: TypeElement) = type in rootTypes
 
     fun hasSyntheticAccessorFor(eventMethod: EventMethod): Boolean {

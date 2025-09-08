@@ -21,7 +21,7 @@ import org.gradle.api.provider.ProviderFactory
 
 class FakeProviderFactory(
     private val originalFactory: ProviderFactory,
-    private val gradleProperties: Map<String, Any>
+    private val gradleProperties: Map<String, Any>,
 ) : ProviderFactory by originalFactory {
 
     override fun gradleProperty(propertyName: String): Provider<String> {
@@ -33,9 +33,6 @@ class FakeProviderFactory(
     }
 
     companion object {
-        @JvmStatic
-        val factory: ProviderFactory by lazy {
-            ProjectFactory.project.providers
-        }
+        @JvmStatic val factory: ProviderFactory by lazy { ProjectFactory.project.providers }
     }
 }

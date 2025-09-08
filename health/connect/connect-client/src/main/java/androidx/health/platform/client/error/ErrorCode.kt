@@ -18,9 +18,7 @@ package androidx.health.platform.client.error
 import androidx.annotation.IntDef
 import androidx.annotation.RestrictTo
 
-/**
- * List of error codes returned by Health Platform, used in [ErrorStatus].
- */
+/** List of error codes returned by Health Platform, used in [ErrorStatus]. */
 @IntDef(
     ErrorCode.PROVIDER_NOT_INSTALLED,
     ErrorCode.PROVIDER_NOT_ENABLED,
@@ -35,7 +33,7 @@ import androidx.annotation.RestrictTo
     ErrorCode.DATABASE_ERROR,
     ErrorCode.INTERNAL_ERROR,
     ErrorCode.CHANGES_TOKEN_OUTDATED,
-    ErrorCode.TRANSACTION_TOO_LARGE
+    ErrorCode.TRANSACTION_TOO_LARGE,
 )
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 annotation class ErrorCode {

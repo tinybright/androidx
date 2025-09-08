@@ -20,12 +20,15 @@ package androidx.camera.core.concurrent;
 import android.hardware.camera2.CameraManager;
 
 import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
 import androidx.camera.core.CameraInfo;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.impl.CameraRepository;
 import androidx.camera.core.impl.CameraStateRegistry;
+import androidx.camera.core.impl.InternalCameraPresenceListener;
+
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -40,7 +43,7 @@ import java.util.List;
  *
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-public interface CameraCoordinator {
+public interface CameraCoordinator extends InternalCameraPresenceListener {
 
     int CAMERA_OPERATING_MODE_UNSPECIFIED = 0;
 
@@ -57,6 +60,17 @@ public interface CameraCoordinator {
     }
 
     /**
+     * Initializes the coordinator with a reference to the CameraRepository.
+     *
+     * <p>This must be called once before the coordinator is used.
+     *
+     * @param cameraRepository The CameraProvider's CameraRepository instance.
+     */
+    default void init(@NonNull CameraRepository cameraRepository) {
+        // No-op by default
+    }
+
+    /**
      * Returns concurrent camera selectors, which are converted from concurrent camera ids
      * queried from {@link CameraManager#getConcurrentCameraIds()}.
      *
@@ -65,16 +79,14 @@ public interface CameraCoordinator {
      *
      * @return List of list of {@link CameraSelector}.
      */
-    @NonNull
-    List<List<CameraSelector>> getConcurrentCameraSelectors();
+    @NonNull List<List<CameraSelector>> getConcurrentCameraSelectors();
 
     /**
      * Gets active concurrent camera infos.
      *
      * @return list of active concurrent camera infos.
      */
-    @NonNull
-    List<CameraInfo> getActiveConcurrentCameraInfos();
+    @NonNull List<CameraInfo> getActiveConcurrentCameraInfos();
 
     /**
      * Sets active concurrent camera infos.
@@ -94,8 +106,7 @@ public interface CameraCoordinator {
      * @param cameraId camera id.
      * @return The paired camera id if exists or null if paired camera not exists.
      */
-    @Nullable
-    String getPairedConcurrentCameraId(@NonNull String cameraId);
+    @Nullable String getPairedConcurrentCameraId(@NonNull String cameraId);
 
     /**
      * Returns camera operating mode.

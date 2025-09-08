@@ -71,10 +71,8 @@ fun TabDemo() {
         Spacer(Modifier.requiredHeight(24.dp))
         Button(
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            onClick = {
-                showingSimple.value = !showingSimple.value
-            },
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Cyan)
+            onClick = { showingSimple.value = !showingSimple.value },
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Cyan),
         ) {
             Text(buttonText)
         }

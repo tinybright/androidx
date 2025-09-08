@@ -25,10 +25,10 @@ import android.widget.EdgeEffect;
 import android.widget.OverScroller;
 import android.widget.Scroller;
 
-import androidx.annotation.DoNotInline;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Helper for accessing {@link EdgeEffect}.
@@ -64,8 +64,8 @@ public final class EdgeEffectCompat {
      * @param context Context to use for theming the effect
      * @param attrs The attributes of the XML tag that is inflating the view
      */
-    @NonNull
-    public static EdgeEffect create(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public static @NonNull EdgeEffect create(@NonNull Context context,
+            @Nullable AttributeSet attrs) {
         if (SDK_INT >= 31) {
             return Api31Impl.create(context, attrs);
         }
@@ -194,11 +194,7 @@ public final class EdgeEffectCompat {
      */
     public static void onPull(@NonNull EdgeEffect edgeEffect, float deltaDistance,
             float displacement) {
-        if (SDK_INT >= 21) {
-            Api21Impl.onPull(edgeEffect, deltaDistance, displacement);
-        } else {
-            edgeEffect.onPull(deltaDistance);
-        }
+        edgeEffect.onPull(deltaDistance, displacement);
     }
 
     /**
@@ -306,7 +302,6 @@ public final class EdgeEffectCompat {
     private static class Api31Impl {
         private Api31Impl() {}
 
-        @DoNotInline
         public static EdgeEffect create(Context context, AttributeSet attrs) {
             try {
                 return new EdgeEffect(context, attrs);
@@ -315,7 +310,6 @@ public final class EdgeEffectCompat {
             }
         }
 
-        @DoNotInline
         public static float onPullDistance(
                 EdgeEffect edgeEffect,
                 float deltaDistance,
@@ -329,25 +323,12 @@ public final class EdgeEffectCompat {
             }
         }
 
-        @DoNotInline
         public static float getDistance(EdgeEffect edgeEffect) {
             try {
                 return edgeEffect.getDistance();
             } catch (Throwable t) {
                 return 0; // Old preview release
             }
-        }
-    }
-
-    @RequiresApi(21)
-    static class Api21Impl {
-        private Api21Impl() {
-            // This class is not instantiable.
-        }
-
-        @DoNotInline
-        static void onPull(EdgeEffect edgeEffect, float deltaDistance, float displacement) {
-            edgeEffect.onPull(deltaDistance, displacement);
         }
     }
 }

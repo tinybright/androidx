@@ -32,21 +32,22 @@ class EntityTest {
 
     @Test
     fun shouldBeDeletedAfter() {
-        val child = createEntity(
-            "Child",
-            listOf(
-                createForeignKey("NoAction", ForeignKeyAction.NO_ACTION, false),
-                createForeignKey("NoActionDeferred", ForeignKeyAction.NO_ACTION, true),
-                createForeignKey("Restrict", ForeignKeyAction.RESTRICT, false),
-                createForeignKey("RestrictDeferred", ForeignKeyAction.RESTRICT, true),
-                createForeignKey("SetNull", ForeignKeyAction.SET_NULL, false),
-                createForeignKey("SetNullDeferred", ForeignKeyAction.SET_NULL, true),
-                createForeignKey("SetDefault", ForeignKeyAction.SET_DEFAULT, false),
-                createForeignKey("SetDefaultDeferred", ForeignKeyAction.SET_DEFAULT, true),
-                createForeignKey("Cascade", ForeignKeyAction.CASCADE, false),
-                createForeignKey("CascadeDeferred", ForeignKeyAction.CASCADE, true)
+        val child =
+            createEntity(
+                "Child",
+                listOf(
+                    createForeignKey("NoAction", ForeignKeyAction.NO_ACTION, false),
+                    createForeignKey("NoActionDeferred", ForeignKeyAction.NO_ACTION, true),
+                    createForeignKey("Restrict", ForeignKeyAction.RESTRICT, false),
+                    createForeignKey("RestrictDeferred", ForeignKeyAction.RESTRICT, true),
+                    createForeignKey("SetNull", ForeignKeyAction.SET_NULL, false),
+                    createForeignKey("SetNullDeferred", ForeignKeyAction.SET_NULL, true),
+                    createForeignKey("SetDefault", ForeignKeyAction.SET_DEFAULT, false),
+                    createForeignKey("SetDefaultDeferred", ForeignKeyAction.SET_DEFAULT, true),
+                    createForeignKey("Cascade", ForeignKeyAction.CASCADE, false),
+                    createForeignKey("CascadeDeferred", ForeignKeyAction.CASCADE, true),
+                ),
             )
-        )
         val noAction = createEntity("NoAction")
         val noActionDeferred = createEntity("NoActionDeferred")
         val restrict = createEntity("Restrict")
@@ -73,34 +74,34 @@ class EntityTest {
 
     private fun createEntity(
         tableName: String,
-        foreignKeys: List<ForeignKey> = emptyList()
+        foreignKeys: List<ForeignKey> = emptyList(),
     ): Entity {
         return Entity(
             element = mock(XTypeElement::class.java),
             tableName = tableName,
             type = mock(XType::class.java),
-            fields = emptyList(),
-            embeddedFields = emptyList(),
-            primaryKey = PrimaryKey(mock(XElement::class.java), Fields(), false),
+            properties = emptyList(),
+            embeddedProperties = emptyList(),
+            primaryKey = PrimaryKey(mock(XElement::class.java), Properties(), false),
             indices = emptyList(),
             foreignKeys = foreignKeys,
             constructor = Constructor(mock(XConstructorElement::class.java), emptyList()),
-            shadowTableName = null
+            shadowTableName = null,
         )
     }
 
     private fun createForeignKey(
         parentTable: String,
         onDelete: ForeignKeyAction,
-        deferred: Boolean
+        deferred: Boolean,
     ): ForeignKey {
         return ForeignKey(
             parentTable = parentTable,
             parentColumns = emptyList(),
-            childFields = emptyList(),
+            childProperties = emptyList(),
             onDelete = onDelete,
             onUpdate = ForeignKeyAction.NO_ACTION,
-            deferred = deferred
+            deferred = deferred,
         )
     }
 }

@@ -37,45 +37,46 @@ import org.gradle.process.ExecSpec
  *
  * Cloned from `com.android.build.gradle.internal.process.GradleProcessExecutor`.
  */
-class GradleProcessExecutor(
-    private val execOperations: Function<Action<in ExecSpec>, ExecResult>
-) : ProcessExecutor {
+class GradleProcessExecutor(private val execOperations: Function<Action<in ExecSpec>, ExecResult>) :
+    ProcessExecutor {
     override fun submit(
         processInfo: ProcessInfo,
-        processOutputHandler: ProcessOutputHandler
+        processOutputHandler: ProcessOutputHandler,
     ): ListenableFuture<ProcessResult> {
         val res = SettableFuture.create<ProcessResult>()
         object : Thread() {
-            override fun run() {
-                try {
-                    val result = execute(processInfo, processOutputHandler)
-                    res.set(result)
-                } catch (e: Throwable) {
-                    res.setException(e)
+                override fun run() {
+                    try {
+                        val result = execute(processInfo, processOutputHandler)
+                        res.set(result)
+                    } catch (e: Throwable) {
+                        res.setException(e)
+                    }
                 }
             }
-        }.start()
+            .start()
         return res
     }
 
     override fun execute(
         processInfo: ProcessInfo,
-        processOutputHandler: ProcessOutputHandler
+        processOutputHandler: ProcessOutputHandler,
     ): ProcessResult {
         val output = processOutputHandler.createOutput()
-        val result: ExecResult = try {
-            execOperations.apply(ExecAction(processInfo, output))
-        } finally {
+        val result: ExecResult =
             try {
-                output.close()
-            } catch (e: IOException) {
-                LoggerWrapper.getLogger(GradleProcessExecutor::class.java)
-                    .warning(
-                        "Exception while closing sub process streams: " +
-                            Throwables.getStackTraceAsString(e)
-                    )
+                execOperations.apply(ExecAction(processInfo, output))
+            } finally {
+                try {
+                    output.close()
+                } catch (e: IOException) {
+                    LoggerWrapper.getLogger(GradleProcessExecutor::class.java)
+                        .warning(
+                            "Exception while closing sub process streams: " +
+                                Throwables.getStackTraceAsString(e)
+                        )
+                }
             }
-        }
         try {
             processOutputHandler.handleOutput(output)
         } catch (e: ProcessException) {
@@ -86,16 +87,18 @@ class GradleProcessExecutor(
 
     private class ExecAction(
         private val processInfo: ProcessInfo,
-        private val processOutput: ProcessOutput
+        private val processOutput: ProcessOutput,
     ) : Action<ExecSpec> {
         override fun execute(execSpec: ExecSpec) {
 
             /*
              * Gradle doesn't work correctly when there are empty args.
              */
-            val args = processInfo.args.stream()
-                .map { a: String -> a.ifEmpty { "\"\"" } }
-                .collect(Collectors.toList())
+            val args =
+                processInfo.args
+                    .stream()
+                    .map { a: String -> a.ifEmpty { "\"\"" } }
+                    .collect(Collectors.toList())
             execSpec.executable = processInfo.executable
             execSpec.args(args)
             execSpec.environment(processInfo.environment)

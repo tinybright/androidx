@@ -37,19 +37,20 @@ actual fun AlertDialog(
     shape: Shape,
     backgroundColor: Color,
     contentColor: Color,
-    properties: DialogProperties
-): Unit = AlertDialogImpl(
-    onDismissRequest = onDismissRequest,
-    confirmButton = confirmButton,
-    modifier = modifier,
-    dismissButton = dismissButton,
-    title = title,
-    text = text,
-    shape = shape,
-    backgroundColor = backgroundColor,
-    contentColor = contentColor,
-    properties = properties
-)
+    properties: DialogProperties,
+): Unit =
+    AlertDialogImpl(
+        onDismissRequest = onDismissRequest,
+        confirmButton = confirmButton,
+        modifier = modifier,
+        dismissButton = dismissButton,
+        title = title,
+        text = text,
+        shape = shape,
+        backgroundColor = backgroundColor,
+        contentColor = contentColor,
+        properties = properties,
+    )
 
 @Composable
 actual fun AlertDialog(
@@ -61,15 +62,16 @@ actual fun AlertDialog(
     shape: Shape,
     backgroundColor: Color,
     contentColor: Color,
-    properties: DialogProperties
-): Unit = AlertDialogImpl(
-    onDismissRequest = onDismissRequest,
-    buttons = buttons,
-    modifier = modifier,
-    title = title,
-    text = text,
-    shape = shape,
-    backgroundColor = backgroundColor,
-    contentColor = contentColor,
-    properties = properties
-)
+    properties: DialogProperties,
+): Unit =
+    AlertDialogImpl(
+        onDismissRequest = onDismissRequest,
+        buttons = buttons,
+        modifier = modifier,
+        title = title,
+        text = text,
+        shape = shape,
+        backgroundColor = backgroundColor,
+        contentColor = contentColor,
+        properties = properties,
+    )

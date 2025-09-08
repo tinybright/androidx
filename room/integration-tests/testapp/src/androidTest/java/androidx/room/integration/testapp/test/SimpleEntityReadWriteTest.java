@@ -58,6 +58,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 
 import org.hamcrest.CoreMatchers;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -75,6 +76,7 @@ import java.util.Set;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class SimpleEntityReadWriteTest {
+    private TestDatabase mDb;
     private UserDao mUserDao;
     private BlobEntityDao mBlobEntityDao;
     private PetDao mPetDao;
@@ -84,12 +86,17 @@ public class SimpleEntityReadWriteTest {
     @Before
     public void createDb() {
         Context context = ApplicationProvider.getApplicationContext();
-        TestDatabase db = Room.inMemoryDatabaseBuilder(context, TestDatabase.class).build();
-        mUserDao = db.getUserDao();
-        mPetDao = db.getPetDao();
-        mUserPetDao = db.getUserPetDao();
-        mBlobEntityDao = db.getBlobEntityDao();
-        mProductDao = db.getProductDao();
+        mDb = Room.inMemoryDatabaseBuilder(context, TestDatabase.class).build();
+        mUserDao = mDb.getUserDao();
+        mPetDao = mDb.getPetDao();
+        mUserPetDao = mDb.getUserPetDao();
+        mBlobEntityDao = mDb.getBlobEntityDao();
+        mProductDao = mDb.getProductDao();
+    }
+
+    @After
+    public void closeDb() {
+        mDb.close();
     }
 
     @Test
@@ -102,7 +109,7 @@ public class SimpleEntityReadWriteTest {
     }
 
     @Test
-    public void insertNull() throws Exception {
+    public void insertNullColumn() throws Exception {
         @SuppressWarnings("ConstantConditions")
         Product product = new Product(1, null);
         Throwable throwable = null;
@@ -113,6 +120,20 @@ public class SimpleEntityReadWriteTest {
         }
         assertNotNull("Was expecting an exception", throwable);
         assertThat(throwable, instanceOf(SQLiteConstraintException.class));
+    }
+
+    @Test
+    public void insertNullEntity() throws Exception {
+        @SuppressWarnings("ConstantConditions")
+        Throwable throwable = null;
+        try {
+            //noinspection DataFlowIssue - testing insert of null arg on @NonNull param
+            mProductDao.insert((Product) null);
+        } catch (Throwable t) {
+            throwable = t;
+        }
+        assertNotNull("Was expecting an exception", throwable);
+        assertThat(throwable, instanceOf(NullPointerException.class));
     }
 
     @Test

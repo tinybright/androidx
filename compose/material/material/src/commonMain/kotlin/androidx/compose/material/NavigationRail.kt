@@ -61,14 +61,15 @@ import kotlin.math.max
 import kotlin.math.roundToInt
 
 /**
- * <a href="https://material.io/components/navigation-rail" class="external" target="_blank">Material Design navigation rail</a>.
+ * [Material Design navigation rail](https://material.io/components/navigation-rail)
  *
  * A Navigation Rail is a side navigation component that allows movement between primary
  * destinations in an app. A navigation rail should be used to display three to seven app
  * destinations and, optionally, a [FloatingActionButton] or a logo inside [header]. Each
  * destination is typically represented by an icon and an optional text label.
  *
- * ![Navigation rail image](https://developer.android.com/images/reference/androidx/compose/material/navigation-rail.png)
+ * ![Navigation rail
+ * image](https://developer.android.com/images/reference/androidx/compose/material/navigation-rail.png)
  *
  * This particular overload provides ability to specify [WindowInsets]. Recommended value can be
  * found in [NavigationRailDefaults.windowInsets].
@@ -88,14 +89,13 @@ import kotlin.math.roundToInt
  * @param windowInsets a window insets that navigation rail will respect
  * @param modifier optional [Modifier] for this NavigationRail
  * @param backgroundColor The background color for this NavigationRail
- * @param contentColor The preferred content color provided by this NavigationRail to its
- * children. Defaults to either the matching content color for [backgroundColor], or if
- * [backgroundColor] is not a color from the theme, this will keep the same value set above this
- * NavigationRail.
+ * @param contentColor The preferred content color provided by this NavigationRail to its children.
+ *   Defaults to either the matching content color for [backgroundColor], or if [backgroundColor] is
+ *   not a color from the theme, this will keep the same value set above this NavigationRail.
  * @param elevation elevation for this NavigationRail
  * @param header an optional header that may hold a [FloatingActionButton] or a logo
  * @param content destinations inside this NavigationRail, this should contain multiple
- * [NavigationRailItem]s
+ *   [NavigationRailItem]s
  */
 @Composable
 fun NavigationRail(
@@ -105,17 +105,16 @@ fun NavigationRail(
     contentColor: Color = contentColorFor(backgroundColor),
     elevation: Dp = NavigationRailDefaults.Elevation,
     header: @Composable (ColumnScope.() -> Unit)? = null,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     Surface(
         modifier = modifier,
         color = backgroundColor,
         contentColor = contentColor,
-        elevation = elevation
+        elevation = elevation,
     ) {
         Column(
-            Modifier
-                .fillMaxHeight()
+            Modifier.fillMaxHeight()
                 .windowInsetsPadding(windowInsets)
                 .padding(vertical = NavigationRailPadding)
                 .selectableGroup(),
@@ -131,14 +130,15 @@ fun NavigationRail(
 }
 
 /**
- * <a href="https://material.io/components/navigation-rail" class="external" target="_blank">Material Design navigation rail</a>.
+ * [Material Design navigation rail](https://material.io/components/navigation-rail)
  *
  * A Navigation Rail is a side navigation component that allows movement between primary
  * destinations in an app. A navigation rail should be used to display three to seven app
  * destinations and, optionally, a [FloatingActionButton] or a logo inside [header]. Each
  * destination is typically represented by an icon and an optional text label.
  *
- * ![Navigation rail image](https://developer.android.com/images/reference/androidx/compose/material/navigation-rail.png)
+ * ![Navigation rail
+ * image](https://developer.android.com/images/reference/androidx/compose/material/navigation-rail.png)
  *
  * NavigationRail should contain multiple [NavigationRailItem]s, each representing a singular
  * destination.
@@ -154,14 +154,13 @@ fun NavigationRail(
  *
  * @param modifier optional [Modifier] for this NavigationRail
  * @param backgroundColor The background color for this NavigationRail
- * @param contentColor The preferred content color provided by this NavigationRail to its
- * children. Defaults to either the matching content color for [backgroundColor], or if
- * [backgroundColor] is not a color from the theme, this will keep the same value set above this
- * NavigationRail.
+ * @param contentColor The preferred content color provided by this NavigationRail to its children.
+ *   Defaults to either the matching content color for [backgroundColor], or if [backgroundColor] is
+ *   not a color from the theme, this will keep the same value set above this NavigationRail.
  * @param elevation elevation for this NavigationRail
  * @param header an optional header that may hold a [FloatingActionButton] or a logo
  * @param content destinations inside this NavigationRail, this should contain multiple
- * [NavigationRailItem]s
+ *   [NavigationRailItem]s
  */
 @Composable
 fun NavigationRail(
@@ -170,32 +169,32 @@ fun NavigationRail(
     contentColor: Color = contentColorFor(backgroundColor),
     elevation: Dp = NavigationRailDefaults.Elevation,
     header: @Composable (ColumnScope.() -> Unit)? = null,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     NavigationRail(ZeroInsets, modifier, backgroundColor, contentColor, elevation, header, content)
 }
 
 /**
- * <a href="https://material.io/components/navigation-rail" class="external" target="_blank">Material Design navigation rail</a> item.
+ * [Material Design navigation rail](https://material.io/components/navigation-rail)
  *
- * A NavigationRailItem always shows text labels (if it exists) when selected. Showing text
- * labels if not selected is controlled by [alwaysShowLabel].
+ * A NavigationRailItem always shows text labels (if it exists) when selected. Showing text labels
+ * if not selected is controlled by [alwaysShowLabel].
  *
  * @param selected whether this item is selected (active)
  * @param onClick the callback to be invoked when this item is selected
  * @param icon icon for this item, typically this will be an [Icon]
  * @param modifier optional [Modifier] for this item
- * @param enabled controls the enabled state of this item. When `false`, this item will not
- * be clickable and will appear disabled to accessibility services.
+ * @param enabled controls the enabled state of this item. When `false`, this item will not be
+ *   clickable and will appear disabled to accessibility services.
  * @param label optional text label for this item
  * @param alwaysShowLabel whether to always show the label for this item. If false, the label will
- * only be shown when this item is selected.
+ *   only be shown when this item is selected.
  * @param interactionSource an optional hoisted [MutableInteractionSource] for observing and
- * emitting [Interaction]s for this item. You can use this to change the item's
- * appearance or preview the item in different states. Note that if `null` is provided,
- * interactions will still happen internally.
- * @param selectedContentColor the color of the text label and icon when this item is selected,
- * and the color of the ripple.
+ *   emitting [Interaction]s for this item. You can use this to change the item's appearance or
+ *   preview the item in different states. Note that if `null` is provided, interactions will still
+ *   happen internally.
+ * @param selectedContentColor the color of the text label and icon when this item is selected, and
+ *   the color of the ripple.
  * @param unselectedContentColor the color of the text label and icon when this item is not selected
  */
 @Composable
@@ -209,14 +208,15 @@ fun NavigationRailItem(
     alwaysShowLabel: Boolean = true,
     interactionSource: MutableInteractionSource? = null,
     selectedContentColor: Color = MaterialTheme.colors.primary,
-    unselectedContentColor: Color = LocalContentColor.current.copy(alpha = ContentAlpha.medium)
+    unselectedContentColor: Color = LocalContentColor.current.copy(alpha = ContentAlpha.medium),
 ) {
-    val styledLabel: @Composable (() -> Unit)? = label?.let {
-        @Composable {
-            val style = MaterialTheme.typography.caption.copy(textAlign = TextAlign.Center)
-            ProvideTextStyle(style, content = label)
+    val styledLabel: @Composable (() -> Unit)? =
+        label?.let {
+            @Composable {
+                val style = MaterialTheme.typography.caption.copy(textAlign = TextAlign.Center)
+                ProvideTextStyle(style, content = label)
+            }
         }
-    }
     // Default to compact size when the item has no label, or a regular size when it does.
     // Any size value that was set on the given Modifier will take precedence and allow custom
     // sizing.
@@ -224,10 +224,7 @@ fun NavigationRailItem(
     // The color of the Ripple should always the selected color, as we want to show the color
     // before the item is considered selected, and hence before the new contentColor is
     // provided by NavigationRailTransition.
-    val ripple = rippleOrFallbackImplementation(
-        bounded = false,
-        color = selectedContentColor
-    )
+    val ripple = ripple(bounded = false, color = selectedContentColor)
     Box(
         modifier
             .selectable(
@@ -236,43 +233,36 @@ fun NavigationRailItem(
                 enabled = enabled,
                 role = Role.Tab,
                 interactionSource = interactionSource,
-                indication = ripple
+                indication = ripple,
             )
             .size(itemSize),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
-        NavigationRailTransition(
-            selectedContentColor,
-            unselectedContentColor,
-            selected
-        ) { progress ->
+        NavigationRailTransition(selectedContentColor, unselectedContentColor, selected) { progress
+            ->
             val animationProgress = if (alwaysShowLabel) 1f else progress
 
             NavigationRailItemBaselineLayout(
                 icon = icon,
                 label = styledLabel,
-                iconPositionAnimationProgress = animationProgress
+                iconPositionAnimationProgress = animationProgress,
             )
         }
     }
 }
 
-/**
- * Contains default values used for [NavigationRail].
- */
+/** Contains default values used for [NavigationRail]. */
 object NavigationRailDefaults {
-    /**
-     * Default elevation used for [NavigationRail].
-     */
+    /** Default elevation used for [NavigationRail]. */
     val Elevation = 8.dp
 
-    /**
-     * Recommended window insets for navigation rail.
-     */
+    /** Recommended window insets for navigation rail. */
     val windowInsets: WindowInsets
         @Composable
-        get() = WindowInsets.systemBarsForVisualComponents
-            .only(WindowInsetsSides.Vertical + WindowInsetsSides.Start)
+        get() =
+            WindowInsets.systemBarsForVisualComponents.only(
+                WindowInsetsSides.Vertical + WindowInsetsSides.Start
+            )
 }
 
 /**
@@ -284,20 +274,21 @@ object NavigationRailDefaults {
  * @param activeColor [LocalContentColor] when this item is [selected]
  * @param inactiveColor [LocalContentColor] when this item is not [selected]
  * @param selected whether this item is selected
- * @param content the content of the [NavigationRailItem] to animate [LocalContentColor] for,
- * where the animationProgress is the current progress of the animation from 0f to 1f.
+ * @param content the content of the [NavigationRailItem] to animate [LocalContentColor] for, where
+ *   the animationProgress is the current progress of the animation from 0f to 1f.
  */
 @Composable
 private fun NavigationRailTransition(
     activeColor: Color,
     inactiveColor: Color,
     selected: Boolean,
-    content: @Composable (animationProgress: Float) -> Unit
+    content: @Composable (animationProgress: Float) -> Unit,
 ) {
-    val animationProgress by animateFloatAsState(
-        targetValue = if (selected) 1f else 0f,
-        animationSpec = NavigationRailAnimationSpec
-    )
+    val animationProgress by
+        animateFloatAsState(
+            targetValue = if (selected) 1f else 0f,
+            animationSpec = NavigationRailAnimationSpec,
+        )
 
     val color = lerp(inactiveColor, activeColor, animationProgress)
 
@@ -314,39 +305,36 @@ private fun NavigationRailTransition(
  *
  * @param icon icon for this item
  * @param label text label for this item
- * @param iconPositionAnimationProgress progress of the animation that controls icon position,
- * where 0 represents its unselected position and 1 represents its selected position. If both the
- * [icon] and [label] should be shown at all times, this will always be 1, as the icon position
- * should remain constant.
+ * @param iconPositionAnimationProgress progress of the animation that controls icon position, where
+ *   0 represents its unselected position and 1 represents its selected position. If both the [icon]
+ *   and [label] should be shown at all times, this will always be 1, as the icon position should
+ *   remain constant.
  */
 @Composable
 private fun NavigationRailItemBaselineLayout(
     icon: @Composable () -> Unit,
     label: @Composable (() -> Unit)?,
-    @FloatRange(from = 0.0, to = 1.0)
-    iconPositionAnimationProgress: Float
+    @FloatRange(from = 0.0, to = 1.0) iconPositionAnimationProgress: Float,
 ) {
-    Layout(
-        {
-            Box(Modifier.layoutId("icon")) { icon() }
-            if (label != null) {
-                Box(
-                    Modifier
-                        .layoutId("label")
-                        .alpha(iconPositionAnimationProgress)
-                ) { label() }
-            }
+    Layout({
+        Box(Modifier.layoutId("icon")) { icon() }
+        if (label != null) {
+            Box(Modifier.layoutId("label").alpha(iconPositionAnimationProgress)) { label() }
         }
-    ) { measurables, constraints ->
+    }) { measurables, constraints ->
         val iconPlaceable = measurables.fastFirst { it.layoutId == "icon" }.measure(constraints)
 
-        val labelPlaceable = label?.let {
-            measurables.fastFirst { it.layoutId == "label" }.measure(
-                // Measure with loose constraints for height as we don't want the label to take up more
-                // space than it needs
-                constraints.copy(minHeight = 0)
-            )
-        }
+        val labelPlaceable =
+            label?.let {
+                measurables
+                    .fastFirst { it.layoutId == "label" }
+                    .measure(
+                        // Measure with loose constraints for height as we don't want the label to
+                        // take up more
+                        // space than it needs
+                        constraints.copy(minHeight = 0)
+                    )
+            }
 
         // If there is no label, just place the icon.
         if (label == null) {
@@ -356,18 +344,16 @@ private fun NavigationRailItemBaselineLayout(
                 labelPlaceable!!,
                 iconPlaceable,
                 constraints,
-                iconPositionAnimationProgress
+                iconPositionAnimationProgress,
             )
         }
     }
 }
 
-/**
- * Places the provided [iconPlaceable] in the vertical center of the provided [constraints]
- */
+/** Places the provided [iconPlaceable] in the vertical center of the provided [constraints] */
 private fun MeasureScope.placeIcon(
     iconPlaceable: Placeable,
-    constraints: Constraints
+    constraints: Constraints,
 ): MeasureResult {
     val iconX = max(0, (constraints.maxWidth - iconPlaceable.width) / 2)
     val iconY = max(0, (constraints.maxHeight - iconPlaceable.height) / 2)
@@ -392,15 +378,14 @@ private fun MeasureScope.placeIcon(
  * @param labelPlaceable text label placeable inside this item
  * @param iconPlaceable icon placeable inside this item
  * @param iconPositionAnimationProgress the progress of the icon position animation, where 0
- * represents centered icon and no label, and 1 represents top aligned icon with label.
- * Values between 0 and 1 interpolate the icon position so we can smoothly move the icon.
+ *   represents centered icon and no label, and 1 represents top aligned icon with label. Values
+ *   between 0 and 1 interpolate the icon position so we can smoothly move the icon.
  */
 private fun MeasureScope.placeLabelAndIcon(
     labelPlaceable: Placeable,
     iconPlaceable: Placeable,
     constraints: Constraints,
-    @FloatRange(from = 0.0, to = 1.0)
-    iconPositionAnimationProgress: Float
+    @FloatRange(from = 0.0, to = 1.0) iconPositionAnimationProgress: Float,
 ): MeasureResult {
     val baseline = labelPlaceable[LastBaseline]
     val labelBaselineOffset = ItemLabelBaselineBottomOffset.roundToPx()
@@ -432,24 +417,16 @@ private fun MeasureScope.placeLabelAndIcon(
  * [VectorizedAnimationSpec] controlling the transition between unselected and selected
  * [NavigationRailItem]s.
  */
-private val NavigationRailAnimationSpec = TweenSpec<Float>(
-    durationMillis = 300,
-    easing = FastOutSlowInEasing
-)
+private val NavigationRailAnimationSpec =
+    TweenSpec<Float>(durationMillis = 300, easing = FastOutSlowInEasing)
 
-/**
- * Size of a regular [NavigationRailItem].
- */
+/** Size of a regular [NavigationRailItem]. */
 private val NavigationRailItemSize = 72.dp
 
-/**
- * Size of a compact [NavigationRailItem].
- */
+/** Size of a compact [NavigationRailItem]. */
 private val NavigationRailItemCompactSize = 56.dp
 
-/**
- * Padding at the top and the bottom of the [NavigationRail]
- */
+/** Padding at the top and the bottom of the [NavigationRail] */
 private val NavigationRailPadding = 8.dp
 
 /**
@@ -458,9 +435,7 @@ private val NavigationRailPadding = 8.dp
  */
 private val HeaderPadding = 8.dp
 
-/**
- * The space between the text label's baseline and the bottom of the container.
- */
+/** The space between the text label's baseline and the bottom of the container. */
 private val ItemLabelBaselineBottomOffset = 16.dp
 
 /**

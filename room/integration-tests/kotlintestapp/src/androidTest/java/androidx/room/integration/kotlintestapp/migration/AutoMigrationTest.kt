@@ -21,25 +21,22 @@ import androidx.room.util.TableInfo.Companion.read
 import androidx.sqlite.SQLiteException
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
-import androidx.test.filters.SdkSuppress
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Test custom database migrations.
- */
+/** Test custom database migrations. */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-@SdkSuppress(minSdkVersion = 22) // b/329236938
 class AutoMigrationTest {
     @JvmField
     @Rule
-    var helper: MigrationTestHelper = MigrationTestHelper(
-        InstrumentationRegistry.getInstrumentation(),
-        AutoMigrationDb::class.java
-    )
+    var helper: MigrationTestHelper =
+        MigrationTestHelper(
+            InstrumentationRegistry.getInstrumentation(),
+            AutoMigrationDb::class.java,
+        )
 
     // Run this to create the very 1st version of the db.
     fun createFirstVersion() {
@@ -55,57 +52,59 @@ class AutoMigrationTest {
     @Suppress("DEPRECATION") // Due to TableInfo.read()
     fun goFromV1ToV2() {
         createFirstVersion()
-        val db = helper.runMigrationsAndValidate(
-            TEST_DB,
-            2,
-            true
-        )
+        val db = helper.runMigrationsAndValidate(TEST_DB, 2, true)
         val info = read(db, AutoMigrationDb.Entity1.TABLE_NAME)
         assertThat(info.columns.size).isEqualTo(3)
+        db.close()
     }
 
     @Test
+    @Suppress("DEPRECATION") // Due to TableInfo.read()
     fun goFromV1ToV3() {
         createFirstVersion()
+        val db = helper.runMigrationsAndValidate(TEST_DB, 3, true)
+        val info = read(db, AutoMigrationDb.Entity1.TABLE_NAME)
+        assertThat(info.columns.size).isEqualTo(3)
+        db.close()
+    }
+
+    @Test
+    @Suppress("DEPRECATION") // Due to TableInfo.read()
+    fun goFromV1ToV4() {
+        createFirstVersion()
+        val db = helper.runMigrationsAndValidate(TEST_DB, 4, true)
+        val info = read(db, AutoMigrationDb.Entity1.TABLE_NAME)
+        assertThat(info.columns.size).isEqualTo(3)
+        db.close()
+    }
+
+    @Test
+    fun goFromV1ToV5() {
+        createFirstVersion()
         try {
-            helper.runMigrationsAndValidate(
-                TEST_DB,
-                3,
-                true
-            )
+            helper.runMigrationsAndValidate(TEST_DB, 5, true)
         } catch (e: SQLiteException) {
-            assertThat(e.message).isEqualTo(
-                """Foreign key violation(s) detected in 'Entity9'.
-Number of different violations discovered: 1
-Number of rows in violation: 2
-Violation(s) detected in the following constraint(s):
-	Parent Table = Entity27, Foreign Key Constraint Index = 0
-"""
-            )
+            assertThat(e.message).contains("""Foreign key violation(s) detected in 'Entity9'""")
         }
     }
 
     @Test
     @Suppress("DEPRECATION") // Due to TableInfo.read()
     fun testAutoMigrationWithNewEmbeddedField() {
-        val embeddedHelper = MigrationTestHelper(
-            InstrumentationRegistry.getInstrumentation(),
-            EmbeddedAutoMigrationDb::class.java
-        )
-        val db = embeddedHelper.createDatabase(
-            "embedded-auto-migration-test",
-            1
-        )
+        val embeddedHelper =
+            MigrationTestHelper(
+                InstrumentationRegistry.getInstrumentation(),
+                EmbeddedAutoMigrationDb::class.java,
+            )
+        val db = embeddedHelper.createDatabase("embedded-auto-migration-test", 1)
         db.execSQL("INSERT INTO Entity1 (id, name) VALUES (1, 'row1')")
-        val info = read(
-            embeddedHelper.runMigrationsAndValidate(
-                "embedded-auto-migration-test",
-                2,
-                true
-            ),
-            EmbeddedAutoMigrationDb.EmbeddedEntity1.TABLE_NAME
-        )
+        db.close()
+
+        val migratedDb =
+            embeddedHelper.runMigrationsAndValidate("embedded-auto-migration-test", 2, true)
+        val info = read(migratedDb, EmbeddedAutoMigrationDb.EmbeddedEntity1.TABLE_NAME)
         assertThat(info.columns.size).isEqualTo(3)
+        migratedDb.close()
     }
 
     companion object {

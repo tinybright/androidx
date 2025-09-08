@@ -30,93 +30,82 @@ import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 /**
- * A specification of the requirements that need to be met before a [WorkRequest] can run.  By
+ * A specification of the requirements that need to be met before a [WorkRequest] can run. By
  * default, WorkRequests do not have any requirements and can run immediately. By adding
  * requirements, you can make sure that work only runs in certain situations - for example, when you
  * have an unmetered network and are charging.
  */
-class Constraints {
-    /**
-     * The type of network required for the work to run.
-     */
-    @ColumnInfo(name = "required_network_type")
-    val requiredNetworkType: NetworkType
+public class Constraints {
+    /** The type of network required for the work to run. */
+    @ColumnInfo(name = "required_network_type") public val requiredNetworkType: NetworkType
 
     /**
-     * [NetworkRequest] required for work to run on.
-     * It is used only the API levels >= 28 (Android P). For the older
-     * API levels, [requiredNetworkType] will be used instead on the older platforms
-     * and this property will be `null`.
+     * [NetworkRequest] required for work to run on. It is used only the API levels >= 28 (Android
+     * P). For the older API levels, [requiredNetworkType] will be used instead on the older
+     * platforms and this property will be `null`.
      *
-     * `NetworkRequest`-s with `NetworkSpecifier` set aren't supported,
-     * as well as `NetworkRequest` with `setIncludeOtherUidNetworks` set.
-     * passed.
+     * `NetworkRequest`-s with `NetworkSpecifier` set aren't supported, as well as `NetworkRequest`
+     * with `setIncludeOtherUidNetworks` set. passed.
      */
-    @get:RequiresApi(21) // NetworkRequest class is available since 21
-    val requiredNetworkRequest: NetworkRequest?
+    public val requiredNetworkRequest: NetworkRequest?
         get() = requiredNetworkRequestCompat.networkRequest
 
     @ColumnInfo(name = "required_network_request", defaultValue = "x''")
     internal val requiredNetworkRequestCompat: NetworkRequestCompat
 
-    @ColumnInfo(name = "requires_charging")
-    private val requiresCharging: Boolean
+    @ColumnInfo(name = "requires_charging") private val requiresCharging: Boolean
 
-    @ColumnInfo(name = "requires_device_idle")
-    private val requiresDeviceIdle: Boolean
+    @ColumnInfo(name = "requires_device_idle") private val requiresDeviceIdle: Boolean
 
-    @ColumnInfo(name = "requires_battery_not_low")
-    private val requiresBatteryNotLow: Boolean
+    @ColumnInfo(name = "requires_battery_not_low") private val requiresBatteryNotLow: Boolean
 
-    @ColumnInfo(name = "requires_storage_not_low")
-    private val requiresStorageNotLow: Boolean
+    @ColumnInfo(name = "requires_storage_not_low") private val requiresStorageNotLow: Boolean
 
     /**
-     * The delay in milliseconds that is allowed from the
-     * time a `content:` [Uri] change is detected to the time when the [WorkRequest] is scheduled.
-     * If there are more changes during this time, the delay will be reset to the start of the most
-     * recent change. This functionality is identical to the one found in `JobScheduler` and
-     * is described in [android.app.job.JobInfo.Builder.setTriggerContentUpdateDelay]
+     * The delay in milliseconds that is allowed from the time a `content:` [Uri] change is detected
+     * to the time when the [WorkRequest] is scheduled. If there are more changes during this time,
+     * the delay will be reset to the start of the most recent change. This functionality is
+     * identical to the one found in `JobScheduler` and is described in
+     * [android.app.job.JobInfo.Builder.setTriggerContentUpdateDelay]
      */
     @get:RequiresApi(24)
     @ColumnInfo(name = "trigger_content_update_delay")
-    val contentTriggerUpdateDelayMillis: Long
+    public val contentTriggerUpdateDelayMillis: Long
 
     /**
-     * The maximum delay in milliseconds that is allowed
-     * from the first time a `content:` [Uri] change is detected to the time when the [WorkRequest]
-     * is scheduled. This functionality is identical to the one found in `JobScheduler` and is
-     * described in [android.app.job.JobInfo.Builder.setTriggerContentMaxDelay].
+     * The maximum delay in milliseconds that is allowed from the first time a `content:` [Uri]
+     * change is detected to the time when the [WorkRequest] is scheduled. This functionality is
+     * identical to the one found in `JobScheduler` and is described in
+     * [android.app.job.JobInfo.Builder.setTriggerContentMaxDelay].
      */
     @get:RequiresApi(24)
     @ColumnInfo(name = "trigger_max_content_delay")
-    val contentTriggerMaxDelayMillis: Long
+    public val contentTriggerMaxDelayMillis: Long
 
     /**
-     * Set of [ContentUriTrigger]. [WorkRequest] will run when a local
-     * `content:` [Uri] of one of the triggers in the set is updated.
-     * This functionality is identical to the one found in `JobScheduler` and is described in
-     * [android.app.job.JobInfo.Builder.addTriggerContentUri].
+     * Set of [ContentUriTrigger]. [WorkRequest] will run when a local `content:` [Uri] of one of
+     * the triggers in the set is updated. This functionality is identical to the one found in
+     * `JobScheduler` and is described in [android.app.job.JobInfo.Builder.addTriggerContentUri].
      */
     @ColumnInfo(name = "content_uri_triggers")
     @get:RequiresApi(24)
-    val contentUriTriggers: Set<ContentUriTrigger>
+    public val contentUriTriggers: Set<ContentUriTrigger>
 
     /**
      * Constructs [Constraints].
      *
-     * @param requiredNetworkType The type of network required for the work to run.
-     * The default value is [NetworkType.NOT_REQUIRED].
+     * @param requiredNetworkType The type of network required for the work to run. The default
+     *   value is [NetworkType.NOT_REQUIRED].
      * @param requiresCharging whether device should be charging for the [WorkRequest] to run. The
-     * default value is `false`.
+     *   default value is `false`.
      * @param requiresBatteryNotLow whether device battery should be at an acceptable level for the
-     * [WorkRequest] to run. The default value is `false`.
+     *   [WorkRequest] to run. The default value is `false`.
      * @param requiresStorageNotLow whether the device's available storage should be at an
-     * acceptable level for the [WorkRequest] to run. The default value is `false`.
+     *   acceptable level for the [WorkRequest] to run. The default value is `false`.
      */
     @Ignore
     @SuppressLint("NewApi")
-    constructor(
+    public constructor(
         requiredNetworkType: NetworkType = NetworkType.NOT_REQUIRED,
         requiresCharging: Boolean = false,
         requiresBatteryNotLow: Boolean = false,
@@ -126,27 +115,25 @@ class Constraints {
         requiresCharging = requiresCharging,
         requiresStorageNotLow = requiresStorageNotLow,
         requiresBatteryNotLow = requiresBatteryNotLow,
-        requiresDeviceIdle = false
+        requiresDeviceIdle = false,
     )
 
     /**
      * Constructs [Constraints].
      *
-     * @param requiredNetworkType The type of network required for the work to run.
-     * The default value is [NetworkType.NOT_REQUIRED].
+     * @param requiredNetworkType The type of network required for the work to run. The default
+     *   value is [NetworkType.NOT_REQUIRED].
      * @param requiresCharging whether device should be charging for the [WorkRequest] to run. The
-     * default value is `false`.
+     *   default value is `false`.
      * @param requiresDeviceIdle whether device should be idle for the [WorkRequest] to run. The
-     * default value is `false`.
+     *   default value is `false`.
      * @param requiresBatteryNotLow whether device battery should be at an acceptable level for the
-     * [WorkRequest] to run. The default value is `false`.
+     *   [WorkRequest] to run. The default value is `false`.
      * @param requiresStorageNotLow whether the device's available storage should be at an
-     * acceptable level for the [WorkRequest] to run. The default value is `false`.
+     *   acceptable level for the [WorkRequest] to run. The default value is `false`.
      */
     @Ignore
-    @SuppressLint("NewApi")
-    @RequiresApi(23) // requiresDeviceIdle is supported since API 23
-    constructor(
+    public constructor(
         requiredNetworkType: NetworkType = NetworkType.NOT_REQUIRED,
         requiresCharging: Boolean = false,
         requiresDeviceIdle: Boolean = false,
@@ -164,33 +151,33 @@ class Constraints {
     /**
      * Constructs [Constraints].
      *
-     * @param requiredNetworkType The type of network required for the work to run.
-     * The default value is [NetworkType.NOT_REQUIRED].
+     * @param requiredNetworkType The type of network required for the work to run. The default
+     *   value is [NetworkType.NOT_REQUIRED].
      * @param requiresCharging whether device should be charging for the [WorkRequest] to run. The
-     * default value is `false`.
+     *   default value is `false`.
      * @param requiresDeviceIdle whether device should be idle for the [WorkRequest] to run. The
-     * default value is `false`.
+     *   default value is `false`.
      * @param requiresBatteryNotLow whether device battery should be at an acceptable level for the
-     * [WorkRequest] to run. The default value is `false`.
+     *   [WorkRequest] to run. The default value is `false`.
      * @param requiresStorageNotLow whether the device's available storage should be at an
-     * acceptable level for the [WorkRequest] to run. The default value is `false`.
+     *   acceptable level for the [WorkRequest] to run. The default value is `false`.
      * @param contentTriggerUpdateDelayMillis the delay in milliseconds that is allowed from the
-     * time a `content:` [Uri] change is detected to the time when the [WorkRequest] is scheduled.
-     * If there are more changes during this time, the delay will be reset to the start of the most
-     * recent change. This functionality is identical to the one found in `JobScheduler` and
-     * is described in [android.app.job.JobInfo.Builder.setTriggerContentUpdateDelay]
-     * @param contentTriggerMaxDelayMillis the maximum delay in milliseconds that is allowed
-     * from the first time a `content:` [Uri] change is detected to the time when the [WorkRequest]
-     * is scheduled. This functionality is identical to the one found in `JobScheduler` and is
-     * described in [android.app.job.JobInfo.Builder.setTriggerContentMaxDelay].
+     *   time a `content:` [Uri] change is detected to the time when the [WorkRequest] is scheduled.
+     *   If there are more changes during this time, the delay will be reset to the start of the
+     *   most recent change. This functionality is identical to the one found in `JobScheduler` and
+     *   is described in [android.app.job.JobInfo.Builder.setTriggerContentUpdateDelay]
+     * @param contentTriggerMaxDelayMillis the maximum delay in milliseconds that is allowed from
+     *   the first time a `content:` [Uri] change is detected to the time when the [WorkRequest] is
+     *   scheduled. This functionality is identical to the one found in `JobScheduler` and is
+     *   described in [android.app.job.JobInfo.Builder.setTriggerContentMaxDelay].
      * @param contentUriTriggers set of [ContentUriTrigger]. [WorkRequest] will run when a local
-     * `content:` [Uri] of one of the triggers in the set is updated.
-     * This functionality is identical to the one found in `JobScheduler` and is described in
-     * [android.app.job.JobInfo.Builder.addTriggerContentUri].
+     *   `content:` [Uri] of one of the triggers in the set is updated. This functionality is
+     *   identical to the one found in `JobScheduler` and is described in
+     *   [android.app.job.JobInfo.Builder.addTriggerContentUri].
      */
     @Ignore
     @RequiresApi(24)
-    constructor(
+    public constructor(
         requiredNetworkType: NetworkType = NetworkType.NOT_REQUIRED,
         requiresCharging: Boolean = false,
         requiresDeviceIdle: Boolean = false,
@@ -234,7 +221,7 @@ class Constraints {
     }
 
     @SuppressLint("NewApi") // just copy everything
-    constructor(other: Constraints) {
+    public constructor(other: Constraints) {
         requiresCharging = other.requiresCharging
         requiresDeviceIdle = other.requiresDeviceIdle
         requiredNetworkRequestCompat = other.requiredNetworkRequestCompat
@@ -246,40 +233,29 @@ class Constraints {
         contentTriggerMaxDelayMillis = other.contentTriggerMaxDelayMillis
     }
 
-    /**
-     * @return `true` if the work should only execute while the device is charging
-     */
-    fun requiresCharging(): Boolean {
+    /** @return `true` if the work should only execute while the device is charging */
+    public fun requiresCharging(): Boolean {
         return requiresCharging
     }
 
-    /**
-     * @return `true` if the work should only execute while the device is idle
-     */
-    @RequiresApi(23)
-    fun requiresDeviceIdle(): Boolean {
+    /** @return `true` if the work should only execute while the device is idle */
+    public fun requiresDeviceIdle(): Boolean {
         return requiresDeviceIdle
     }
 
-    /**
-     * @return `true` if the work should only execute when the battery isn't low
-     */
-    fun requiresBatteryNotLow(): Boolean {
+    /** @return `true` if the work should only execute when the battery isn't low */
+    public fun requiresBatteryNotLow(): Boolean {
         return requiresBatteryNotLow
     }
 
-    /**
-     * @return `true` if the work should only execute when the storage isn't low
-     */
-    fun requiresStorageNotLow(): Boolean {
+    /** @return `true` if the work should only execute when the storage isn't low */
+    public fun requiresStorageNotLow(): Boolean {
         return requiresStorageNotLow
     }
 
-    /**
-     * @return `true` if [ContentUriTrigger] is not empty
-     */
+    /** @return `true` if [ContentUriTrigger] is not empty */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun hasContentUriTriggers(): Boolean {
+    public fun hasContentUriTriggers(): Boolean {
         return Build.VERSION.SDK_INT < 24 || contentUriTriggers.isNotEmpty()
     }
 
@@ -310,10 +286,13 @@ class Constraints {
         result = 31 * result + if (requiresDeviceIdle) 1 else 0
         result = 31 * result + if (requiresBatteryNotLow) 1 else 0
         result = 31 * result + if (requiresStorageNotLow) 1 else 0
-        result = 31 * result +
-            (contentTriggerUpdateDelayMillis xor (contentTriggerUpdateDelayMillis ushr 32)).toInt()
-        result = 31 * result +
-            (contentTriggerMaxDelayMillis xor (contentTriggerMaxDelayMillis ushr 32)).toInt()
+        result =
+            31 * result +
+                (contentTriggerUpdateDelayMillis xor (contentTriggerUpdateDelayMillis ushr 32))
+                    .toInt()
+        result =
+            31 * result +
+                (contentTriggerMaxDelayMillis xor (contentTriggerMaxDelayMillis ushr 32)).toInt()
         result = 31 * result + contentUriTriggers.hashCode()
         result = 31 * result + requiredNetworkRequest.hashCode()
         return result
@@ -335,10 +314,8 @@ class Constraints {
             "}"
     }
 
-    /**
-     * A Builder for a [Constraints] object.
-     */
-    class Builder {
+    /** A Builder for a [Constraints] object. */
+    public class Builder {
         private var requiresCharging = false
         private var requiresDeviceIdle = false
         private var requiredNetworkRequest: NetworkRequestCompat = NetworkRequestCompat()
@@ -351,16 +328,15 @@ class Constraints {
         private var triggerContentMaxDelay: Long = -1
         private var contentUriTriggers = mutableSetOf<ContentUriTrigger>()
 
-        constructor() {
+        public constructor() {
             // default public constructor
         }
 
-        /**
-         */
+        /**  */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        constructor(constraints: Constraints) {
+        public constructor(constraints: Constraints) {
             requiresCharging = constraints.requiresCharging()
-            requiresDeviceIdle = Build.VERSION.SDK_INT >= 23 && constraints.requiresDeviceIdle()
+            requiresDeviceIdle = constraints.requiresDeviceIdle()
             requiredNetworkType = constraints.requiredNetworkType
             requiresBatteryNotLow = constraints.requiresBatteryNotLow()
             requiresStorageNotLow = constraints.requiresStorageNotLow()
@@ -372,65 +348,63 @@ class Constraints {
         }
 
         /**
-         * Sets whether device should be charging for the [WorkRequest] to run.  The
-         * default value is `false`.
+         * Sets whether device should be charging for the [WorkRequest] to run. The default value is
+         * `false`.
          *
          * @param requiresCharging `true` if device must be charging for the work to run
          * @return The current [Builder]
          */
-        fun setRequiresCharging(requiresCharging: Boolean): Builder {
+        public fun setRequiresCharging(requiresCharging: Boolean): Builder {
             this.requiresCharging = requiresCharging
             return this
         }
 
         /**
-         * Sets whether device should be idle for the [WorkRequest] to run. The default
-         * value is `false`.
+         * Sets whether device should be idle for the [WorkRequest] to run. The default value is
+         * `false`.
          *
          * @param requiresDeviceIdle `true` if device must be idle for the work to run
          * @return The current [Builder]
          */
-        @RequiresApi(23)
-        fun setRequiresDeviceIdle(requiresDeviceIdle: Boolean): Builder {
+        public fun setRequiresDeviceIdle(requiresDeviceIdle: Boolean): Builder {
             this.requiresDeviceIdle = requiresDeviceIdle
             return this
         }
 
         /**
-         * Sets whether device should have a particular [NetworkType] for the
-         * [WorkRequest] to run. The default value is [NetworkType.NOT_REQUIRED].
+         * Sets whether device should have a particular [NetworkType] for the [WorkRequest] to run.
+         * The default value is [NetworkType.NOT_REQUIRED].
          *
          * @param networkType The type of network required for the work to run
          * @return The current [Builder]
          */
-        fun setRequiredNetworkType(networkType: NetworkType): Builder {
+        public fun setRequiredNetworkType(networkType: NetworkType): Builder {
             requiredNetworkType = networkType
             requiredNetworkRequest = NetworkRequestCompat()
             return this
         }
 
         /**
-         * Sets whether device should have a particular [NetworkRequest] for the
-         * [WorkRequest] to run on the API levels >= 28 (Android P). For the older
-         * API levels, `networkType` will be used instead on the older platforms.
+         * Sets whether device should have a particular [NetworkRequest] for the [WorkRequest] to
+         * run on the API levels >= 28 (Android P). For the older API levels, `networkType` will be
+         * used instead on the older platforms.
          *
-         * `NetworkRequest` with `NetworkSpecifier` set aren't supported,
-         * as well as `NetworkRequest` with `setIncludeOtherUidNetworks` set.
-         * [IllegalArgumentException] will be thrown if such requests are
-         * passed.
+         * `NetworkRequest` with `NetworkSpecifier` set aren't supported, as well as
+         * `NetworkRequest` with `setIncludeOtherUidNetworks` set. [IllegalArgumentException] will
+         * be thrown if such requests are passed.
          *
          * @param networkRequest
          * @param networkType The type of network required for t
          * @return The current [Builder]
          */
-        @RequiresApi(21)
-        fun setRequiredNetworkRequest(
+        public fun setRequiredNetworkRequest(
             networkRequest: NetworkRequest,
-            networkType: NetworkType
+            networkType: NetworkType,
         ): Builder {
             if (Build.VERSION.SDK_INT >= 28) {
-                if (Build.VERSION.SDK_INT >= 31 &&
-                    NetworkRequest30.getNetworkSpecifier(networkRequest) != null
+                if (
+                    Build.VERSION.SDK_INT >= 31 &&
+                        NetworkRequest30.getNetworkSpecifier(networkRequest) != null
                 ) {
                     throw IllegalArgumentException(
                         "NetworkRequests with NetworkSpecifiers set aren't supported."
@@ -445,14 +419,14 @@ class Constraints {
         }
 
         /**
-         * Sets whether device battery should be at an acceptable level for the
-         * [WorkRequest] to run. The default value is `false`.
+         * Sets whether device battery should be at an acceptable level for the [WorkRequest] to
+         * run. The default value is `false`.
          *
-         * @param requiresBatteryNotLow `true` if the battery should be at an acceptable level
-         * for the work to run
+         * @param requiresBatteryNotLow `true` if the battery should be at an acceptable level for
+         *   the work to run
          * @return The current [Builder]
          */
-        fun setRequiresBatteryNotLow(requiresBatteryNotLow: Boolean): Builder {
+        public fun setRequiresBatteryNotLow(requiresBatteryNotLow: Boolean): Builder {
             this.requiresBatteryNotLow = requiresBatteryNotLow
             return this
         }
@@ -461,92 +435,91 @@ class Constraints {
          * Sets whether the device's available storage should be at an acceptable level for the
          * [WorkRequest] to run. The default value is `false`.
          *
-         * @param requiresStorageNotLow `true` if the available storage should not be below a
-         * a critical threshold for the work to run
+         * @param requiresStorageNotLow `true` if the available storage should not be below a a
+         *   critical threshold for the work to run
          * @return The current [Builder]
          */
-        fun setRequiresStorageNotLow(requiresStorageNotLow: Boolean): Builder {
+        public fun setRequiresStorageNotLow(requiresStorageNotLow: Boolean): Builder {
             this.requiresStorageNotLow = requiresStorageNotLow
             return this
         }
 
         /**
-         * Sets whether the [WorkRequest] should run when a local `content:` [Uri]
-         * is updated.  This functionality is identical to the one found in `JobScheduler` and
-         * is described in
+         * Sets whether the [WorkRequest] should run when a local `content:` [Uri] is updated. This
+         * functionality is identical to the one found in `JobScheduler` and is described in
          * `JobInfo.Builder#addTriggerContentUri(android.app.job.JobInfo.TriggerContentUri)`.
          *
          * @param uri The local `content:` Uri to observe
          * @param triggerForDescendants `true` if any changes in descendants cause this
-         * [WorkRequest] to run
+         *   [WorkRequest] to run
          * @return The current [Builder]
          */
         @RequiresApi(24)
-        fun addContentUriTrigger(uri: Uri, triggerForDescendants: Boolean): Builder {
+        public fun addContentUriTrigger(uri: Uri, triggerForDescendants: Boolean): Builder {
             contentUriTriggers.add(ContentUriTrigger(uri, triggerForDescendants))
             return this
         }
 
         /**
-         * Sets the delay that is allowed from the time a `content:` [Uri]
-         * change is detected to the time when the [WorkRequest] is scheduled.  If there are
-         * more changes during this time, the delay will be reset to the start of the most recent
-         * change. This functionality is identical to the one found in `JobScheduler` and
-         * is described in `JobInfo.Builder#setTriggerContentUpdateDelay(long)`.
+         * Sets the delay that is allowed from the time a `content:` [Uri] change is detected to the
+         * time when the [WorkRequest] is scheduled. If there are more changes during this time, the
+         * delay will be reset to the start of the most recent change. This functionality is
+         * identical to the one found in `JobScheduler` and is described in
+         * `JobInfo.Builder#setTriggerContentUpdateDelay(long)`.
          *
          * @param duration The length of the delay in `timeUnit` units
          * @param timeUnit The units of time for `duration`
          * @return The current [Builder]
          */
         @RequiresApi(24)
-        fun setTriggerContentUpdateDelay(duration: Long, timeUnit: TimeUnit): Builder {
+        public fun setTriggerContentUpdateDelay(duration: Long, timeUnit: TimeUnit): Builder {
             triggerContentUpdateDelay = timeUnit.toMillis(duration)
             return this
         }
 
         /**
-         * Sets the delay that is allowed from the time a `content:` [Uri] change
-         * is detected to the time when the [WorkRequest] is scheduled.  If there are more
-         * changes during this time, the delay will be reset to the start of the most recent change.
-         * This functionality is identical to the one found in `JobScheduler` and
-         * is described in `JobInfo.Builder#setTriggerContentUpdateDelay(long)`.
+         * Sets the delay that is allowed from the time a `content:` [Uri] change is detected to the
+         * time when the [WorkRequest] is scheduled. If there are more changes during this time, the
+         * delay will be reset to the start of the most recent change. This functionality is
+         * identical to the one found in `JobScheduler` and is described in
+         * `JobInfo.Builder#setTriggerContentUpdateDelay(long)`.
          *
          * @param duration The length of the delay
          * @return The current [Builder]
          */
         @RequiresApi(26)
-        fun setTriggerContentUpdateDelay(duration: Duration): Builder {
+        public fun setTriggerContentUpdateDelay(duration: Duration): Builder {
             triggerContentUpdateDelay = duration.toMillisCompat()
             return this
         }
 
         /**
-         * Sets the maximum delay that is allowed from the first time a `content:`
-         * [Uri] change is detected to the time when the [WorkRequest] is scheduled.
-         * This functionality is identical to the one found in `JobScheduler` and
-         * is described in `JobInfo.Builder#setTriggerContentMaxDelay(long)`.
+         * Sets the maximum delay that is allowed from the first time a `content:` [Uri] change is
+         * detected to the time when the [WorkRequest] is scheduled. This functionality is identical
+         * to the one found in `JobScheduler` and is described in
+         * `JobInfo.Builder#setTriggerContentMaxDelay(long)`.
          *
          * @param duration The length of the delay in `timeUnit` units
          * @param timeUnit The units of time for `duration`
          * @return The current [Builder]
          */
         @RequiresApi(24)
-        fun setTriggerContentMaxDelay(duration: Long, timeUnit: TimeUnit): Builder {
+        public fun setTriggerContentMaxDelay(duration: Long, timeUnit: TimeUnit): Builder {
             triggerContentMaxDelay = timeUnit.toMillis(duration)
             return this
         }
 
         /**
-         * Sets the maximum delay that is allowed from the first time a `content:` [Uri]
-         * change is detected to the time when the [WorkRequest] is scheduled. This
-         * functionality is identical to the one found in `JobScheduler` and is described
-         * in `JobInfo.Builder#setTriggerContentMaxDelay(long)`.
+         * Sets the maximum delay that is allowed from the first time a `content:` [Uri] change is
+         * detected to the time when the [WorkRequest] is scheduled. This functionality is identical
+         * to the one found in `JobScheduler` and is described in
+         * `JobInfo.Builder#setTriggerContentMaxDelay(long)`.
          *
          * @param duration The length of the delay
          * @return The current [Builder]
          */
         @RequiresApi(26)
-        fun setTriggerContentMaxDelay(duration: Duration): Builder {
+        public fun setTriggerContentMaxDelay(duration: Duration): Builder {
             triggerContentMaxDelay = duration.toMillisCompat()
             return this
         }
@@ -556,7 +529,7 @@ class Constraints {
          *
          * @return The [Constraints] specified by this Builder
          */
-        fun build(): Constraints {
+        public fun build(): Constraints {
             val contentUriTriggers: Set<ContentUriTrigger>
             val triggerContentUpdateDelay: Long
             val triggerMaxContentDelay: Long
@@ -570,12 +543,11 @@ class Constraints {
                 triggerMaxContentDelay = -1
             }
 
-            @Suppress("NewApi")
             return Constraints(
                 requiredNetworkRequestCompat = requiredNetworkRequest,
                 requiredNetworkType = requiredNetworkType,
                 requiresCharging = requiresCharging,
-                requiresDeviceIdle = Build.VERSION.SDK_INT >= 23 && requiresDeviceIdle,
+                requiresDeviceIdle = requiresDeviceIdle,
                 requiresBatteryNotLow = requiresBatteryNotLow,
                 requiresStorageNotLow = requiresStorageNotLow,
                 contentTriggerMaxDelayMillis = triggerMaxContentDelay,
@@ -587,14 +559,18 @@ class Constraints {
 
     /**
      * This class describes a content uri trigger on the [WorkRequest]: it should run when a local
-     * `content:` [Uri] is updated.  This functionality is identical to the one found
-     * in `JobScheduler` and is described in
+     * `content:` [Uri] is updated. This functionality is identical to the one found in
+     * `JobScheduler` and is described in
      * `JobInfo.Builder#addTriggerContentUri(android.app.job.JobInfo.TriggerContentUri)`.
      *
      * @property uri The local `content:` Uri to observe
-     * @property isTriggeredForDescendants `true` if trigger also applies to descendants of the [Uri]
+     * @property isTriggeredForDescendants `true` if trigger also applies to descendants of the
+     *   [Uri]
      */
-    class ContentUriTrigger(val uri: Uri, val isTriggeredForDescendants: Boolean) {
+    public class ContentUriTrigger(
+        public val uri: Uri,
+        public val isTriggeredForDescendants: Boolean,
+    ) {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
@@ -614,12 +590,9 @@ class Constraints {
         }
     }
 
-    companion object {
-        /**
-         * Represents a Constraints object with no requirements.
-         */
-        @JvmField
-        val NONE = Constraints()
+    public companion object {
+        /** Represents a Constraints object with no requirements. */
+        @JvmField public val NONE: Constraints = Constraints()
     }
 }
 

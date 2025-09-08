@@ -28,6 +28,7 @@ import androidx.glance.testing.GlanceNodeAssertionsProvider
 import androidx.glance.testing.unit.GlanceMappedNode
 import androidx.glance.testing.unit.MappedNode
 import kotlin.time.Duration
+import kotlinx.coroutines.test.TestResult
 
 /**
  * Sets up the test environment and runs the given unit [test block][block]. Use the methods on
@@ -35,9 +36,8 @@ import kotlin.time.Duration
  * and make assertions on them.
  *
  * Test your individual Glance composable functions in isolation to verify that your logic outputs
- * right elements. For example: if input data is 'x', an image 'y' was
- * outputted. In sample below, the test class has a separate test for the header and the status
- * row.
+ * right elements. For example: if input data is 'x', an image 'y' was outputted. In sample below,
+ * the test class has a separate test for the header and the status row.
  *
  * Tests can be run on JVM as these don't involve rendering the UI. If your logic depends on
  * [Context] or other android APIs, tests can be run on Android unit testing frameworks such as
@@ -46,7 +46,6 @@ import kotlin.time.Duration
  * Note: Keeping a reference to the [GlanceAppWidgetUnitTest] outside of this function is an error.
  *
  * @sample androidx.glance.appwidget.testing.samples.isolatedGlanceComposableTestSamples
- *
  * @param timeout test time out; defaults to 10s
  * @param block The test block that involves calling methods in [GlanceAppWidgetUnitTest]
  */
@@ -54,10 +53,10 @@ import kotlin.time.Duration
 // "androidx.compose.ui.test.runComposeUiTest". Alternative of exposing testRule was explored, but
 // it wasn't necessary for this case. If developers wish, they may use this function to create their
 // own test rule.
-fun runGlanceAppWidgetUnitTest(
+public fun runGlanceAppWidgetUnitTest(
     timeout: Duration = DEFAULT_TIMEOUT,
-    block: GlanceAppWidgetUnitTest.() -> Unit
-) = GlanceAppWidgetUnitTestEnvironment(timeout).runTest(block)
+    block: GlanceAppWidgetUnitTest.() -> Unit,
+): TestResult = GlanceAppWidgetUnitTestEnvironment(timeout).runTest(block)
 
 /**
  * Provides methods to enable you to test your logic of building Glance composable content in the
@@ -65,27 +64,25 @@ fun runGlanceAppWidgetUnitTest(
  *
  * @see [runGlanceAppWidgetUnitTest]
  */
-sealed interface GlanceAppWidgetUnitTest :
+public sealed interface GlanceAppWidgetUnitTest :
     GlanceNodeAssertionsProvider<MappedNode, GlanceMappedNode> {
     /**
      * Sets the size of the appWidget to be assumed for the test. This corresponds to the
-     * `LocalSize.current` composition local. If you are accessing the local size, you must
-     * call this method to set the intended size for the test.
+     * `LocalSize.current` composition local. If you are accessing the local size, you must call
+     * this method to set the intended size for the test.
      *
-     * Note: This should be called before calling [provideComposable].
-     * Default is `349.dp, 455.dp` that of a 5x4 widget in Pixel 4 portrait mode. See
-     * [GlanceAppWidgetUnitTestDefaults.size]
-     *
+     * Note: This should be called before calling [provideComposable]. Default is `349.dp, 455.dp`
+     * that of a 5x4 widget in Pixel 4 portrait mode. See [GlanceAppWidgetUnitTestDefaults.size]
      * 1. If your appWidget uses `sizeMode == Single`, you can set this to the `minWidth` and
-     * `minHeight` set in your appwidget info xml.
-     * 2. If your appWidget uses `sizeMode == Exact`, you can identify the sizes to test looking
-     * at the documentation on
-     * [Determine a size for your widget](https://developer.android.com/develop/ui/views/appwidgets/layouts#anatomy_determining_size).
-     * and identifying landscape and portrait sizes that your widget may appear on.
+     *    `minHeight` set in your appwidget info xml.
+     * 2. If your appWidget uses `sizeMode == Exact`, you can identify the sizes to test looking at
+     *    the documentation on
+     *    [Determine a size for your widget](https://developer.android.com/develop/ui/views/appwidgets/layouts#anatomy_determining_size).
+     *    and identifying landscape and portrait sizes that your widget may appear on.
      * 3. If your appWidget uses `sizeMode == Responsive`, you can set this to one of the sizes from
-     * the list that you provide when specifying the sizeMode.
+     *    the list that you provide when specifying the sizeMode.
      */
-    fun setAppWidgetSize(size: DpSize)
+    public fun setAppWidgetSize(size: DpSize)
 
     /**
      * Sets the state to be used for the test if your composable under test accesses it via
@@ -97,9 +94,9 @@ sealed interface GlanceAppWidgetUnitTest :
      *
      * @param state the state to be used for testing the composable.
      * @param T type of state used in your [GlanceStateDefinition] e.g. `Preferences` if your state
-     *          definition is `GlanceStateDefinition<Preferences>`
+     *   definition is `GlanceStateDefinition<Preferences>`
      */
-    fun <T> setState(state: T)
+    public fun <T> setState(state: T)
 
     /**
      * Sets the context to be used for the test.
@@ -111,7 +108,7 @@ sealed interface GlanceAppWidgetUnitTest :
      * Note: This should be called before calling [provideComposable], updates to the state after
      * providing content has no effect
      */
-    fun setContext(context: Context)
+    public fun setContext(context: Context)
 
     /**
      * Sets the Glance composable function to be tested. Each unit test should test a composable in
@@ -121,23 +118,21 @@ sealed interface GlanceAppWidgetUnitTest :
      *
      * @param composable the composable function under test
      */
-    fun provideComposable(composable: @Composable () -> Unit)
+    public fun provideComposable(composable: @Composable () -> Unit)
 
     /**
      * Wait until all recompositions are calculated. For example if you have `LaunchedEffect` with
      * delays in your composable.
      */
-    fun awaitIdle()
+    public fun awaitIdle()
 }
 
-/**
- * Provides default values for various properties used in the Glance appWidget unit tests.
- */
-object GlanceAppWidgetUnitTestDefaults {
+/** Provides default values for various properties used in the Glance appWidget unit tests. */
+public object GlanceAppWidgetUnitTestDefaults {
     /**
      * [GlanceId] that can be assumed for state updates testing a Glance composable in isolation.
      */
-    fun glanceId(): GlanceId = AppWidgetId(1)
+    public fun glanceId(): GlanceId = AppWidgetId(1)
 
     /**
      * Default size of the appWidget assumed in the unit tests. To override the size, use the
@@ -145,12 +140,12 @@ object GlanceAppWidgetUnitTestDefaults {
      *
      * The default `349.dp, 455.dp` is that of a 5x4 widget in Pixel 4 portrait mode.
      */
-    fun size(): DpSize = DpSize(height = 349.dp, width = 455.dp)
+    public fun size(): DpSize = DpSize(height = 349.dp, width = 455.dp)
 
     /**
      * Default category of the appWidget assumed in the unit tests.
      *
      * The default is `WIDGET_CATEGORY_HOME_SCREEN`
      */
-    fun hostCategory(): Int = AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN
+    public fun hostCategory(): Int = AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN
 }

@@ -39,19 +39,13 @@ import kotlinx.coroutines.launch
 @Sampled
 @Composable
 fun SimpleScalingLazyColumn() {
-    ScalingLazyColumn(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        item {
-            ListHeader {
-                Text(text = "List Header")
-            }
-        }
+    ScalingLazyColumn(modifier = Modifier.fillMaxWidth()) {
+        item { ListHeader { Text(text = "List Header") } }
         items(20) {
             Chip(
-                onClick = { },
+                onClick = {},
                 label = { Text("List item $it") },
-                colors = ChipDefaults.secondaryChipColors()
+                colors = ChipDefaults.secondaryChipColors(),
             )
         }
     }
@@ -64,18 +58,14 @@ fun SimpleScalingLazyColumnWithSnap() {
     ScalingLazyColumn(
         modifier = Modifier.fillMaxWidth(),
         state = state,
-        flingBehavior = ScalingLazyColumnDefaults.snapFlingBehavior(state = state)
+        flingBehavior = ScalingLazyColumnDefaults.snapFlingBehavior(state = state),
     ) {
-        item {
-            ListHeader {
-                Text(text = "List Header")
-            }
-        }
+        item { ListHeader { Text(text = "List Header") } }
         items(20) {
             Chip(
-                onClick = { },
+                onClick = {},
                 label = { Text("List item $it") },
-                colors = ChipDefaults.secondaryChipColors()
+                colors = ChipDefaults.secondaryChipColors(),
             )
         }
     }
@@ -87,26 +77,21 @@ fun ScalingLazyColumnEdgeAnchoredAndAnimatedScrollTo() {
     val coroutineScope = rememberCoroutineScope()
     val itemSpacing = 6.dp
     // Line up the gap between the items on the center-line
-    val scrollOffset = with(LocalDensity.current) {
-        -(itemSpacing / 2).roundToPx()
-    }
-    val state = rememberScalingLazyListState(
-        initialCenterItemIndex = 1,
-        initialCenterItemScrollOffset = scrollOffset
-    )
+    val scrollOffset = with(LocalDensity.current) { -(itemSpacing / 2).roundToPx() }
+    val state =
+        rememberScalingLazyListState(
+            initialCenterItemIndex = 1,
+            initialCenterItemScrollOffset = scrollOffset,
+        )
 
     ScalingLazyColumn(
         modifier = Modifier.fillMaxWidth(),
         anchorType = ScalingLazyListAnchorType.ItemStart,
         verticalArrangement = Arrangement.spacedBy(itemSpacing),
         state = state,
-        autoCentering = AutoCenteringParams(itemOffset = scrollOffset)
+        autoCentering = AutoCenteringParams(itemOffset = scrollOffset),
     ) {
-        item {
-            ListHeader {
-                Text(text = "List Header")
-            }
-        }
+        item { ListHeader { Text(text = "List Header") } }
         items(20) {
             Chip(
                 onClick = {
@@ -116,7 +101,7 @@ fun ScalingLazyColumnEdgeAnchoredAndAnimatedScrollTo() {
                     }
                 },
                 label = { Text("List item $it") },
-                colors = ChipDefaults.secondaryChipColors()
+                colors = ChipDefaults.secondaryChipColors(),
             )
         }
     }
@@ -128,18 +113,14 @@ fun SimpleScalingLazyColumnWithContentPadding() {
     ScalingLazyColumn(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = PaddingValues(top = 20.dp, bottom = 20.dp),
-        autoCentering = null
+        autoCentering = null,
     ) {
-        item {
-            ListHeader {
-                Text(text = "List Header")
-            }
-        }
+        item { ListHeader { Text(text = "List Header") } }
         items(20) {
             Chip(
-                onClick = { },
+                onClick = {},
                 label = { Text("List item $it") },
-                colors = ChipDefaults.secondaryChipColors()
+                colors = ChipDefaults.secondaryChipColors(),
             )
         }
     }
@@ -148,23 +129,21 @@ fun SimpleScalingLazyColumnWithContentPadding() {
 @Sampled
 @Composable
 fun ScalingLazyColumnWithHeaders() {
-    ScalingLazyColumn(
-        modifier = Modifier.fillMaxWidth(),
-    ) {
+    ScalingLazyColumn(modifier = Modifier.fillMaxWidth()) {
         item { ListHeader { Text("Header1") } }
         items(5) {
             Chip(
-                onClick = { },
+                onClick = {},
                 label = { Text("List item $it") },
-                colors = ChipDefaults.secondaryChipColors()
+                colors = ChipDefaults.secondaryChipColors(),
             )
         }
         item { ListHeader { Text("Header2") } }
         items(5) {
             Chip(
-                onClick = { },
+                onClick = {},
                 label = { Text("List item ${it + 5}") },
-                colors = ChipDefaults.secondaryChipColors()
+                colors = ChipDefaults.secondaryChipColors(),
             )
         }
     }

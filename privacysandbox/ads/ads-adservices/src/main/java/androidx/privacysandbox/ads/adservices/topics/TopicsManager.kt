@@ -28,29 +28,29 @@ import androidx.privacysandbox.ads.adservices.internal.BackCompatManager
  * TopicsManager provides APIs for App and Ad-Sdks to get the user interest topics in a privacy
  * preserving way.
  */
-abstract class TopicsManager internal constructor() {
+public abstract class TopicsManager internal constructor() {
     /**
      * Return the topics.
      *
      * @param request The GetTopicsRequest for obtaining Topics.
+     * @return GetTopicsResponse
      * @throws SecurityException if caller is not authorized to call this API.
      * @throws IllegalStateException if this API is not available.
      * @throws LimitExceededException if rate limit was reached.
-     * @return GetTopicsResponse
      */
     @RequiresPermission(AdServicesPermissions.ACCESS_ADSERVICES_TOPICS)
-    abstract suspend fun getTopics(request: GetTopicsRequest): GetTopicsResponse
+    public abstract suspend fun getTopics(request: GetTopicsRequest): GetTopicsResponse
 
-    companion object {
+    public companion object {
         /**
-         *  Creates [TopicsManager].
+         * Creates [TopicsManager].
          *
-         *  @return TopicsManagerCompat object. If the device is running an incompatible
-         *  build, the value returned is null.
+         * @return TopicsManagerCompat object. If the device is running an incompatible build, the
+         *   value returned is null.
          */
         @JvmStatic
-        @SuppressLint("NewApi", "ClassVerificationFailure")
-        fun obtain(context: Context): TopicsManager? {
+        @SuppressLint("NewApi")
+        public fun obtain(context: Context): TopicsManager? {
             return if (AdServicesInfo.adServicesVersion() >= 11) {
                 TopicsManagerApi33Ext11Impl(context)
             } else if (AdServicesInfo.adServicesVersion() >= 5) {

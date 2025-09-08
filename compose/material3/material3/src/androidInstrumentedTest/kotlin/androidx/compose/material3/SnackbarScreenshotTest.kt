@@ -16,7 +16,6 @@
 
 package androidx.compose.material3
 
-import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.testutils.assertAgainstGolden
 import androidx.compose.ui.Modifier
@@ -34,30 +33,24 @@ import org.junit.runner.RunWith
 
 @MediumTest
 @RunWith(AndroidJUnit4::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 class SnackbarScreenshotTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL3)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL3)
 
     private val snackbarTestTag = "snackbarTestTag"
 
     @Test
     fun snackbar_lightTheme() {
-        rule.setMaterialContent(lightColorScheme()) {
-            TestSnackbar()
-        }
+        rule.setMaterialContent(lightColorScheme()) { TestSnackbar() }
         assertAgainstGolden("snackbar_lightTheme")
     }
 
     @Test
     fun snackbar_withAction_lightTheme() {
-        rule.setMaterialContent(lightColorScheme()) {
-            TestSnackbar(showAction = true)
-        }
+        rule.setMaterialContent(lightColorScheme()) { TestSnackbar(showAction = true) }
         assertAgainstGolden("snackbar_withAction_lightTheme")
     }
 
@@ -71,17 +64,13 @@ class SnackbarScreenshotTest {
 
     @Test
     fun snackbar_darkTheme() {
-        rule.setMaterialContent(darkColorScheme()) {
-            TestSnackbar()
-        }
+        rule.setMaterialContent(darkColorScheme()) { TestSnackbar() }
         assertAgainstGolden("snackbar_darkTheme")
     }
 
     @Test
     fun snackbar_withAction_darkTheme() {
-        rule.setMaterialContent(darkColorScheme()) {
-            TestSnackbar(showAction = true)
-        }
+        rule.setMaterialContent(darkColorScheme()) { TestSnackbar(showAction = true) }
         assertAgainstGolden("snackbar_withAction_darkTheme")
     }
 
@@ -96,32 +85,35 @@ class SnackbarScreenshotTest {
     @Composable
     private fun TestSnackbar(
         showAction: Boolean = false,
-        duration: SnackbarDuration = SnackbarDuration.Long
+        duration: SnackbarDuration = SnackbarDuration.Long,
     ) {
         Snackbar(
-            snackbarData = object : SnackbarData {
-                override val visuals: SnackbarVisuals = object : SnackbarVisuals {
-                    override val message: String = "Snackbar message"
-                    override val actionLabel: String? = if (showAction) "Undo" else null
-                    override val withDismissAction: Boolean =
-                        duration == SnackbarDuration.Indefinite
-                    override val duration: SnackbarDuration = duration
-                }
+            snackbarData =
+                object : SnackbarData {
+                    override val visuals: SnackbarVisuals =
+                        object : SnackbarVisuals {
+                            override val message: String = "Snackbar message"
+                            override val actionLabel: String? = if (showAction) "Undo" else null
+                            override val withDismissAction: Boolean =
+                                duration == SnackbarDuration.Indefinite
+                            override val duration: SnackbarDuration = duration
+                        }
 
-                override fun performAction() {
-                    // no-op
-                }
+                    override fun performAction() {
+                        // no-op
+                    }
 
-                override fun dismiss() {
-                    // no-op
-                }
-            },
+                    override fun dismiss() {
+                        // no-op
+                    }
+                },
             modifier = Modifier.testTag(snackbarTestTag),
         )
     }
 
     private fun assertAgainstGolden(goldenName: String) {
-        rule.onNodeWithTag(snackbarTestTag)
+        rule
+            .onNodeWithTag(snackbarTestTag)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, goldenName)
     }

@@ -18,7 +18,6 @@
 
 package androidx.compose.ui.node
 
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BuildDrawCacheParams
 import androidx.compose.ui.draw.DrawCacheModifier
@@ -68,13 +67,12 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.toSize
 
 /**
- * This entity will end up implementing all of the entity type interfaces, but its [kindSet]
- * will only be set to the expected values based on the interface(s) that the modifier element that
- * it has implements. This is nice because it will be one class that simply delegates / pipes
+ * This entity will end up implementing all of the entity type interfaces, but its [kindSet] will
+ * only be set to the expected values based on the interface(s) that the modifier element that it
+ * has implements. This is nice because it will be one class that simply delegates / pipes
  * everything to the modifier instance, but those interfaces should only be called in the cases
  * where the modifier would have been previously.
  */
-@OptIn(ExperimentalComposeUiApi::class)
 internal class BackwardsCompatNode(element: Modifier.Element) :
     LayoutModifierNode,
     DrawModifierNode,
@@ -116,9 +114,7 @@ internal class BackwardsCompatNode(element: Modifier.Element) :
         val element = element
         if (isKind(Nodes.Locals)) {
             if (element is ModifierLocalProvider<*>) {
-                requireOwner()
-                    .modifierLocalManager
-                    .removedProvider(this, element.key)
+                requireOwner().modifierLocalManager.removedProvider(this, element.key)
             }
             if (element is ModifierLocalConsumer) {
                 element.onModifierLocalsUpdated(DetachedModifierLocalReadScope)
@@ -167,29 +163,28 @@ internal class BackwardsCompatNode(element: Modifier.Element) :
         if (element is RemeasurementModifier) {
             element.onRemeasurementAvailable(requireLayoutNode())
         }
-        if (isKind(Nodes.LayoutAware)) {
-            if (element is OnRemeasuredModifier) {
-                // if the modifier was added but layout has already happened and might not change,
-                // we want to call remeasured in case layout doesn't happen again
-                val isChainUpdate = isChainUpdate()
-                if (isChainUpdate) {
-                    requireLayoutNode().invalidateMeasurements()
-                }
+        if (isKind(Nodes.OnRemeasured) && element is OnRemeasuredModifier) {
+            // if the modifier was added but layout has already happened and might not change,
+            // we want to call remeasured in case layout doesn't happen again
+            val isChainUpdate = isChainUpdate()
+            if (isChainUpdate) {
+                requireLayoutNode().invalidateMeasurements()
             }
-            if (element is OnPlacedModifier) {
-                lastOnPlacedCoordinates = null
-                val isChainUpdate = isChainUpdate()
-                if (isChainUpdate) {
-                    requireOwner().registerOnLayoutCompletedListener(
+        }
+        if (isKind(Nodes.OnPlaced) && element is OnPlacedModifier) {
+            lastOnPlacedCoordinates = null
+            val isChainUpdate = isChainUpdate()
+            if (isChainUpdate) {
+                requireOwner()
+                    .registerOnLayoutCompletedListener(
                         object : Owner.OnLayoutCompletedListener {
                             override fun onLayoutComplete() {
                                 if (lastOnPlacedCoordinates == null) {
-                                    onPlaced(requireCoordinator(Nodes.LayoutAware))
+                                    onPlaced(requireCoordinator(Nodes.OnPlaced))
                                 }
                             }
                         }
                     )
-                }
             }
         }
         if (isKind(Nodes.GlobalPositionAware)) {
@@ -216,11 +211,15 @@ internal class BackwardsCompatNode(element: Modifier.Element) :
     }
 
     // BuildDrawCacheParams
-    override val density get() = requireLayoutNode().density
-    override val layoutDirection: LayoutDirection get() = requireLayoutNode().layoutDirection
+    override val density
+        get() = requireLayoutNode().density
+
+    override val layoutDirection: LayoutDirection
+        get() = requireLayoutNode().layoutDirection
+
     override val size: Size
         get() {
-            return requireCoordinator(Nodes.LayoutAware).size.toSize()
+            return requireCoordinator(Nodes.OnRemeasured).size.toSize()
         }
 
     // Flag to determine if the cache should be re-built
@@ -234,11 +233,9 @@ internal class BackwardsCompatNode(element: Modifier.Element) :
     private fun updateDrawCache() {
         val element = element
         if (element is DrawCacheModifier) {
-            requireOwner()
-                .snapshotObserver
-                .observeReads(this, onDrawCacheReadsChanged) {
-                    element.onBuildCache(this)
-                }
+            requireOwner().snapshotObserver.observeReads(this, onDrawCacheReadsChanged) {
+                element.onBuildCache(this)
+            }
         }
         invalidateCache = false
     }
@@ -250,7 +247,8 @@ internal class BackwardsCompatNode(element: Modifier.Element) :
 
     private var _providedValues: BackwardsCompatLocalMap? = null
     var readValues = hashSetOf<ModifierLocal<*>>()
-    override val providedValues: ModifierLocalMap get() = _providedValues ?: modifierLocalMapOf()
+    override val providedValues: ModifierLocalMap
+        get() = _providedValues ?: modifierLocalMapOf()
 
     override val <T> ModifierLocal<T>.current: T
         get() {
@@ -268,10 +266,7 @@ internal class BackwardsCompatNode(element: Modifier.Element) :
     fun updateModifierLocalConsumer() {
         if (isAttached) {
             readValues.clear()
-            requireOwner().snapshotObserver.observeReads(
-                this,
-                updateModifierLocalConsumer
-            ) {
+            requireOwner().snapshotObserver.observeReads(this, updateModifierLocalConsumer) {
                 (element as ModifierLocalConsumer).onModifierLocalsUpdated(this)
             }
         }
@@ -281,9 +276,7 @@ internal class BackwardsCompatNode(element: Modifier.Element) :
         val providedValues = _providedValues
         if (providedValues != null && providedValues.contains(element.key)) {
             providedValues.element = element
-            requireOwner()
-                .modifierLocalManager
-                .updatedProvider(this, element.key)
+            requireOwner().modifierLocalManager.updatedProvider(this, element.key)
         } else {
             _providedValues = BackwardsCompatLocalMap(element)
             // we only need to notify the modifierLocalManager of an inserted provider
@@ -295,51 +288,40 @@ internal class BackwardsCompatNode(element: Modifier.Element) :
             // chain is being attached for the first time.
             val isChainUpdate = isChainUpdate()
             if (isChainUpdate) {
-                requireOwner()
-                    .modifierLocalManager
-                    .insertedProvider(this, element.key)
+                requireOwner().modifierLocalManager.insertedProvider(this, element.key)
             }
         }
     }
 
-    override val isValidOwnerScope: Boolean get() = isAttached
+    override val isValidOwnerScope: Boolean
+        get() = isAttached
 
     override fun MeasureScope.measure(
         measurable: Measurable,
-        constraints: Constraints
+        constraints: Constraints,
     ): MeasureResult {
-        return with(element as LayoutModifier) {
-            measure(measurable, constraints)
-        }
+        return with(element as LayoutModifier) { measure(measurable, constraints) }
     }
 
     override fun IntrinsicMeasureScope.minIntrinsicWidth(
         measurable: IntrinsicMeasurable,
-        height: Int
-    ): Int = with(element as LayoutModifier) {
-        minIntrinsicWidth(measurable, height)
-    }
+        height: Int,
+    ): Int = with(element as LayoutModifier) { minIntrinsicWidth(measurable, height) }
 
     override fun IntrinsicMeasureScope.minIntrinsicHeight(
         measurable: IntrinsicMeasurable,
-        width: Int
-    ): Int = with(element as LayoutModifier) {
-        minIntrinsicHeight(measurable, width)
-    }
+        width: Int,
+    ): Int = with(element as LayoutModifier) { minIntrinsicHeight(measurable, width) }
 
     override fun IntrinsicMeasureScope.maxIntrinsicWidth(
         measurable: IntrinsicMeasurable,
-        height: Int
-    ): Int = with(element as LayoutModifier) {
-        maxIntrinsicWidth(measurable, height)
-    }
+        height: Int,
+    ): Int = with(element as LayoutModifier) { maxIntrinsicWidth(measurable, height) }
 
     override fun IntrinsicMeasureScope.maxIntrinsicHeight(
         measurable: IntrinsicMeasurable,
-        width: Int
-    ): Int = with(element as LayoutModifier) {
-        maxIntrinsicHeight(measurable, width)
-    }
+        width: Int,
+    ): Int = with(element as LayoutModifier) { maxIntrinsicHeight(measurable, width) }
 
     override fun ContentDrawScope.draw() {
         val element = element
@@ -360,23 +342,26 @@ internal class BackwardsCompatNode(element: Modifier.Element) :
     override fun onPointerEvent(
         pointerEvent: PointerEvent,
         pass: PointerEventPass,
-        bounds: IntSize
+        bounds: IntSize,
     ) {
         with(element as PointerInputModifier) {
             pointerInputFilter.onPointerEvent(pointerEvent, pass, bounds)
         }
     }
 
-    override fun onCancelPointerInput() {
-        with(element as PointerInputModifier) {
-            pointerInputFilter.onCancel()
+    /** Explicit override so we only cancel pointer input if this is a PointerInputModifier */
+    override fun onDensityChange() {
+        if (element is PointerInputModifier) {
+            onCancelPointerInput()
         }
     }
 
+    override fun onCancelPointerInput() {
+        with(element as PointerInputModifier) { pointerInputFilter.onCancel() }
+    }
+
     override fun sharePointerInputWithSiblings(): Boolean {
-        return with(element as PointerInputModifier) {
-            pointerInputFilter.shareWithSiblings
-        }
+        return with(element as PointerInputModifier) { pointerInputFilter.shareWithSiblings }
     }
 
     override fun interceptOutOfBoundsChildEvents(): Boolean {
@@ -386,9 +371,7 @@ internal class BackwardsCompatNode(element: Modifier.Element) :
     }
 
     override fun Density.modifyParentData(parentData: Any?): Any? {
-        return with(element as ParentDataModifier) {
-            modifyParentData(parentData)
-        }
+        return with(element as ParentDataModifier) { modifyParentData(parentData) }
     }
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
@@ -403,6 +386,7 @@ internal class BackwardsCompatNode(element: Modifier.Element) :
     }
 
     private var lastOnPlacedCoordinates: LayoutCoordinates? = null
+
     override fun onPlaced(coordinates: LayoutCoordinates) {
         lastOnPlacedCoordinates = coordinates
         val element = element
@@ -425,21 +409,19 @@ internal class BackwardsCompatNode(element: Modifier.Element) :
             "applyFocusProperties called on wrong node"
         }
 
-        @Suppress("DEPRECATION")
-        focusOrderModifier.populateFocusOrder(FocusOrder(focusProperties))
+        @Suppress("DEPRECATION") focusOrderModifier.populateFocusOrder(FocusOrder(focusProperties))
     }
 
     override fun toString(): String = element.toString()
 }
 
-private val DetachedModifierLocalReadScope = object : ModifierLocalReadScope {
-    override val <T> ModifierLocal<T>.current: T
-        get() = defaultFactory()
-}
+private val DetachedModifierLocalReadScope =
+    object : ModifierLocalReadScope {
+        override val <T> ModifierLocal<T>.current: T
+            get() = defaultFactory()
+    }
 
-private val onDrawCacheReadsChanged = { it: BackwardsCompatNode ->
-    it.onDrawCacheReadsChanged()
-}
+private val onDrawCacheReadsChanged = { it: BackwardsCompatNode -> it.onDrawCacheReadsChanged() }
 
 private val updateModifierLocalConsumer = { it: BackwardsCompatNode ->
     it.updateModifierLocalConsumer()

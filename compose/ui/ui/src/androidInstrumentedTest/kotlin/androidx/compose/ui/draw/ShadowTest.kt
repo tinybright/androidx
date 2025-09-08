@@ -58,7 +58,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -73,13 +72,14 @@ class ShadowTest {
     private lateinit var activity: TestActivity
     private lateinit var drawLatch: CountDownLatch
 
-    private val rectShape = object : Shape {
-        override fun createOutline(
-            size: Size,
-            layoutDirection: LayoutDirection,
-            density: Density
-        ) = Outline.Rectangle(size.toRect())
-    }
+    private val rectShape =
+        object : Shape {
+            override fun createOutline(
+                size: Size,
+                layoutDirection: LayoutDirection,
+                density: Density,
+            ) = Outline.Rectangle(size.toRect())
+        }
 
     @Before
     fun setup() {
@@ -97,53 +97,33 @@ class ShadowTest {
     @SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
     @Test
     fun shadowDrawn() {
-        rule.runOnUiThreadIR {
-            activity.setContent {
-                ShadowContainer()
-            }
-        }
+        rule.runOnUiThreadIR { activity.setContent { ShadowContainer() } }
 
         assertTrue(drawLatch.await(1, TimeUnit.SECONDS))
-        takeScreenShot(12).apply {
-            hasShadow()
-        }
+        takeScreenShot(12).apply { hasShadow() }
     }
 
     @SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
     @Test
     fun shadowDrawnInsideRenderNode() {
         rule.runOnUiThreadIR {
-            activity.setContent {
-                ShadowContainer(modifier = Modifier.graphicsLayer())
-            }
+            activity.setContent { ShadowContainer(modifier = Modifier.graphicsLayer()) }
         }
 
         assertTrue(drawLatch.await(1, TimeUnit.SECONDS))
-        takeScreenShot(12).apply {
-            hasShadow()
-        }
+        takeScreenShot(12).apply { hasShadow() }
     }
 
-    @Ignore // b/266748959
     @SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
     @Test
     fun switchFromShadowToNoShadow() {
-        val elevation = mutableStateOf(0.dp)
-
-        rule.runOnUiThreadIR {
-            activity.setContent {
-                ShadowContainer(elevation = elevation)
-            }
-        }
+        val elevation = mutableStateOf(10.dp)
+        rule.runOnUiThreadIR { activity.setContent { ShadowContainer(elevation = elevation) } }
         assertTrue(drawLatch.await(1, TimeUnit.SECONDS))
+        takeScreenShot(12).apply { hasShadow() }
+        rule.runOnUiThreadIR { elevation.value = 0.dp }
 
-        rule.runOnUiThreadIR {
-            elevation.value = 0.dp
-        }
-
-        takeScreenShot(12).apply {
-            assertEquals(color(5, 11), Color.White)
-        }
+        takeScreenShot(12).apply { hasNoShadow() }
     }
 
     @SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
@@ -158,13 +138,9 @@ class ShadowTest {
         }
         assertTrue(drawLatch.await(1, TimeUnit.SECONDS))
 
-        rule.runOnUiThreadIR {
-            elevation.value = 12.dp
-        }
+        rule.runOnUiThreadIR { elevation.value = 12.dp }
 
-        takeScreenShot(12).apply {
-            hasShadow()
-        }
+        takeScreenShot(12).apply { hasShadow() }
     }
 
     @SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
@@ -176,13 +152,13 @@ class ShadowTest {
                     val elevation = with(LocalDensity.current) { 4.dp.toPx() }
                     AtLeastSize(
                         size = 10,
-                        modifier = Modifier.graphicsLayer(
-                            shadowElevation = elevation,
-                            shape = rectShape,
-                            alpha = 0.5f
-                        )
-                    ) {
-                    }
+                        modifier =
+                            Modifier.graphicsLayer(
+                                shadowElevation = elevation,
+                                shape = rectShape,
+                                alpha = 0.5f,
+                            ),
+                    ) {}
                 }
             }
         }
@@ -207,14 +183,14 @@ class ShadowTest {
                     val elevation = with(LocalDensity.current) { 4.dp.toPx() }
                     AtLeastSize(
                         size = 10,
-                        modifier = Modifier.graphicsLayer(
-                            shadowElevation = elevation,
-                            shape = rectShape,
-                            ambientShadowColor = Color(0xFFFF00FF),
-                            spotShadowColor = Color(0xFFFF00FF),
-                        )
-                    ) {
-                    }
+                        modifier =
+                            Modifier.graphicsLayer(
+                                shadowElevation = elevation,
+                                shape = rectShape,
+                                ambientShadowColor = Color(0xFFFF00FF),
+                                spotShadowColor = Color(0xFFFF00FF),
+                            ),
+                    ) {}
                 }
             }
         }
@@ -237,26 +213,22 @@ class ShadowTest {
         rule.runOnUiThreadIR {
             activity.setContent {
                 AtLeastSize(size = 12, modifier = Modifier.background(Color.White)) {
-                    val shadow = if (model.value) {
-                        Modifier.shadow(8.dp, rectShape)
-                    } else {
-                        Modifier
-                    }
-                    AtLeastSize(size = 10, modifier = shadow) {
-                    }
+                    val shadow =
+                        if (model.value) {
+                            Modifier.shadow(8.dp, rectShape)
+                        } else {
+                            Modifier
+                        }
+                    AtLeastSize(size = 10, modifier = shadow) {}
                 }
             }
         }
         assertTrue(drawLatch.await(1, TimeUnit.SECONDS))
 
         drawLatch = CountDownLatch(1)
-        rule.runOnUiThreadIR {
-            model.value = true
-        }
+        rule.runOnUiThreadIR { model.value = true }
 
-        takeScreenShot(12).apply {
-            hasShadow()
-        }
+        takeScreenShot(12).apply { hasShadow() }
     }
 
     @Test
@@ -265,13 +237,14 @@ class ShadowTest {
             val modifier = Modifier.shadow(4.0.dp).first() as InspectableValue
             assertThat(modifier.nameFallback).isEqualTo("shadow")
             assertThat(modifier.valueOverride).isNull()
-            assertThat(modifier.inspectableElements.asIterable()).containsExactly(
-                ValueElement("elevation", 4.0.dp),
-                ValueElement("shape", RectangleShape),
-                ValueElement("clip", true),
-                ValueElement("ambientColor", DefaultShadowColor),
-                ValueElement("spotColor", DefaultShadowColor)
-            )
+            assertThat(modifier.inspectableElements.asIterable())
+                .containsExactly(
+                    ValueElement("elevation", 4.0.dp),
+                    ValueElement("shape", RectangleShape),
+                    ValueElement("clip", true),
+                    ValueElement("ambientColor", DefaultShadowColor),
+                    ValueElement("spotColor", DefaultShadowColor),
+                )
         }
     }
 
@@ -280,34 +253,25 @@ class ShadowTest {
         val elevation = mutableStateOf(0f)
         val color = mutableStateOf(Color.Blue)
         val underColor = mutableStateOf(Color.Transparent)
-        val modifier = Modifier.graphicsLayer()
-            .background(underColor)
-            .drawLatchModifier()
-            .graphicsLayer {
-                shadowElevation = elevation.value
-            }
-            .background(color)
+        val modifier =
+            Modifier.graphicsLayer()
+                .background(underColor)
+                .drawLatchModifier()
+                .graphicsLayer { shadowElevation = elevation.value }
+                .background(color)
 
-        rule.runOnUiThread {
-            activity.setContent {
-                androidx.compose.ui.FixedSize(30, modifier)
-            }
-        }
+        rule.runOnUiThread { activity.setContent { androidx.compose.ui.FixedSize(30, modifier) } }
 
         assertTrue(drawLatch.await(1, TimeUnit.SECONDS))
 
         drawLatch = CountDownLatch(1)
 
-        rule.runOnUiThread {
-            color.value = Color.Red
-        }
+        rule.runOnUiThread { color.value = Color.Red }
 
         Assert.assertFalse(drawLatch.await(200, TimeUnit.MILLISECONDS))
 
         drawLatch = CountDownLatch(1)
-        rule.runOnUiThread {
-            elevation.value = 1f
-        }
+        rule.runOnUiThread { elevation.value = 1f }
 
         assertTrue(drawLatch.await(1, TimeUnit.SECONDS))
 
@@ -337,24 +301,25 @@ class ShadowTest {
 
         drawLatch = CountDownLatch(1)
 
-        rule.runOnUiThread {
-            elevation.value = 1f
-        }
+        rule.runOnUiThread { elevation.value = 1f }
         assertTrue(drawLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Composable
     private fun ShadowContainer(
         modifier: Modifier = Modifier,
-        elevation: State<Dp> = mutableStateOf(8.dp)
+        elevation: State<Dp> = mutableStateOf(8.dp),
     ) {
         AtLeastSize(size = 12, modifier = modifier.background(Color.White)) {
             AtLeastSize(
                 size = 10,
-                modifier = Modifier.shadow(elevation = elevation.value, shape = rectShape)
-            ) {
-            }
+                modifier = Modifier.shadow(elevation = elevation.value, shape = rectShape),
+            ) {}
         }
+    }
+
+    private fun Bitmap.hasNoShadow() {
+        assertEquals(Color.White, color(width / 2, height - 1))
     }
 
     private fun Bitmap.hasShadow() {
@@ -368,9 +333,7 @@ class ShadowTest {
 
     fun Modifier.drawLatchModifier() = drawBehind { drawLatch.countDown() }
 
-    private fun Modifier.background(
-        color: State<Color>
-    ) = drawBehind {
+    private fun Modifier.background(color: State<Color>) = drawBehind {
         if (color.value != Color.Transparent) {
             drawRect(color.value)
         }

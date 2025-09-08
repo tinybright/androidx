@@ -30,11 +30,10 @@ import org.robolectric.annotation.internal.DoNotInstrument
 
 @RunWith(RobolectricTestRunner::class)
 @DoNotInstrument
-@Config(minSdk = Build.VERSION_CODES.LOLLIPOP)
 class ContextUtilTest {
     companion object {
         const val ATTRIBUTION_TAG = "attributionTag"
-        const val DEVICE_ID = 2
+        const val VIRTUAL_DEVICE_ID = 2
     }
 
     @Test
@@ -54,28 +53,41 @@ class ContextUtilTest {
             FakeContext(
                 "non-application",
                 baseContext = appContext,
-                deviceId = DEVICE_ID,
-                attributionTag = ATTRIBUTION_TAG
+                deviceId = VIRTUAL_DEVICE_ID,
+                attributionTag = ATTRIBUTION_TAG,
             )
         val resultContext = ContextUtil.getApplicationContext(context) as FakeContext
         assertThat(resultContext.attributionTag).isEqualTo(ATTRIBUTION_TAG)
-        assertThat(resultContext.deviceId).isEqualTo(DEVICE_ID)
+        assertThat(resultContext.deviceId).isEqualTo(VIRTUAL_DEVICE_ID)
         // Ensures the result context is created from application context.
         assertThat(resultContext.getTag()).isEqualTo(appContext.getTag())
     }
 
     @Config(minSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     @Test
-    fun testGetApplicationContext_deviceId() {
+    fun testGetApplicationContext_virtualDeviceId() {
         val appContext = FakeAppContext("application")
+        val context =
+            FakeContext("non-application", baseContext = appContext, deviceId = VIRTUAL_DEVICE_ID)
+        val resultContext = ContextUtil.getApplicationContext(context) as FakeContext
+        assertThat(resultContext.deviceId).isEqualTo(VIRTUAL_DEVICE_ID)
+        assertThat(resultContext.attributionTag).isEqualTo(null)
+        // Ensures the result context is created from application context.
+        assertThat(resultContext.getTag()).isEqualTo(appContext.getTag())
+    }
+
+    @Config(minSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    @Test
+    fun testGetApplicationContext_defaultDeviceId() {
+        val appContext = FakeAppContext("application", deviceId = VIRTUAL_DEVICE_ID)
         val context =
             FakeContext(
                 "non-application",
                 baseContext = appContext,
-                deviceId = DEVICE_ID,
+                deviceId = Context.DEVICE_ID_DEFAULT,
             )
         val resultContext = ContextUtil.getApplicationContext(context) as FakeContext
-        assertThat(resultContext.deviceId).isEqualTo(DEVICE_ID)
+        assertThat(resultContext.deviceId).isEqualTo(Context.DEVICE_ID_DEFAULT)
         assertThat(resultContext.attributionTag).isEqualTo(null)
         // Ensures the result context is created from application context.
         assertThat(resultContext.getTag()).isEqualTo(appContext.getTag())
@@ -97,55 +109,16 @@ class ContextUtilTest {
         assertThat(resultContext.getTag()).isEqualTo(appContext.getTag())
     }
 
-    @Config(minSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    @Test
-    fun testGetBaseContext_deviceIdAndAttributionTag() {
-        val baseContext = FakeContext("baseContext")
-        val context =
-            FakeContext(
-                "non-baseContext",
-                baseContext = baseContext,
-                deviceId = DEVICE_ID,
-                attributionTag = ATTRIBUTION_TAG
-            )
-        val resultContext = ContextUtil.getBaseContext(context) as FakeContext
-        assertThat(resultContext.attributionTag).isEqualTo(ATTRIBUTION_TAG)
-        assertThat(resultContext.deviceId).isEqualTo(DEVICE_ID)
-        // Ensures the result context is created from base context.
-        assertThat(resultContext.getTag()).isEqualTo(baseContext.getTag())
-    }
-
-    @Config(minSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    @Test
-    fun testGetBaseContext_deviceId() {
-        val baseContext = FakeContext("baseContext")
-        val context =
-            FakeContext(
-                "non-baseContext",
-                baseContext = baseContext,
-                deviceId = DEVICE_ID,
-            )
-        val resultContext = ContextUtil.getBaseContext(context) as FakeContext
-        assertThat(resultContext.deviceId).isEqualTo(DEVICE_ID)
-        assertThat(resultContext.attributionTag).isEqualTo(null)
-        // Ensures the result context is created from base context.
-        assertThat(resultContext.getTag()).isEqualTo(baseContext.getTag())
-    }
-
     @Config(minSdk = Build.VERSION_CODES.R)
     @Test
-    fun testGetBaseContext_attributionTag() {
-        val baseContext = FakeContext("baseContext")
+    fun testGetApplicationContext_appContextHasDifferentAttributionTag() {
+        val appContext = FakeAppContext("application", attributionTag = ATTRIBUTION_TAG)
         val context =
-            FakeContext(
-                "non-baseContext",
-                baseContext = baseContext,
-                attributionTag = ATTRIBUTION_TAG,
-            )
-        val resultContext = ContextUtil.getBaseContext(context) as FakeContext
-        assertThat(resultContext.attributionTag).isEqualTo(ATTRIBUTION_TAG)
-        // Ensures the result context is created from base context.
-        assertThat(resultContext.getTag()).isEqualTo(baseContext.getTag())
+            FakeContext("non-application", baseContext = appContext, attributionTag = null)
+        val resultContext = ContextUtil.getApplicationContext(context) as FakeContext
+        assertThat(resultContext.attributionTag).isNull()
+        // Ensures the result context is created from application context.
+        assertThat(resultContext.getTag()).isEqualTo(appContext.getTag())
     }
 
     @Test
@@ -169,7 +142,7 @@ class ContextUtilTest {
         private val tag: String? = null,
         baseContext: Context = mock(Context::class.java),
         private val deviceId: Int = Context.DEVICE_ID_DEFAULT,
-        private val attributionTag: String? = null
+        private val attributionTag: String? = null,
     ) : ContextWrapper(baseContext) {
         override fun getDeviceId(): Int = deviceId
 
@@ -195,7 +168,7 @@ class ContextUtilTest {
         */
         tag: String? = null,
         deviceId: Int = Context.DEVICE_ID_DEFAULT,
-        attributionTag: String? = null
+        attributionTag: String? = null,
     ) : FakeContext(tag, ApplicationProvider.getApplicationContext(), deviceId, attributionTag) {
         override fun getApplicationContext(): Context {
             return this

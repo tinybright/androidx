@@ -37,37 +37,34 @@ internal class TextStringSimpleElement(
     private val softWrap: Boolean = true,
     private val maxLines: Int = Int.MAX_VALUE,
     private val minLines: Int = DefaultMinLines,
-    private val color: ColorProducer? = null
+    private val color: ColorProducer? = null,
 ) : ModifierNodeElement<TextStringSimpleNode>() {
 
-    override fun create(): TextStringSimpleNode = TextStringSimpleNode(
-        text,
-        style,
-        fontFamilyResolver,
-        overflow,
-        softWrap,
-        maxLines,
-        minLines,
-        color
-    )
+    override fun create(): TextStringSimpleNode =
+        TextStringSimpleNode(
+            text,
+            style,
+            fontFamilyResolver,
+            overflow,
+            softWrap,
+            maxLines,
+            minLines,
+            color,
+        )
 
     override fun update(node: TextStringSimpleNode) {
         node.doInvalidations(
-            drawChanged = node.updateDraw(
-                color,
-                style
-            ),
-            textChanged = node.updateText(
-                text = text
-            ),
-            layoutChanged = node.updateLayoutRelatedArgs(
-                style = style,
-                minLines = minLines,
-                maxLines = maxLines,
-                softWrap = softWrap,
-                fontFamilyResolver = fontFamilyResolver,
-                overflow = overflow
-            )
+            drawChanged = node.updateDraw(color, style),
+            textChanged = node.updateText(text = text),
+            layoutChanged =
+                node.updateLayoutRelatedArgs(
+                    style = style,
+                    minLines = minLines,
+                    maxLines = maxLines,
+                    softWrap = softWrap,
+                    fontFamilyResolver = fontFamilyResolver,
+                    overflow = overflow,
+                ),
         )
     }
 

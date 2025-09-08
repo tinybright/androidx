@@ -46,7 +46,7 @@ class DrawableLoadingDetectorTest {
                    ResourceLoader().getDrawable(android.R.drawable.ic_delete)
                 }
             }
-            """
+            """,
                 )
                 .indented()
                 .within("src")
@@ -77,13 +77,13 @@ class DrawableLoadingDetectorTest {
                     getDrawable(android.R.drawable.ic_delete)
                 }
             }
-            """
+            """,
                 )
                 .indented()
                 .within("src")
 
         // We expect the call to Context.getDrawable to be flagged to use ContextCompat loading
-        /* ktlint-disable max-line-length */
+
         lint()
             .files(Stubs.APPCOMPAT_ACTIVITY, customActivity)
             .issues(DrawableLoadingDetector.NOT_USING_COMPAT_LOADING)
@@ -97,7 +97,6 @@ src/com/example/CustomActivity.kt:9: Warning: Use AppCompatResources.getDrawable
                 """
                     .trimIndent()
             )
-        /* ktlint-enable max-line-length */
     }
 
     @Test
@@ -117,13 +116,13 @@ src/com/example/CustomActivity.kt:9: Warning: Use AppCompatResources.getDrawable
                     getResources().getDrawable(android.R.drawable.ic_delete)
                 }
             }
-            """
+            """,
                 )
                 .indented()
                 .within("src")
 
         // We expect the call to Resources.getDrawable to be flagged to use ResourcesCompat loading
-        /* ktlint-disable max-line-length */
+
         lint()
             .files(Stubs.APPCOMPAT_ACTIVITY, customActivity)
             .issues(DrawableLoadingDetector.NOT_USING_COMPAT_LOADING)
@@ -137,7 +136,6 @@ src/com/example/CustomActivity.kt:9: Warning: Use ResourcesCompat.getDrawable() 
                 """
                     .trimIndent()
             )
-        /* ktlint-enable max-line-length */
     }
 
     @Test
@@ -157,13 +155,13 @@ src/com/example/CustomActivity.kt:9: Warning: Use ResourcesCompat.getDrawable() 
                     getResources().getDrawable(android.R.drawable.ic_delete, getTheme())
                 }
             }
-            """
+            """,
                 )
                 .indented()
                 .within("src")
 
         // We expect the call to Resources.getDrawable to be flagged to use ResourcesCompat loading
-        /* ktlint-disable max-line-length */
+
         lint()
             .files(Stubs.APPCOMPAT_ACTIVITY, customActivity)
             .issues(DrawableLoadingDetector.NOT_USING_COMPAT_LOADING)
@@ -177,6 +175,5 @@ src/com/example/CustomActivity.kt:9: Warning: Use ResourcesCompat.getDrawable() 
                 """
                     .trimIndent()
             )
-        /* ktlint-enable max-line-length */
     }
 }

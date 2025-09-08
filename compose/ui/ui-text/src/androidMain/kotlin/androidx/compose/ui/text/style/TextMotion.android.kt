@@ -18,13 +18,20 @@ package androidx.compose.ui.text.style
 
 import androidx.compose.runtime.Immutable
 
+// TODO: b/350954962 the sample link is needed here as our KMP structure makes expect classes
+//  invisible to lint, so the lint check doesn't find the sample on the corresponding expect. Once
+//  this is resolved, the sample can be removed from here (since the actual isn't used to generate
+//  documentation)
 /**
  * Implementation of possible TextMotion configurations on Android.
+ *
+ * @sample androidx.compose.ui.text.samples.TextMotionSample
  */
 @Immutable
-actual class TextMotion internal constructor(
+actual class TextMotion
+internal constructor(
     internal val linearity: Linearity,
-    internal val subpixelTextPositioning: Boolean
+    internal val subpixelTextPositioning: Boolean,
 ) {
     actual companion object {
         actual val Static: TextMotion = TextMotion(Linearity.FontHinting, false)
@@ -33,11 +40,9 @@ actual class TextMotion internal constructor(
 
     internal fun copy(
         linearity: Linearity = this.linearity,
-        subpixelTextPositioning: Boolean = this.subpixelTextPositioning
-    ): TextMotion = TextMotion(
-        linearity = linearity,
-        subpixelTextPositioning = subpixelTextPositioning
-    )
+        subpixelTextPositioning: Boolean = this.subpixelTextPositioning,
+    ): TextMotion =
+        TextMotion(linearity = linearity, subpixelTextPositioning = subpixelTextPositioning)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -69,7 +74,7 @@ actual class TextMotion internal constructor(
      * may render the same output as [Linearity.Linear] on many OEM and API levels.
      */
     @JvmInline
-    internal value class Linearity private constructor(private val value: Int) {
+    internal value class Linearity internal constructor(internal val value: Int) {
         companion object {
             /**
              * Equal to applying [android.graphics.Paint.LINEAR_TEXT_FLAG] and turning hinting off.
@@ -87,11 +92,12 @@ actual class TextMotion internal constructor(
             val None = Linearity(3)
         }
 
-        override fun toString(): String = when (this) {
-            Linear -> "Linearity.Linear"
-            FontHinting -> "Linearity.FontHinting"
-            None -> "Linearity.None"
-            else -> "Invalid"
-        }
+        override fun toString(): String =
+            when (this) {
+                Linear -> "Linearity.Linear"
+                FontHinting -> "Linearity.FontHinting"
+                None -> "Linearity.None"
+                else -> "Invalid"
+            }
     }
 }

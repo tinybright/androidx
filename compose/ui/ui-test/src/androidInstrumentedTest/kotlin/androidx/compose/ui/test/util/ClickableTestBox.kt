@@ -40,13 +40,12 @@ fun ClickableTestBox(
     width: Float = defaultSize,
     height: Float = defaultSize,
     color: Color = defaultColor,
-    tag: String = defaultTag
+    tag: String = defaultTag,
 ) {
     with(LocalDensity.current) {
         Box(
-            modifier = modifier.testTag(tag)
-                .requiredSize(width.toDp(), height.toDp())
-                .background(color)
+            modifier =
+                modifier.testTag(tag).requiredSize(width.toDp(), height.toDp()).background(color)
         )
     }
 }

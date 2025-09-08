@@ -25,23 +25,25 @@ import android.telecom.PhoneAccount.CAPABILITY_SUPPORTS_TRANSACTIONAL_OPERATIONS
 import android.telecom.PhoneAccount.CAPABILITY_SUPPORTS_VIDEO_CALLING
 import android.telecom.PhoneAccount.CAPABILITY_VIDEO_CALLING
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.core.telecom.CallAttributesCompat
 import androidx.core.telecom.CallEndpointCompat
 import androidx.core.telecom.CallsManager
 import androidx.core.telecom.internal.AddCallResult
-import androidx.core.telecom.internal.ConnectionServiceProduction
-import androidx.core.telecom.internal.TelecomManagerProduction
 import androidx.core.telecom.internal.utils.Utils
 import androidx.core.telecom.test.utils.BaseTelecomTest
-import androidx.core.telecom.test.utils.ConnectionServiceFailPlatformSide
-import androidx.core.telecom.test.utils.TelecomManagerFailPlatformSide
+import androidx.core.telecom.test.utils.TestPermissionUtils.createBluetoothPermissionRule
 import androidx.core.telecom.test.utils.TestUtils
+import androidx.core.telecom.test.utils.TestUtils.ALL_CALL_CAPABILITIES
+import androidx.core.telecom.test.utils.TestUtils.OUTGOING_NAME
 import androidx.core.telecom.util.ExperimentalAppActions
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SdkSuppress
 import androidx.test.filters.SmallTest
+import androidx.test.rule.GrantPermissionRule
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -50,15 +52,16 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @SdkSuppress(minSdkVersion = VERSION_CODES.O /* api=26 */)
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-@RequiresApi(VERSION_CODES.O)
 @RunWith(AndroidJUnit4::class)
 class CallsManagerTest : BaseTelecomTest() {
     private val mTestClassName = "androidx.core.telecom.test"
+    @get:Rule val bluetoothPermissionRule: GrantPermissionRule = createBluetoothPermissionRule()
 
     companion object {
         val TAG = CallsManagerTest::class.java.simpleName
@@ -114,26 +117,26 @@ class CallsManagerTest : BaseTelecomTest() {
 
             mCallsManager.registerAppWithTelecom(CallsManager.CAPABILITY_BASELINE)
             val account = mCallsManager.getBuiltPhoneAccount()!!
-
+            assertNotNull(account.extras)
+            assertTrue(account.extras.getBoolean(CallsManager.PLACEHOLDER_VALUE_ACCOUNT_BUNDLE))
             if (Utils.hasPlatformV2Apis()) {
                 assertTrue(
                     Utils.hasCapability(
                         CAPABILITY_SUPPORTS_TRANSACTIONAL_OPERATIONS,
-                        account.capabilities
+                        account.capabilities,
                     )
                 )
             } else {
                 assertTrue(
-                    account.capabilities and CAPABILITY_SELF_MANAGED ==
-                        CAPABILITY_SELF_MANAGED
+                    account.capabilities and CAPABILITY_SELF_MANAGED == CAPABILITY_SELF_MANAGED
                 )
             }
         }
     }
 
     /**
-     * Register all the capabilities currently exposed by the CallsManager class and verify they
-     * are re-mapped to the correct platform capabilities.
+     * Register all the capabilities currently exposed by the CallsManager class and verify they are
+     * re-mapped to the correct platform capabilities.
      */
     @SdkSuppress(minSdkVersion = VERSION_CODES.UPSIDE_DOWN_CAKE)
     @SmallTest
@@ -141,8 +144,8 @@ class CallsManagerTest : BaseTelecomTest() {
     fun testRegisterAllCapabilities() {
         setUpV2Test()
         mCallsManager.registerAppWithTelecom(
-            CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING
-                or CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING
+            CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING or
+                CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING
         )
 
         val phoneAccount = mCallsManager.getBuiltPhoneAccount()!!
@@ -180,9 +183,7 @@ class CallsManagerTest : BaseTelecomTest() {
     @Test
     fun testAddOutgoingVideoCall_CallEndpointShouldBeSpeaker_Transactional() {
         setUpV2Test()
-        runBlocking {
-            assertVideoCallStartsWithSpeakerEndpoint()
-        }
+        runBlocking { assertVideoCallStartsWithSpeakerEndpoint() }
     }
 
     /**
@@ -195,9 +196,7 @@ class CallsManagerTest : BaseTelecomTest() {
     @Test
     fun testAddOutgoingVideoCall_CallEndpointShouldBeSpeaker_BackwardsCompat() {
         setUpBackwardsCompatTest()
-        runBlocking {
-            assertVideoCallStartsWithSpeakerEndpoint()
-        }
+        runBlocking { assertVideoCallStartsWithSpeakerEndpoint() }
     }
 
     @SdkSuppress(minSdkVersion = VERSION_CODES.UPSIDE_DOWN_CAKE)
@@ -210,74 +209,6 @@ class CallsManagerTest : BaseTelecomTest() {
             val cd = CompletableDeferred<AddCallResult>()
             cd.complete(AddCallResult.SuccessCallSession())
             mCallsManager.pauseExecutionUntilCallIsReadyOrTimeout(cd)
-        }
-    }
-
-    @SdkSuppress(minSdkVersion = VERSION_CODES.UPSIDE_DOWN_CAKE)
-    @SmallTest
-    @Test
-    fun testFailPlatformSide_Transactional() {
-        setUpV2Test()
-        val telecomManagerFailPlatformSide = TelecomManagerFailPlatformSide()
-        val expectedCallExceptionCode = CallException.CODE_CALL_NOT_PERMITTED_AT_PRESENT_TIME
-        telecomManagerFailPlatformSide.setCallException(expectedCallExceptionCode)
-        mCallsManager.setTelecomManagerAdapter(telecomManagerFailPlatformSide)
-        try {
-            runBlocking {
-                val waitForCallException =
-                    CompletableDeferred<androidx.core.telecom.CallException>()
-                try {
-                    mCallsManager.addCall(
-                        TestUtils.INCOMING_CALL_ATTRIBUTES,
-                        TestUtils.mOnAnswerLambda,
-                        TestUtils.mOnDisconnectLambda,
-                        TestUtils.mOnSetActiveLambda,
-                        TestUtils.mOnSetInActiveLambda,
-                    ) {
-                    }
-                } catch (e: androidx.core.telecom.CallException) {
-                    waitForCallException.complete(e)
-                }
-                waitForCallException.await()
-                assertEquals(expectedCallExceptionCode, waitForCallException.getCompleted().code)
-            }
-        } finally {
-            mCallsManager.setTelecomManagerAdapter(TelecomManagerProduction(mContext))
-        }
-    }
-
-    @SdkSuppress(minSdkVersion = VERSION_CODES.O)
-    @SmallTest
-    @Test
-    fun testFailPlatformSide_BackwardsCompat() {
-        setUpBackwardsCompatTest()
-        mCallsManager.setTelecomManagerAdapter(TelecomManagerFailPlatformSide())
-        mCallsManager.setConnectionServiceAdapter(ConnectionServiceFailPlatformSide())
-        try {
-            runBlocking {
-                val waitForCallException =
-                    CompletableDeferred<androidx.core.telecom.CallException>()
-                try {
-                    mCallsManager.addCall(
-                        TestUtils.INCOMING_CALL_ATTRIBUTES,
-                        TestUtils.mOnAnswerLambda,
-                        TestUtils.mOnDisconnectLambda,
-                        TestUtils.mOnSetActiveLambda,
-                        TestUtils.mOnSetInActiveLambda,
-                    ) {
-                    }
-                } catch (e: androidx.core.telecom.CallException) {
-                    waitForCallException.complete(e)
-                }
-                waitForCallException.await()
-                assertEquals(
-                    androidx.core.telecom.CallException.ERROR_UNKNOWN,
-                    waitForCallException.getCompleted().code
-                )
-            }
-        } finally {
-            mCallsManager.setTelecomManagerAdapter(TelecomManagerProduction(mContext))
-            mCallsManager.setConnectionServiceAdapter(ConnectionServiceProduction())
         }
     }
 
@@ -302,22 +233,125 @@ class CallsManagerTest : BaseTelecomTest() {
         }
     }
 
+    @SdkSuppress(minSdkVersion = VERSION_CODES.UPSIDE_DOWN_CAKE)
+    @SmallTest
+    @Test
+    fun testEndToEndSelectingAStartingEndpointTransactional() {
+        setUpV2Test()
+        runBlocking { assertStartingCallEndpoint(coroutineContext) }
+    }
+
+    @SdkSuppress(minSdkVersion = VERSION_CODES.O)
+    @SmallTest
+    @Test
+    fun testEndToEndSelectingAStartingEndpointBackwardsCompat() {
+        setUpBackwardsCompatTest()
+        runBlocking { assertStartingCallEndpoint(coroutineContext) }
+    }
+
+    private suspend fun assertStartingCallEndpoint(coroutineContext: CoroutineContext) {
+        mCallsManager.registerAppWithTelecom(
+            CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING or
+                CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING
+        )
+        var preCallEndpointsScope: CoroutineScope? = null
+        try {
+            val endpointsFlow = mCallsManager.getAvailableStartingCallEndpoints()
+
+            val initialEndpointsJob = CompletableDeferred<List<CallEndpointCompat>>()
+            CoroutineScope(coroutineContext).launch {
+                preCallEndpointsScope = this
+                Log.i(TAG, "launched initialEndpointsJob")
+                endpointsFlow.collect {
+                    it.forEach { endpoint ->
+                        Log.i(TAG, "endpointsFlow: collecting endpoint=[$endpoint]")
+                    }
+                    initialEndpointsJob.complete(it)
+                }
+            }
+            Log.i(TAG, "initialEndpointsJob STARTED")
+            initialEndpointsJob.await()
+            Log.i(TAG, "initialEndpointsJob COMPLETED")
+            val initialEndpoints = initialEndpointsJob.getCompleted()
+            val earpieceEndpoint =
+                initialEndpoints.find { it.type == CallEndpointCompat.TYPE_EARPIECE }
+            if (initialEndpoints.size > 1 && earpieceEndpoint != null) {
+                Log.i(TAG, "found 2 endpoints, including TYPE_EARPIECE")
+                mCallsManager.addCall(
+                    CallAttributesCompat(
+                        OUTGOING_NAME,
+                        TestUtils.TEST_ADDRESS,
+                        CallAttributesCompat.DIRECTION_OUTGOING,
+                        CallAttributesCompat.CALL_TYPE_AUDIO_CALL,
+                        ALL_CALL_CAPABILITIES,
+                        earpieceEndpoint,
+                    ),
+                    TestUtils.mOnAnswerLambda,
+                    TestUtils.mOnDisconnectLambda,
+                    TestUtils.mOnSetActiveLambda,
+                    TestUtils.mOnSetInActiveLambda,
+                ) {
+                    Log.i(TAG, "addCallWithStartingCallEndpoint: running CallControlScope")
+                    launch {
+                        val waitUntilEarpieceEndpointJob = CompletableDeferred<CallEndpointCompat>()
+
+                        val flowsJob = launch {
+                            val earpieceFlow =
+                                currentCallEndpoint.filter {
+                                    Log.i(TAG, "currentCallEndpoint: e=[$it]")
+                                    it.type == CallEndpointCompat.TYPE_EARPIECE
+                                }
+
+                            earpieceFlow.collect {
+                                Log.i(TAG, "earpieceFlow.collect=[$it]")
+                                waitUntilEarpieceEndpointJob.complete(it)
+                            }
+                        }
+
+                        Log.i(TAG, "addCallWithStartingCallEndpoint: before await")
+                        waitUntilEarpieceEndpointJob.await()
+                        Log.i(TAG, "addCallWithStartingCallEndpoint: after await")
+
+                        // at this point, the CallEndpoint has been found
+                        val endpoint = waitUntilEarpieceEndpointJob.getCompleted()
+                        assertNotNull(endpoint)
+                        assertEquals(CallEndpointCompat.TYPE_EARPIECE, endpoint.type)
+
+                        // finally, terminate the call
+                        disconnect(DisconnectCause(DisconnectCause.LOCAL))
+                        // stop collecting flows so the test can end
+                        flowsJob.cancel()
+                        Log.i(TAG, " flowsJob.cancel()")
+                    }
+                }
+            } else {
+                Log.i(
+                    TAG,
+                    "assertStartingCallEndpoint: " +
+                        "endpoints.size=[${initialEndpoints.size}], earpiece=[$earpieceEndpoint]",
+                )
+                preCallEndpointsScope?.cancel()
+            }
+        } finally {
+            preCallEndpointsScope?.cancel()
+        }
+    }
+
     suspend fun assertVideoCallStartsWithSpeakerEndpoint() {
         assertWithinTimeout_addCall(
             CallAttributesCompat(
                 TestUtils.OUTGOING_NAME,
-                TestUtils.TEST_PHONE_NUMBER_8985,
+                TestUtils.TEST_ADDRESS,
                 CallAttributesCompat.DIRECTION_OUTGOING,
-                CallAttributesCompat.CALL_TYPE_VIDEO_CALL
+                CallAttributesCompat.CALL_TYPE_VIDEO_CALL,
             )
         ) {
             launch {
                 val waitUntilSpeakerEndpointJob = CompletableDeferred<CallEndpointCompat>()
 
                 val flowsJob = launch {
-                    val speakerFlow = currentCallEndpoint.filter {
-                        it.type == CallEndpointCompat.TYPE_SPEAKER
-                    }
+                    val speakerFlow =
+                        currentCallEndpoint.filter { it.type == CallEndpointCompat.TYPE_SPEAKER }
 
                     speakerFlow.collect {
                         Log.i(TAG, "speakerFlow.collect=[$it]")

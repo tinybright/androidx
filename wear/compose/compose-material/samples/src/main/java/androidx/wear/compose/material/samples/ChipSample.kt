@@ -44,17 +44,18 @@ fun ChipWithIconAndLabel() {
         label = {
             Text(
                 text = "Main label can span up to 3 lines",
-                maxLines = 3, overflow = TextOverflow.Ellipsis
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
             )
         },
         icon = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_airplanemode_active_24px),
                 contentDescription = "airplane",
-                modifier = Modifier.size(ChipDefaults.IconSize)
-                    .wrapContentSize(align = Alignment.Center),
+                modifier =
+                    Modifier.size(ChipDefaults.IconSize).wrapContentSize(align = Alignment.Center),
             )
-        }
+        },
     )
 }
 
@@ -68,17 +69,18 @@ fun OutlinedChipWithIconAndLabel() {
         label = {
             Text(
                 text = "Main label can span up to 3 lines",
-                maxLines = 3, overflow = TextOverflow.Ellipsis
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
             )
         },
         icon = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_airplanemode_active_24px),
                 contentDescription = "airplane",
-                modifier = Modifier.size(ChipDefaults.IconSize)
-                    .wrapContentSize(align = Alignment.Center),
+                modifier =
+                    Modifier.size(ChipDefaults.IconSize).wrapContentSize(align = Alignment.Center),
             )
-        }
+        },
     )
 }
 
@@ -97,10 +99,10 @@ fun ChipWithIconAndLabels() {
             Icon(
                 painter = painterResource(id = R.drawable.ic_airplanemode_active_24px),
                 contentDescription = "airplane",
-                modifier = Modifier.size(ChipDefaults.IconSize)
-                    .wrapContentSize(align = Alignment.Center),
+                modifier =
+                    Modifier.size(ChipDefaults.IconSize).wrapContentSize(align = Alignment.Center),
             )
-        }
+        },
     )
 }
 
@@ -111,9 +113,7 @@ fun CompactChipWithIconAndLabel() {
         onClick = { /* Do something */ },
         enabled = true,
         // CompactChip label should be no more than 1 line of text
-        label = {
-            Text("Single line label", maxLines = 1, overflow = TextOverflow.Ellipsis)
-        },
+        label = { Text("Single line label", maxLines = 1, overflow = TextOverflow.Ellipsis) },
         icon = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_airplanemode_active_24px),
@@ -137,7 +137,7 @@ fun CompactChipWithLabel() {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         },
     )
@@ -153,7 +153,7 @@ fun CompactChipWithIcon() {
             Icon(
                 painter = painterResource(id = R.drawable.ic_airplanemode_active_24px),
                 contentDescription = "airplane",
-                modifier = Modifier.size(ChipDefaults.IconSize)
+                modifier = Modifier.size(ChipDefaults.IconSize),
             )
         },
     )
@@ -166,9 +166,7 @@ fun OutlinedCompactChipWithIconAndLabel() {
         onClick = { /* Do something */ },
         enabled = true,
         // CompactChip label should be no more than 1 line of text
-        label = {
-            Text("Single line label", maxLines = 1, overflow = TextOverflow.Ellipsis)
-        },
+        label = { Text("Single line label", maxLines = 1, overflow = TextOverflow.Ellipsis) },
         icon = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_airplanemode_active_24px),

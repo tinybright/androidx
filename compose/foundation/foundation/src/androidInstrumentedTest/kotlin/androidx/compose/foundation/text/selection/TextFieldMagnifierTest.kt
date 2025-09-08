@@ -55,7 +55,7 @@ internal class TextFieldMagnifierTest : AbstractSelectionMagnifierTests() {
         modifier: Modifier,
         style: TextStyle,
         onTextLayout: (TextLayoutResult) -> Unit,
-        maxLines: Int
+        maxLines: Int,
     ) {
         BasicTextField(
             text,
@@ -63,7 +63,7 @@ internal class TextFieldMagnifierTest : AbstractSelectionMagnifierTests() {
             modifier = modifier,
             textStyle = style,
             onTextLayout = onTextLayout,
-            maxLines = Int.MAX_VALUE
+            maxLines = Int.MAX_VALUE,
         )
     }
 
@@ -79,18 +79,12 @@ internal class TextFieldMagnifierTest : AbstractSelectionMagnifierTests() {
 
     @Test
     fun magnifier_staysAtLineEnd_whenCursorDraggedPastStart() {
-        checkMagnifierConstrainedToLineHorizontalBounds(
-            Handle.Cursor,
-            checkStart = true
-        )
+        checkMagnifierConstrainedToLineHorizontalBounds(Handle.Cursor, checkStart = true)
     }
 
     @Test
     fun magnifier_staysAtLineEnd_whenCursorDraggedPastEnd() {
-        checkMagnifierConstrainedToLineHorizontalBounds(
-            Handle.Cursor,
-            checkStart = false
-        )
+        checkMagnifierConstrainedToLineHorizontalBounds(Handle.Cursor, checkStart = false)
     }
 
     @Test
@@ -133,27 +127,27 @@ internal class TextFieldMagnifierTest : AbstractSelectionMagnifierTests() {
             // The value won't ever change so we don't need to worry about ever updating the state.
             selectionManager.state = remember {
                 LegacyTextFieldState(
-                    textDelegate = TextDelegate(
-                        text = AnnotatedString(Text),
-                        style = TextStyle.Default,
-                        density = density,
-                        fontFamilyResolver = fontFamilyResolver
-                    ),
+                    textDelegate =
+                        TextDelegate(
+                            text = AnnotatedString(Text),
+                            style = TextStyle.Default,
+                            density = density,
+                            fontFamilyResolver = fontFamilyResolver,
+                        ),
                     recomposeScope = scope,
-                    keyboardController = null
+                    keyboardController = null,
                 )
             }
             // Required for the drag observers to actually update the selection.
-            selectionManager.onValueChange = {
-                selectionManager.value = it
-            }
+            selectionManager.onValueChange = { selectionManager.value = it }
 
             DisposableEffect(Unit) {
-                val (_, _, result) = TextFieldDelegate.layout(
-                    selectionManager.state!!.textDelegate,
-                    constraints = Constraints(),
-                    layoutDirection = LayoutDirection.Ltr
-                )
+                val (_, _, result) =
+                    TextFieldDelegate.layout(
+                        selectionManager.state!!.textDelegate,
+                        constraints = Constraints(),
+                        layoutDirection = LayoutDirection.Ltr,
+                    )
                 selectionManager.state!!.layoutResult = TextLayoutResultProxy(result)
                 onDispose {}
             }

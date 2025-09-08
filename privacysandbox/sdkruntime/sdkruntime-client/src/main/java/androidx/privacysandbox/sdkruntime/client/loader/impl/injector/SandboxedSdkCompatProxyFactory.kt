@@ -21,10 +21,9 @@ import androidx.privacysandbox.sdkruntime.core.SandboxedSdkCompat
 import androidx.privacysandbox.sdkruntime.core.SandboxedSdkInfo
 import java.lang.reflect.Constructor
 
-/**
- * Creates instance of [SandboxedSdkCompat] class loaded by SDK Classloader.
- */
-internal class SandboxedSdkCompatProxyFactory private constructor(
+/** Creates instance of [SandboxedSdkCompat] class loaded by SDK Classloader. */
+internal class SandboxedSdkCompatProxyFactory
+private constructor(
     private val sandboxedSdkInfoConstructor: Constructor<out Any>,
     private val sandboxedSdkCompatConstructor: Constructor<out Any>,
 ) {
@@ -48,29 +47,31 @@ internal class SandboxedSdkCompatProxyFactory private constructor(
 
     companion object {
         fun createFor(classLoader: ClassLoader): SandboxedSdkCompatProxyFactory {
-            val sandboxedSdkCompatClass = Class.forName(
-                SandboxedSdkCompat::class.java.name,
-                /* initialize = */ false,
-                classLoader
-            )
-            val sandboxedSdkInfoClass = Class.forName(
-                SandboxedSdkInfo::class.java.name,
-                /* initialize = */ false,
-                classLoader
-            )
+            val sandboxedSdkCompatClass =
+                Class.forName(
+                    "androidx.privacysandbox.sdkruntime.core.SandboxedSdkCompat",
+                    /* initialize = */ false,
+                    classLoader,
+                )
+            val sandboxedSdkInfoClass =
+                Class.forName(
+                    "androidx.privacysandbox.sdkruntime.core.SandboxedSdkInfo",
+                    /* initialize = */ false,
+                    classLoader,
+                )
             val sandboxedSdkCompatConstructor =
                 sandboxedSdkCompatClass.getConstructor(
                     /* parameter1 */ IBinder::class.java,
-                    /* parameter2 */ sandboxedSdkInfoClass
+                    /* parameter2 */ sandboxedSdkInfoClass,
                 )
             val sandboxedSdkInfoConstructor =
                 sandboxedSdkInfoClass.getConstructor(
                     /* parameter1 */ String::class.java,
-                    /* parameter2 */ Long::class.java
+                    /* parameter2 */ Long::class.java,
                 )
             return SandboxedSdkCompatProxyFactory(
                 sandboxedSdkInfoConstructor = sandboxedSdkInfoConstructor,
-                sandboxedSdkCompatConstructor = sandboxedSdkCompatConstructor
+                sandboxedSdkCompatConstructor = sandboxedSdkCompatConstructor,
             )
         }
     }

@@ -16,7 +16,6 @@
 
 package androidx.compose.foundation.demos.text2
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.demos.text.TagLine
 import androidx.compose.foundation.demos.text.fontSize8
 import androidx.compose.foundation.layout.Box
@@ -55,23 +54,24 @@ fun KeyboardActionsDemos() {
     val coroutineScope = rememberCoroutineScope()
     Box(Modifier.imePadding()) {
         var executeDefaultActions by remember { mutableStateOf(true) }
-        val onKeyboardAction: KeyboardActionHandler = remember(executeDefaultActions) {
-            KeyboardActionHandler { performDefaultAction ->
-                coroutineScope.launch {
-                    snackbarHostState.showSnackbar("Keyboard action is executed")
-                }
-                if (executeDefaultActions) {
-                    performDefaultAction()
+        val onKeyboardAction: KeyboardActionHandler =
+            remember(executeDefaultActions) {
+                KeyboardActionHandler { performDefaultAction ->
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("Keyboard action is executed")
+                    }
+                    if (executeDefaultActions) {
+                        performDefaultAction()
+                    }
                 }
             }
-        }
         LazyColumn {
             item {
                 Row(Modifier.padding(8.dp)) {
                     Text("Execute default actions")
                     Checkbox(
                         checked = executeDefaultActions,
-                        onCheckedChange = { executeDefaultActions = it }
+                        onCheckedChange = { executeDefaultActions = it },
                     )
                 }
             }
@@ -80,7 +80,7 @@ fun KeyboardActionsDemos() {
                     KeyboardActionDemoItem(
                         imeAction = it,
                         onKeyboardAction = onKeyboardAction,
-                        singleLine = true
+                        singleLine = true,
                     )
                 }
 
@@ -88,7 +88,7 @@ fun KeyboardActionsDemos() {
                     KeyboardActionDemoItem(
                         imeAction = it,
                         onKeyboardAction = onKeyboardAction,
-                        singleLine = false
+                        singleLine = false,
                     )
                 }
             }
@@ -100,37 +100,36 @@ fun KeyboardActionsDemos() {
 }
 
 @Suppress("PrimitiveInCollection")
-private val imeActions = listOf(
-    ImeAction.Default,
-    ImeAction.None,
-    ImeAction.Go,
-    ImeAction.Search,
-    ImeAction.Send,
-    ImeAction.Previous,
-    ImeAction.Next,
-    ImeAction.Done
-)
+private val imeActions =
+    listOf(
+        ImeAction.Default,
+        ImeAction.None,
+        ImeAction.Go,
+        ImeAction.Search,
+        ImeAction.Send,
+        ImeAction.Previous,
+        ImeAction.Next,
+        ImeAction.Done,
+    )
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun KeyboardActionDemoItem(
     imeAction: ImeAction,
     onKeyboardAction: KeyboardActionHandler,
-    singleLine: Boolean
+    singleLine: Boolean,
 ) {
     TagLine(tag = "Ime Action: $imeAction, singleLine: $singleLine")
     val state = remember { TextFieldState() }
     BasicTextField(
         modifier = demoTextFieldModifiers,
         state = state,
-        keyboardOptions = KeyboardOptions(
-            imeAction = imeAction
-        ),
-        lineLimits = if (singleLine) {
-            TextFieldLineLimits.SingleLine
-        } else {
-            TextFieldLineLimits.Default
-        },
+        keyboardOptions = KeyboardOptions(imeAction = imeAction),
+        lineLimits =
+            if (singleLine) {
+                TextFieldLineLimits.SingleLine
+            } else {
+                TextFieldLineLimits.Default
+            },
         onKeyboardAction = onKeyboardAction,
         textStyle = TextStyle(fontSize = fontSize8),
     )

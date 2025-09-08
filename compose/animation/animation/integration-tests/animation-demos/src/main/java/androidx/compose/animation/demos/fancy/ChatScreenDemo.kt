@@ -76,13 +76,13 @@ fun ChatScreen() {
                         MyChatEntry(
                             text = messages[i].text,
                             hasMessageAbove = hasMessageAbove(messages, i),
-                            hasMessageBelow = hasMessageBelow(messages, i)
+                            hasMessageBelow = hasMessageBelow(messages, i),
                         )
                     } else {
                         TheirChatEntry(
                             text = messages[i].text,
                             hasMessageAbove = hasMessageAbove(messages, i),
-                            hasMessageBelow = hasMessageBelow(messages, i)
+                            hasMessageBelow = hasMessageBelow(messages, i),
                         )
                     }
                 }
@@ -118,8 +118,10 @@ private fun animateCorner(hasSharpCorner: Boolean): MutableState<Float> {
         animate(
             initialValue = state.floatValue,
             targetValue = if (hasSharpCorner) 2f else roundCornerSize,
-            animationSpec = spring(stiffness = 50f, dampingRatio = 0.6f)
-        ) { animationValue, _ -> state.floatValue = animationValue }
+            animationSpec = spring(stiffness = 50f, dampingRatio = 0.6f),
+        ) { animationValue, _ ->
+            state.floatValue = animationValue
+        }
     }
     return state
 }
@@ -128,7 +130,7 @@ private fun animateCorner(hasSharpCorner: Boolean): MutableState<Float> {
 private fun ColumnScope.MyChatEntry(
     text: String,
     hasMessageAbove: Boolean,
-    hasMessageBelow: Boolean
+    hasMessageBelow: Boolean,
 ) {
     val topCorner by animateCorner(hasMessageAbove)
     val bottomCorner by animateCorner(hasMessageBelow)
@@ -136,13 +138,14 @@ private fun ColumnScope.MyChatEntry(
         text = text,
         textColor = myMessageTextColor,
         backgroundColor = myMessageBgColor,
-        shape = RoundedCornerShape(
-            topStart = roundCornerSize.dp,
-            topEnd = topCorner.dp,
-            bottomStart = roundCornerSize.dp,
-            bottomEnd = bottomCorner.dp
-        ),
-        alignment = Alignment.End
+        shape =
+            RoundedCornerShape(
+                topStart = roundCornerSize.dp,
+                topEnd = topCorner.dp,
+                bottomStart = roundCornerSize.dp,
+                bottomEnd = bottomCorner.dp,
+            ),
+        alignment = Alignment.End,
     )
 }
 
@@ -150,7 +153,7 @@ private fun ColumnScope.MyChatEntry(
 private fun ColumnScope.TheirChatEntry(
     text: String,
     hasMessageAbove: Boolean,
-    hasMessageBelow: Boolean
+    hasMessageBelow: Boolean,
 ) {
     val topCorner by animateCorner(hasMessageAbove)
     val bottomCorner by animateCorner(hasMessageBelow)
@@ -158,13 +161,14 @@ private fun ColumnScope.TheirChatEntry(
         text = text,
         textColor = theirMessageTextColor,
         backgroundColor = theirMessageBgColor,
-        shape = RoundedCornerShape(
-            topStart = topCorner.dp,
-            topEnd = roundCornerSize.dp,
-            bottomStart = bottomCorner.dp,
-            bottomEnd = roundCornerSize.dp
-        ),
-        alignment = Alignment.Start
+        shape =
+            RoundedCornerShape(
+                topStart = topCorner.dp,
+                topEnd = roundCornerSize.dp,
+                bottomStart = bottomCorner.dp,
+                bottomEnd = roundCornerSize.dp,
+            ),
+        alignment = Alignment.Start,
     )
 }
 
@@ -175,26 +179,24 @@ private fun ColumnScope.ChatEntry(
     textColor: Color,
     backgroundColor: Color,
     shape: Shape,
-    alignment: Alignment.Horizontal
+    alignment: Alignment.Horizontal,
 ) {
     AnimatedVisibility(
         visibleState = remember { MutableTransitionState(false).apply { targetState = true } },
-        enter = fadeIn() + slideInVertically(
-            initialOffsetY = { it / 2 },
-            animationSpec = spring(stiffness = 50f, dampingRatio = 0.6f)
-        ),
-        modifier = Modifier.align(alignment)
+        enter =
+            fadeIn() +
+                slideInVertically(
+                    initialOffsetY = { it / 2 },
+                    animationSpec = spring(stiffness = 50f, dampingRatio = 0.6f),
+                ),
+        modifier = Modifier.align(alignment),
     ) {
         Card(
             backgroundColor = backgroundColor,
             shape = shape,
-            modifier = Modifier.padding(bottom = 4.dp)
+            modifier = Modifier.padding(bottom = 4.dp),
         ) {
-            Text(
-                modifier = Modifier.padding(8.dp),
-                color = textColor,
-                text = text
-            )
+            Text(modifier = Modifier.padding(8.dp), color = textColor, text = text)
         }
     }
 }

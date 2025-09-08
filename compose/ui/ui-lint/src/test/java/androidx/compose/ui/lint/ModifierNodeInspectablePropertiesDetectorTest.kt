@@ -21,19 +21,18 @@ import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
 import org.junit.Test
 
-/* ktlint-disable max-line-length */
 class ModifierNodeInspectablePropertiesDetectorTest : LintDetectorTest() {
     override fun getDetector(): Detector = ModifierNodeInspectablePropertiesDetector()
 
-    override fun getIssues(): MutableList<Issue> = mutableListOf(
-        ModifierNodeInspectablePropertiesDetector.ModifierNodeInspectableProperties
-    )
+    override fun getIssues(): MutableList<Issue> =
+        mutableListOf(ModifierNodeInspectablePropertiesDetector.ModifierNodeInspectableProperties)
 
     @Test
     fun testNodeElementWithNoInspectableValues_flagsError() {
-        lint().files(
-            kotlin(
-                """
+        lint()
+            .files(
+                kotlin(
+                    """
                 package test
 
                 import androidx.compose.ui.Modifier
@@ -45,25 +44,29 @@ class ModifierNodeInspectablePropertiesDetectorTest : LintDetectorTest() {
                     override fun update(node: Modifier.Node) = node
                 }
                 """
-            ),
-            ModifierStub, InspectableValueStub, ModifierNodeElementStub
-        )
+                ),
+                ModifierStub,
+                InspectableValueStub,
+                ModifierNodeElementStub,
+            )
             .run()
             .expect(
                 """
-src/test/Element.kt:8: Information: Element does not override inspectableProperties(). The layout inspector will use the default implementation of this function, which will attempt to read Element's properties reflectively. Override inspectableProperties() if you'd like to customize this modifier's presentation in the layout inspector. [ModifierNodeInspectableProperties]
+src/test/Element.kt:8: Hint: Element does not override inspectableProperties(). The layout inspector will use the default implementation of this function, which will attempt to read Element's properties reflectively. Override inspectableProperties() if you'd like to customize this modifier's presentation in the layout inspector. [ModifierNodeInspectableProperties]
                 class Element : ModifierNodeElement<Modifier.Node>() {
                       ~~~~~~~
-0 errors, 0 warnings
-                """.trimIndent()
+0 errors, 0 warnings, 1 hint
+                """
+                    .trimIndent()
             )
     }
 
     @Test
     fun testNodeElementWithAlmostInspectableValues_flagsError() {
-        lint().files(
-            kotlin(
-                """
+        lint()
+            .files(
+                kotlin(
+                    """
                 package test
 
                 import androidx.compose.ui.Modifier
@@ -81,9 +84,9 @@ src/test/Element.kt:8: Information: Element does not override inspectablePropert
                     }
                 }
                 """
-            ),
-            kotlin(
-                """
+                ),
+                kotlin(
+                    """
                 package test
 
                 import androidx.compose.ui.Modifier
@@ -98,28 +101,32 @@ src/test/Element.kt:8: Information: Element does not override inspectablePropert
                     fun inspectableProperties() { }
                 }
                 """
-            ),
-            ModifierStub, InspectableValueStub, ModifierNodeElementStub
-        )
+                ),
+                ModifierStub,
+                InspectableValueStub,
+                ModifierNodeElementStub,
+            )
             .run()
             .expect(
                 """
-src/test/ElementWithExtraParam.kt:9: Information: ElementWithExtraParam does not override inspectableProperties(). The layout inspector will use the default implementation of this function, which will attempt to read ElementWithExtraParam's properties reflectively. Override inspectableProperties() if you'd like to customize this modifier's presentation in the layout inspector. [ModifierNodeInspectableProperties]
+src/test/ElementWithExtraParam.kt:9: Hint: ElementWithExtraParam does not override inspectableProperties(). The layout inspector will use the default implementation of this function, which will attempt to read ElementWithExtraParam's properties reflectively. Override inspectableProperties() if you'd like to customize this modifier's presentation in the layout inspector. [ModifierNodeInspectableProperties]
                 class ElementWithExtraParam : ModifierNodeElement<Modifier.Node>() {
                       ~~~~~~~~~~~~~~~~~~~~~
-src/test/ElementWithoutReceiver.kt:9: Information: ElementWithoutReceiver does not override inspectableProperties(). The layout inspector will use the default implementation of this function, which will attempt to read ElementWithoutReceiver's properties reflectively. Override inspectableProperties() if you'd like to customize this modifier's presentation in the layout inspector. [ModifierNodeInspectableProperties]
+src/test/ElementWithoutReceiver.kt:9: Hint: ElementWithoutReceiver does not override inspectableProperties(). The layout inspector will use the default implementation of this function, which will attempt to read ElementWithoutReceiver's properties reflectively. Override inspectableProperties() if you'd like to customize this modifier's presentation in the layout inspector. [ModifierNodeInspectableProperties]
                 class ElementWithoutReceiver : ModifierNodeElement<Modifier.Node>() {
                       ~~~~~~~~~~~~~~~~~~~~~~
-0 errors, 0 warnings
-                """.trimIndent()
+0 errors, 0 warnings, 2 hints
+                """
+                    .trimIndent()
             )
     }
 
     @Test
     fun testNodeElementWithInspectableValues_doesNotFlagError() {
-        lint().files(
-            kotlin(
-                """
+        lint()
+            .files(
+                kotlin(
+                    """
                 package test
 
                 import androidx.compose.ui.Modifier
@@ -136,18 +143,21 @@ src/test/ElementWithoutReceiver.kt:9: Information: ElementWithoutReceiver does n
                     }
                 }
                 """
-            ),
-            ModifierStub, InspectableValueStub, ModifierNodeElementStub
-        )
+                ),
+                ModifierStub,
+                InspectableValueStub,
+                ModifierNodeElementStub,
+            )
             .run()
             .expectClean()
     }
 
     @Test
     fun testNodeElementWithInheritedInspectableValues_doesNotFlagError() {
-        lint().files(
-            kotlin(
-                """
+        lint()
+            .files(
+                kotlin(
+                    """
                 package test
 
                 import androidx.compose.ui.Modifier
@@ -169,16 +179,19 @@ src/test/ElementWithoutReceiver.kt:9: Information: ElementWithoutReceiver does n
                     override fun update(node: Modifier.Node) = node
                 }
                 """
-            ),
-            ModifierStub, InspectableValueStub, ModifierNodeElementStub
-        )
+                ),
+                ModifierStub,
+                InspectableValueStub,
+                ModifierNodeElementStub,
+            )
             .run()
             .expectClean()
     }
 
     companion object {
-        private val ModifierStub = kotlin(
-            """
+        private val ModifierStub =
+            kotlin(
+                """
             package androidx.compose.ui
 
             interface Modifier {
@@ -186,10 +199,11 @@ src/test/ElementWithoutReceiver.kt:9: Information: ElementWithoutReceiver does n
                 interface Element
             }
             """
-        )
+            )
 
-        private val InspectableValueStub = kotlin(
-            """
+        private val InspectableValueStub =
+            kotlin(
+                """
             package androidx.compose.ui.platform
 
             import androidx.compose.ui.Modifier
@@ -223,10 +237,11 @@ src/test/ElementWithoutReceiver.kt:9: Information: ElementWithoutReceiver does n
                 }
             }
             """
-        )
+            )
 
-        private val ModifierNodeElementStub = kotlin(
-            """
+        private val ModifierNodeElementStub =
+            kotlin(
+                """
             package androidx.compose.ui.node
 
             abstract class ModifierNodeElement<N : Modifier.Node> : Modifier.Element {
@@ -240,7 +255,6 @@ src/test/ElementWithoutReceiver.kt:9: Information: ElementWithoutReceiver does n
                 }
             }
             """
-        )
+            )
     }
 }
-/* ktlint-enable max-line-length */

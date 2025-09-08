@@ -47,25 +47,25 @@ class ScrollActivity : ComponentActivity() {
             MaterialTheme {
                 ScalingLazyColumn(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(
-                        space = defaultItemSpacingDp,
-                        alignment = Alignment.CenterVertically
-                    ),
+                    verticalArrangement =
+                        Arrangement.spacedBy(
+                            space = defaultItemSpacingDp,
+                            alignment = Alignment.CenterVertically,
+                        ),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 30.dp),
                     state = rememberScalingLazyListState(),
-                    modifier = Modifier.semantics { contentDescription = CONTENT_DESCRIPTION }
+                    modifier = Modifier.semantics { contentDescription = CONTENT_DESCRIPTION },
                 ) {
                     items(5000) { it ->
                         Box(
-                            Modifier
-                                .requiredHeight(itemHeightDp)
+                            Modifier.requiredHeight(itemHeightDp)
                                 .background(MaterialTheme.colors.surface)
                                 .fillMaxSize()
                         ) {
                             Text(
                                 modifier = Modifier.align(Alignment.Center),
                                 text = "Item $it",
-                                color = MaterialTheme.colors.onSurface
+                                color = MaterialTheme.colors.onSurface,
                             )
                         }
                     }

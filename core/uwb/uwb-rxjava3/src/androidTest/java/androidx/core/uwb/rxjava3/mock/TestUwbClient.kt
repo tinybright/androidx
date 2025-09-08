@@ -40,16 +40,19 @@ public class TestUwbClient(
     val complexChannel: UwbComplexChannel,
     val localAddress: UwbAddress,
     val rangingCapabilities: RangingCapabilities,
-    val isAvailable: Boolean
+    val isAvailable: Boolean,
 ) : UwbClient {
     var stopRangingCalled = false
         private set
+
     private lateinit var callback: RangingSessionCallback
     private var startedRanging = false
+
     companion object {
-        val rangingPosition = RangingPosition(
-            RangingMeasurement(1, 1.0F), null, null, 20, -50, null)
+        val rangingPosition =
+            RangingPosition(RangingMeasurement(1, 1.0F), null, null, 20, -50, null)
     }
+
     override fun getApiKey(): ApiKey<zze> {
         TODO("Not yet implemented")
     }
@@ -100,7 +103,7 @@ public class TestUwbClient(
 
     override fun startRanging(
         parameters: RangingParameters,
-        sessionCallback: RangingSessionCallback
+        sessionCallback: RangingSessionCallback,
     ): Task<Void> {
         if (startedRanging) {
             throw ApiException(Status(UwbStatusCodes.RANGING_ALREADY_STARTED))

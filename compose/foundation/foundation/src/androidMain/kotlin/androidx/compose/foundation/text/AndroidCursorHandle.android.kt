@@ -48,27 +48,27 @@ internal val CursorHandleWidth = CursorHandleHeight * 2f / (1 + Sqrt2)
 internal actual fun CursorHandle(
     offsetProvider: OffsetProvider,
     modifier: Modifier,
-    minTouchTargetSize: DpSize
+    minTouchTargetSize: DpSize,
 ) {
-    val finalModifier = modifier.semantics {
-        this[SelectionHandleInfoKey] = SelectionHandleInfo(
-            handle = Handle.Cursor,
-            position = offsetProvider.provide(),
-            anchor = SelectionHandleAnchor.Middle,
-            visible = true,
-        )
-    }
-    HandlePopup(
-        positionProvider = offsetProvider,
-        handleReferencePoint = Alignment.TopCenter
-    ) {
+    val finalModifier =
+        modifier.semantics {
+            this[SelectionHandleInfoKey] =
+                SelectionHandleInfo(
+                    handle = Handle.Cursor,
+                    position = offsetProvider.provide(),
+                    anchor = SelectionHandleAnchor.Middle,
+                    visible = true,
+                )
+        }
+    HandlePopup(positionProvider = offsetProvider, handleReferencePoint = Alignment.TopCenter) {
         if (minTouchTargetSize.isSpecified) {
             Box(
-                modifier = finalModifier.requiredSizeIn(
-                    minWidth = minTouchTargetSize.width,
-                    minHeight = minTouchTargetSize.height
-                ),
-                contentAlignment = Alignment.TopCenter
+                modifier =
+                    finalModifier.requiredSizeIn(
+                        minWidth = minTouchTargetSize.width,
+                        minHeight = minTouchTargetSize.height,
+                    ),
+                contentAlignment = Alignment.TopCenter,
             ) {
                 DefaultCursorHandle()
             }

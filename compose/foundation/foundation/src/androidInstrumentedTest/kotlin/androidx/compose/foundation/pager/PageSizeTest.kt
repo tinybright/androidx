@@ -38,7 +38,7 @@ class PageSizeTest(val config: ParamConfig) : BasePagerTest(config) {
         // Arrange
 
         // Act
-        createPager(initialPage = 5, modifier = Modifier.fillMaxSize())
+        createPager(initialPage = 5, modifier = Modifier.fillMaxSize(), prefetchEnabled = false)
 
         // Assert
         rule.onNodeWithTag("4").assertDoesNotExist()
@@ -50,29 +50,29 @@ class PageSizeTest(val config: ParamConfig) : BasePagerTest(config) {
     @Test
     fun pagerSizeCustom_visibleItemsAreWithinViewport() {
         // Arrange
-        val pagerMode = object : PageSize {
-            override fun Density.calculateMainAxisPageSize(
-                availableSpace: Int,
-                pageSpacing: Int
-            ): Int {
-                return 100.dp.roundToPx() + pageSpacing
+        val pagerMode =
+            object : PageSize {
+                override fun Density.calculateMainAxisPageSize(
+                    availableSpace: Int,
+                    pageSpacing: Int,
+                ): Int {
+                    return 100.dp.roundToPx() + pageSpacing
+                }
             }
-        }
 
         // Act
         createPager(
             initialPage = 5,
             modifier = Modifier.crossAxisSize(200.dp),
             beyondViewportPageCount = 0,
-            pageSize = { pagerMode }
+            pageSize = { pagerMode },
         )
 
         // Assert
         rule.runOnIdle {
             val visibleItems = pagerState.layoutInfo.visiblePagesInfo.size
-            val pageCount = with(rule.density) {
-                (pagerSize / (pageSize + config.pageSpacing.roundToPx()))
-            } + 1
+            val pageCount =
+                with(rule.density) { (pagerSize / (pageSize + config.pageSpacing.roundToPx())) } + 1
             Truth.assertThat(visibleItems).isEqualTo(pageCount)
         }
 
@@ -84,17 +84,13 @@ class PageSizeTest(val config: ParamConfig) : BasePagerTest(config) {
     companion object {
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
-        fun params() = mutableListOf<ParamConfig>().apply {
-            for (orientation in TestOrientation) {
-                for (pageSpacing in TestPageSpacing) {
-                    add(
-                        ParamConfig(
-                            orientation = orientation,
-                            pageSpacing = pageSpacing
-                        )
-                    )
+        fun params() =
+            mutableListOf<ParamConfig>().apply {
+                for (orientation in TestOrientation) {
+                    for (pageSpacing in TestPageSpacing) {
+                        add(ParamConfig(orientation = orientation, pageSpacing = pageSpacing))
+                    }
                 }
             }
-        }
     }
 }

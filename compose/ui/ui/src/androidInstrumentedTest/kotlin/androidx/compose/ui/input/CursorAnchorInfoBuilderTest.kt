@@ -140,7 +140,7 @@ class CursorAnchorInfoBuilderTest {
         val textFieldValue =
             TextFieldValue(
                 word1 + word2 + word3,
-                composition = TextRange(word1.length, (word1 + word2).length)
+                composition = TextRange(word1.length, (word1 + word2).length),
             )
 
         val cursorAnchorInfo =
@@ -159,7 +159,7 @@ class CursorAnchorInfoBuilderTest {
         val textFieldValue =
             TextFieldValue(
                 word1 + word2 + word3,
-                composition = TextRange(word1.length, (word1 + word2).length)
+                composition = TextRange(word1.length, (word1 + word2).length),
             )
 
         val cursorAnchorInfo =
@@ -168,7 +168,7 @@ class CursorAnchorInfoBuilderTest {
                     textFieldValue,
                     getTextLayoutResult(textFieldValue.text),
                     matrix,
-                    includeCharacterBounds = false
+                    includeCharacterBounds = false,
                 )
 
         assertThat(cursorAnchorInfo.composingTextStart).isEqualTo(-1)
@@ -280,10 +280,13 @@ class CursorAnchorInfoBuilderTest {
     fun testInsertionMarkerWithVisualTransformation() {
         val fontSize = 10.sp
         val textFieldValue = TextFieldValue("abcde", selection = TextRange(2))
-        val offsetMapping = object : OffsetMapping {
-            override fun originalToTransformed(offset: Int) = if (offset < 2) offset else offset + 3
-            override fun transformedToOriginal(offset: Int) = throw NotImplementedError()
-        }
+        val offsetMapping =
+            object : OffsetMapping {
+                override fun originalToTransformed(offset: Int) =
+                    if (offset < 2) offset else offset + 3
+
+                override fun transformedToOriginal(offset: Int) = throw NotImplementedError()
+            }
         val textLayoutResult = getTextLayoutResult("ab---cde", fontSize = fontSize)
 
         val cursorAnchorInfo =
@@ -317,7 +320,7 @@ class CursorAnchorInfoBuilderTest {
                     textLayoutResult,
                     matrix,
                     innerTextFieldBounds = innerTextFieldBounds,
-                    decorationBoxBounds = innerTextFieldBounds
+                    decorationBoxBounds = innerTextFieldBounds,
                 )
 
         assertThat(cursorAnchorInfo.insertionMarkerHorizontal).isEqualTo(fontSizeInPx)
@@ -345,7 +348,7 @@ class CursorAnchorInfoBuilderTest {
                     textLayoutResult,
                     matrix,
                     innerTextFieldBounds = innerTextFieldBounds,
-                    decorationBoxBounds = innerTextFieldBounds
+                    decorationBoxBounds = innerTextFieldBounds,
                 )
 
         assertThat(cursorAnchorInfo.insertionMarkerHorizontal).isEqualTo(fontSizeInPx)
@@ -426,7 +429,7 @@ class CursorAnchorInfoBuilderTest {
                             width - ((index + 1) * fontSizeInPx),
                             0f,
                             width - (index * fontSizeInPx),
-                            fontSizeInPx
+                            fontSizeInPx,
                         )
                     )
                 assertThat(cursorAnchorInfo.getCharacterBoundsFlags(index))
@@ -445,10 +448,12 @@ class CursorAnchorInfoBuilderTest {
         val text = "abcd"
         // Composition is on "bc"
         val composition = TextRange(2, 4)
-        val offsetMapping = object : OffsetMapping {
-            override fun originalToTransformed(offset: Int) = 2 * offset
-            override fun transformedToOriginal(offset: Int) = throw NotImplementedError()
-        }
+        val offsetMapping =
+            object : OffsetMapping {
+                override fun originalToTransformed(offset: Int) = 2 * offset
+
+                override fun transformedToOriginal(offset: Int) = throw NotImplementedError()
+            }
         val transformedText = "a-b-c-d-"
         val textFieldValue = TextFieldValue(text, composition = composition)
         val width = transformedText.length * fontSizeInPx
@@ -467,7 +472,7 @@ class CursorAnchorInfoBuilderTest {
                             2 * index * fontSizeInPx,
                             0f,
                             (2 * index + 1) * fontSizeInPx,
-                            fontSizeInPx
+                            fontSizeInPx,
                         )
                     )
                 assertThat(cursorAnchorInfo.getCharacterBoundsFlags(index))
@@ -500,7 +505,7 @@ class CursorAnchorInfoBuilderTest {
                     textLayoutResult,
                     matrix,
                     innerTextFieldBounds = innerTextFieldBounds,
-                    decorationBoxBounds = innerTextFieldBounds
+                    decorationBoxBounds = innerTextFieldBounds,
                 )
 
         // Character at index 2 spans horizontal range [2 * fontSizeInPx, 3 * fontSizeInPx], so it
@@ -547,7 +552,7 @@ class CursorAnchorInfoBuilderTest {
                     getTextLayoutResult(textFieldValue.text),
                     matrix,
                     innerTextFieldBounds = Rect(1f, 2f, 3f, 4f),
-                    decorationBoxBounds = Rect(5f, 6f, 7f, 8f)
+                    decorationBoxBounds = Rect(5f, 6f, 7f, 8f),
                 )
 
         assertThat(cursorAnchorInfo.editorBoundsInfo?.editorBounds).isEqualTo(RectF(5f, 6f, 7f, 8f))
@@ -569,7 +574,7 @@ class CursorAnchorInfoBuilderTest {
                     matrix,
                     innerTextFieldBounds = Rect(1f, 2f, 3f, 4f),
                     decorationBoxBounds = Rect(5f, 6f, 7f, 8f),
-                    includeEditorBounds = false
+                    includeEditorBounds = false,
                 )
 
         assertThat(cursorAnchorInfo.editorBoundsInfo).isNull()
@@ -589,7 +594,7 @@ class CursorAnchorInfoBuilderTest {
                 0f,
                 textLayoutResult.getLineTop(2) + 1f,
                 fontSizeInPx,
-                textLayoutResult.getLineBottom(4) - 1f
+                textLayoutResult.getLineBottom(4) - 1f,
             )
 
         val cursorAnchorInfo =
@@ -600,7 +605,7 @@ class CursorAnchorInfoBuilderTest {
                     textLayoutResult,
                     matrix,
                     innerTextFieldBounds = innerTextFieldBounds,
-                    decorationBoxBounds = innerTextFieldBounds
+                    decorationBoxBounds = innerTextFieldBounds,
                 )
 
         assertThat(cursorAnchorInfo.visibleLineBounds.size).isEqualTo(3)
@@ -611,7 +616,7 @@ class CursorAnchorInfoBuilderTest {
                     0f,
                     textLayoutResult.getLineTop(2),
                     3 * fontSizeInPx,
-                    textLayoutResult.getLineBottom(2)
+                    textLayoutResult.getLineBottom(2),
                 )
             )
         // Line 3 "dddd" has 4 characters
@@ -621,7 +626,7 @@ class CursorAnchorInfoBuilderTest {
                     0f,
                     textLayoutResult.getLineTop(3),
                     4 * fontSizeInPx,
-                    textLayoutResult.getLineBottom(3)
+                    textLayoutResult.getLineBottom(3),
                 )
             )
         // Line 4 "eeeee" has 5 characters
@@ -631,7 +636,7 @@ class CursorAnchorInfoBuilderTest {
                     0f,
                     textLayoutResult.getLineTop(4),
                     5 * fontSizeInPx,
-                    textLayoutResult.getLineBottom(4)
+                    textLayoutResult.getLineBottom(4),
                 )
             )
     }
@@ -650,7 +655,7 @@ class CursorAnchorInfoBuilderTest {
                 0f,
                 textLayoutResult.getLineTop(2) + 1f,
                 fontSizeInPx,
-                textLayoutResult.getLineBottom(4) - 1f
+                textLayoutResult.getLineBottom(4) - 1f,
             )
 
         val cursorAnchorInfo =
@@ -662,7 +667,7 @@ class CursorAnchorInfoBuilderTest {
                     matrix,
                     innerTextFieldBounds = innerTextFieldBounds,
                     decorationBoxBounds = innerTextFieldBounds,
-                    includeLineBounds = false
+                    includeLineBounds = false,
                 )
 
         assertThat(cursorAnchorInfo.visibleLineBounds.size).isEqualTo(0)
@@ -671,7 +676,7 @@ class CursorAnchorInfoBuilderTest {
     private fun getTextLayoutResult(
         text: String,
         fontSize: TextUnit = 12.sp,
-        width: Float = with(defaultDensity) { 1000.dp.toPx() }
+        width: Float = with(defaultDensity) { 1000.dp.toPx() },
     ): TextLayoutResult {
         val intWidth = ceil(width).toInt()
 
@@ -688,7 +693,7 @@ class CursorAnchorInfoBuilderTest {
                 density = defaultDensity,
                 layoutDirection = LayoutDirection.Ltr,
                 fontFamilyResolver = fontFamilyResolver,
-                constraints = Constraints(maxWidth = intWidth)
+                constraints = Constraints(maxWidth = intWidth),
             )
 
         val paragraph =
@@ -697,7 +702,7 @@ class CursorAnchorInfoBuilderTest {
                 style = input.style,
                 constraints = Constraints(maxWidth = ceil(width).toInt()),
                 density = input.density,
-                fontFamilyResolver = fontFamilyResolver
+                fontFamilyResolver = fontFamilyResolver,
             )
 
         return TextLayoutResult(input, paragraph, IntSize(intWidth, ceil(paragraph.height).toInt()))
@@ -712,7 +717,7 @@ private fun CursorAnchorInfo.Builder.build(
     includeInsertionMarker: Boolean = true,
     includeCharacterBounds: Boolean = true,
     includeEditorBounds: Boolean = true,
-    includeLineBounds: Boolean = true
+    includeLineBounds: Boolean = true,
 ): CursorAnchorInfo {
     val innerTextFieldBounds =
         Rect(0f, 0f, textLayoutResult.size.width.toFloat(), textLayoutResult.size.height.toFloat())
@@ -726,6 +731,6 @@ private fun CursorAnchorInfo.Builder.build(
         includeInsertionMarker = includeInsertionMarker,
         includeCharacterBounds = includeCharacterBounds,
         includeEditorBounds = includeEditorBounds,
-        includeLineBounds = includeLineBounds
+        includeLineBounds = includeLineBounds,
     )
 }

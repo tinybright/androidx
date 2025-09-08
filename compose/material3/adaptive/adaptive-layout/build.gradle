@@ -21,35 +21,39 @@
  * Please use that script when creating a new project, rather than copying an existing project and
  * modifying its settings.
  */
-import androidx.build.LibraryType
+
+import androidx.build.KotlinTarget
+import androidx.build.SoftwareType
 import androidx.build.PlatformIdentifier
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("AndroidXPlugin")
-    id("com.android.library")
     id("AndroidXComposePlugin")
 }
 
 androidXMultiplatform {
-    android()
-    desktop()
+    androidLibrary {
+        compileSdk = 35
+        namespace = "androidx.compose.material3.adaptive.layout"
+        androidResources.enable = true
+    }
+    jvmStubs()
+    linuxX64Stubs()
 
     defaultPlatform(PlatformIdentifier.ANDROID)
 
     sourceSets {
         commonMain {
             dependencies {
-                implementation(libs.kotlinStdlibCommon)
+                implementation(libs.kotlinStdlib)
                 api(project(":compose:material3:adaptive:adaptive"))
-                api(project(":compose:animation:animation-core"))
-                api(project(":compose:ui:ui"))
-                implementation(project(":compose:animation:animation"))
-                implementation("androidx.compose.foundation:foundation:1.6.5")
-                implementation("androidx.compose.foundation:foundation-layout:1.6.5")
-                implementation("androidx.compose.ui:ui-geometry:1.6.5")
-                implementation("androidx.compose.ui:ui-util:1.6.5")
-                implementation("androidx.window:window-core:1.3.0-beta02")
+                api("androidx.compose.animation:animation-core:1.9.0")
+                api("androidx.compose.ui:ui:1.9.0")
+                implementation("androidx.compose.animation:animation:1.9.0")
+                implementation("androidx.compose.foundation:foundation:1.9.0")
+                implementation("androidx.compose.foundation:foundation-layout:1.9.0")
+                implementation("androidx.compose.ui:ui-geometry:1.9.0")
+                implementation("androidx.window:window-core:1.4.0")
             }
         }
 
@@ -61,47 +65,46 @@ androidXMultiplatform {
         jvmMain {
             dependsOn(commonMain)
             dependencies {
-                implementation(libs.kotlinStdlib)
             }
         }
 
         androidMain {
             dependsOn(jvmMain)
             dependencies {
-                api("androidx.annotation:annotation:1.1.0")
-                api("androidx.annotation:annotation-experimental:1.4.0")
+                api("androidx.annotation:annotation:1.9.1")
+                api("androidx.annotation:annotation-experimental:1.5.1")
+                implementation("androidx.compose.runtime:runtime:1.9.0")
+                implementation("androidx.core:core:1.15.0")
             }
         }
 
-        desktopMain {
-            dependsOn(jvmMain)
-            dependencies {
-            }
+        commonStubsMain {
+            dependsOn(commonMain)
         }
 
-        jvmTest {
-            dependencies {
-            }
+        jvmStubsMain {
+            dependsOn(commonStubsMain)
         }
 
-        desktopTest {
-            dependsOn(jvmTest)
+        linuxx64StubsMain {
+            dependsOn(commonStubsMain)
         }
 
         androidInstrumentedTest {
-            dependsOn(jvmTest)
+            dependsOn(commonTest)
             dependencies {
                 implementation(project(":compose:material3:material3"))
                 implementation(project(":compose:test-utils"))
                 implementation(project(":window:window-testing"))
                 implementation(libs.junit)
+                implementation(libs.kotlinTest)
                 implementation(libs.testRunner)
                 implementation(libs.truth)
             }
         }
 
         androidUnitTest {
-            dependsOn(jvmTest)
+            dependsOn(commonTest)
             dependencies {
                 implementation(libs.junit)
                 implementation(libs.testRunner)
@@ -111,25 +114,12 @@ androidXMultiplatform {
     }
 }
 
-android {
-    namespace "androidx.compose.material3.adaptive.layout"
-}
-
 androidx {
     name = "Material Adaptive"
-    type = LibraryType.PUBLISHED_LIBRARY_ONLY_USED_BY_KOTLIN_CONSUMERS
+    type = SoftwareType.PUBLISHED_LIBRARY_ONLY_USED_BY_KOTLIN_CONSUMERS
     inceptionYear = "2023"
     description = "Compose Material Design Adaptive Library"
+    legacyDisableKotlinStrictApiMode = true
     samples(project(":compose:material3:adaptive:adaptive-samples"))
-}
-
-tasks.withType(KotlinCompile).configureEach {
-    kotlinOptions.freeCompilerArgs += "-Xcontext-receivers"
-}
-
-// Screenshot tests related setup
-android {
-    sourceSets.androidTest.assets.srcDirs +=
-            project.rootDir.absolutePath + "/../../golden/compose/material3/adaptive"
-    namespace "androidx.compose.material3.adaptive.layout"
+    addGoldenImageAssets()
 }

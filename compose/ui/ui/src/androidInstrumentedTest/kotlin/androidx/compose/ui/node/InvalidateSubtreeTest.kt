@@ -19,19 +19,24 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.DrawModifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.LayoutModifier
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import com.google.common.truth.Truth.assertThat
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,12 +44,12 @@ import org.junit.runner.RunWith
 @MediumTest
 @RunWith(AndroidJUnit4::class)
 class InvalidateSubtreeTest {
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     @Test
     fun invalidateSubtreeNoLayers() {
         lateinit var invalidate: () -> Unit
+        var drawLatch = CountDownLatch(1)
         val counter1 = LayoutAndDrawCounter()
         val counter2 = LayoutAndDrawCounter()
         val counter3 = LayoutAndDrawCounter()
@@ -52,12 +57,11 @@ class InvalidateSubtreeTest {
             invalidate = { node.invalidateSubtree() }
         }
         rule.setContent {
-            Box(counter1) {
-                Box(counter2 then captureInvalidate) {
-                    Box(counter3.size(10.dp))
-                }
+            Box(counter1.drawBehind { drawLatch.countDown() }) {
+                Box(counter2 then captureInvalidate) { Box(counter3.size(10.dp)) }
             }
         }
+        assertThat(drawLatch.await(1, TimeUnit.SECONDS)).isTrue()
         rule.waitForIdle()
         assertThat(counter1.drawCount).isEqualTo(1)
         assertThat(counter1.measureCount).isEqualTo(1)
@@ -68,10 +72,10 @@ class InvalidateSubtreeTest {
         assertThat(counter3.drawCount).isEqualTo(1)
         assertThat(counter3.measureCount).isEqualTo(1)
         assertThat(counter3.placeCount).isEqualTo(1)
+        drawLatch = CountDownLatch(1)
 
-        rule.runOnUiThread {
-            invalidate()
-        }
+        rule.runOnUiThread { invalidate() }
+        assertThat(drawLatch.await(1, TimeUnit.SECONDS)).isTrue()
         rule.waitForIdle()
 
         // There isn't a layer that can be invalidated, so we draw this twice also
@@ -97,9 +101,12 @@ class InvalidateSubtreeTest {
             invalidate = { node.invalidateSubtree() }
         }
         rule.setContent {
-            Box(Modifier.graphicsLayer {} then counter1.graphicsLayer { }) {
-                Box(Modifier.graphicsLayer { } then
-                    counter2 then captureInvalidate.graphicsLayer { } then counter3
+            Box(Modifier.graphicsLayer {} then counter1.graphicsLayer {}) {
+                Box(
+                    Modifier.graphicsLayer {} then
+                        counter2 then
+                        captureInvalidate.graphicsLayer {} then
+                        counter3
                 ) {
                     Box(counter4.size(10.dp))
                 }
@@ -111,9 +118,7 @@ class InvalidateSubtreeTest {
         assertThat(counter3.drawCount).isEqualTo(1)
         assertThat(counter4.drawCount).isEqualTo(1)
 
-        rule.runOnUiThread {
-            invalidate()
-        }
+        rule.runOnUiThread { invalidate() }
         rule.waitForIdle()
 
         assertThat(counter1.drawCount).isEqualTo(1)
@@ -122,13 +127,116 @@ class InvalidateSubtreeTest {
         assertThat(counter4.drawCount).isEqualTo(2)
     }
 
+    @Test
+    fun invalidateLayoutForSubtreeTest() {
+        lateinit var invalidate: () -> Unit
+        var layoutLatch = CountDownLatch(1)
+        val counter1 = LayoutAndDrawCounter()
+        val counter2 = LayoutAndDrawCounter()
+        val counter3 = LayoutAndDrawCounter()
+        val captureInvalidate = CaptureInvalidateCounterElement { node ->
+            invalidate = { node.invalidateLayoutForSubtree() }
+        }
+        rule.setContent {
+            Box(counter1) {
+                Box(
+                    counter2 then
+                        captureInvalidate.layout { measurable, constraints ->
+                            val p = measurable.measure(constraints)
+                            layoutLatch.countDown()
+                            layout(p.width, p.height) { p.place(IntOffset.Zero) }
+                        }
+                ) {
+                    Box(counter3.size(10.dp))
+                }
+            }
+        }
+        assertThat(layoutLatch.await(1, TimeUnit.SECONDS)).isTrue()
+        rule.waitForIdle()
+        assertThat(counter1.drawCount).isEqualTo(1)
+        assertThat(counter1.measureCount).isEqualTo(1)
+        assertThat(counter1.placeCount).isEqualTo(1)
+        assertThat(counter2.drawCount).isEqualTo(1)
+        assertThat(counter2.measureCount).isEqualTo(1)
+        assertThat(counter2.placeCount).isEqualTo(1)
+        assertThat(counter3.drawCount).isEqualTo(1)
+        assertThat(counter3.measureCount).isEqualTo(1)
+        assertThat(counter3.placeCount).isEqualTo(1)
+        layoutLatch = CountDownLatch(1)
+
+        rule.runOnUiThread { invalidate() }
+        assertThat(layoutLatch.await(1, TimeUnit.SECONDS)).isTrue()
+        rule.waitForIdle()
+
+        assertThat(counter1.drawCount).isEqualTo(1)
+        assertThat(counter1.measureCount).isEqualTo(1)
+        assertThat(counter1.placeCount).isEqualTo(1)
+        assertThat(counter2.drawCount).isEqualTo(1)
+        assertThat(counter2.measureCount).isEqualTo(2)
+        assertThat(counter2.placeCount).isEqualTo(2)
+        assertThat(counter3.drawCount).isEqualTo(1)
+        assertThat(counter3.measureCount).isEqualTo(2)
+        assertThat(counter3.placeCount).isEqualTo(2)
+    }
+
+    @Test
+    fun invalidateDrawForSubtreeTest() {
+        lateinit var invalidate: () -> Unit
+        var drawLatch = CountDownLatch(1)
+        val counter1 = LayoutAndDrawCounter()
+        val counter2 = LayoutAndDrawCounter()
+        val counter3 = LayoutAndDrawCounter()
+        val counter4 = LayoutAndDrawCounter()
+        val captureInvalidate = CaptureInvalidateCounterElement { node ->
+            invalidate = { node.invalidateDrawForSubtree() }
+        }
+        rule.setContent {
+            Box(counter1.graphicsLayer().then(counter2).drawBehind { drawLatch.countDown() }) {
+                Box(counter3.then(captureInvalidate)) { Box(counter4.size(10.dp)) }
+            }
+        }
+        assertThat(drawLatch.await(1, TimeUnit.SECONDS)).isTrue()
+        rule.waitForIdle()
+        assertThat(counter1.drawCount).isEqualTo(1)
+        assertThat(counter1.measureCount).isEqualTo(1)
+        assertThat(counter1.placeCount).isEqualTo(1)
+        assertThat(counter2.drawCount).isEqualTo(1)
+        assertThat(counter2.measureCount).isEqualTo(1)
+        assertThat(counter2.placeCount).isEqualTo(1)
+        assertThat(counter3.drawCount).isEqualTo(1)
+        assertThat(counter3.measureCount).isEqualTo(1)
+        assertThat(counter3.placeCount).isEqualTo(1)
+        assertThat(counter4.drawCount).isEqualTo(1)
+        assertThat(counter4.measureCount).isEqualTo(1)
+        assertThat(counter4.placeCount).isEqualTo(1)
+        drawLatch = CountDownLatch(1)
+
+        rule.runOnUiThread { invalidate() }
+        assertThat(drawLatch.await(1, TimeUnit.SECONDS)).isTrue()
+        rule.waitForIdle()
+
+        assertThat(counter1.drawCount).isEqualTo(1)
+        assertThat(counter1.measureCount).isEqualTo(1)
+        assertThat(counter1.placeCount).isEqualTo(1)
+        assertThat(counter2.drawCount).isEqualTo(2)
+        assertThat(counter2.measureCount).isEqualTo(1)
+        assertThat(counter2.placeCount).isEqualTo(1)
+        assertThat(counter3.drawCount).isEqualTo(2)
+        assertThat(counter3.measureCount).isEqualTo(1)
+        assertThat(counter3.placeCount).isEqualTo(1)
+        assertThat(counter4.drawCount).isEqualTo(2)
+        assertThat(counter4.measureCount).isEqualTo(1)
+        assertThat(counter4.placeCount).isEqualTo(1)
+    }
+
     private class LayoutAndDrawCounter : LayoutModifier, DrawModifier {
         var measureCount = 0
         var placeCount = 0
         var drawCount = 0
+
         override fun MeasureScope.measure(
             measurable: Measurable,
-            constraints: Constraints
+            constraints: Constraints,
         ): MeasureResult {
             measureCount++
             val p = measurable.measure(constraints)
@@ -147,8 +255,7 @@ class InvalidateSubtreeTest {
     private class CaptureInvalidateCounterElement(
         private val onCreate: (node: Modifier.Node) -> Unit
     ) : ModifierNodeElement<Modifier.Node>() {
-        override fun create() = object : Modifier.Node() {}
-            .apply<Modifier.Node>(onCreate)
+        override fun create() = object : Modifier.Node() {}.apply<Modifier.Node>(onCreate)
 
         override fun update(node: Modifier.Node) {}
 
@@ -157,6 +264,7 @@ class InvalidateSubtreeTest {
         }
 
         override fun hashCode() = 0
+
         override fun equals(other: Any?) = (other === this)
     }
 }

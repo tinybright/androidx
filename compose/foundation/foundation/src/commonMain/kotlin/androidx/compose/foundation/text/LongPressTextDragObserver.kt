@@ -19,7 +19,6 @@ package androidx.compose.foundation.text
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.util.fastAny
@@ -39,15 +38,13 @@ internal interface TextDragObserver {
      */
     fun onDown(point: Offset)
 
-    /**
-     * Called after [onDown] if an up event is received without dragging.
-     */
+    /** Called after [onDown] if an up event is received without dragging. */
     fun onUp()
 
     /**
-     * Called once a drag gesture has started, which means touch slop has been exceeded.
-     * [onDown] _may_ be called before this method if the down event could not have
-     * started a different gesture.
+     * Called once a drag gesture has started, which means touch slop has been exceeded. [onDown]
+     * _may_ be called before this method if the down event could not have started a different
+     * gesture.
      */
     fun onStart(startPoint: Offset)
 
@@ -58,19 +55,6 @@ internal interface TextDragObserver {
     fun onCancel()
 }
 
-internal suspend fun PointerInputScope.detectDragGesturesAfterLongPressWithObserver(
-    observer: TextDragObserver
-) = detectDragGesturesAfterLongPress(
-    onDragEnd = { observer.onStop() },
-    onDrag = { _, offset ->
-        observer.onDrag(offset)
-    },
-    onDragStart = {
-        observer.onStart(it)
-    },
-    onDragCancel = { observer.onCancel() }
-)
-
 /**
  * Detects gesture events for a [TextDragObserver], including both initial down events and drag
  * events.
@@ -79,19 +63,12 @@ internal suspend fun PointerInputScope.detectDownAndDragGesturesWithObserver(
     observer: TextDragObserver
 ) {
     coroutineScope {
-        launch(start = CoroutineStart.UNDISPATCHED) {
-            detectPreDragGesturesWithObserver(observer)
-        }
-        launch(start = CoroutineStart.UNDISPATCHED) {
-            detectDragGesturesWithObserver(observer)
-        }
+        launch(start = CoroutineStart.UNDISPATCHED) { detectPreDragGesturesWithObserver(observer) }
+        launch(start = CoroutineStart.UNDISPATCHED) { detectDragGesturesWithObserver(observer) }
     }
 }
 
-/**
- * Detects initial down events and calls [TextDragObserver.onDown] and
- * [TextDragObserver.onUp].
- */
+/** Detects initial down events and calls [TextDragObserver.onDown] and [TextDragObserver.onUp]. */
 private suspend fun PointerInputScope.detectPreDragGesturesWithObserver(
     observer: TextDragObserver
 ) {
@@ -106,20 +83,12 @@ private suspend fun PointerInputScope.detectPreDragGesturesWithObserver(
     }
 }
 
-/**
- * Detects drag gestures for a [TextDragObserver].
- */
-private suspend fun PointerInputScope.detectDragGesturesWithObserver(
-    observer: TextDragObserver
-) {
+/** Detects drag gestures for a [TextDragObserver]. */
+private suspend fun PointerInputScope.detectDragGesturesWithObserver(observer: TextDragObserver) {
     detectDragGestures(
         onDragEnd = { observer.onStop() },
-        onDrag = { _, offset ->
-            observer.onDrag(offset)
-        },
-        onDragStart = {
-            observer.onStart(it)
-        },
-        onDragCancel = { observer.onCancel() }
+        onDrag = { _, offset -> observer.onDrag(offset) },
+        onDragStart = { observer.onStart(it) },
+        onDragCancel = { observer.onCancel() },
     )
 }

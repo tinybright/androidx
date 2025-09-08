@@ -19,15 +19,13 @@ package androidx.lifecycle
 import androidx.annotation.MainThread
 import kotlinx.coroutines.Job
 
-/**
- * Attaches to a lifecycle and controls the [DispatchQueue]'s execution.
- */
+/** Attaches to a lifecycle and controls the [DispatchQueue]'s execution. */
 @MainThread
 internal class LifecycleController(
     private val lifecycle: Lifecycle,
     private val minState: Lifecycle.State,
     private val dispatchQueue: DispatchQueue,
-    parentJob: Job
+    parentJob: Job,
 ) {
     private val observer = LifecycleEventObserver { source, _ ->
         if (source.lifecycle.currentState == Lifecycle.State.DESTROYED) {

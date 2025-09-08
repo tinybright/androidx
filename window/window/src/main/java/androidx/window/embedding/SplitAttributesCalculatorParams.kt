@@ -26,39 +26,41 @@ import androidx.window.layout.WindowMetrics
  * [SplitController.setSplitAttributesCalculator] and references the corresponding [SplitRule] by
  * [splitRuleTag] if [SplitPairRule.tag] is specified.
  */
-class SplitAttributesCalculatorParams @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
+public class SplitAttributesCalculatorParams
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     /** The parent container's [WindowMetrics] */
-    val parentWindowMetrics: WindowMetrics,
+    public val parentWindowMetrics: WindowMetrics,
     /** The parent container's [Configuration] */
-    val parentConfiguration: Configuration,
+    public val parentConfiguration: Configuration,
     /** The parent container's [WindowLayoutInfo] */
-    val parentWindowLayoutInfo: WindowLayoutInfo,
+    public val parentWindowLayoutInfo: WindowLayoutInfo,
     /**
      * The [SplitRule.defaultSplitAttributes]. It could be from [SplitRule] Builder APIs
      * ([SplitPairRule.Builder.setDefaultSplitAttributes] or
      * [SplitPlaceholderRule.Builder.setDefaultSplitAttributes]) or from the `splitRatio` and
      * `splitLayoutDirection` attributes from static rule definitions.
      */
-    val defaultSplitAttributes: SplitAttributes,
+    public val defaultSplitAttributes: SplitAttributes,
     /**
-     * Whether the [parentWindowMetrics] satisfies the dimensions and aspect
-     * ratios requirements specified in the [SplitRule], which are:
-     *  - [SplitRule.minWidthDp]
-     *  - [SplitRule.minHeightDp]
-     *  - [SplitRule.minSmallestWidthDp]
-     *  - [SplitRule.maxAspectRatioInPortrait]
-     *  - [SplitRule.maxAspectRatioInLandscape]
+     * Whether the [parentWindowMetrics] satisfies the dimensions and aspect ratios requirements
+     * specified in the [SplitRule], which are:
+     * - [SplitRule.minWidthDp]
+     * - [SplitRule.minHeightDp]
+     * - [SplitRule.minSmallestWidthDp]
+     * - [SplitRule.maxAspectRatioInPortrait]
+     * - [SplitRule.maxAspectRatioInLandscape]
      */
-    @get: JvmName("areDefaultConstraintsSatisfied")
-    val areDefaultConstraintsSatisfied: Boolean,
+    @get:JvmName("areDefaultConstraintsSatisfied")
+    public val areDefaultConstraintsSatisfied: Boolean,
     /**
-     * The [tag of `SplitRule`][SplitRule.tag] to apply this [SplitAttributes], which is `null`
-     * if the tag is not set.
+     * The [tag of `SplitRule`][SplitRule.tag] to apply this [SplitAttributes], which is `null` if
+     * the tag is not set.
      *
      * @see SplitPairRule.Builder.setTag
      * @see SplitPlaceholderRule.Builder.setTag
      */
-    val splitRuleTag: String?,
+    public val splitRuleTag: String?,
 ) {
     override fun toString(): String =
         "${SplitAttributesCalculatorParams::class.java.simpleName}:{" +

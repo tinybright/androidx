@@ -19,23 +19,23 @@ package androidx.work
  * An abstract class that allows the user to define how to merge a list of inputs to a
  * [ListenableWorker].
  *
- * Before workers run, they receive input [Data] from their parent workers, as well as
- * anything specified directly to them via [WorkRequest.Builder.setInputData].  An
- * InputMerger takes all of these objects and converts them to a single merged [Data] to be
- * used as the worker input.  [WorkManager] offers two concrete InputMerger implementations:
- * [OverwritingInputMerger] and [ArrayCreatingInputMerger].
+ * Before workers run, they receive input [Data] from their parent workers, as well as anything
+ * specified directly to them via [WorkRequest.Builder.setInputData]. An InputMerger takes all of
+ * these objects and converts them to a single merged [Data] to be used as the worker input.
+ * [WorkManager] offers two concrete InputMerger implementations: [OverwritingInputMerger] and
+ * [ArrayCreatingInputMerger].
  *
- * Note that the list of inputs to merge is in an unspecified order.  You should not make
- * assumptions about the order of inputs.
+ * Note that the list of inputs to merge is in an unspecified order. You should not make assumptions
+ * about the order of inputs.
  */
-abstract class InputMerger {
+public abstract class InputMerger {
     /**
      * Merges a list of [Data] and outputs a single Data object.
      *
      * @param inputs A list of [Data]
      * @return The merged output
      */
-    abstract fun merge(inputs: List<Data>): Data
+    public abstract fun merge(inputs: List<Data>): Data
 }
 
 private val TAG = Logger.tagWithPrefix("InputMerger")

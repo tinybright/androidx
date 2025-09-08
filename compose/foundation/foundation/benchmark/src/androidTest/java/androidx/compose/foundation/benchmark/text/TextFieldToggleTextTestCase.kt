@@ -18,7 +18,6 @@
 
 package androidx.compose.foundation.benchmark.text
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.requiredWidth
@@ -50,16 +49,14 @@ class TextFieldToggleTextTestCase(
     private val textLength: Int,
     private val textNumber: Int,
     private val width: Dp,
-    private val fontSize: TextUnit
+    private val fontSize: TextUnit,
 ) : LayeredComposeTestCase(), ToggleableTestCase {
 
     private val textInputService = TextInputService(TestPlatformTextInputService())
 
-    private val texts = List(textNumber) {
-        mutableStateOf(textGenerator.nextParagraph(length = textLength))
-    }
+    private val texts =
+        List(textNumber) { mutableStateOf(textGenerator.nextParagraph(length = textLength)) }
 
-    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     override fun MeasuredContent() {
         for (text in texts) {
@@ -67,26 +64,20 @@ class TextFieldToggleTextTestCase(
                 value = text.value,
                 onValueChange = {},
                 textStyle = TextStyle(color = Color.Black, fontSize = fontSize),
-                modifier = Modifier.background(color = Color.Cyan).requiredWidth(width)
+                modifier = Modifier.background(color = Color.Cyan).requiredWidth(width),
             )
         }
     }
 
     @Composable
     override fun ContentWrappers(content: @Composable () -> Unit) {
-        Column(
-            modifier = Modifier.width(width).verticalScroll(rememberScrollState())
-        ) {
-            CompositionLocalProvider(LocalTextInputService provides textInputService) {
-                content()
-            }
+        Column(modifier = Modifier.width(width).verticalScroll(rememberScrollState())) {
+            CompositionLocalProvider(LocalTextInputService provides textInputService) { content() }
         }
     }
 
     override fun toggleState() {
-        texts.forEach {
-            it.value = textGenerator.nextParagraph(length = textLength)
-        }
+        texts.forEach { it.value = textGenerator.nextParagraph(length = textLength) }
     }
 
     private class TestPlatformTextInputService : PlatformTextInputService {
@@ -94,11 +85,23 @@ class TextFieldToggleTextTestCase(
             value: TextFieldValue,
             imeOptions: ImeOptions,
             onEditCommand: (List<EditCommand>) -> Unit,
-            onImeActionPerformed: (ImeAction) -> Unit
-        ) { /*do nothing*/ }
-        override fun stopInput() { /*do nothing*/ }
-        override fun showSoftwareKeyboard() { /*do nothing*/ }
-        override fun hideSoftwareKeyboard() { /*do nothing*/ }
+            onImeActionPerformed: (ImeAction) -> Unit,
+        ) {
+            /*do nothing*/
+        }
+
+        override fun stopInput() {
+            /*do nothing*/
+        }
+
+        override fun showSoftwareKeyboard() {
+            /*do nothing*/
+        }
+
+        override fun hideSoftwareKeyboard() {
+            /*do nothing*/
+        }
+
         override fun updateState(oldValue: TextFieldValue?, newValue: TextFieldValue) {
             /*do nothing*/
         }

@@ -18,12 +18,12 @@ package androidx.camera.core.processing
 
 import android.graphics.SurfaceTexture
 import android.opengl.Matrix
-import android.os.Build
 import android.os.Looper
 import android.util.Size
 import android.view.Surface
 import androidx.camera.core.CameraEffect
 import androidx.camera.core.CameraSelector.LENS_FACING_FRONT
+import androidx.camera.core.SurfaceOutput
 import androidx.camera.core.impl.ImageFormatConstants.INTERNAL_DEFINED_IMAGE_FORMAT_PRIVATE
 import androidx.camera.core.impl.utils.TransformUtils.sizeToRect
 import androidx.camera.core.impl.utils.executor.CameraXExecutors.mainThreadExecutor
@@ -36,13 +36,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
-import org.robolectric.annotation.Config
 import org.robolectric.annotation.internal.DoNotInstrument
 
 /** Unit tests for [SurfaceOutputImpl]. */
 @RunWith(RobolectricTestRunner::class)
 @DoNotInstrument
-@Config(minSdk = Build.VERSION_CODES.LOLLIPOP)
 class SurfaceOutputImplTest {
 
     companion object {
@@ -169,12 +167,15 @@ class SurfaceOutputImplTest {
                 TARGET,
                 INTERNAL_DEFINED_IMAGE_FORMAT_PRIVATE,
                 OUTPUT_SIZE,
-                INPUT_SIZE,
-                sizeToRect(INPUT_SIZE),
-                /*rotationDegrees=*/ 180,
-                /*mirroring=*/ false,
-                camera,
-                android.graphics.Matrix()
+                SurfaceOutput.CameraInputInfo.of(
+                    INPUT_SIZE,
+                    sizeToRect(INPUT_SIZE),
+                    camera,
+                    /*rotationDegrees=*/ 180,
+                    /*mirroring=*/ false,
+                ),
+                null,
+                android.graphics.Matrix(),
             )
             .apply { surfaceOutputsToCleanup.add(this) }
 }

@@ -69,7 +69,7 @@ class AdapterDataSetChangeWhileSmoothScrollTest(private val config: TestConfig) 
         val rtl: Boolean,
         val targetBound: Boolean,
         val modification: Modification,
-        val adapterProvider: AdapterProviderForItems
+        val adapterProvider: AdapterProviderForItems,
     )
 
     companion object {
@@ -83,7 +83,7 @@ class AdapterDataSetChangeWhileSmoothScrollTest(private val config: TestConfig) 
         SHIFT_FIRST_VISIBLE_THEN_REMOVE_FIRST,
         SHIFT_FIRST_VISIBLE_THEN_REMOVE_LAST,
         SHIFT_FIRST_VISIBLE_THEN_REMOVE_FIRST_AND_LAST,
-        REMOVE_FIRST_VISIBLE
+        REMOVE_FIRST_VISIBLE,
     }
 
     // start and end of the window of opportunity to modify the dataset
@@ -132,11 +132,12 @@ class AdapterDataSetChangeWhileSmoothScrollTest(private val config: TestConfig) 
             test.assertBasicState(expectedFinalPosition, dataSet[expectedFinalPosition])
             recorder.apply {
                 val removeItemMarkIx = markerIx(modificationMark)
-                val expectedSelectEvents = if (targetPage == expectedFinalPosition) {
-                    listOf(targetPage)
-                } else {
-                    listOf(targetPage, expectedFinalPosition)
-                }
+                val expectedSelectEvents =
+                    if (targetPage == expectedFinalPosition) {
+                        listOf(targetPage)
+                    } else {
+                        listOf(targetPage, expectedFinalPosition)
+                    }
                 // verify all events
                 assertThat(settlingIx, equalTo(0))
                 assertThat(pageSelectedIx(targetPage), equalTo(1))
@@ -151,8 +152,9 @@ class AdapterDataSetChangeWhileSmoothScrollTest(private val config: TestConfig) 
                 listOf(scrollsBeforeMarker, scrollsAfterMarker).forEach {
                     it.assertPositionSorted(SortOrder.ASC)
                     it.assertValueCorrectness(
-                        0, targetPage + removeCountHead,
-                        test.viewPager.pageSize
+                        0,
+                        targetPage + removeCountHead,
+                        test.viewPager.pageSize,
                     )
                 }
                 // Only check assertOffsetSorted on scroll events _before_ the marker:
@@ -171,18 +173,17 @@ class AdapterDataSetChangeWhileSmoothScrollTest(private val config: TestConfig) 
     }
 
     private fun scrollToTargetUntilWindowStart() {
-        val latch = test.viewPager
-            .addWaitForDistanceToTarget(targetPage, targetPage - windowStart - epsilon)
-        test.runOnUiThreadSync {
-            test.viewPager.setCurrentItem(targetPage, true)
-        }
+        val latch =
+            test.viewPager.addWaitForDistanceToTarget(
+                targetPage,
+                targetPage - windowStart - epsilon,
+            )
+        test.runOnUiThreadSync { test.viewPager.setCurrentItem(targetPage, true) }
         latch.await(2, SECONDS)
     }
 
     private fun verifyWindowOfOpportunity(lastScrollEvent: OnPageScrolledEvent) {
-        val lastScrollPosition = lastScrollEvent.let {
-            it.position + it.positionOffset.toDouble()
-        }
+        val lastScrollPosition = lastScrollEvent.let { it.position + it.positionOffset.toDouble() }
         if (lastScrollPosition >= windowEnd) {
             throw RetryException(
                 "Data set should be modified while scrolling through " +
@@ -233,9 +234,7 @@ class AdapterDataSetChangeWhileSmoothScrollTest(private val config: TestConfig) 
     private fun removeLastPages() {
         // Remove last items (including the target)
         val removeCount = pageCount - targetPage
-        repeat(removeCount) {
-            dataSet.removeAt(targetPage)
-        }
+        repeat(removeCount) { dataSet.removeAt(targetPage) }
         test.viewPager.adapter!!.notifyItemRangeRemoved(targetPage, removeCount)
     }
 
@@ -253,30 +252,49 @@ class AdapterDataSetChangeWhileSmoothScrollTest(private val config: TestConfig) 
         data class OnPageScrolledEvent(
             val position: Int,
             val positionOffset: Float,
-            val positionOffsetPixels: Int
+            val positionOffsetPixels: Int,
         ) : Event()
+
         data class OnPageSelectedEvent(val position: Int) : Event()
+
         data class OnPageScrollStateChangedEvent(val state: Int) : Event()
+
         data class MarkerEvent(val id: Int) : Event()
     }
 
     private class RecordingCallback : ViewPager2.OnPageChangeCallback() {
         private val events = mutableListOf<Event>()
 
-        val scrollEvents get() = events.mapNotNull { it as? OnPageScrolledEvent }
-        val selectEvents get() = events.mapNotNull { it as? OnPageSelectedEvent }
-        val eventCount get() = events.size
-        val scrollEventCount get() = scrollEvents.size
-        val lastIx get() = events.size - 1
-        val settlingIx get() = events.indexOf(OnPageScrollStateChangedEvent(SCROLL_STATE_SETTLING))
-        val idleIx get() = events.indexOf(OnPageScrollStateChangedEvent(SCROLL_STATE_IDLE))
+        val scrollEvents
+            get() = events.mapNotNull { it as? OnPageScrolledEvent }
+
+        val selectEvents
+            get() = events.mapNotNull { it as? OnPageSelectedEvent }
+
+        val eventCount
+            get() = events.size
+
+        val scrollEventCount
+            get() = scrollEvents.size
+
+        val lastIx
+            get() = events.size - 1
+
+        val settlingIx
+            get() = events.indexOf(OnPageScrollStateChangedEvent(SCROLL_STATE_SETTLING))
+
+        val idleIx
+            get() = events.indexOf(OnPageScrollStateChangedEvent(SCROLL_STATE_IDLE))
+
         val pageSelectedIx: (page: Int) -> Int = { events.indexOf(OnPageSelectedEvent(it)) }
         val markerIx: (id: Int) -> Int = { events.indexOf(MarkerEvent(it)) }
 
-        val scrollEventsBefore: (ix: Int) -> List<OnPageScrolledEvent> =
-            { scrollEventsBetween(0, it) }
-        val scrollEventsAfter: (ix: Int) -> List<OnPageScrolledEvent> =
-            { scrollEventsBetween(it + 1, events.size) }
+        val scrollEventsBefore: (ix: Int) -> List<OnPageScrolledEvent> = {
+            scrollEventsBetween(0, it)
+        }
+        val scrollEventsAfter: (ix: Int) -> List<OnPageScrolledEvent> = {
+            scrollEventsBetween(it + 1, events.size)
+        }
         val scrollEventsBetween: (fromIx: Int, toIx: Int) -> List<OnPageScrolledEvent> = { a, b ->
             events.subList(a, b).mapNotNull { it as? OnPageScrolledEvent }
         }
@@ -284,7 +302,7 @@ class AdapterDataSetChangeWhileSmoothScrollTest(private val config: TestConfig) 
         override fun onPageScrolled(
             position: Int,
             positionOffset: Float,
-            positionOffsetPixels: Int
+            positionOffsetPixels: Int,
         ) {
             events.add(OnPageScrolledEvent(position, positionOffset, positionOffsetPixels))
         }
@@ -320,7 +338,7 @@ class AdapterDataSetChangeWhileSmoothScrollTest(private val config: TestConfig) 
     private fun List<OnPageScrolledEvent>.assertValueCorrectness(
         initialPage: Int,
         otherPage: Int,
-        pageSize: Int
+        pageSize: Int,
     ) = forEach {
         assertThat(it.position, isBetweenInInMinMax(initialPage, otherPage))
         assertThat(it.positionOffset, isBetweenInEx(0f, 1f))
@@ -339,7 +357,7 @@ class AdapterDataSetChangeWhileSmoothScrollTest(private val config: TestConfig) 
                 .dropWhile { it == sortOrder.sign }
                 .dropWhile { it != sortOrder.sign }
                 .size,
-            equalTo(0)
+            equalTo(0),
         )
     }
 

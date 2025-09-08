@@ -26,15 +26,13 @@ import androidx.health.connect.client.response.ChangesResponse
 import androidx.health.platform.client.proto.ChangeProto
 import androidx.health.platform.client.proto.ResponseProto
 
-/**
- * Converts proto response to public API object.
- */
+/** Converts proto response to public API object. */
 fun toChangesResponse(proto: ResponseProto.GetChangesResponse): ChangesResponse {
     return ChangesResponse(
         changes = extractChanges(proto.changesList),
         nextChangesToken = proto.nextChangesToken,
         hasMore = proto.hasMore,
-        changesTokenExpired = proto.changesTokenExpired
+        changesTokenExpired = proto.changesTokenExpired,
     )
 }
 

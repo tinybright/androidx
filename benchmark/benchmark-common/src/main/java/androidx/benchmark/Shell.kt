@@ -32,6 +32,8 @@ import java.io.Closeable
 import java.io.File
 import java.io.InputStream
 import java.nio.charset.Charset
+import kotlin.random.Random
+import kotlin.random.nextUInt
 
 /**
  * Wrappers for UiAutomation.executeShellCommand to handle compat behavior, and add additional
@@ -39,6 +41,9 @@ import java.nio.charset.Charset
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object Shell {
+
+    private const val COMPILATION_PROFILE_UNKNOWN = "unknown"
+
     /**
      * Returns true if the line from ps output contains the given process/package name.
      *
@@ -54,38 +59,28 @@ object Shell {
      * As this function is also used for package names (which never have a leading `/`), we simply
      * check for either.
      */
-    private fun psLineContainsProcess(psOutputLine: String, processName: String): Boolean {
-        return psOutputLine.endsWith(" $processName") || psOutputLine.endsWith("/$processName")
+    internal fun psLineContainsProcess(psOutputLine: String, processName: String): Boolean {
+        val processLabel = psOutputLine.substringAfterLast(" ")
+        return processLabel == processName || // exact match
+            processLabel.startsWith("$processName:") || // app subprocess
+            processLabel.endsWith("/$processName") // executable with relative path
     }
 
     /**
      * Equivalent of [psLineContainsProcess], but to be used with full process name string (e.g.
      * from pgrep)
      */
-    private fun fullProcessNameMatchesProcess(
+    internal fun fullProcessNameMatchesProcess(
         fullProcessName: String,
-        processName: String
+        processName: String,
     ): Boolean {
-        return fullProcessName == processName || fullProcessName.endsWith("/$processName")
+        return fullProcessName == processName || // exact match
+            fullProcessName.startsWith("$processName:") || // app subprocess
+            fullProcessName.endsWith("/$processName") // executable with relative path
     }
 
     fun connectUiAutomation() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            ShellImpl // force initialization
-        }
-    }
-
-    /**
-     * Run a command, and capture stdout, dropping / ignoring stderr
-     *
-     * Below L, returns null
-     */
-    fun optionalCommand(command: String): String? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            executeScriptCaptureStdoutStderr(command).stdout
-        } else {
-            null
-        }
+        ShellImpl // force initialization
     }
 
     /**
@@ -93,7 +88,7 @@ object Shell {
      * directly by the app process.
      */
     fun catProcFileLong(path: String): Long? {
-        return optionalCommand("cat $path")?.trim()?.run {
+        return executeScriptCaptureStdoutStderr("cat $path").stdout.trim().run {
             try {
                 toLong()
             } catch (exception: NumberFormatException) {
@@ -109,11 +104,10 @@ object Shell {
      * Note: Does not check for stderr, as this method is used during ShellImpl init, so stderr not
      * yet available
      */
-    @RequiresApi(21)
     internal fun getChecksum(path: String): String {
         val sum =
             if (Build.VERSION.SDK_INT >= 23) {
-                ShellImpl.executeCommandUnsafe("md5sum $path").substringBefore(" ")
+                md5sum(path)
             } else {
                 // this isn't good, but it's good enough for API 22
                 return getFileSizeLsUnsafe(path) ?: ""
@@ -133,7 +127,6 @@ object Shell {
     }
 
     /** Waits for the file size of the [path] to be table for at least [stableIterations]. */
-    @RequiresApi(21)
     @SuppressLint("BanThreadSleep") // Need polling to wait for file content to be flushed
     fun waitForFileFlush(
         path: String,
@@ -141,7 +134,7 @@ object Shell {
         maxInitialFlushWaitIterations: Int,
         maxStableFlushWaitIterations: Int,
         pollDurationMs: Long,
-        triggerFileFlush: () -> Unit
+        triggerFileFlush: () -> Unit,
     ) {
         var lastKnownSize = getFileSizeUnsafe(path)
 
@@ -180,7 +173,6 @@ object Shell {
     }
 
     /** Gets the file size for a given path. */
-    @RequiresApi(21)
     internal fun getFileSizeUnsafe(path: String): Long {
         // API 23 comes with the helpful stat command
         val fileSize =
@@ -203,7 +195,6 @@ object Shell {
      *
      * @return `null` when the file [path] cannot be found.
      */
-    @RequiresApi(21)
     private fun getFileSizeLsUnsafe(path: String): String? {
         val result = ShellImpl.executeCommandUnsafe("ls -l $path")
         return if (result.isBlank()) null else result.split(Regex("\\s+"))[3]
@@ -215,9 +206,16 @@ object Shell {
      * Note: this operation does checksum validation of dst, since it's used during setup of the
      * shell script used to capture stderr, so stderr isn't available.
      */
-    @RequiresApi(21)
     private fun moveToTmpAndMakeExecutable(src: String, dst: String) {
-        ShellImpl.executeCommandUnsafe("cp $src $dst")
+        if (UserInfo.isAdditionalUser) {
+            val dstFile = ShellFile(dst).also { it.delete() }
+            val srcFile = UserFile(src)
+            srcFile.copyTo(dstFile)
+        } else {
+            ShellImpl.executeCommandUnsafe("cp $src $dst")
+        }
+
+        // Sets execution permissions on the script
         if (Build.VERSION.SDK_INT >= 23) {
             ShellImpl.executeCommandUnsafe("chmod +x $dst")
         } else {
@@ -230,8 +228,8 @@ object Shell {
         // validate checksums instead of checking stderr, since it's not yet safe to
         // read from stderr. This detects the problem where root left a stale executable
         // that can't be modified by shell at the dst path
-        val srcSum = getChecksum(src)
-        val dstSum = getChecksum(dst)
+        val srcSum = getChecksum(path = src)
+        val dstSum = getChecksum(path = dst)
         if (srcSum != dstSum) {
             throw IllegalStateException(
                 "Failed to verify copied executable $dst, " +
@@ -247,7 +245,6 @@ object Shell {
      * Note: this operation does not validate command success, since it's used during setup of shell
      * scripting code used to parse stderr. This means callers should validate.
      */
-    @RequiresApi(21)
     fun createRunnableExecutable(name: String, inputStream: InputStream): String {
         // dirUsableByAppAndShell is writable, but we can't execute there (as of Q),
         // so we copy to /data/local/tmp
@@ -255,7 +252,7 @@ object Shell {
             File.createTempFile(
                 /* prefix */ "temporary_$name",
                 /* suffix */ null,
-                /* directory */ Outputs.dirUsableByAppAndShell
+                /* directory */ Outputs.dirUsableByAppAndShell,
             )
         val runnableExecutablePath = "/data/local/tmp/$name"
 
@@ -268,7 +265,7 @@ object Shell {
             }
             moveToTmpAndMakeExecutable(
                 src = writableExecutableFile.absolutePath,
-                dst = runnableExecutablePath
+                dst = runnableExecutablePath,
             )
         } finally {
             writableExecutableFile.delete()
@@ -281,12 +278,10 @@ object Shell {
      * Returns true if the shell session is rooted or su is usable, and thus root commands can be
      * run (e.g. atrace commands with root-only tags)
      */
-    @RequiresApi(21)
     fun isSessionRooted(): Boolean {
         return ShellImpl.isSessionRooted || ShellImpl.isSuAvailable
     }
 
-    @RequiresApi(21)
     fun getprop(propertyName: String): String {
         return executeScriptCaptureStdout("getprop $propertyName").trim()
     }
@@ -307,7 +302,6 @@ object Shell {
      * @param stdin String to pass in as stdin to first command in script
      * @return Stdout string
      */
-    @RequiresApi(21)
     fun executeScriptSilent(script: String, stdin: String? = null) {
         val output = executeScriptCaptureStdoutStderr(script, stdin)
         check(output.isBlank()) { "Expected no stdout/stderr from $script, saw $output" }
@@ -329,12 +323,49 @@ object Shell {
      * @param stdin String to pass in as stdin to first command in script
      * @return Stdout string
      */
-    @RequiresApi(21)
     @CheckResult
     fun executeScriptCaptureStdout(script: String, stdin: String? = null): String {
         val output = executeScriptCaptureStdoutStderr(script, stdin)
         check(output.stderr.isBlank()) { "Expected no stderr from $script, saw ${output.stderr}" }
         return output.stdout
+    }
+
+    internal fun parseCompilationMode(apiLevel: Int, dump: String): String {
+        require(apiLevel >= 24)
+
+        /**
+         * Note that the actual string can take several forms, depending on API level and
+         * potentially ABI as well.
+         *
+         * Emulators are known to have different structure than physical devices on the same API
+         * level, this is potentially due to ABI.
+         *
+         * For this reason, we use a relatively lax matching system (only relying on prefix, equals,
+         * and trailing bracket), and rely on tests to validate.
+         */
+        val modePrefix =
+            when (apiLevel) {
+                // lower API levels will sometimes have newlines within the compilation_filter=...
+                // so we're happy to accept any whitespace within. whitespace in the capture is
+                // filtered below
+                in 24..27 -> ", compilation_filter=".toCharArray().joinToString("\\s*?")
+                // haven't observed this on higher APIs :shrug:
+                else -> "\\[status="
+            }
+        return "Dexopt state:.*?$modePrefix([^]]+?)]"
+            .toRegex(RegexOption.DOT_MATCHES_ALL)
+            .find(dump)
+            ?.groups
+            ?.get(1)
+            ?.value
+            ?.filter { !it.isWhitespace() } ?: COMPILATION_PROFILE_UNKNOWN
+    }
+
+    @CheckResult
+    fun getCompilationMode(packageName: String): String {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) return "speed"
+        val dump = executeScriptCaptureStdout("cmd package dump $packageName").trim()
+        return parseCompilationMode(Build.VERSION.SDK_INT, dump)
     }
 
     /**
@@ -354,7 +385,6 @@ object Shell {
      * java -jar bundletool.jar install-apks --apks=out.apks
      * ```
      */
-    @RequiresApi(21)
     @CheckResult
     fun pmPath(packageName: String): List<String> {
         return executeScriptCaptureStdout("pm path $packageName").split("\n").mapNotNull {
@@ -395,7 +425,6 @@ object Shell {
      * @param stdin String to pass in as stdin to first command in script
      * @return Output object containing stdout and stderr of full script, and stderr of last command
      */
-    @RequiresApi(21)
     @CheckResult
     fun executeScriptCaptureStdoutStderr(script: String, stdin: String? = null): Output {
         return trace("executeScript $script".take(127)) {
@@ -409,7 +438,6 @@ object Shell {
      *
      * Only use this function if you do not care about failure / errors.
      */
-    @RequiresApi(21)
     @CheckResult
     fun executeCommandCaptureStdoutOnly(command: String): String {
         return ShellImpl.executeCommandUnsafe(command)
@@ -423,23 +451,20 @@ object Shell {
      * @param stdin String to pass in as stdin to first command in script
      * @return ShellScript that can be started.
      */
-    @RequiresApi(21)
     fun createShellScript(script: String, stdin: String? = null): ShellScript {
         return ShellImpl.createShellScript(script = script, stdin = stdin)
     }
 
-    @RequiresApi(21)
     fun isPackageAlive(packageName: String): Boolean {
         return getPidsForProcess(packageName).isNotEmpty()
     }
 
-    @RequiresApi(21)
     fun getPidsForProcess(processName: String): List<Int> {
         if (Build.VERSION.SDK_INT >= 23) {
-            return pgrepLF(pattern = processName).mapNotNull { (pid, fullProcessName) ->
+            return pgrepLF(pattern = processName).mapNotNull { runningProcess ->
                 // aggressive safety - ensure target isn't subset of another running package
-                if (fullProcessNameMatchesProcess(fullProcessName, processName)) {
-                    pid
+                if (fullProcessNameMatchesProcess(runningProcess.processName, processName)) {
+                    runningProcess.pid
                 } else {
                     null
                 }
@@ -472,32 +497,38 @@ object Shell {
      * @return List of processes - pid & full process name
      */
     @RequiresApi(23)
-    private fun pgrepLF(pattern: String): List<Pair<Int, String>> {
+    fun pgrepLF(pattern: String): List<ProcessPid> {
         // Note: we use the unsafe variant for performance, since this is a
         // common operation, and pgrep is stable after API 23 see [ShellBehaviorTest#pgrep]
-        return ShellImpl.executeCommandUnsafe("pgrep -l -f $pattern")
+        val apiSpecificArgs =
+            setOfNotNull(
+                    // aosp/3507001 -> needed to print full command line (so full package name)
+                    if (Build.VERSION.SDK_INT >= 36) "-a" else null
+                )
+                .joinToString(" ")
+
+        return ShellImpl.executeCommandUnsafe("pgrep -l -f $apiSpecificArgs $pattern")
             .split(Regex("\r?\n"))
             .filter { it.isNotEmpty() }
             .map {
                 val (pidString, process) = it.trim().split(" ")
-                Pair(pidString.toInt(), process)
+                ProcessPid(process, pidString.toInt())
             }
     }
 
-    @RequiresApi(21)
+    @RequiresApi(23)
+    fun getRunningPidsAndProcessesForPackage(packageName: String): List<ProcessPid> {
+        require(!packageName.contains(":")) { "Package $packageName must not contain ':'" }
+        return pgrepLF(pattern = packageName.replace(".", "\\.")).filter {
+            it.processName == packageName || it.processName.startsWith("$packageName:")
+        }
+    }
+
     fun getRunningProcessesForPackage(packageName: String): List<String> {
         require(!packageName.contains(":")) { "Package $packageName must not contain ':'" }
-
-        // pgrep is nice and fast, but requires API 23
         if (Build.VERSION.SDK_INT >= 23) {
-            return pgrepLF(pattern = packageName).mapNotNull { (_, process) ->
-                // aggressive safety - ensure target isn't subset of another running package
-                if (process == packageName || process.startsWith("$packageName:")) {
-                    process
-                } else {
-                    null
-                }
-            }
+            // uses pgrep which is nice and fast, but requires API 23
+            return getRunningPidsAndProcessesForPackage(packageName).map { it.processName }
         }
 
         // Grep device side, since ps output by itself gets truncated
@@ -521,7 +552,6 @@ object Shell {
      *
      * Both must match in order to return true.
      */
-    @RequiresApi(21)
     fun isProcessAlive(pid: Int, processName: String): Boolean {
         // unsafe, since this behavior is well tested, and performance here is important
         // See [ShellBehaviorTest#ps]
@@ -530,42 +560,55 @@ object Shell {
         }
     }
 
-    @RequiresApi(21)
     data class ProcessPid(val processName: String, val pid: Int) {
         fun isAlive() = isProcessAlive(pid, processName)
     }
 
-    @RequiresApi(21)
-    fun terminateProcessesAndWait(
-        waitPollPeriodMs: Long,
-        waitPollMaxCount: Int,
-        processName: String
-    ) {
-        val processes =
-            getPidsForProcess(processName).map { pid ->
-                ProcessPid(pid = pid, processName = processName)
-            }
-        terminateProcessesAndWait(
-            waitPollPeriodMs = waitPollPeriodMs,
-            waitPollMaxCount = waitPollMaxCount,
-            *processes.toTypedArray()
-        )
-    }
-
-    @RequiresApi(21)
-    fun terminateProcessesAndWait(
-        waitPollPeriodMs: Long,
-        waitPollMaxCount: Int,
-        vararg processes: ProcessPid
-    ) {
+    fun killTerm(processes: List<ProcessPid>) {
         processes.forEach {
             // NOTE: we don't fail on stdout/stderr, since killing processes can be racy, and
             // killing one can kill others. Instead, validation of process death happens below.
             val stopOutput = executeScriptCaptureStdoutStderr("kill -TERM ${it.pid}")
             Log.d(BenchmarkState.TAG, "kill -TERM command output - $stopOutput")
         }
+    }
 
+    private const val DEFAULT_KILL_POLL_PERIOD_MS = 50L
+    private const val DEFAULT_KILL_POLL_MAX_COUNT = 100
+
+    fun killProcessesAndWait(
+        processName: String,
+        waitPollPeriodMs: Long = DEFAULT_KILL_POLL_PERIOD_MS,
+        waitPollMaxCount: Int = DEFAULT_KILL_POLL_MAX_COUNT,
+        onFailure: (String) -> Unit = { errorMessage -> throw IllegalStateException(errorMessage) },
+        processKiller: (List<ProcessPid>) -> Unit = ::killTerm,
+    ) {
+        val processes =
+            getPidsForProcess(processName).map { pid ->
+                ProcessPid(pid = pid, processName = processName)
+            }
+        if (!processes.isEmpty()) {
+            killProcessesAndWait(
+                processes,
+                waitPollPeriodMs = waitPollPeriodMs,
+                waitPollMaxCount = waitPollMaxCount,
+                onFailure,
+                processKiller,
+            )
+        } else {
+            Log.d(BenchmarkState.TAG, "No processes for name $processName, skipping kill")
+        }
+    }
+
+    fun killProcessesAndWait(
+        processes: List<ProcessPid>,
+        waitPollPeriodMs: Long = DEFAULT_KILL_POLL_PERIOD_MS,
+        waitPollMaxCount: Int = DEFAULT_KILL_POLL_MAX_COUNT,
+        onFailure: (String) -> Unit = { errorMessage -> throw IllegalStateException(errorMessage) },
+        processKiller: (List<ProcessPid>) -> Unit = ::killTerm,
+    ) {
         var runningProcesses = processes.toList()
+        processKiller(runningProcesses)
         repeat(waitPollMaxCount) {
             runningProcesses = runningProcesses.filter { isProcessAlive(it.pid, it.processName) }
             if (runningProcesses.isEmpty()) {
@@ -576,15 +619,16 @@ object Shell {
             }
             Log.d(BenchmarkState.TAG, "Waiting $waitPollPeriodMs ms for $runningProcesses to die")
         }
-        throw IllegalStateException("Failed to stop $runningProcesses")
+        onFailure.invoke("Failed to stop $runningProcesses")
     }
 
-    @RequiresApi(21)
-    fun pathExists(absoluteFilePath: String): Boolean {
-        return ShellImpl.executeCommandUnsafe("ls $absoluteFilePath").trim() == absoluteFilePath
-    }
+    fun pathExists(absoluteFilePath: String) =
+        if (UserInfo.isAdditionalUser) {
+            VirtualFile.fromPath(absoluteFilePath).ls().first() == absoluteFilePath
+        } else {
+            ShellImpl.executeCommandUnsafe("ls $absoluteFilePath").trim() == absoluteFilePath
+        }
 
-    @RequiresApi(21)
     fun amBroadcast(broadcastArguments: String): Int? {
         // unsafe here for perf, since we validate the return value so we don't need to check stderr
         return ShellImpl.executeCommandUnsafe("am broadcast $broadcastArguments")
@@ -593,7 +637,6 @@ object Shell {
             .toIntOrNull()
     }
 
-    @RequiresApi(21)
     fun disablePackages(appPackages: List<String>) {
         // Additionally use `am force-stop` to force JobScheduler to drop all jobs.
         val command =
@@ -604,14 +647,21 @@ object Shell {
             """
                     .trimIndent()
             }
-        executeScriptCaptureStdoutStderr(command)
+
+        val output = executeScriptCaptureStdoutStderr(command)
+        if (output.stderr.isNotBlank()) {
+            Log.d(BenchmarkState.TAG, "disabling packages failed, stderr: ${output.stderr}")
+        }
     }
 
-    @RequiresApi(21)
     fun enablePackages(appPackages: List<String>) {
         val command =
             appPackages.joinToString(separator = "\n") { appPackage -> "pm enable $appPackage" }
-        executeScriptCaptureStdoutStderr(command)
+
+        val output = executeScriptCaptureStdoutStderr(command)
+        if (output.stderr.isNotBlank()) {
+            Log.d(BenchmarkState.TAG, "enabling packages failed, stderr: ${output.stderr}")
+        }
     }
 
     @RequiresApi(24)
@@ -626,7 +676,6 @@ object Shell {
         ShellImpl.executeCommandUnsafe("cmd package bg-dexopt-job --enable")
     }
 
-    @RequiresApi(21)
     fun isSELinuxEnforced(): Boolean {
         return when (val value = executeScriptCaptureStdout("getenforce").trim()) {
             "Permissive" -> false
@@ -635,9 +684,62 @@ object Shell {
             else -> throw IllegalStateException("unexpected result from getenforce: $value")
         }
     }
+
+    fun cp(from: String, to: String) {
+        if (UserInfo.isAdditionalUser) {
+            val fromFile = VirtualFile.fromPath(from)
+            val toFile = VirtualFile.fromPath(to)
+            toFile.delete()
+            fromFile.copyTo(toFile)
+        } else {
+            executeScriptSilent("cp $from $to")
+        }
+    }
+
+    fun mv(from: String, to: String) {
+        if (UserInfo.isAdditionalUser) {
+            val fromFile = VirtualFile.fromPath(from)
+            val toFile = VirtualFile.fromPath(to)
+            toFile.delete()
+            fromFile.moveTo(toFile)
+        } else {
+            executeScriptSilent("mv $from $to")
+        }
+    }
+
+    fun rm(path: String) {
+        if (UserInfo.isAdditionalUser) {
+            VirtualFile.fromPath(path).delete()
+        } else {
+            executeScriptSilent("rm -f $path")
+        }
+    }
+
+    fun chmod(path: String, args: String) {
+        if (UserInfo.isAdditionalUser) {
+            VirtualFile.fromPath(path).chmod(args)
+        } else {
+            executeScriptSilent("chmod $args $path")
+        }
+    }
+
+    fun mkdir(path: String) {
+        if (UserInfo.isAdditionalUser) {
+            VirtualFile.fromPath(path).mkdir()
+        } else {
+            executeScriptSilent("mkdir -p $path")
+        }
+    }
+
+    private fun md5sum(path: String): String {
+        return if (UserInfo.isAdditionalUser) {
+            VirtualFile.fromPath(path).md5sum()
+        } else {
+            ShellImpl.executeCommandUnsafe("md5sum $path").substringBefore(" ")
+        }
+    }
 }
 
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 private object ShellImpl {
     init {
         require(Looper.getMainLooper().thread != Thread.currentThread()) {
@@ -656,11 +758,13 @@ private object ShellImpl {
 
     init {
         // b/268107648: UiAutomation always runs on user 0 so shell cannot access other user data.
-        if (UserInfo.currentUserId > 0) {
+        // This behavior was introduced with FUSE on api 30. Before then, shell could access any
+        // user data.
+        if (UserInfo.currentUserId > 0 && Build.VERSION.SDK_INT in 30 until 31) {
             throw IllegalStateException(
                 "Benchmark and Baseline Profile generation are not currently " +
                     "supported on AAOS and multiuser environment when a secondary user is " +
-                    "selected."
+                    "selected, on api 30"
             )
         }
         // These variables are used in executeCommand and executeScript, so we keep them as var
@@ -704,29 +808,35 @@ private object ShellImpl {
 
             // dirUsableByAppAndShell is writable, but we can't execute there (as of Q),
             // so we copy to /data/local/tmp
-            val externalDir = Outputs.dirUsableByAppAndShell
-            val scriptContentFile = File.createTempFile("temporaryScript", null, externalDir)
+            val scriptName = "temporaryScript_${Random.nextUInt()}.sh"
 
-            if (Outputs.forceFilesForShellAccessible) {
-                // script content must be readable by shell, and for some reason doesn't
-                // inherit shell readability from dirUsableByAppAndShell
-                scriptContentFile.setReadable(true, false)
-            }
+            val (scriptContentFile, stdInFile) =
+                if (UserInfo.isAdditionalUser) {
+                    Pair(
+                        ShellFile.inTempDir(scriptName).apply { writeText(script) },
+                        stdin?.let {
+                            ShellFile.inTempDir("${scriptName}_stdin").apply { writeText(it) }
+                        },
+                    )
+                } else {
+                    Pair(
+                        UserFile.inOutputsDir(scriptName).apply { writeText(script) },
+                        stdin?.let { input ->
+                            UserFile.inOutputsDir("${scriptName}_stdin").apply { writeText(input) }
+                        },
+                    )
+                }
 
-            // only create/read/delete stdin/stderr files if they are needed
-            val stdinFile = stdin?.run { File.createTempFile("temporaryStdin", null, externalDir) }
             // we use a path on /data/local/tmp (as opposed to externalDir) because some shell
             // commands fail to redirect stderr to externalDir (notably, `am start`).
             // This also means we need to `cat` the file to read it, and `rm` to remove it.
-            val stderrPath = "/data/local/tmp/" + scriptContentFile.name + "_stderr"
+            val stderrPath = "/data/local/tmp/${scriptName}_stderr"
 
             try {
-                stdinFile?.writeText(stdin)
-                scriptContentFile.writeText(script)
                 return@trace ShellScript(
-                    stdinFile = stdinFile,
+                    stdinFile = stdInFile,
                     scriptContentFile = scriptContentFile,
-                    stderrPath = stderrPath
+                    stderrPath = stderrPath,
                 )
             } catch (e: Exception) {
                 throw Exception("Can't create shell script", e)
@@ -735,12 +845,11 @@ private object ShellImpl {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 class ShellScript
 internal constructor(
-    private val stdinFile: File?,
-    private val scriptContentFile: File,
-    private val stderrPath: String
+    private val stdinFile: VirtualFile?,
+    private val scriptContentFile: VirtualFile,
+    private val stderrPath: String,
 ) {
     private var cleanedUp: Boolean = false
 
@@ -756,7 +865,7 @@ internal constructor(
                     scriptWrapperCommand(
                         scriptContentPath = scriptContentFile.absolutePath,
                         stderrPath = stderrPath,
-                        stdinPath = stdinFile?.absolutePath
+                        stdinPath = stdinFile?.absolutePath,
                     )
                 )
             val stderrDescriptorFn =
@@ -765,7 +874,7 @@ internal constructor(
             return@trace StartedShellScript(
                 stdoutDescriptor = stdoutDescriptor,
                 stderrDescriptorFn = stderrDescriptorFn,
-                cleanUpBlock = ::cleanUp
+                cleanUpBlock = ::cleanUp,
             )
         }
 
@@ -786,7 +895,7 @@ internal constructor(
                     listOfNotNull(
                             stderrPath,
                             scriptContentFile.absolutePath,
-                            stdinFile?.absolutePath
+                            stdinFile?.absolutePath,
                         )
                         .joinToString(" ")
             )
@@ -811,13 +920,13 @@ internal constructor(
                 fi
             """
                     .trimIndent()
-                    .byteInputStream()
+                    .byteInputStream(),
             )
 
         fun scriptWrapperCommand(
             scriptContentPath: String,
             stderrPath: String,
-            stdinPath: String?
+            stdinPath: String?,
         ): String =
             listOfNotNull(scriptWrapperPath, scriptContentPath, stderrPath, stdinPath)
                 .joinToString(" ")
@@ -825,12 +934,11 @@ internal constructor(
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 class StartedShellScript
 internal constructor(
     private val stdoutDescriptor: ParcelFileDescriptor,
     private val stderrDescriptorFn: (() -> (String)),
-    private val cleanUpBlock: () -> Unit
+    private val cleanUpBlock: () -> Unit,
 ) : Closeable {
 
     /** Returns a [Sequence] of [String] containing the lines written by the process to stdOut. */
@@ -845,7 +953,7 @@ internal constructor(
         val output =
             Shell.Output(
                 stdout = stdoutDescriptor.fullyReadInputStream(),
-                stderr = stderrDescriptorFn.invoke()
+                stderr = stderrDescriptorFn.invoke(),
             )
         close()
         return output

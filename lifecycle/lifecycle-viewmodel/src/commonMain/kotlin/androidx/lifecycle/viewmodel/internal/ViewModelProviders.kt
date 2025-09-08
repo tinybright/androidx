@@ -39,13 +39,12 @@ internal object ViewModelProviders {
         "androidx.lifecycle.ViewModelProvider.DefaultKey"
 
     internal fun <T : ViewModel> getDefaultKey(modelClass: KClass<T>): String {
-        val canonicalName = requireNotNull(modelClass.canonicalName) {
-            "Local and anonymous classes can not be ViewModels"
-        }
+        val canonicalName =
+            requireNotNull(modelClass.canonicalName) {
+                "Local and anonymous classes can not be ViewModels"
+            }
         return "$VIEW_MODEL_PROVIDER_DEFAULT_KEY:$canonicalName"
     }
-
-    internal object ViewModelKey : CreationExtras.Key<String>
 
     internal fun <VM : ViewModel> unsupportedCreateViewModel(): VM =
         throw UnsupportedOperationException(
@@ -55,11 +54,11 @@ internal object ViewModelProviders {
         )
 
     internal fun createInitializerFactory(
-        initializers: Collection<ViewModelInitializer<*>>,
+        initializers: Collection<ViewModelInitializer<*>>
     ): ViewModelProvider.Factory = InitializerViewModelFactory(*initializers.toTypedArray())
 
     internal fun createInitializerFactory(
-        vararg initializers: ViewModelInitializer<*>,
+        vararg initializers: ViewModelInitializer<*>
     ): ViewModelProvider.Factory = InitializerViewModelFactory(*initializers)
 
     internal fun getDefaultFactory(owner: ViewModelStoreOwner): ViewModelProvider.Factory =
@@ -82,17 +81,10 @@ internal object ViewModelProviders {
         vararg initializers: ViewModelInitializer<*>,
     ): VM {
         @Suppress("UNCHECKED_CAST")
-        val viewModel = initializers.firstOrNull { it.clazz == modelClass }
-            ?.initializer
-            ?.invoke(extras) as VM?
+        val viewModel =
+            initializers.firstOrNull { it.clazz == modelClass }?.initializer?.invoke(extras) as VM?
         return requireNotNull(viewModel) {
             "No initializer set for given class ${modelClass.canonicalName}"
         }
     }
 }
-
-/**
- * Multiplatform replacement for [KClass.qualifiedName] reflection API.
- * It's required because it's not supported for all platforms.
- */
-internal expect val <T : Any> KClass<T>.canonicalName: String?

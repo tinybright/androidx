@@ -51,6 +51,9 @@ class CoroutineBroadcastReceiverTest {
                 coroutineScopeUsed.set(this)
                 extraValue.set(intent.getStringExtra(EXTRA_STRING))
                 broadcastExecuted.countDown()
+                // Test throwing an error directly in goAsync's job. The error should be caught,
+                // logged, and cancel the job/scope, without crashing the process.
+                error("This error should be caught and logged.")
             }
         }
     }
@@ -61,10 +64,7 @@ class CoroutineBroadcastReceiverTest {
         val broadcastReceiver = TestBroadcast()
 
         if (android.os.Build.VERSION.SDK_INT < 33) {
-            context.registerReceiver(
-                broadcastReceiver,
-                IntentFilter(BROADCAST_ACTION),
-            )
+            context.registerReceiver(broadcastReceiver, IntentFilter(BROADCAST_ACTION))
         } else {
             context.registerReceiver(
                 broadcastReceiver,
@@ -85,9 +85,7 @@ class CoroutineBroadcastReceiverTest {
         assertWithMessage("Broadcast receiver did not execute")
             .that(broadcastReceiver.broadcastExecuted.await(5, TimeUnit.SECONDS))
             .isTrue()
-        waitFor(Duration.ofSeconds(5)) {
-            !broadcastReceiver.coroutineScopeUsed.get().isActive
-        }
+        waitFor(Duration.ofSeconds(5)) { !broadcastReceiver.coroutineScopeUsed.get().isActive }
         assertWithMessage("Coroutine scope did not get cancelled")
             .that(broadcastReceiver.coroutineScopeUsed.get().isActive)
             .isFalse()

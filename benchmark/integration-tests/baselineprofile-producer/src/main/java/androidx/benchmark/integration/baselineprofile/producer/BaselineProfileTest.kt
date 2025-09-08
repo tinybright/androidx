@@ -47,19 +47,19 @@ class BaselineProfileTest {
             profileBlock = {
                 startActivityAndWait(Intent(ACTION))
                 device.waitForIdle()
-            }
+            },
         )
 
     @Test
     fun startupBaselineProfile() =
         baselineRule.collect(
             packageName = PACKAGE_NAME,
-            includeInStartupProfile = true,
+            includeInStartupProfile = false,
             maxIterations = 1,
             profileBlock = {
                 startActivityAndWait(Intent(ACTION))
                 device.waitForIdle()
-            }
+            },
         )
 
     companion object {

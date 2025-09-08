@@ -56,8 +56,8 @@ class FragmentAnimatorTest {
 
     // Detect leaks BEFORE and AFTER activity is destroyed
     @get:Rule
-    val ruleChain: RuleChain = RuleChain.outerRule(DetectLeaksAfterTestSuccess())
-        .around(activityRule)
+    val ruleChain: RuleChain =
+        RuleChain.outerRule(DetectLeaksAfterTestSuccess()).around(activityRule)
 
     @Before
     fun setupContainer() {
@@ -175,9 +175,7 @@ class FragmentAnimatorTest {
         val layoutCountDownLatch = CountDownLatch(1)
 
         activityRule.runOnUiThread {
-            Choreographer.getInstance().postFrameCallback {
-                layoutCountDownLatch.countDown()
-            }
+            Choreographer.getInstance().postFrameCallback { layoutCountDownLatch.countDown() }
         }
 
         assertThat(layoutCountDownLatch.await(1000, TimeUnit.MILLISECONDS)).isTrue()
@@ -222,9 +220,7 @@ class FragmentAnimatorTest {
         val postFrameCountDownLatch = CountDownLatch(1)
 
         activityRule.runOnUiThread {
-            Choreographer.getInstance().postFrameCallback {
-                postFrameCountDownLatch.countDown()
-            }
+            Choreographer.getInstance().postFrameCallback { postFrameCountDownLatch.countDown() }
         }
 
         assertThat(postFrameCountDownLatch.await(1000, TimeUnit.MILLISECONDS)).isTrue()
@@ -256,6 +252,71 @@ class FragmentAnimatorTest {
         activityRule.waitForExecution()
 
         assertExitPopEnter(fragment)
+    }
+
+    @SdkSuppress(minSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    @Test
+    fun hideAnimatorsPredictiveBackCancelRepeat() {
+        val fm = activityRule.activity.supportFragmentManager
+
+        // One fragment with a view
+        val fragment1 = AnimatorFragment(R.layout.scene1)
+        fm.beginTransaction().add(R.id.fragmentContainer, fragment1, "1").commit()
+        activityRule.waitForExecution()
+
+        val fragment2 = AnimatorFragment(R.layout.scene1)
+        fm.beginTransaction()
+            .setCustomAnimations(ENTER, EXIT, POP_ENTER, POP_EXIT)
+            .add(R.id.fragmentContainer, fragment2, "2")
+            .hide(fragment1)
+            .addToBackStack(null)
+            .commit()
+        activityRule.waitForExecution()
+
+        val dispatcher = activityRule.activity.onBackPressedDispatcher
+        activityRule.runOnUiThread {
+            dispatcher.dispatchOnBackStarted(BackEventCompat(0.1F, 0.1F, 0.1F, BackEvent.EDGE_LEFT))
+        }
+
+        activityRule.runOnUiThread {
+            dispatcher.dispatchOnBackProgressed(
+                BackEventCompat(0.2F, 0.2F, 0.2F, BackEvent.EDGE_LEFT)
+            )
+        }
+
+        if (FragmentManager.USE_PREDICTIVE_BACK) {
+            assertThat(fragment1.startLatch.await(1000, TimeUnit.MILLISECONDS)).isTrue()
+            assertThat(fragment2.startLatch.await(1000, TimeUnit.MILLISECONDS)).isTrue()
+            assertThat(fragment1.inProgress).isTrue()
+            assertThat(fragment2.inProgress).isTrue()
+        } else {
+            assertThat(fragment1.inProgress).isFalse()
+            assertThat(fragment1.inProgress).isFalse()
+        }
+
+        activityRule.runOnUiThread { dispatcher.dispatchOnBackCancelled() }
+
+        activityRule.runOnUiThread {
+            dispatcher.dispatchOnBackStarted(BackEventCompat(0.1F, 0.1F, 0.1F, BackEvent.EDGE_LEFT))
+        }
+
+        activityRule.runOnUiThread {
+            dispatcher.dispatchOnBackProgressed(
+                BackEventCompat(0.2F, 0.2F, 0.2F, BackEvent.EDGE_LEFT)
+            )
+        }
+
+        if (FragmentManager.USE_PREDICTIVE_BACK) {
+            assertThat(fragment1.startLatch.await(1000, TimeUnit.MILLISECONDS)).isTrue()
+            assertThat(fragment2.startLatch.await(1000, TimeUnit.MILLISECONDS)).isTrue()
+            assertThat(fragment1.inProgress).isTrue()
+            assertThat(fragment2.inProgress).isTrue()
+        } else {
+            assertThat(fragment1.inProgress).isFalse()
+            assertThat(fragment1.inProgress).isFalse()
+        }
+
+        activityRule.runOnUiThread { dispatcher.dispatchOnBackCancelled() }
     }
 
     // Ensure a hide animation is canceled if fragment is shown before it happens
@@ -669,7 +730,7 @@ class FragmentAnimatorTest {
                 android.R.animator.fade_in,
                 android.R.animator.fade_out,
                 android.R.animator.fade_in,
-                android.R.animator.fade_out
+                android.R.animator.fade_out,
             )
             .replace(R.id.fragmentContainer, fragment2, "2")
             .addToBackStack(null)
@@ -684,14 +745,12 @@ class FragmentAnimatorTest {
         activityRule.runOnUiThread {
             dispatcher.dispatchOnBackStarted(BackEventCompat(0.1F, 0.1F, 0.1F, BackEvent.EDGE_LEFT))
         }
-        activityRule.executePendingTransactions(fm1)
 
         activityRule.runOnUiThread {
             dispatcher.dispatchOnBackProgressed(
                 BackEventCompat(0.2F, 0.2F, 0.2F, BackEvent.EDGE_LEFT)
             )
         }
-        activityRule.executePendingTransactions(fm1)
 
         if (FragmentManager.USE_PREDICTIVE_BACK) {
             assertThat(fragment1.startLatch.await(1000, TimeUnit.MILLISECONDS)).isTrue()
@@ -703,10 +762,7 @@ class FragmentAnimatorTest {
             assertThat(fragment1.inProgress).isFalse()
         }
 
-        activityRule.runOnUiThread {
-            dispatcher.onBackPressed()
-        }
-        activityRule.executePendingTransactions(fm1)
+        activityRule.runOnUiThread { dispatcher.onBackPressed() }
 
         assertThat(fragment2.wasStarted).isTrue()
         // Now fragment2 should be animating away
@@ -740,7 +796,7 @@ class FragmentAnimatorTest {
                 android.R.animator.fade_in,
                 android.R.animator.fade_out,
                 android.R.animator.fade_in,
-                android.R.animator.fade_out
+                android.R.animator.fade_out,
             )
             .replace(R.id.fragmentContainer, fragment2, "2")
             .addToBackStack(null)
@@ -755,7 +811,6 @@ class FragmentAnimatorTest {
         activityRule.runOnUiThread {
             dispatcher.dispatchOnBackStarted(BackEventCompat(0.1F, 0.1F, 0.1F, BackEvent.EDGE_LEFT))
         }
-        activityRule.executePendingTransactions(fm1)
 
         fragment2.resumeLatch = CountDownLatch(1)
 
@@ -764,7 +819,6 @@ class FragmentAnimatorTest {
                 BackEventCompat(0.2F, 0.2F, 0.2F, BackEvent.EDGE_LEFT)
             )
         }
-        activityRule.executePendingTransactions(fm1)
 
         if (FragmentManager.USE_PREDICTIVE_BACK) {
             assertThat(fragment1.startLatch.await(1000, TimeUnit.MILLISECONDS)).isTrue()
@@ -776,10 +830,7 @@ class FragmentAnimatorTest {
             assertThat(fragment1.inProgress).isFalse()
         }
 
-        activityRule.runOnUiThread {
-            dispatcher.dispatchOnBackCancelled()
-        }
-        activityRule.executePendingTransactions(fm1)
+        activityRule.runOnUiThread { dispatcher.dispatchOnBackCancelled() }
 
         assertThat(fragment2.wasStarted).isTrue()
         // Now fragment1 should be animating away
@@ -839,7 +890,7 @@ class FragmentAnimatorTest {
         fragment: AnimatorFragment,
         numAnimators: Int,
         isEnter: Boolean,
-        animatorResourceId: Int
+        animatorResourceId: Int,
     ) {
         assertThat(fragment.numStartedAnimators).isEqualTo(numAnimators)
         assertThat(fragment.baseEnter).isEqualTo(isEnter)
@@ -869,11 +920,7 @@ class FragmentAnimatorTest {
         var initialized: Boolean = false
         var inProgress = false
 
-        override fun onCreateAnimator(
-            transit: Int,
-            enter: Boolean,
-            nextAnim: Int
-        ): Animator? {
+        override fun onCreateAnimator(transit: Int, enter: Boolean, nextAnim: Int): Animator? {
             if (nextAnim == 0) {
                 return null
             }
@@ -881,26 +928,28 @@ class FragmentAnimatorTest {
             var animator: Animator? = null
             try {
                 animator = AnimatorInflater.loadAnimator(context, nextAnim)
-            } catch (e: Resources.NotFoundException) { }
+            } catch (e: Resources.NotFoundException) {}
 
             if (animator == null) {
                 animator = ValueAnimator.ofFloat(0f, 1f).setDuration(1)
             }
 
             return animator?.apply {
-                addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationStart(animation: Animator) {
-                        wasStarted = true
-                        inProgress = true
-                        numStartedAnimators++
-                        startLatch.countDown()
-                    }
+                addListener(
+                    object : AnimatorListenerAdapter() {
+                        override fun onAnimationStart(animation: Animator) {
+                            wasStarted = true
+                            inProgress = true
+                            numStartedAnimators++
+                            startLatch.countDown()
+                        }
 
-                    override fun onAnimationEnd(animation: Animator) {
-                        endLatch.countDown()
-                        inProgress = false
+                        override fun onAnimationEnd(animation: Animator) {
+                            endLatch.countDown()
+                            inProgress = false
+                        }
                     }
-                })
+                )
                 wasStarted = false
                 startLatch = CountDownLatch(1)
                 endLatch = CountDownLatch(1)
@@ -920,13 +969,9 @@ class FragmentAnimatorTest {
     companion object {
         // These are pretend resource IDs for animators. We don't need real ones since we
         // load them by overriding onCreateAnimator
-        @AnimatorRes
-        private val ENTER = 1
-        @AnimatorRes
-        private val EXIT = 2
-        @AnimatorRes
-        private val POP_ENTER = 3
-        @AnimatorRes
-        private val POP_EXIT = 4
+        @AnimatorRes private val ENTER = 1
+        @AnimatorRes private val EXIT = 2
+        @AnimatorRes private val POP_ENTER = 3
+        @AnimatorRes private val POP_EXIT = 4
     }
 }

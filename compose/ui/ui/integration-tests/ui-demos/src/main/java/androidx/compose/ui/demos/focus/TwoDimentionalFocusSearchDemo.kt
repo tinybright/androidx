@@ -82,14 +82,15 @@ fun TwoDimensionalFocusSearchDemo() {
 @Composable
 private fun FocusableBox(
     modifier: Modifier = Modifier,
-    content: @Composable BoxScope.() -> Unit = {}
+    content: @Composable BoxScope.() -> Unit = {},
 ) {
     var borderColor by remember { mutableStateOf(Black) }
     Box(
-        modifier = modifier
-            .onFocusChanged { borderColor = if (it.isFocused) Red else Black }
-            .border(2.dp, borderColor)
-            .focusable(),
-        content = content
+        modifier =
+            modifier
+                .onFocusChanged { borderColor = if (it.isFocused) Red else Black }
+                .border(2.dp, borderColor)
+                .focusable(),
+        content = content,
     )
 }

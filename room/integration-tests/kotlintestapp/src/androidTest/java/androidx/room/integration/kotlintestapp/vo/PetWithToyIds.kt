@@ -20,14 +20,13 @@ import androidx.room.Ignore
 import androidx.room.Relation
 
 class PetWithToyIds {
-    @Embedded
-    val mPet: Pet?
+    @Embedded val mPet: Pet?
 
     @Relation(
         parentColumn = "mPetId",
         entityColumn = "mPetId",
         projection = ["mId"],
-        entity = Toy::class
+        entity = Toy::class,
     )
     var mToyIds: List<Int>? = null
 
@@ -57,9 +56,6 @@ class PetWithToyIds {
     }
 
     override fun toString(): String {
-        return ("PetWithToyIds{" +
-            "pet=" + mPet +
-            ", toyIds=" + mToyIds +
-            '}')
+        return ("PetWithToyIds{" + "pet=" + mPet + ", toyIds=" + mToyIds + '}')
     }
 }

@@ -31,19 +31,19 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 class ProfileinstallerStartupBenchmark(
     private val startupMode: StartupMode,
-    private val compilationMode: CompilationMode
+    private val compilationMode: CompilationMode,
 ) {
-    @get:Rule
-    val benchmarkRule = MacrobenchmarkRule()
+    @get:Rule val benchmarkRule = MacrobenchmarkRule()
 
     @Test
-    fun startup() = benchmarkRule.measureStartup(
-        compilationMode = compilationMode,
-        startupMode = startupMode,
-        packageName = "androidx.profileinstaller.integration.macrobenchmark.target"
-    ) {
-        action = "profileinstaller.init.macrobenchmark.TARGET"
-    }
+    fun startup() =
+        benchmarkRule.measureStartup(
+            compilationMode = compilationMode,
+            startupMode = startupMode,
+            packageName = "androidx.profileinstaller.integration.macrobenchmark.target",
+        ) {
+            action = "profileinstaller.init.macrobenchmark.TARGET"
+        }
 
     companion object {
         @Parameterized.Parameters(name = "startup={0},compilation={1}")

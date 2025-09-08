@@ -17,9 +17,6 @@
 package androidx.compose.foundation.gestures
 
 import android.content.pm.PackageManager.FEATURE_LEANBACK
-import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.BringIntoViewSpec.Companion.DefaultBringIntoViewSpec
 import androidx.compose.runtime.ProvidableCompositionLocal
@@ -33,8 +30,6 @@ import kotlin.math.abs
  * the scroll behavior will pivot around 30% of the container size. For other platforms, the scroll
  * behavior will move the least to bring the requested region into view.
  */
-@Suppress("OPT_IN_MARKER_ON_WRONG_TARGET")
-@get:ExperimentalFoundationApi
 @ExperimentalFoundationApi
 actual val LocalBringIntoViewSpec: ProvidableCompositionLocal<BringIntoViewSpec> =
     compositionLocalWithComputedDefaultOf {
@@ -48,39 +43,35 @@ actual val LocalBringIntoViewSpec: ProvidableCompositionLocal<BringIntoViewSpec>
     }
 
 @OptIn(ExperimentalFoundationApi::class)
-internal val PivotBringIntoViewSpec = object : BringIntoViewSpec {
-    val parentFraction = 0.3f
-    val childFraction = 0f
-    override val scrollAnimationSpec: AnimationSpec<Float> = tween<Float>(
-        durationMillis = 125,
-        easing = CubicBezierEasing(0.25f, 0.1f, .25f, 1f)
-    )
+internal val PivotBringIntoViewSpec =
+    object : BringIntoViewSpec {
+        val parentFraction = 0.3f
+        val childFraction = 0f
 
-    override fun calculateScrollDistance(
-        offset: Float,
-        size: Float,
-        containerSize: Float
-    ): Float {
-        val leadingEdgeOfItemRequestingFocus = offset
-        val trailingEdgeOfItemRequestingFocus = offset + size
+        override fun calculateScrollDistance(
+            offset: Float,
+            size: Float,
+            containerSize: Float,
+        ): Float {
+            val leadingEdgeOfItemRequestingFocus = offset
+            val trailingEdgeOfItemRequestingFocus = offset + size
 
-        val sizeOfItemRequestingFocus =
-            abs(trailingEdgeOfItemRequestingFocus - leadingEdgeOfItemRequestingFocus)
-        val childSmallerThanParent = sizeOfItemRequestingFocus <= containerSize
-        val initialTargetForLeadingEdge =
-            parentFraction * containerSize -
-                (childFraction * sizeOfItemRequestingFocus)
-        val spaceAvailableToShowItem = containerSize - initialTargetForLeadingEdge
+            val sizeOfItemRequestingFocus =
+                abs(trailingEdgeOfItemRequestingFocus - leadingEdgeOfItemRequestingFocus)
+            val childSmallerThanParent = sizeOfItemRequestingFocus <= containerSize
+            val initialTargetForLeadingEdge =
+                parentFraction * containerSize - (childFraction * sizeOfItemRequestingFocus)
+            val spaceAvailableToShowItem = containerSize - initialTargetForLeadingEdge
 
-        val targetForLeadingEdge =
-            if (childSmallerThanParent &&
-                spaceAvailableToShowItem < sizeOfItemRequestingFocus
-            ) {
-                containerSize - sizeOfItemRequestingFocus
-            } else {
-                initialTargetForLeadingEdge
-            }
+            val targetForLeadingEdge =
+                if (
+                    childSmallerThanParent && spaceAvailableToShowItem < sizeOfItemRequestingFocus
+                ) {
+                    containerSize - sizeOfItemRequestingFocus
+                } else {
+                    initialTargetForLeadingEdge
+                }
 
-        return leadingEdgeOfItemRequestingFocus - targetForLeadingEdge
+            return leadingEdgeOfItemRequestingFocus - targetForLeadingEdge
+        }
     }
-}

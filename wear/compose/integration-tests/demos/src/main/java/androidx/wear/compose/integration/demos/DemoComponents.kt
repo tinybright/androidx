@@ -39,9 +39,7 @@ import androidx.wear.compose.material.LocalContentAlpha
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 
-/**
- * A simple [Icon] with default size
- */
+/** A simple [Icon] with default size */
 @Composable
 fun DemoIcon(
     resourceId: Int,
@@ -52,53 +50,40 @@ fun DemoIcon(
     Icon(
         painter = painterResource(id = resourceId),
         contentDescription = contentDescription,
-        modifier = modifier
-            .size(size)
-            .wrapContentSize(align = Alignment.Center),
+        modifier = modifier.size(size).wrapContentSize(align = Alignment.Center),
     )
 }
 
 @Composable
-fun DemoImage(
-    resourceId: Int,
-    modifier: Modifier = Modifier,
-    size: Dp = 24.dp,
-) {
+fun DemoImage(resourceId: Int, modifier: Modifier = Modifier, size: Dp = 24.dp) {
     Image(
         painter = painterResource(id = resourceId),
         contentDescription = null,
         modifier = modifier.size(size),
         contentScale = ContentScale.Crop,
-        alpha = LocalContentAlpha.current
+        alpha = LocalContentAlpha.current,
     )
 }
 
 @Composable
-fun TextIcon(
-    text: String,
-    size: Dp = 24.dp,
-    style: TextStyle = MaterialTheme.typography.button
-) {
+fun TextIcon(text: String, size: Dp = 24.dp, style: TextStyle = MaterialTheme.typography.button) {
     Button(
-        modifier = Modifier
-            .padding(0.dp)
-            .requiredSize(32.dp),
+        modifier = Modifier.padding(0.dp).requiredSize(32.dp),
         onClick = {},
-        colors = ButtonDefaults.buttonColors(
-            disabledBackgroundColor = MaterialTheme.colors.primary.copy(
-                alpha = LocalContentAlpha.current
+        colors =
+            ButtonDefaults.buttonColors(
+                disabledBackgroundColor =
+                    MaterialTheme.colors.primary.copy(alpha = LocalContentAlpha.current),
+                disabledContentColor =
+                    MaterialTheme.colors.onPrimary.copy(alpha = LocalContentAlpha.current),
             ),
-            disabledContentColor = MaterialTheme.colors.onPrimary.copy(
-                alpha = LocalContentAlpha.current
-            )
-        ),
-        enabled = false
+        enabled = false,
     ) {
         Box(
-            modifier = Modifier
-                .padding(all = 0.dp)
-                .requiredSize(size)
-                .wrapContentSize(align = Alignment.Center)
+            modifier =
+                Modifier.padding(all = 0.dp)
+                    .requiredSize(size)
+                    .wrapContentSize(align = Alignment.Center)
         ) {
             Text(
                 text = text,

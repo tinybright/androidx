@@ -26,10 +26,11 @@ import kotlinx.coroutines.flow.Flow
 class TestUwbControleeSessionScope(
     uwbClient: TestUwbClient,
     override val rangingCapabilities: RangingCapabilities,
-    override val localAddress: UwbAddress
+    override val localAddress: UwbAddress,
 ) : UwbControleeSessionScope {
     private val uwbClientSessionScope =
         TestUwbClientSessionScope(uwbClient, rangingCapabilities, localAddress)
+
     override fun prepareSession(parameters: RangingParameters): Flow<RangingResult> {
         return uwbClientSessionScope.prepareSession(parameters)
     }
@@ -37,9 +38,12 @@ class TestUwbControleeSessionScope(
     override suspend fun reconfigureRangeDataNtf(
         configType: Int,
         proximityNear: Int,
-        proximityFar: Int
+        proximityFar: Int,
     ) {
         return uwbClientSessionScope.reconfigureRangeDataNtf(
-            configType, proximityNear, proximityFar)
+            configType,
+            proximityNear,
+            proximityFar,
+        )
     }
 }

@@ -20,10 +20,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.pointer.util.VelocityTrackerStrategyUseImpulse
+import androidx.compose.ui.input.pointer.util.ExperimentalVelocityTrackerApi
 import androidx.compose.ui.test.InputDispatcher.Companion.eventPeriodMillis
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -45,23 +44,18 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
-/**
- * Tests if we can generate gestures that end with a specific velocity
- */
+/** Tests if we can generate gestures that end with a specific velocity */
+@OptIn(ExperimentalVelocityTrackerApi::class)
 @MediumTest
 @RunWith(Parameterized::class)
 class SendSwipeVelocityTest(private val config: TestConfig) {
-    data class TestConfig(
-        val direction: Direction,
-        val durationMillis: Long,
-        val velocity: Float
-    )
+    data class TestConfig(val direction: Direction, val durationMillis: Long, val velocity: Float)
 
     enum class Direction(val from: Offset, val to: Offset) {
         LeftToRight(Offset(boxStart, boxMiddle), Offset(boxEnd, boxMiddle)),
         RightToLeft(Offset(boxEnd, boxMiddle), Offset(boxStart, boxMiddle)),
         TopToBottom(Offset(boxMiddle, boxStart), Offset(boxMiddle, boxEnd)),
-        BottomToTop(Offset(boxMiddle, boxEnd), Offset(boxMiddle, boxStart))
+        BottomToTop(Offset(boxMiddle, boxEnd), Offset(boxMiddle, boxStart)),
     }
 
     companion object {
@@ -87,44 +81,46 @@ class SendSwipeVelocityTest(private val config: TestConfig) {
         private val boxEnd = boxSize - 1.0f
     }
 
-    private val start get() = config.direction.from
-    private val end get() = config.direction.to
-    private val duration get() = config.durationMillis
-    private val velocity get() = config.velocity
+    private val start
+        get() = config.direction.from
 
-    private val expectedXVelocity = when (config.direction) {
-        Direction.LeftToRight -> velocity
-        Direction.RightToLeft -> -velocity
-        else -> 0f
-    }
+    private val end
+        get() = config.direction.to
 
-    private val expectedYVelocity = when (config.direction) {
-        Direction.TopToBottom -> velocity
-        Direction.BottomToTop -> -velocity
-        else -> 0f
-    }
+    private val duration
+        get() = config.durationMillis
 
-    @get:Rule
-    val rule = createComposeRule()
+    private val velocity
+        get() = config.velocity
+
+    private val expectedXVelocity =
+        when (config.direction) {
+            Direction.LeftToRight -> velocity
+            Direction.RightToLeft -> -velocity
+            else -> 0f
+        }
+
+    private val expectedYVelocity =
+        when (config.direction) {
+            Direction.TopToBottom -> velocity
+            Direction.BottomToTop -> -velocity
+            else -> 0f
+        }
+
+    @get:Rule val rule = createComposeRule()
 
     private val recorder = SinglePointerInputRecorder()
 
-    @OptIn(ExperimentalComposeUiApi::class)
     @Test
     fun swipeWithVelocity() {
         rule.setContent {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .wrapContentSize(Alignment.BottomEnd)) {
+            Box(Modifier.fillMaxSize().wrapContentSize(Alignment.BottomEnd)) {
                 ClickableTestBox(recorder, boxSize, boxSize, tag = tag)
             }
         }
 
         @Suppress("DEPRECATION")
-        rule.onNodeWithTag(tag).performGesture {
-            swipeWithVelocity(start, end, velocity, duration)
-        }
+        rule.onNodeWithTag(tag).performGesture { swipeWithVelocity(start, end, velocity, duration) }
 
         rule.runOnIdle {
             recorder.run {
@@ -143,13 +139,9 @@ class SendSwipeVelocityTest(private val config: TestConfig) {
                 assertThat(recordedDurationMillis).isEqualTo(duration)
 
                 // Check velocity
-                if (VelocityTrackerStrategyUseImpulse) {
-                    assertThat(recordedVelocity.x).isWithin(1f).of(expectedXVelocity)
-                    assertThat(recordedVelocity.y).isWithin(1f).of(expectedYVelocity)
-                } else {
-                    assertThat(recordedVelocity.x).isWithin(.1f).of(expectedXVelocity)
-                    assertThat(recordedVelocity.y).isWithin(.1f).of(expectedYVelocity)
-                }
+
+                assertThat(recordedVelocity.x).isWithin(.1f).of(expectedXVelocity)
+                assertThat(recordedVelocity.y).isWithin(.1f).of(expectedYVelocity)
             }
         }
     }

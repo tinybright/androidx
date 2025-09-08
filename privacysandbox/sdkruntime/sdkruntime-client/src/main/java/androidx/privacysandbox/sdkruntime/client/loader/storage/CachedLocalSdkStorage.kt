@@ -26,24 +26,24 @@ import java.io.File
 /**
  * Caching implementation of [LocalSdkStorage].
  *
- * Extract SDK DEX files into folder provided by [LocalSdkFolderProvider].
- * Not extracting new files if available space lower than lowSpaceThreshold.
- * Return result only if all files successfully extracted.
+ * Extract SDK DEX files into folder provided by [LocalSdkFolderProvider]. Not extracting new files
+ * if available space lower than lowSpaceThreshold. Return result only if all files successfully
+ * extracted.
  */
-internal class CachedLocalSdkStorage private constructor(
+internal class CachedLocalSdkStorage
+private constructor(
     private val context: Context,
     private val rootFolderProvider: LocalSdkFolderProvider,
-    private val lowSpaceThreshold: Long
+    private val lowSpaceThreshold: Long,
 ) : LocalSdkStorage {
 
     /**
-     * Return SDK DEX files from folder provided by [LocalSdkFolderProvider].
-     * Extract missing files from assets if available space bigger than lowSpaceThreshold.
+     * Return SDK DEX files from folder provided by [LocalSdkFolderProvider]. Extract missing files
+     * from assets if available space bigger than lowSpaceThreshold.
      *
      * @param sdkConfig sdk config
-     * @return [LocalSdkDexFiles] if all SDK DEX files available in SDK folder
-     * or null if something missing and couldn't be extracted because of
-     * available space lower than lowSpaceThreshold
+     * @return [LocalSdkDexFiles] if all SDK DEX files available in SDK folder or null if something
+     *   missing and couldn't be extracted because of available space lower than lowSpaceThreshold
      */
     override fun dexFilesFor(sdkConfig: LocalSdkConfig): LocalSdkDexFiles? {
         val disableExtracting = availableBytes() < lowSpaceThreshold
@@ -72,30 +72,21 @@ internal class CachedLocalSdkStorage private constructor(
             Log.e(
                 LOG_TAG,
                 "Failed to extract ${sdkConfig.packageName}, deleting $targetFolder.",
-                ex
+                ex,
             )
 
             if (!targetFolder.deleteRecursively()) {
-                Log.e(
-                    LOG_TAG,
-                    "Failed to delete $targetFolder during cleanup.",
-                    ex
-                )
+                Log.e(LOG_TAG, "Failed to delete $targetFolder during cleanup.", ex)
             }
 
             throw ex
         }
     }
 
-    private fun extractAssetToFile(
-        assetName: String,
-        outputFile: File,
-    ) {
+    private fun extractAssetToFile(assetName: String, outputFile: File) {
         outputFile.createNewFile()
         context.assets.open(assetName).use { fromStream ->
-            outputFile.outputStream().use { toStream ->
-                fromStream.copyTo(toStream)
-            }
+            outputFile.outputStream().use { toStream -> fromStream.copyTo(toStream) }
         }
         outputFile.setReadOnly()
     }
@@ -115,12 +106,9 @@ internal class CachedLocalSdkStorage private constructor(
          *
          * @param context Application context
          * @param lowSpaceThreshold Minimal available space in bytes required to proceed with
-         * extracting new SDK Dex files.
+         *   extracting new SDK Dex files.
          */
-        fun create(
-            context: Context,
-            lowSpaceThreshold: Long
-        ): CachedLocalSdkStorage {
+        fun create(context: Context, lowSpaceThreshold: Long): CachedLocalSdkStorage {
             val localSdkFolderProvider = LocalSdkFolderProvider.create(context)
             return CachedLocalSdkStorage(context, localSdkFolderProvider, lowSpaceThreshold)
         }

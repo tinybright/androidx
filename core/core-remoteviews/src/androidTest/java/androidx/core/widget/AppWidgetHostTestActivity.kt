@@ -35,7 +35,7 @@ import android.widget.FrameLayout
 import androidx.core.remoteviews.test.R
 import org.junit.Assert.fail
 
-/** Test activity that contains an [AppWidgetHost].  */
+/** Test activity that contains an [AppWidgetHost]. */
 @TargetApi(29)
 public class AppWidgetHostTestActivity : Activity() {
     private var mHost: AppWidgetHost? = null
@@ -74,8 +74,8 @@ public class AppWidgetHostTestActivity : Activity() {
             hostView,
             FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
-            )
+                FrameLayout.LayoutParams.MATCH_PARENT,
+            ),
         )
 
         fun pxToDp(px: Int): Int {
@@ -93,14 +93,11 @@ public class AppWidgetHostTestActivity : Activity() {
         if (Build.VERSION.SDK_INT >= 31) {
             optionsBundle.putParcelableArrayList(
                 OPTION_APPWIDGET_SIZES,
-                arrayListOf(SizeF(width.toFloat(), height.toFloat()))
+                arrayListOf(SizeF(width.toFloat(), height.toFloat())),
             )
         }
 
-        appWidgetManager.updateAppWidgetOptions(
-            appWidgetId,
-            optionsBundle
-        )
+        appWidgetManager.updateAppWidgetOptions(appWidgetId, optionsBundle)
 
         return hostView
     }

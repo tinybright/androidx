@@ -26,8 +26,8 @@ import androidx.compose.ui.text.TextStyle
 /**
  * ProvideContentColorTextStyle
  *
- * A convenience method to provide values to both LocalContentColor and LocalTextStyle in
- * one call. This is less expensive than nesting calls to CompositionLocalProvider.
+ * A convenience method to provide values to both LocalContentColor and LocalTextStyle in one call.
+ * This is less expensive than nesting calls to CompositionLocalProvider.
  *
  * Text styles will be merged with the current value of LocalTextStyle.
  */
@@ -35,12 +35,12 @@ import androidx.compose.ui.text.TextStyle
 internal fun ProvideContentColorTextStyle(
     contentColor: Color,
     textStyle: TextStyle,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val mergedStyle = LocalTextStyle.current.merge(textStyle)
     CompositionLocalProvider(
         LocalContentColor provides contentColor,
         LocalTextStyle provides mergedStyle,
-        content = content
+        content = content,
     )
 }

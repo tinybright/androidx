@@ -35,7 +35,6 @@ import androidx.compose.ui.test.isFocusable
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -48,8 +47,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class RadioButtonTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     private val itemOne = "Bar"
     private val itemTwo = "Foo"
@@ -73,26 +71,23 @@ class RadioButtonTest {
                     RadioButton(
                         modifier = Modifier.testTag(item),
                         selected = (selected.value == item),
-                        onClick = { selected.value = item }
+                        onClick = { selected.value = item },
                     )
                 }
             }
         }
 
-        rule.onNodeWithTag(itemOne)
-            .assert(
-                SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.RadioButton)
-            )
+        rule
+            .onNodeWithTag(itemOne)
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.RadioButton))
             .assertHasSelectedSemantics()
-        rule.onNodeWithTag(itemTwo)
+        rule
+            .onNodeWithTag(itemTwo)
             .assertHasUnSelectedSemantics()
-            .assert(
-                SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.RadioButton)
-            )
-        rule.onNodeWithTag(itemThree)
-            .assert(
-                SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.RadioButton)
-            )
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.RadioButton))
+        rule
+            .onNodeWithTag(itemThree)
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.RadioButton))
             .assertHasUnSelectedSemantics()
     }
 
@@ -106,22 +101,21 @@ class RadioButtonTest {
                     RadioButton(
                         modifier = Modifier.testTag(item),
                         selected = (selected.value == item),
-                        onClick = { selected.value = item }
+                        onClick = { selected.value = item },
                     )
                 }
             }
         }
 
-        rule.onNodeWithTag(itemOne)
+        rule
+            .onNodeWithTag(itemOne)
             .assertHasSelectedSemantics()
             .performClick()
             .assertHasSelectedSemantics()
 
-        rule.onNodeWithTag(itemTwo)
-            .assertHasUnSelectedSemantics()
+        rule.onNodeWithTag(itemTwo).assertHasUnSelectedSemantics()
 
-        rule.onNodeWithTag(itemThree)
-            .assertHasUnSelectedSemantics()
+        rule.onNodeWithTag(itemThree).assertHasUnSelectedSemantics()
     }
 
     @Test
@@ -133,21 +127,20 @@ class RadioButtonTest {
                     RadioButton(
                         modifier = Modifier.testTag(item),
                         selected = (selected.value == item),
-                        onClick = { selected.value = item }
+                        onClick = { selected.value = item },
                     )
                 }
             }
         }
-        rule.onNodeWithTag(itemTwo)
+        rule
+            .onNodeWithTag(itemTwo)
             .assertHasUnSelectedSemantics()
             .performClick()
             .assertHasSelectedSemantics()
 
-        rule.onNodeWithTag(itemOne)
-            .assertHasUnSelectedSemantics()
+        rule.onNodeWithTag(itemOne).assertHasUnSelectedSemantics()
 
-        rule.onNodeWithTag(itemThree)
-            .assertHasUnSelectedSemantics()
+        rule.onNodeWithTag(itemThree).assertHasUnSelectedSemantics()
     }
 
     @Test
@@ -158,12 +151,13 @@ class RadioButtonTest {
                 RadioButton(
                     selected = true,
                     onClick = null,
-                    modifier = Modifier.semantics { focused = true }
+                    modifier = Modifier.semantics { focused = true },
                 )
             }
         }
 
-        rule.onNodeWithTag(parentTag)
+        rule
+            .onNodeWithTag(parentTag)
             .assertHasNoClickAction()
             .assert(isFocusable()) // Check merged into parent
     }
@@ -179,120 +173,90 @@ class RadioButtonTest {
                     RadioButton(
                         modifier = Modifier.testTag(item),
                         selected = (selected.value == item),
-                        onClick = { selected.value = item }
+                        onClick = { selected.value = item },
                     )
                 }
             }
         }
 
-        rule.onNodeWithTag(itemTwo)
+        rule
+            .onNodeWithTag(itemTwo)
             .assertHasUnSelectedSemantics()
             .performClick()
             .assertHasSelectedSemantics()
 
-        rule.onNodeWithTag(itemOne)
-            .assertHasUnSelectedSemantics()
+        rule.onNodeWithTag(itemOne).assertHasUnSelectedSemantics()
 
-        rule.onNodeWithTag(itemThree)
+        rule
+            .onNodeWithTag(itemThree)
             .assertHasUnSelectedSemantics()
             .performClick()
             .assertHasSelectedSemantics()
 
-        rule.onNodeWithTag(itemOne)
-            .assertHasUnSelectedSemantics()
+        rule.onNodeWithTag(itemOne).assertHasUnSelectedSemantics()
 
-        rule.onNodeWithTag(itemTwo)
-            .assertHasUnSelectedSemantics()
+        rule.onNodeWithTag(itemTwo).assertHasUnSelectedSemantics()
     }
 
     @Test
     fun radioButton_materialSizes_whenSelected_minimumTouchTarget() {
-        materialSizesTestForValue(
-            selected = true,
-            clickable = true,
-            minimumTouchTarget = true
-        )
+        materialSizesTestForValue(selected = true, clickable = true, minimumTouchTarget = true)
     }
 
     @Test
     fun radioButton_materialSizes_whenSelected_withoutMinimumTouchTarget() {
-        materialSizesTestForValue(
-            selected = true,
-            clickable = true,
-            minimumTouchTarget = false
-        )
+        materialSizesTestForValue(selected = true, clickable = true, minimumTouchTarget = false)
     }
 
     @Test
     fun radioButton_materialSizes_whenNotSelected_minimumTouchTarget() {
-        materialSizesTestForValue(
-            selected = false,
-            clickable = true,
-            minimumTouchTarget = true
-        )
+        materialSizesTestForValue(selected = false, clickable = true, minimumTouchTarget = true)
     }
 
     @Test
     fun radioButton_materialSizes_whenNotSelected_withoutMinimumTouchTarget() {
-        materialSizesTestForValue(
-            selected = false,
-            clickable = true,
-            minimumTouchTarget = false
-        )
+        materialSizesTestForValue(selected = false, clickable = true, minimumTouchTarget = false)
     }
 
     @Test
     fun radioButton_materialSizes_whenSelected_notClickable_minimumTouchTarget() {
-        materialSizesTestForValue(
-            selected = true,
-            clickable = false,
-            minimumTouchTarget = true
-        )
+        materialSizesTestForValue(selected = true, clickable = false, minimumTouchTarget = true)
     }
 
     @Test
     fun radioButton_materialSizes_whenSelected_notClickable_withoutMinimumTouchTarget() {
-        materialSizesTestForValue(
-            selected = true,
-            clickable = false,
-            minimumTouchTarget = false
-        )
+        materialSizesTestForValue(selected = true, clickable = false, minimumTouchTarget = false)
     }
 
     @Test
     fun radioButton_materialSizes_whenNotSelected_notClickable_minimumTouchTarget() {
-        materialSizesTestForValue(
-            selected = false,
-            clickable = false,
-            minimumTouchTarget = true
-        )
+        materialSizesTestForValue(selected = false, clickable = false, minimumTouchTarget = true)
     }
 
     @Test
     fun radioButton_materialSizes_whenNotSelected_notClickable_withoutMinimumTouchTarget() {
-        materialSizesTestForValue(
-            selected = false,
-            clickable = false,
-            minimumTouchTarget = false
-        )
+        materialSizesTestForValue(selected = false, clickable = false, minimumTouchTarget = false)
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     private fun materialSizesTestForValue(
         selected: Boolean,
         clickable: Boolean,
-        minimumTouchTarget: Boolean
+        minimumTouchTarget: Boolean,
     ) {
         rule
             .setMaterialContentForSizeAssertions {
                 CompositionLocalProvider(
                     LocalMinimumInteractiveComponentSize provides
-                        if (minimumTouchTarget) 48.dp else Dp.Unspecified
+                        if (minimumTouchTarget) 48.dp else 0.dp
                 ) {
                     RadioButton(
-                        selected = selected, onClick = if (clickable) {
-                            {}
-                        } else null)
+                        selected = selected,
+                        onClick =
+                            if (clickable) {
+                                {}
+                            } else null,
+                    )
                 }
             }
             .run {

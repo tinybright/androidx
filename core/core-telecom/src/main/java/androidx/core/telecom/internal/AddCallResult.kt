@@ -17,13 +17,12 @@
 package androidx.core.telecom.internal
 
 import androidx.annotation.RestrictTo
-import androidx.core.telecom.util.ExperimentalAppActions
 import java.util.Objects
 
 /**
  * AddCallResult should be used to represent the platform request to add a call via
- * [androidx.core.telecom.CallsManager.addCall]. Generally, the platform can either successfully
- * add the call at the time or fail with or without an exception code.
+ * [androidx.core.telecom.CallsManager.addCall]. Generally, the platform can either successfully add
+ * the call at the time or fail with or without an exception code.
  */
 @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY)
 internal sealed class AddCallResult {
@@ -50,7 +49,6 @@ internal sealed class AddCallResult {
      * [androidx.core.telecom.CallsManager.addCall] used a [CallSessionLegacy] to manage the call
      * meaning the client is using sdk 33- (backwards compat layer aka ConnectionService).
      */
-    @ExperimentalAppActions
     class SuccessCallSessionLegacy(val callSessionLegacy: CallSessionLegacy) : AddCallResult() {
         override fun toString(): String {
             return "AddCallResult(SuccessCallSessionLegacy)"
@@ -66,9 +64,9 @@ internal sealed class AddCallResult {
     }
 
     /**
-     * The error code the platform provided as to why the new call could not be added.
-     * For Sdk 34+ (Android UpsideDownCase), the platform will return a non ERROR_UNKNOWN exception
-     * code. For 33-, the platform will not provide an error code and ERROR_UNKNOWN will be used.
+     * The error code the platform provided as to why the new call could not be added. For Sdk 34+
+     * (Android UpsideDownCase), the platform will return a non ERROR_UNKNOWN exception code. For
+     * 33-, the platform will not provide an error code and ERROR_UNKNOWN will be used.
      */
     class Error(val errorCode: Int) : AddCallResult() {
         override fun toString(): String {

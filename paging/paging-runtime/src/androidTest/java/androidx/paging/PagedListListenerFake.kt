@@ -21,16 +21,11 @@ class PagedListListenerFake<T : Any> : AsyncPagedListDiffer.PagedListListener<T>
     val onCurrentListChangedEvents = mutableListOf<OnCurrentListChangedEvent<T>>()
 
     override fun onCurrentListChanged(previousList: PagedList<T>?, currentList: PagedList<T>?) {
-        onCurrentListChangedEvents.add(
-            OnCurrentListChangedEvent(
-                previousList,
-                currentList
-            )
-        )
+        onCurrentListChangedEvents.add(OnCurrentListChangedEvent(previousList, currentList))
     }
 
     data class OnCurrentListChangedEvent<T : Any>(
         val previousList: PagedList<T>?,
-        val currentList: PagedList<T>?
+        val currentList: PagedList<T>?,
     )
 }

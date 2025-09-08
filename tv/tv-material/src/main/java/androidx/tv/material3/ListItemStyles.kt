@@ -24,9 +24,6 @@ import androidx.compose.ui.graphics.Shape
 /**
  * Represents the [Shape] of ListItem in different interaction states.
  *
- * @constructor create an instance with arbitrary shapes.
- * See [ListItemDefaults.shape] for the default shapes used in a [ListItem].
- *
  * @param shape the shape used when the ListItem is enabled.
  * @param focusedShape the shape used when the ListItem is enabled and focused.
  * @param pressedShape the shape used when the ListItem is enabled and pressed.
@@ -35,9 +32,12 @@ import androidx.compose.ui.graphics.Shape
  * @param focusedSelectedShape the shape used when the ListItem is enabled, focused and selected.
  * @param focusedDisabledShape the shape used when the ListItem is not enabled and focused.
  * @param pressedSelectedShape the shape used when the ListItem is enabled, pressed and selected.
+ * @constructor create an instance with arbitrary shapes. See [ListItemDefaults.shape] for the
+ *   default shapes used in a [ListItem].
  */
 @Immutable
-class ListItemShape constructor(
+class ListItemShape
+constructor(
     val shape: Shape,
     val focusedShape: Shape,
     val pressedShape: Shape,
@@ -45,7 +45,7 @@ class ListItemShape constructor(
     val disabledShape: Shape,
     val focusedSelectedShape: Shape,
     val focusedDisabledShape: Shape,
-    val pressedSelectedShape: Shape
+    val pressedSelectedShape: Shape,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -93,31 +93,30 @@ class ListItemShape constructor(
 /**
  * Represents the container & content color [Color] of ListItem in different interaction states.
  *
- * @constructor create an instance with arbitrary colors.
- * See [ListItemDefaults.colors] for the default colors used in a [ListItem].
- *
  * @param containerColor the container color used when the ListItem is enabled.
  * @param contentColor the content color used when the ListItem is enabled.
  * @param focusedContainerColor the container color used when the ListItem is enabled and focused.
  * @param focusedContentColor the content color used when the ListItem is enabled and focused.
  * @param pressedContainerColor the container color used when the ListItem is enabled and pressed.
  * @param pressedContentColor the content color used when the ListItem is enabled and pressed.
- * @param selectedContainerColor the container color used when the ListItem is enabled and
- * selected.
+ * @param selectedContainerColor the container color used when the ListItem is enabled and selected.
  * @param selectedContentColor the content color used when the ListItem is enabled and selected.
  * @param disabledContainerColor the container color used when the ListItem is not enabled.
  * @param disabledContentColor the content color used when the ListItem is not enabled.
  * @param focusedSelectedContainerColor the container color used when the ListItem is enabled,
- * focused and selected.
- * @param focusedSelectedContentColor the content color used when the ListItem is enabled,
- * focused and selected.
+ *   focused and selected.
+ * @param focusedSelectedContentColor the content color used when the ListItem is enabled, focused
+ *   and selected.
  * @param pressedSelectedContainerColor the container color used when the ListItem is enabled,
- * pressed and selected.
- * @param pressedSelectedContentColor the content color used when the ListItem is enabled,
- * pressed and selected.
+ *   pressed and selected.
+ * @param pressedSelectedContentColor the content color used when the ListItem is enabled, pressed
+ *   and selected.
+ * @constructor create an instance with arbitrary colors. See [ListItemDefaults.colors] for the
+ *   default colors used in a [ListItem].
  */
 @Immutable
-class ListItemColors constructor(
+class ListItemColors
+constructor(
     val containerColor: Color,
     val contentColor: Color,
     val focusedContainerColor: Color,
@@ -131,7 +130,7 @@ class ListItemColors constructor(
     val focusedSelectedContainerColor: Color,
     val focusedSelectedContentColor: Color,
     val pressedSelectedContainerColor: Color,
-    val pressedSelectedContentColor: Color
+    val pressedSelectedContentColor: Color,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -194,26 +193,23 @@ class ListItemColors constructor(
 }
 
 /**
- * Represents the scale [Float] of ListItem for different interaction states.
- * Note: This scale must always be a non-negative float.
- *
- * @constructor create an instance with arbitrary scale factors.
- * See [ListItemDefaults.scale] for the default scale factors used in a [ListItem].
+ * Represents the scale [Float] of ListItem for different interaction states. Note: This scale must
+ * always be a non-negative float.
  *
  * @param scale the scale used when the ListItem is enabled.
  * @param focusedScale the scale used when the ListItem is enabled and focused.
  * @param pressedScale the scale used when the ListItem is enabled and pressed.
  * @param selectedScale the scale used when the ListItem is enabled and selected.
  * @param disabledScale the scale used when the ListItem is not enabled.
- * @param focusedSelectedScale the scale used when the ListItem is enabled, focused and
- * selected.
- * @param focusedDisabledScale the scale used when the ListItem is not enabled and
- * focused.
- * @param pressedSelectedScale the scale used when the ListItem is enabled, pressed and
- * selected.
+ * @param focusedSelectedScale the scale used when the ListItem is enabled, focused and selected.
+ * @param focusedDisabledScale the scale used when the ListItem is not enabled and focused.
+ * @param pressedSelectedScale the scale used when the ListItem is enabled, pressed and selected.
+ * @constructor create an instance with arbitrary scale factors. See [ListItemDefaults.scale] for
+ *   the default scale factors used in a [ListItem].
  */
 @Immutable
-class ListItemScale constructor(
+class ListItemScale
+constructor(
     @FloatRange(from = 0.0) val scale: Float,
     @FloatRange(from = 0.0) val focusedScale: Float,
     @FloatRange(from = 0.0) val pressedScale: Float,
@@ -221,7 +217,7 @@ class ListItemScale constructor(
     @FloatRange(from = 0.0) val disabledScale: Float,
     @FloatRange(from = 0.0) val focusedSelectedScale: Float,
     @FloatRange(from = 0.0) val focusedDisabledScale: Float,
-    @FloatRange(from = 0.0) val pressedSelectedScale: Float
+    @FloatRange(from = 0.0) val pressedSelectedScale: Float,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -266,27 +262,23 @@ class ListItemScale constructor(
     }
 
     companion object {
-        /**
-         * Signifies the absence of a [ScaleIndication] in ListItem component.
-         */
-        val None = ListItemScale(
-            scale = 1f,
-            focusedScale = 1f,
-            pressedScale = 1f,
-            selectedScale = 1f,
-            disabledScale = 1f,
-            focusedSelectedScale = 1f,
-            focusedDisabledScale = 1f,
-            pressedSelectedScale = 1f
-        )
+        /** Signifies the absence of a [ScaleIndication] in ListItem component. */
+        val None =
+            ListItemScale(
+                scale = 1f,
+                focusedScale = 1f,
+                pressedScale = 1f,
+                selectedScale = 1f,
+                disabledScale = 1f,
+                focusedSelectedScale = 1f,
+                focusedDisabledScale = 1f,
+                pressedSelectedScale = 1f,
+            )
     }
 }
 
 /**
  * Represents the [Border] of ListItem for different interaction states.
- *
- * @constructor create an instance with arbitrary borders.
- * See [ListItemDefaults.border] for the default borders used in a [ListItem].
  *
  * @param border the [Border] used when the ListItem is enabled.
  * @param focusedBorder the [Border] used when the ListItem is enabled and focused.
@@ -294,13 +286,16 @@ class ListItemScale constructor(
  * @param selectedBorder the [Border] used when the ListItem is enabled and selected.
  * @param disabledBorder the [Border] used when the ListItem is not enabled.
  * @param focusedSelectedBorder the [Border] used when the ListItem is enabled, focused and
- * selected.
+ *   selected.
  * @param focusedDisabledBorder the [Border] used when the ListItem is not enabled and focused.
  * @param pressedSelectedBorder the [Border] used when the ListItem is enabled, pressed and
- * selected.
+ *   selected.
+ * @constructor create an instance with arbitrary borders. See [ListItemDefaults.border] for the
+ *   default borders used in a [ListItem].
  */
 @Immutable
-class ListItemBorder constructor(
+class ListItemBorder
+constructor(
     val border: Border,
     val focusedBorder: Border,
     val pressedBorder: Border,
@@ -308,7 +303,7 @@ class ListItemBorder constructor(
     val disabledBorder: Border,
     val focusedSelectedBorder: Border,
     val focusedDisabledBorder: Border,
-    val pressedSelectedBorder: Border
+    val pressedSelectedBorder: Border,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -356,24 +351,24 @@ class ListItemBorder constructor(
 /**
  * Represents the [Glow] of ListItem for different interaction states.
  *
- * @constructor create an instance with arbitrary glows.
- * See [ListItemDefaults.glow] for the default glows used in a [ListItem].
- *
  * @param glow the [Glow] used when the ListItem is enabled.
  * @param focusedGlow the [Glow] used when the ListItem is enabled and focused.
  * @param pressedGlow the [Glow] used when the ListItem is enabled and pressed.
  * @param selectedGlow the [Glow] used when the ListItem is enabled and selected.
  * @param focusedSelectedGlow the [Glow] used when the ListItem is enabled, focused and selected.
  * @param pressedSelectedGlow the [Glow] used when the ListItem is enabled, pressed and selected.
+ * @constructor create an instance with arbitrary glows. See [ListItemDefaults.glow] for the default
+ *   glows used in a [ListItem].
  */
 @Immutable
-class ListItemGlow constructor(
+class ListItemGlow
+constructor(
     val glow: Glow,
     val focusedGlow: Glow,
     val pressedGlow: Glow,
     val selectedGlow: Glow,
     val focusedSelectedGlow: Glow,
-    val pressedSelectedGlow: Glow
+    val pressedSelectedGlow: Glow,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

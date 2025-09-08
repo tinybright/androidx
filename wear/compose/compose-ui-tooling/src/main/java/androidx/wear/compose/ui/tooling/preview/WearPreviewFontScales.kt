@@ -23,13 +23,14 @@ import androidx.wear.tooling.preview.devices.WearDevices
  * [WearPreviewFontScales] is a multi-preview annotation for the Wear devices of following font
  * scales
  * <ul>
- *     <li> Fonts - Small: 0.94f </li>
- *     <li> Fonts - Normal: 1f </li>
- *     <li> Fonts - Medium: 1.06f </li>
- *     <li> Fonts - Large: 1.12f </li>
- *     <li> Fonts - Larger: 1.18f </li>
- *     <li> Fonts - Largest: 1.24f </li>
+ * <li> Fonts - Small: 0.94f </li>
+ * <li> Fonts - Normal: 1f </li>
+ * <li> Fonts - Medium: 1.06f </li>
+ * <li> Fonts - Large: 1.12f </li>
+ * <li> Fonts - Larger: 1.18f </li>
+ * <li> Fonts - Largest: 1.24f </li>
  * </ul>
+ *
  * Font scales represent the scaling factor for fonts, relative to the base density scaling. Please
  * note, the above list is not exhaustive. It previews the composables on a small round Wear device.
  *
@@ -41,7 +42,7 @@ import androidx.wear.tooling.preview.devices.WearDevices
     backgroundColor = 0xff000000,
     showBackground = true,
     group = "Fonts - Small",
-    fontScale = 0.94f
+    fontScale = 0.94f,
 )
 @Preview(
     device = WearDevices.SMALL_ROUND,
@@ -49,7 +50,7 @@ import androidx.wear.tooling.preview.devices.WearDevices
     backgroundColor = 0xff000000,
     showBackground = true,
     group = "Fonts - Normal",
-    fontScale = 1f
+    fontScale = 1f,
 )
 @Preview(
     device = WearDevices.SMALL_ROUND,
@@ -57,7 +58,7 @@ import androidx.wear.tooling.preview.devices.WearDevices
     backgroundColor = 0xff000000,
     showBackground = true,
     group = "Fonts - Medium",
-    fontScale = 1.06f
+    fontScale = 1.06f,
 )
 @Preview(
     device = WearDevices.SMALL_ROUND,
@@ -65,7 +66,7 @@ import androidx.wear.tooling.preview.devices.WearDevices
     backgroundColor = 0xff000000,
     showBackground = true,
     group = "Fonts - Large",
-    fontScale = 1.12f
+    fontScale = 1.12f,
 )
 @Preview(
     device = WearDevices.SMALL_ROUND,
@@ -73,7 +74,7 @@ import androidx.wear.tooling.preview.devices.WearDevices
     backgroundColor = 0xff000000,
     showBackground = true,
     group = "Fonts - Larger",
-    fontScale = 1.18f
+    fontScale = 1.18f,
 )
 @Preview(
     device = WearDevices.SMALL_ROUND,
@@ -81,6 +82,6 @@ import androidx.wear.tooling.preview.devices.WearDevices
     backgroundColor = 0xff000000,
     showBackground = true,
     group = "Fonts - Largest",
-    fontScale = 1.24f
+    fontScale = 1.24f,
 )
 public annotation class WearPreviewFontScales

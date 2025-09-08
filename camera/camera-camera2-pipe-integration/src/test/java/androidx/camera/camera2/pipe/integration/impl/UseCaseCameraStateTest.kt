@@ -16,11 +16,17 @@
 
 package androidx.camera.camera2.pipe.integration.impl
 
-import android.os.Build
+import android.hardware.camera2.CameraDevice.TEMPLATE_RECORD
+import android.hardware.camera2.CaptureRequest.CONTROL_CAPTURE_INTENT
+import android.hardware.camera2.CaptureRequest.CONTROL_CAPTURE_INTENT_PREVIEW
+import androidx.camera.camera2.pipe.RequestTemplate
 import androidx.camera.camera2.pipe.StreamId
 import androidx.camera.camera2.pipe.integration.adapter.CameraStateAdapter
 import androidx.camera.camera2.pipe.integration.adapter.RobolectricCameraPipeTestRunner
 import androidx.camera.camera2.pipe.integration.adapter.asListenableFuture
+import androidx.camera.camera2.pipe.integration.compat.quirk.CaptureIntentPreviewQuirk
+import androidx.camera.camera2.pipe.integration.compat.workaround.NoOpTemplateParamsOverride
+import androidx.camera.camera2.pipe.integration.compat.workaround.TemplateParamsQuirkOverride
 import androidx.camera.camera2.pipe.integration.config.UseCaseGraphConfig
 import androidx.camera.camera2.pipe.integration.testing.FakeCameraGraph
 import androidx.camera.camera2.pipe.integration.testing.FakeCameraGraphSession
@@ -29,7 +35,9 @@ import androidx.camera.camera2.pipe.integration.testing.FakeCameraGraphSession.R
 import androidx.camera.camera2.pipe.integration.testing.FakeCameraGraphSession.RequestStatus.TOTAL_CAPTURE_DONE
 import androidx.camera.camera2.pipe.integration.testing.FakeSurface
 import androidx.camera.core.impl.DeferrableSurface
+import androidx.camera.core.impl.Quirks
 import androidx.testutils.MainDispatcherRule
+import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import com.google.common.util.concurrent.ListenableFuture
 import java.util.concurrent.ExecutionException
@@ -48,11 +56,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.annotation.Config
 import org.robolectric.annotation.internal.DoNotInstrument
 
 @RunWith(RobolectricCameraPipeTestRunner::class)
-@Config(minSdk = Build.VERSION_CODES.LOLLIPOP)
 @DoNotInstrument
 @OptIn(ExperimentalCoroutinesApi::class)
 class UseCaseCameraStateTest {
@@ -80,7 +86,7 @@ class UseCaseCameraStateTest {
         UseCaseCameraState(
             useCaseGraphConfig = fakeUseCaseGraphConfig,
             threads = useCaseThreads,
-            sessionProcessorManager = null,
+            templateParamsOverride = NoOpTemplateParamsOverride,
         )
 
     @Before
@@ -187,6 +193,36 @@ class UseCaseCameraStateTest {
         fakeCameraGraphSession.startRepeatingSignal.complete(TOTAL_CAPTURE_DONE)
 
         assertFutureCompletes(result)
+    }
+
+    @Test
+    fun updateAsync_overrideTemplateParams(): Unit = runBlocking {
+        val useCaseCameraState =
+            UseCaseCameraState(
+                useCaseGraphConfig = fakeUseCaseGraphConfig,
+                threads = useCaseThreads,
+                templateParamsOverride =
+                    TemplateParamsQuirkOverride(
+                        Quirks(listOf(object : CaptureIntentPreviewQuirk {}))
+                    ),
+            )
+
+        // startRepeating is called when there is at least one stream after updateAsync call
+        val template = RequestTemplate(TEMPLATE_RECORD)
+        val result =
+            useCaseCameraState
+                .updateAsync(streams = setOf(StreamId(0)), template = template)
+                .asListenableFuture()
+
+        // simulate startRepeating request being completed in camera
+        fakeCameraGraphSession.startRepeatingSignal.complete(TOTAL_CAPTURE_DONE)
+
+        assertFutureCompletes(result)
+
+        assertThat(fakeCameraGraphSession.repeatingRequests.size).isEqualTo(1)
+        val request = fakeCameraGraphSession.repeatingRequests[0]
+        assertThat(request.template).isEqualTo(template)
+        assertThat(request[CONTROL_CAPTURE_INTENT]).isEqualTo(CONTROL_CAPTURE_INTENT_PREVIEW)
     }
 
     private fun <T> assertFutureCompletes(future: ListenableFuture<T>) {

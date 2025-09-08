@@ -16,7 +16,6 @@
 
 package androidx.compose.material3
 
-import android.os.Build
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.testutils.assertAgainstGolden
@@ -38,26 +37,25 @@ import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
 @LargeTest
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 @OptIn(ExperimentalMaterial3Api::class)
 class TimeInputScreenshotTest(private val scheme: ColorSchemeWrapper) {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL3)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(GOLDEN_MATERIAL3)
 
     @Test
     fun timeInput_12h_hourFocused() {
         rule.setMaterialContent(scheme.colorScheme) {
             Box(Modifier.testTag(TestTag)) {
                 TimeInput(
-                    state = rememberTimePickerState(
-                        initialHour = 10,
-                        initialMinute = 23,
-                        is24Hour = false,
-                    )
+                    state =
+                        rememberTimePickerState(
+                            initialHour = 10,
+                            initialMinute = 23,
+                            is24Hour = false,
+                        )
                 )
             }
         }
@@ -71,11 +69,12 @@ class TimeInputScreenshotTest(private val scheme: ColorSchemeWrapper) {
             Box(Modifier.testTag(TestTag)) {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     TimeInput(
-                        state = rememberTimePickerState(
-                            initialHour = 10,
-                            initialMinute = 23,
-                            is24Hour = false,
-                        )
+                        state =
+                            rememberTimePickerState(
+                                initialHour = 10,
+                                initialMinute = 23,
+                                is24Hour = false,
+                            )
                     )
                 }
             }
@@ -89,11 +88,12 @@ class TimeInputScreenshotTest(private val scheme: ColorSchemeWrapper) {
         rule.setMaterialContent(scheme.colorScheme) {
             Box(Modifier.testTag(TestTag)) {
                 TimeInput(
-                    state = rememberTimePickerState(
-                        initialHour = 22,
-                        initialMinute = 23,
-                        is24Hour = true,
-                    )
+                    state =
+                        rememberTimePickerState(
+                            initialHour = 22,
+                            initialMinute = 23,
+                            is24Hour = true,
+                        )
                 )
             }
         }
@@ -107,11 +107,12 @@ class TimeInputScreenshotTest(private val scheme: ColorSchemeWrapper) {
             Box(Modifier.testTag(TestTag)) {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     TimeInput(
-                        state = rememberTimePickerState(
-                            initialHour = 22,
-                            initialMinute = 23,
-                            is24Hour = true,
-                        )
+                        state =
+                            rememberTimePickerState(
+                                initialHour = 22,
+                                initialMinute = 23,
+                                is24Hour = true,
+                            )
                     )
                 }
             }
@@ -121,9 +122,7 @@ class TimeInputScreenshotTest(private val scheme: ColorSchemeWrapper) {
     }
 
     private fun ComposeContentTestRule.assertAgainstGolden(goldenName: String) {
-        this.onNodeWithTag(TestTag)
-            .captureToImage()
-            .assertAgainstGolden(screenshotRule, goldenName)
+        this.onNodeWithTag(TestTag).captureToImage().assertAgainstGolden(screenshotRule, goldenName)
     }
 
     companion object {
@@ -131,10 +130,11 @@ class TimeInputScreenshotTest(private val scheme: ColorSchemeWrapper) {
 
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun parameters() = arrayOf(
-            ColorSchemeWrapper("lightTheme", lightColorScheme()),
-            ColorSchemeWrapper("darkTheme", darkColorScheme()),
-        )
+        fun parameters() =
+            arrayOf(
+                ColorSchemeWrapper("lightTheme", lightColorScheme()),
+                ColorSchemeWrapper("darkTheme", darkColorScheme()),
+            )
     }
 
     class ColorSchemeWrapper(val name: String, val colorScheme: ColorScheme) {

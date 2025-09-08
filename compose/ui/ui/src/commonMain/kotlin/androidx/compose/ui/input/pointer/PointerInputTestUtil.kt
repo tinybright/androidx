@@ -29,30 +29,28 @@ internal fun down(
     durationMillis: Long = 0L,
     x: Float = 0f,
     y: Float = 0f,
-    historicalData: List<HistoricalChange>? = null
+    historicalData: List<HistoricalChange>? = null,
 ): PointerInputChange {
-    val pointerInputChange = PointerInputChange(
-        PointerId(id),
-        durationMillis,
-        Offset(x, y),
-        true,
-        pressure = 1f,
-        durationMillis,
-        Offset(x, y),
-        false,
-        isInitiallyConsumed = false
-    )
+    val pointerInputChange =
+        PointerInputChange(
+            PointerId(id),
+            durationMillis,
+            Offset(x, y),
+            true,
+            pressure = 1f,
+            durationMillis,
+            Offset(x, y),
+            false,
+            isInitiallyConsumed = false,
+        )
 
     if (!historicalData.isNullOrEmpty()) {
-        return pointerInputChange.copy(
-            historical = historicalData
-        )
+        return pointerInputChange.copy(historical = historicalData)
     }
 
     return pointerInputChange
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 internal fun PointerInputChange.moveTo(durationMillis: Long, x: Float = 0f, y: Float = 0f) =
     PointerInputChange(
         id = this.id,
@@ -63,10 +61,9 @@ internal fun PointerInputChange.moveTo(durationMillis: Long, x: Float = 0f, y: F
         pressed = true,
         pressure = 1f,
         position = Offset(x, y),
-        isInitiallyConsumed = false
+        isInitiallyConsumed = false,
     )
 
-@OptIn(ExperimentalComposeUiApi::class)
 internal fun PointerInputChange.moveBy(durationMillis: Long, dx: Float = 0f, dy: Float = 0f) =
     PointerInputChange(
         id = this.id,
@@ -77,10 +74,9 @@ internal fun PointerInputChange.moveBy(durationMillis: Long, dx: Float = 0f, dy:
         pressed = true,
         pressure = 1f,
         position = Offset(position.x + dx, position.y + dy),
-        isInitiallyConsumed = false
+        isInitiallyConsumed = false,
     )
 
-@OptIn(ExperimentalComposeUiApi::class)
 internal fun PointerInputChange.up(durationMillis: Long) =
     PointerInputChange(
         id = this.id,
@@ -91,12 +87,10 @@ internal fun PointerInputChange.up(durationMillis: Long) =
         pressed = false,
         pressure = 1f,
         position = position,
-        isInitiallyConsumed = false
+        isInitiallyConsumed = false,
     )
 
-/**
- * A function used to react to and modify [PointerInputChange]s.
- */
+/** A function used to react to and modify [PointerInputChange]s. */
 internal typealias PointerInputHandler = (PointerEvent, PointerEventPass, IntSize) -> Unit
 
 /**
@@ -105,16 +99,13 @@ internal typealias PointerInputHandler = (PointerEvent, PointerEventPass, IntSiz
  */
 internal fun PointerInputHandler.invokeOverAllPasses(
     pointerEvent: PointerEvent,
-    size: IntSize = IntSize(Int.MAX_VALUE, Int.MAX_VALUE)
-) = invokeOverPasses(
-    pointerEvent,
-    listOf(
-        PointerEventPass.Initial,
-        PointerEventPass.Main,
-        PointerEventPass.Final
-    ),
-    size = size
-)
+    size: IntSize = IntSize(Int.MAX_VALUE, Int.MAX_VALUE),
+) =
+    invokeOverPasses(
+        pointerEvent,
+        listOf(PointerEventPass.Initial, PointerEventPass.Main, PointerEventPass.Final),
+        size = size,
+    )
 
 // TODO(shepshapard): Rename to invokeOverPass
 /**
@@ -125,7 +116,7 @@ internal fun PointerInputHandler.invokeOverAllPasses(
 internal fun PointerInputHandler.invokeOverPass(
     pointerEvent: PointerEvent,
     pointerEventPass: PointerEventPass,
-    size: IntSize = IntSize(Int.MAX_VALUE, Int.MAX_VALUE)
+    size: IntSize = IntSize(Int.MAX_VALUE, Int.MAX_VALUE),
 ) = invokeOverPasses(pointerEvent, listOf(pointerEventPass), size)
 
 /**
@@ -136,7 +127,7 @@ internal fun PointerInputHandler.invokeOverPass(
 internal fun PointerInputHandler.invokeOverPasses(
     pointerEvent: PointerEvent,
     vararg pointerEventPasses: PointerEventPass,
-    size: IntSize = IntSize(Int.MAX_VALUE, Int.MAX_VALUE)
+    size: IntSize = IntSize(Int.MAX_VALUE, Int.MAX_VALUE),
 ) = invokeOverPasses(pointerEvent, pointerEventPasses.toList(), size)
 
 /**
@@ -147,11 +138,9 @@ internal fun PointerInputHandler.invokeOverPasses(
 internal fun PointerInputHandler.invokeOverPasses(
     pointerEvent: PointerEvent,
     pointerEventPasses: List<PointerEventPass>,
-    size: IntSize = IntSize(Int.MAX_VALUE, Int.MAX_VALUE)
+    size: IntSize = IntSize(Int.MAX_VALUE, Int.MAX_VALUE),
 ) {
     require(pointerEvent.changes.isNotEmpty()) { "invokeOverPasses called with no changes" }
     require(pointerEventPasses.isNotEmpty()) { "invokeOverPasses called with no passes" }
-    pointerEventPasses.fastForEach {
-        this.invoke(pointerEvent, it, size)
-    }
+    pointerEventPasses.fastForEach { this.invoke(pointerEvent, it, size) }
 }

@@ -35,9 +35,10 @@ class TypeInheritanceTest {
         bazClass: String,
         handler: (XTestInvocation) -> Unit,
     ) {
-        val src = Source.kotlin(
-            "Foo.kt",
-            """
+        val src =
+            Source.kotlin(
+                "Foo.kt",
+                """
             class SubClass : BaseClass<Baz, Bar<Baz>>()
             open class BaseClass<T1, T2> {
                 val valField : Foo<Bar<Baz>> = TODO()
@@ -55,15 +56,13 @@ class TypeInheritanceTest {
             $fooClass
             $barClass
             $bazClass
-            """.trimIndent()
-        )
+            """
+                    .trimIndent(),
+            )
         runProcessorTest(sources = listOf(src), handler = handler)
     }
 
-    private fun XTestInvocation.assertFieldType(
-        fieldName: String,
-        expectedJTypeName: String,
-    ) {
+    private fun XTestInvocation.assertFieldType(fieldName: String, expectedJTypeName: String) {
         val sub = processingEnv.requireTypeElement("SubClass")
         val subField = sub.getField(fieldName).asMemberOf(sub.type)
         assertThat(subField.asTypeName().java.toString()).isEqualTo(expectedJTypeName)
@@ -102,11 +101,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_Foo_Bar_Baz() {
-        runTest(
-            "class Foo<V>",
-            "class Bar<V>",
-            "class Baz",
-        ) { invocation ->
+        runTest("class Foo<V>", "class Bar<V>", "class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<Baz>>")
@@ -124,11 +119,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_OpenFoo_Bar_Baz() {
-        runTest(
-            "open class Foo<V>",
-            "class Bar<V>",
-            "class Baz",
-        ) { invocation ->
+        runTest("open class Foo<V>", "class Bar<V>", "class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<Baz>>")
@@ -146,11 +137,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_Foo_OpenBar_Baz() {
-        runTest(
-            "class Foo<V>",
-            "open class Bar<V>",
-            "class Baz",
-        ) { invocation ->
+        runTest("class Foo<V>", "open class Bar<V>", "class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<Baz>>")
@@ -168,11 +155,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_Foo_Bar_OpenBaz() {
-        runTest(
-            "class Foo<V>",
-            "class Bar<V>",
-            "open class Baz",
-        ) { invocation ->
+        runTest("class Foo<V>", "class Bar<V>", "open class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<Baz>>")
@@ -190,11 +173,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_OpenFoo_OpenBar_Baz() {
-        runTest(
-            "open class Foo<V>",
-            "open class Bar<V>",
-            "class Baz",
-        ) { invocation ->
+        runTest("open class Foo<V>", "open class Bar<V>", "class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<Baz>>")
@@ -212,11 +191,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_OpenFoo_Bar_OpenBaz() {
-        runTest(
-            "open class Foo<V>",
-            "class Bar<V>",
-            "open class Baz",
-        ) { invocation ->
+        runTest("open class Foo<V>", "class Bar<V>", "open class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<Baz>>")
@@ -234,11 +209,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_Foo_OpenBar_OpenBaz() {
-        runTest(
-            "class Foo<V>",
-            "open class Bar<V>",
-            "open class Baz",
-        ) { invocation ->
+        runTest("class Foo<V>", "open class Bar<V>", "open class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<Baz>>")
@@ -256,11 +227,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_OpenFoo_OpenBar_OpenBaz() {
-        runTest(
-            "open class Foo<V>",
-            "open class Bar<V>",
-            "open class Baz",
-        ) { invocation ->
+        runTest("open class Foo<V>", "open class Bar<V>", "open class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<Baz>>")
@@ -278,11 +245,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_FooOut_Bar_Baz() {
-        runTest(
-            "class Foo<out V>",
-            "class Bar<V>",
-            "class Baz",
-        ) { invocation ->
+        runTest("class Foo<out V>", "class Bar<V>", "class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<Baz>>")
@@ -300,11 +263,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_OpenFooOut_Bar_Baz() {
-        runTest(
-            "open class Foo<out V>",
-            "class Bar<V>",
-            "class Baz",
-        ) { invocation ->
+        runTest("open class Foo<out V>", "class Bar<V>", "class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<Baz>>")
@@ -322,11 +281,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_FooOut_OpenBar_Baz() {
-        runTest(
-            "class Foo<out V>",
-            "open class Bar<V>",
-            "class Baz",
-        ) { invocation ->
+        runTest("class Foo<out V>", "open class Bar<V>", "class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<Baz>>")
@@ -344,11 +299,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_FooOut_Bar_OpenBaz() {
-        runTest(
-            "class Foo<out V>",
-            "class Bar<V>",
-            "open class Baz",
-        ) { invocation ->
+        runTest("class Foo<out V>", "class Bar<V>", "open class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<Baz>>")
@@ -366,11 +317,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_OpenFooOut_OpenBar_Baz() {
-        runTest(
-            "open class Foo<out V>",
-            "open class Bar<V>",
-            "class Baz",
-        ) { invocation ->
+        runTest("open class Foo<out V>", "open class Bar<V>", "class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<Baz>>")
@@ -388,11 +335,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_OpenFooOut_Bar_OpenBaz() {
-        runTest(
-            "open class Foo<out V>",
-            "class Bar<V>",
-            "open class Baz",
-        ) { invocation ->
+        runTest("open class Foo<out V>", "class Bar<V>", "open class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<Baz>>")
@@ -410,11 +353,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_FooOut_OpenBar_OpenBaz() {
-        runTest(
-            "class Foo<out V>",
-            "open class Bar<V>",
-            "open class Baz",
-        ) { invocation ->
+        runTest("class Foo<out V>", "open class Bar<V>", "open class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<Baz>>")
@@ -432,11 +371,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_OpenFooOut_OpenBar_OpenBaz() {
-        runTest(
-            "open class Foo<out V>",
-            "open class Bar<V>",
-            "open class Baz",
-        ) { invocation ->
+        runTest("open class Foo<out V>", "open class Bar<V>", "open class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<Baz>>")
@@ -454,11 +389,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_Foo_BarOut_Baz() {
-        runTest(
-            "class Foo<V>",
-            "class Bar<out V>",
-            "class Baz",
-        ) { invocation ->
+        runTest("class Foo<V>", "class Bar<out V>", "class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<? extends Baz>>")
@@ -476,11 +407,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_OpenFoo_BarOut_Baz() {
-        runTest(
-            "open class Foo<V>",
-            "class Bar<out V>",
-            "class Baz",
-        ) { invocation ->
+        runTest("open class Foo<V>", "class Bar<out V>", "class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<? extends Baz>>")
@@ -498,11 +425,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_Foo_OpenBarOut_Baz() {
-        runTest(
-            "class Foo<V>",
-            "open class Bar<out V>",
-            "class Baz",
-        ) { invocation ->
+        runTest("class Foo<V>", "open class Bar<out V>", "class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<? extends Baz>>")
@@ -520,11 +443,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_Foo_BarOut_OpenBaz() {
-        runTest(
-            "class Foo<V>",
-            "class Bar<out V>",
-            "open class Baz",
-        ) { invocation ->
+        runTest("class Foo<V>", "class Bar<out V>", "open class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<? extends Baz>>")
@@ -542,11 +461,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_OpenFoo_OpenBarOut_Baz() {
-        runTest(
-            "open class Foo<V>",
-            "open class Bar<out V>",
-            "class Baz",
-        ) { invocation ->
+        runTest("open class Foo<V>", "open class Bar<out V>", "class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<? extends Baz>>")
@@ -564,11 +479,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_OpenFoo_BarOut_OpenBaz() {
-        runTest(
-            "open class Foo<V>",
-            "class Bar<out V>",
-            "open class Baz",
-        ) { invocation ->
+        runTest("open class Foo<V>", "class Bar<out V>", "open class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<? extends Baz>>")
@@ -586,11 +497,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_Foo_OpenBarOut_OpenBaz() {
-        runTest(
-            "class Foo<V>",
-            "open class Bar<out V>",
-            "open class Baz",
-        ) { invocation ->
+        runTest("class Foo<V>", "open class Bar<out V>", "open class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<? extends Baz>>")
@@ -608,11 +515,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_OpenFoo_OpenBarOut_OpenBaz() {
-        runTest(
-            "open class Foo<V>",
-            "open class Bar<out V>",
-            "open class Baz",
-        ) { invocation ->
+        runTest("open class Foo<V>", "open class Bar<out V>", "open class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<? extends Baz>>")
@@ -630,11 +533,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_FooOut_BarOut_Baz() {
-        runTest(
-            "class Foo<out V>",
-            "class Bar<out V>",
-            "class Baz",
-        ) { invocation ->
+        runTest("class Foo<out V>", "class Bar<out V>", "class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<? extends Baz>>")
@@ -652,11 +551,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_OpenFooOut_BarOut_Baz() {
-        runTest(
-            "open class Foo<out V>",
-            "class Bar<out V>",
-            "class Baz",
-        ) { invocation ->
+        runTest("open class Foo<out V>", "class Bar<out V>", "class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<? extends Baz>>")
@@ -674,11 +569,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_FooOut_OpenBarOut_Baz() {
-        runTest(
-            "class Foo<out V>",
-            "open class Bar<out V>",
-            "class Baz",
-        ) { invocation ->
+        runTest("class Foo<out V>", "open class Bar<out V>", "class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<? extends Baz>>")
@@ -696,11 +587,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_FooOut_BarOut_OpenBaz() {
-        runTest(
-            "class Foo<out V>",
-            "class Bar<out V>",
-            "open class Baz",
-        ) { invocation ->
+        runTest("class Foo<out V>", "class Bar<out V>", "open class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<? extends Baz>>")
@@ -718,11 +605,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_OpenFooOut_OpenBarOut_Baz() {
-        runTest(
-            "open class Foo<out V>",
-            "open class Bar<out V>",
-            "class Baz",
-        ) { invocation ->
+        runTest("open class Foo<out V>", "open class Bar<out V>", "class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<? extends Baz>>")
@@ -740,11 +623,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_OpenFooOut_BarOut_OpenBaz() {
-        runTest(
-            "open class Foo<out V>",
-            "class Bar<out V>",
-            "open class Baz",
-        ) { invocation ->
+        runTest("open class Foo<out V>", "class Bar<out V>", "open class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<? extends Baz>>")
@@ -762,11 +641,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_FooOut_OpenBarOut_OpenBaz() {
-        runTest(
-            "class Foo<out V>",
-            "open class Bar<out V>",
-            "open class Baz",
-        ) { invocation ->
+        runTest("class Foo<out V>", "open class Bar<out V>", "open class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<? extends Baz>>")
@@ -784,11 +659,7 @@ class TypeInheritanceTest {
 
     @Test
     fun test_OpenFooOut_OpenBarOut_OpenBaz() {
-        runTest(
-            "open class Foo<out V>",
-            "open class Bar<out V>",
-            "open class Baz",
-        ) { invocation ->
+        runTest("open class Foo<out V>", "open class Bar<out V>", "open class Baz") { invocation ->
             invocation.assertFieldType("valField", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT1", "Foo<Bar<Baz>>")
             invocation.assertFieldType("valFieldT2", "Foo<Bar<? extends Baz>>")

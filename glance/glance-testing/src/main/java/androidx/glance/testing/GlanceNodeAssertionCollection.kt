@@ -25,19 +25,18 @@ import androidx.annotation.RestrictTo
  * [GlanceNodeAssertionsProvider.onAllNodes] and equivalent methods.
  */
 // Equivalent to SemanticsNodeInteractionCollection in compose.
-class GlanceNodeAssertionCollection<R, T : GlanceNode<R>>
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
+public class GlanceNodeAssertionCollection<R, T : GlanceNode<R>>
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     private val testContext: TestContext<R, T>,
-    private val selector: GlanceNodeSelector<R>
+    private val selector: GlanceNodeSelector<R>,
 ) {
     /**
      * Asserts that this collection of nodes is equal to the given [expectedCount].
      *
      * @throws AssertionError if the size is not equal to [expectedCount]
      */
-    fun assertCountEquals(
-        expectedCount: Int
-    ): GlanceNodeAssertionCollection<R, T> {
+    public fun assertCountEquals(expectedCount: Int): GlanceNodeAssertionCollection<R, T> {
         val errorMessageOnFail = "Failed to assert count of nodes"
 
         val actualCount = testContext.findMatchingNodes(selector, errorMessageOnFail).size
@@ -45,11 +44,12 @@ class GlanceNodeAssertionCollection<R, T : GlanceNode<R>>
             throw AssertionError(
                 buildErrorMessageWithReason(
                     errorMessageOnFail = errorMessageOnFail,
-                    reason = buildErrorReasonForCountMismatch(
-                        matcherDescription = selector.description,
-                        expectedCount = expectedCount,
-                        actualCount = actualCount
-                    )
+                    reason =
+                        buildErrorReasonForCountMismatch(
+                            matcherDescription = selector.description,
+                            expectedCount = expectedCount,
+                            actualCount = actualCount,
+                        ),
                 )
             )
         }
@@ -64,17 +64,13 @@ class GlanceNodeAssertionCollection<R, T : GlanceNode<R>>
      *
      * @param matcher Matcher that has to be satisfied by all the nodes in the collection.
      * @throws AssertionError if the collection contains at least one element that does not satisfy
-     * the given matcher.
+     *   the given matcher.
      */
-    fun assertAll(
-        matcher: GlanceNodeMatcher<R>,
-    ): GlanceNodeAssertionCollection<R, T> {
+    public fun assertAll(matcher: GlanceNodeMatcher<R>): GlanceNodeAssertionCollection<R, T> {
         val errorMessageOnFail = "Failed to assertAll(${matcher.description})"
 
         val filteredNodes = testContext.findMatchingNodes(selector, errorMessageOnFail)
-        val violations = filteredNodes.filter {
-            !matcher.matches(it)
-        }
+        val violations = filteredNodes.filter { !matcher.matches(it) }
         if (violations.isNotEmpty()) {
             throw AssertionError(buildGeneralErrorMessage(errorMessageOnFail, violations))
         }
@@ -86,12 +82,10 @@ class GlanceNodeAssertionCollection<R, T : GlanceNode<R>>
      * [matcher].
      *
      * @param matcher Matcher that has to be satisfied by at least one of the nodes in the
-     * collection.
+     *   collection.
      * @throws AssertionError if not at least one matching node was found.
      */
-    fun assertAny(
-        matcher: GlanceNodeMatcher<R>,
-    ): GlanceNodeAssertionCollection<R, T> {
+    public fun assertAny(matcher: GlanceNodeMatcher<R>): GlanceNodeAssertionCollection<R, T> {
         val errorMessageOnFail = "Failed to assertAny(${matcher.description})"
         val filteredNodes = testContext.findMatchingNodes(selector, errorMessageOnFail)
 
@@ -99,7 +93,7 @@ class GlanceNodeAssertionCollection<R, T : GlanceNode<R>>
             throw AssertionError(
                 buildErrorMessageWithReason(
                     errorMessageOnFail = errorMessageOnFail,
-                    reason = buildErrorReasonForAtLeastOneNodeExpected(selector.description)
+                    reason = buildErrorReasonForAtLeastOneNodeExpected(selector.description),
                 )
             )
         }
@@ -117,23 +111,20 @@ class GlanceNodeAssertionCollection<R, T : GlanceNode<R>>
      * Any subsequent assertion on its result will throw error if index is out of bounds of the
      * matching nodes found from previous operations.
      */
-    operator fun get(index: Int): GlanceNodeAssertion<R, T> {
+    public operator fun get(index: Int): GlanceNodeAssertion<R, T> {
         return GlanceNodeAssertion(
             testContext = testContext,
-            selector = selector.addIndexedSelector(index)
+            selector = selector.addIndexedSelector(index),
         )
     }
 
     /**
      * Returns a new collection of nodes by filtering the given nodes using the provided [matcher].
      */
-    fun filter(matcher: GlanceNodeMatcher<R>): GlanceNodeAssertionCollection<R, T> {
+    public fun filter(matcher: GlanceNodeMatcher<R>): GlanceNodeAssertionCollection<R, T> {
         return GlanceNodeAssertionCollection(
             testContext,
-            selector.addMatcherSelector(
-                selectorName = "filter",
-                matcher = matcher
-            )
+            selector.addMatcherSelector(selectorName = "filter", matcher = matcher),
         )
     }
 }

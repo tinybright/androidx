@@ -25,7 +25,6 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 
-import androidx.annotation.DoNotInline;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.RestrictTo;
@@ -36,7 +35,6 @@ import androidx.annotation.RestrictTo;
 @RestrictTo(LIBRARY)
 public class PredictionEstimator {
     private static final int MAX_PREDICTION_MS = 32;
-    private static final int LEGACY_FRAME_TIME_MS = 16;
     private static final int MS_IN_A_SECOND = 1000;
 
     private long mLastEventTime = -1;
@@ -77,21 +75,17 @@ public class PredictionEstimator {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             return Api23Impl.getFastestFrameTimeMs(defaultDisplay);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return Api21Impl.getFastestFrameTimeMs(defaultDisplay);
         } else {
-            return LEGACY_FRAME_TIME_MS;
+            return Api21Impl.getFastestFrameTimeMs(defaultDisplay);
         }
     }
 
     @SuppressWarnings("deprecation")
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     static class Api21Impl {
         private Api21Impl() {
             // Not instantiable
         }
 
-        @DoNotInline
         static float getFastestFrameTimeMs(Display display) {
             float[] refreshRates = display.getSupportedRefreshRates();
             float largestRefreshRate = refreshRates[0];
@@ -112,7 +106,6 @@ public class PredictionEstimator {
             // Not instantiable
         }
 
-        @DoNotInline
         static float getFastestFrameTimeMs(Display display) {
             Display.Mode[] displayModes = display.getSupportedModes();
             float largestRefreshRate = displayModes[0].getRefreshRate();
@@ -134,7 +127,6 @@ public class PredictionEstimator {
             // Not instantiable
         }
 
-        @DoNotInline
         static Display getDisplayForContext(Context context) {
             return context.getDisplay();
         }

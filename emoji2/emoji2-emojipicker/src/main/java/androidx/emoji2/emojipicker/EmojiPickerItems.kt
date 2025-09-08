@@ -20,11 +20,10 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.IntRange
 
 /**
- * A group of items in RecyclerView for emoji picker body.
- * [titleItem] comes first.
- * [contentItems] comes after [titleItem].
- * [emptyPlaceholderItem] will be served after [titleItem] only if [contentItems] is empty.
- * [maxContentItemCount], if provided, will truncate [contentItems] to certain size.
+ * A group of items in RecyclerView for emoji picker body. [titleItem] comes first. [contentItems]
+ * comes after [titleItem]. [emptyPlaceholderItem] will be served after [titleItem] only if
+ * [contentItems] is empty. [maxContentItemCount], if provided, will truncate [contentItems] to
+ * certain size.
  *
  * [categoryIconId] is the corresponding category icon in emoji picker header.
  */
@@ -33,16 +32,18 @@ internal class ItemGroup(
     internal val titleItem: CategoryTitle,
     private val contentItems: List<EmojiViewData>,
     private val maxContentItemCount: Int? = null,
-    private val emptyPlaceholderItem: PlaceholderText? = null
+    private val emptyPlaceholderItem: PlaceholderText? = null,
 ) {
 
     val size: Int
-        get() = 1 /* title */ + when {
-            contentItems.isEmpty() -> if (emptyPlaceholderItem != null) 1 else 0
-            maxContentItemCount != null && contentItems.size > maxContentItemCount ->
-                maxContentItemCount
-            else -> contentItems.size
-        }
+        get() =
+            1 /* title */ +
+                when {
+                    contentItems.isEmpty() -> if (emptyPlaceholderItem != null) 1 else 0
+                    maxContentItemCount != null && contentItems.size > maxContentItemCount ->
+                        maxContentItemCount
+                    else -> contentItems.size
+                }
 
     operator fun get(index: Int): ItemViewData {
         if (index == 0) return titleItem
@@ -55,13 +56,10 @@ internal class ItemGroup(
     fun getAll(): List<ItemViewData> = IntRange(0, size - 1).map { get(it) }
 }
 
-/**
- * A view of concatenated list of [ItemGroup].
- */
-internal class EmojiPickerItems(
-    private val groups: List<ItemGroup>,
-) : Iterable<ItemViewData> {
-    val size: Int get() = groups.sumOf { it.size }
+/** A view of concatenated list of [ItemGroup]. */
+internal class EmojiPickerItems(private val groups: List<ItemGroup>) : Iterable<ItemViewData> {
+    val size: Int
+        get() = groups.sumOf { it.size }
 
     init {
         check(groups.isNotEmpty()) { "Initialized with empty categorized sources" }
@@ -76,7 +74,8 @@ internal class EmojiPickerItems(
         throw IndexOutOfBoundsException()
     }
 
-    val numGroups: Int get() = groups.size
+    val numGroups: Int
+        get() = groups.size
 
     @DrawableRes
     fun getHeaderIconId(@IntRange(from = 0) index: Int): Int = groups[index].categoryIconId

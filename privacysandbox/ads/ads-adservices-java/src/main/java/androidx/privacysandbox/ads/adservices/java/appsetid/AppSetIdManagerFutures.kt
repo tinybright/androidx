@@ -31,7 +31,7 @@ import kotlinx.coroutines.async
  * AppSetIdManager provides APIs for app and ad-SDKs to access appSetId for non-monetizing purpose.
  * This class can be used by Java clients.
  */
-abstract class AppSetIdManagerFutures internal constructor() {
+public abstract class AppSetIdManagerFutures internal constructor() {
     /**
      * Return the AppSetId.
      *
@@ -39,28 +39,27 @@ abstract class AppSetIdManagerFutures internal constructor() {
      * @throws IllegalStateException if this API is not available.
      * @throws LimitExceededException if rate limit was reached.
      */
-    abstract fun getAppSetIdAsync(): ListenableFuture<AppSetId>
+    public abstract fun getAppSetIdAsync(): ListenableFuture<AppSetId>
 
-    private class Api33Ext4JavaImpl(
-        private val mAppSetIdManager: AppSetIdManager
-    ) : AppSetIdManagerFutures() {
+    private class Api33Ext4JavaImpl(private val mAppSetIdManager: AppSetIdManager) :
+        AppSetIdManagerFutures() {
         @DoNotInline
         override fun getAppSetIdAsync(): ListenableFuture<AppSetId> {
-            return CoroutineScope(Dispatchers.Default).async {
-                mAppSetIdManager.getAppSetId()
-            }.asListenableFuture()
+            return CoroutineScope(Dispatchers.Default)
+                .async { mAppSetIdManager.getAppSetId() }
+                .asListenableFuture()
         }
     }
 
-    companion object {
+    public companion object {
         /**
-         *  Creates [AppSetIdManagerFutures].
+         * Creates [AppSetIdManagerFutures].
          *
-         *  @return AppSetIdManagerFutures object. If the device is running an incompatible
-         *  build, the value returned is null.
+         * @return AppSetIdManagerFutures object. If the device is running an incompatible build,
+         *   the value returned is null.
          */
         @JvmStatic
-        fun from(context: Context): AppSetIdManagerFutures? {
+        public fun from(context: Context): AppSetIdManagerFutures? {
             return AppSetIdManager.obtain(context)?.let { Api33Ext4JavaImpl(it) }
         }
     }

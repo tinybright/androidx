@@ -29,23 +29,23 @@ import androidx.compose.runtime.Immutable
  * will not get a specific link styling for this state. Instead it will be styled according to the
  * rest of the [AnnotatedString].
  *
- * The resulting style of the link is always a combination of all styles merged into one in
- * the order `style.merge(focusedStyle).merge(hoveredStyle).merge(pressedStyle)`.
+ * The resulting style of the link is always a combination of all styles merged into one in the
+ * order `style.merge(focusedStyle).merge(hoveredStyle).merge(pressedStyle)`.
  *
  * @param style style configuration for a link that is always applied
- * @param focusedStyle style configuration for a link applied on top of the [style] when the link
- * is focused
- * @param hoveredStyle style configuration for a link applied on top of the [style] when the link
- * is hovered
- * @param pressedStyle style configuration for a link applied on top of the [style] when the link
- * is pressed
+ * @param focusedStyle style configuration for a link applied on top of the [style] when the link is
+ *   focused
+ * @param hoveredStyle style configuration for a link applied on top of the [style] when the link is
+ *   hovered
+ * @param pressedStyle style configuration for a link applied on top of the [style] when the link is
+ *   pressed
  */
 @Immutable
 class TextLinkStyles(
     val style: SpanStyle? = null,
     val focusedStyle: SpanStyle? = null,
     val hoveredStyle: SpanStyle? = null,
-    val pressedStyle: SpanStyle? = null
+    val pressedStyle: SpanStyle? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

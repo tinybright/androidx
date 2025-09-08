@@ -38,34 +38,33 @@ import androidx.glance.unit.ColorProvider
 import androidx.glance.unit.FixedColorProvider
 
 /** Set of colors to apply to a CheckBox depending on the checked state. */
-sealed class CheckBoxColors {
+public sealed class CheckBoxColors {
     internal abstract val checkBox: CheckableColorProvider
 }
 
-internal data class CheckBoxColorsImpl(
-    override val checkBox: CheckableColorProvider
-) : CheckBoxColors()
+internal data class CheckBoxColorsImpl(override val checkBox: CheckableColorProvider) :
+    CheckBoxColors()
 
 /**
  * Adds a check box view to the glance view.
  *
  * @param checked whether the check box is checked
  * @param onCheckedChange the action to be run when the checkbox is clicked. The current value of
- * checked is provided to this action in its ActionParameters, and can be retrieved using the
- * [ToggleableStateKey]. If this action launches an activity, the current value of checked will be
- * passed as an intent extra with the name [RemoteViews.EXTRA_CHECKED].
- * In order to allow the Launcher to provide this extra on Android version S and later, we use a
- * mutable PendingIntent ([android.app.PendingIntent.FLAG_MUTABLE]) when this action is not a
- * lambda. Before S, and for lambda actions, this will be an immutable PendingIntent.
+ *   checked is provided to this action in its ActionParameters, and can be retrieved using the
+ *   [ToggleableStateKey]. If this action launches an activity, the current value of checked will be
+ *   passed as an intent extra with the name [RemoteViews.EXTRA_CHECKED]. In order to allow the
+ *   Launcher to provide this extra on Android version S and later, we use a mutable PendingIntent
+ *   ([android.app.PendingIntent.FLAG_MUTABLE]) when this action is not a lambda. Before S, and for
+ *   lambda actions, this will be an immutable PendingIntent.
  * @param modifier the modifier to apply to the check box
  * @param text the text to display to the end of the check box
  * @param style the style to apply to [text]
  * @param colors the color tint to apply to the check box
- * @param maxLines An optional maximum number of lines for the text to span, wrapping if
- * necessary. If the text exceeds the given number of lines, it will be truncated.
+ * @param maxLines An optional maximum number of lines for the text to span, wrapping if necessary.
+ *   If the text exceeds the given number of lines, it will be truncated.
  */
 @Composable
-fun CheckBox(
+public fun CheckBox(
     checked: Boolean,
     onCheckedChange: Action?,
     modifier: GlanceModifier = GlanceModifier,
@@ -73,7 +72,7 @@ fun CheckBox(
     style: TextStyle? = null,
     colors: CheckBoxColors = CheckboxDefaults.colors(),
     maxLines: Int = Int.MAX_VALUE,
-) = CheckBoxElement(checked, onCheckedChange, modifier, text, style, colors, maxLines)
+): Unit = CheckBoxElement(checked, onCheckedChange, modifier, text, style, colors, maxLines)
 
 /**
  * Adds a check box view to the glance view.
@@ -84,11 +83,11 @@ fun CheckBox(
  * @param text the text to display to the end of the check box
  * @param style the style to apply to [text]
  * @param colors the color tint to apply to the check box
- * @param maxLines An optional maximum number of lines for the text to span, wrapping if
- * necessary. If the text exceeds the given number of lines, it will be truncated.
+ * @param maxLines An optional maximum number of lines for the text to span, wrapping if necessary.
+ *   If the text exceeds the given number of lines, it will be truncated.
  */
 @Composable
-fun CheckBox(
+public fun CheckBox(
     checked: Boolean,
     onCheckedChange: () -> Unit,
     modifier: GlanceModifier = GlanceModifier,
@@ -96,15 +95,16 @@ fun CheckBox(
     style: TextStyle? = null,
     colors: CheckBoxColors = CheckboxDefaults.colors(),
     maxLines: Int = Int.MAX_VALUE,
-) = CheckBoxElement(
-    checked,
-    action(block = onCheckedChange),
-    modifier,
-    text,
-    style,
-    colors,
-    maxLines
-)
+): Unit =
+    CheckBoxElement(
+        checked,
+        action(block = onCheckedChange),
+        modifier,
+        text,
+        style,
+        colors,
+        maxLines,
+    )
 
 /**
  * Adds a check box view to the glance view.
@@ -115,16 +115,16 @@ fun CheckBox(
  * @param text the text to display to the end of the check box
  * @param style the style to apply to [text]
  * @param colors the color tint to apply to the check box
- * @param maxLines An optional maximum number of lines for the text to span, wrapping if
- * necessary. If the text exceeds the given number of lines, it will be truncated.
+ * @param maxLines An optional maximum number of lines for the text to span, wrapping if necessary.
+ *   If the text exceeds the given number of lines, it will be truncated.
  * @param key A stable and unique key that identifies the action for this checkbox. This ensures
- * that the correct action is triggered, especially in cases of items that change order. If not
- * provided we use the key that is automatically generated by the Compose runtime, which is unique
- * for every exact code location in the composition tree.
+ *   that the correct action is triggered, especially in cases of items that change order. If not
+ *   provided we use the key that is automatically generated by the Compose runtime, which is unique
+ *   for every exact code location in the composition tree.
  */
 @ExperimentalGlanceApi
 @Composable
-fun CheckBox(
+public fun CheckBox(
     checked: Boolean,
     onCheckedChange: () -> Unit,
     modifier: GlanceModifier = GlanceModifier,
@@ -133,15 +133,8 @@ fun CheckBox(
     colors: CheckBoxColors = CheckboxDefaults.colors(),
     maxLines: Int = Int.MAX_VALUE,
     key: String? = null,
-) = CheckBoxElement(
-    checked,
-    action(key, onCheckedChange),
-    modifier,
-    text,
-    style,
-    colors,
-    maxLines
-)
+): Unit =
+    CheckBoxElement(checked, action(key, onCheckedChange), modifier, text, style, colors, maxLines)
 
 @Composable
 private fun CheckBoxElement(
@@ -153,11 +146,12 @@ private fun CheckBoxElement(
     colors: CheckBoxColors = CheckboxDefaults.colors(),
     maxLines: Int = Int.MAX_VALUE,
 ) {
-    val finalModifier = if (onCheckedChange != null) {
-        modifier.then(ActionModifier(CompoundButtonAction(onCheckedChange, checked)))
-    } else {
-        modifier
-    }
+    val finalModifier =
+        if (onCheckedChange != null) {
+            modifier.then(ActionModifier(CompoundButtonAction(onCheckedChange, checked)))
+        } else {
+            modifier
+        }
     GlanceNode(
         factory = { EmittableCheckBox(colors) },
         update = {
@@ -167,31 +161,27 @@ private fun CheckBoxElement(
             this.set(style) { this.style = it }
             this.set(colors) { this.colors = it }
             this.set(maxLines) { this.maxLines = it }
-        }
+        },
     )
 }
 
-/**
- * Contains the default values used by [CheckBox].
- */
-object CheckboxDefaults {
+/** Contains the default values used by [CheckBox]. */
+public object CheckboxDefaults {
 
     /**
      * @param checkedColor the [ColorProvider] to use when the check box is checked.
      * @param uncheckedColor the [ColorProvider] to use when the check box is not checked.
      * @return [CheckBoxColors] that uses [checkedColor] or [uncheckedColor] depending on the
-     * checked state of the CheckBox.
+     *   checked state of the CheckBox.
      */
     @Composable
-    fun colors(
-        checkedColor: ColorProvider,
-        uncheckedColor: ColorProvider
-    ): CheckBoxColors = checkBoxColors(checkedColor, uncheckedColor)
+    public fun colors(checkedColor: ColorProvider, uncheckedColor: ColorProvider): CheckBoxColors =
+        checkBoxColors(checkedColor, uncheckedColor)
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun checkBoxColors(
+    public fun checkBoxColors(
         checkedColor: ColorProvider,
-        uncheckedColor: ColorProvider
+        uncheckedColor: ColorProvider,
     ): CheckBoxColors =
         CheckBoxColorsImpl(
             createCheckableColorProvider(
@@ -205,59 +195,59 @@ object CheckboxDefaults {
      * @param checkedColor the [Color] to use when the check box is checked.
      * @param uncheckedColor the [Color] to use when the check box is not checked.
      * @return [CheckBoxColors] that uses [checkedColor] or [uncheckedColor] depending on the
-     * checked state of the CheckBox.
+     *   checked state of the CheckBox.
      */
     @Composable
-    fun colors(
-        checkedColor: Color,
-        uncheckedColor: Color
-    ): CheckBoxColors = CheckboxDefaults.colors(
-        checkedColor = FixedColorProvider(checkedColor),
-        uncheckedColor = FixedColorProvider(uncheckedColor)
-    )
+    public fun colors(checkedColor: Color, uncheckedColor: Color): CheckBoxColors =
+        colors(
+            checkedColor = FixedColorProvider(checkedColor),
+            uncheckedColor = FixedColorProvider(uncheckedColor),
+        )
 
     /**
      * Creates a default [CheckBoxColors].
+     *
      * @return default [CheckBoxColors].
      */
     @Composable
-    fun colors(): CheckBoxColors {
-        val colorProvider = if (GlanceTheme.colors == DynamicThemeColorProviders) {
-            // If using the m3 dynamic color theme, we need to create a color provider from xml
-            // because resource backed ColorStateLists cannot be created programmatically
-            ResourceCheckableColorProvider(R.color.glance_default_check_box)
-        } else {
-            createCheckableColorProvider(
-                source = "CheckBoxColors",
-                checked = GlanceTheme.colors.primary,
-                unchecked = GlanceTheme.colors.onSurface
-            )
-        }
+    public fun colors(): CheckBoxColors {
+        val colorProvider =
+            if (GlanceTheme.colors == DynamicThemeColorProviders) {
+                // If using the m3 dynamic color theme, we need to create a color provider from xml
+                // because resource backed ColorStateLists cannot be created programmatically
+                ResourceCheckableColorProvider(R.color.glance_default_check_box)
+            } else {
+                createCheckableColorProvider(
+                    source = "CheckBoxColors",
+                    checked = GlanceTheme.colors.primary,
+                    unchecked = GlanceTheme.colors.onSurface,
+                )
+            }
 
         return CheckBoxColorsImpl(colorProvider)
     }
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class EmittableCheckBox(
-    var colors: CheckBoxColors
-) : EmittableCheckable() {
+public class EmittableCheckBox(public var colors: CheckBoxColors) : EmittableCheckable() {
     override var modifier: GlanceModifier = GlanceModifier
 
-    override fun copy(): Emittable = EmittableCheckBox(colors = colors).also {
-        it.modifier = modifier
-        it.checked = checked
-        it.text = text
-        it.style = style
-        it.maxLines = maxLines
-    }
+    override fun copy(): Emittable =
+        EmittableCheckBox(colors = colors).also {
+            it.modifier = modifier
+            it.checked = checked
+            it.text = text
+            it.style = style
+            it.maxLines = maxLines
+        }
 
-    override fun toString(): String = "EmittableCheckBox(" +
-        "modifier=$modifier, " +
-        "checked=$checked, " +
-        "text=$text, " +
-        "style=$style, " +
-        "colors=$colors, " +
-        "maxLines=$maxLines" +
-        ")"
+    override fun toString(): String =
+        "EmittableCheckBox(" +
+            "modifier=$modifier, " +
+            "checked=$checked, " +
+            "text=$text, " +
+            "style=$style, " +
+            "colors=$colors, " +
+            "maxLines=$maxLines" +
+            ")"
 }

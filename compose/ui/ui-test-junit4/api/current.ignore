@@ -1,5 +1,3 @@
 // Baseline format: 1.0
-RemovedPackage: androidx.compose.ui.test:
-    Removed package androidx.compose.ui.test
-RemovedPackage: androidx.compose.ui.test.junit4.android:
-    Removed package androidx.compose.ui.test.junit4.android
+RemovedFromBytecode: androidx.compose.ui.test.junit4.AndroidComposeTestRule_androidKt#createAndroidComposeRule():
+    Binary breaking change: method androidx.compose.ui.test.junit4.AndroidComposeTestRule_androidKt.createAndroidComposeRule() has been removed from bytecode

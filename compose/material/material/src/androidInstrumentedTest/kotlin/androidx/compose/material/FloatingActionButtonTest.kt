@@ -69,8 +69,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class FloatingActionButtonTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     @Test
     fun fabDefaultSemantics() {
@@ -82,7 +81,8 @@ class FloatingActionButtonTest {
             }
         }
 
-        rule.onNodeWithTag("myButton")
+        rule
+            .onNodeWithTag("myButton")
             .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
             .assertIsEnabled()
     }
@@ -94,26 +94,19 @@ class FloatingActionButtonTest {
         val text = "myButton"
 
         rule.setMaterialContent {
-            Box {
-                ExtendedFloatingActionButton(text = { Text(text) }, onClick = onClick)
-            }
+            Box { ExtendedFloatingActionButton(text = { Text(text) }, onClick = onClick) }
         }
 
-        rule.onNodeWithText(text)
-            .performClick()
+        rule.onNodeWithText(text).performClick()
 
-        rule.runOnIdle {
-            assertThat(counter).isEqualTo(1)
-        }
+        rule.runOnIdle { assertThat(counter).isEqualTo(1) }
     }
 
     @Test
     fun defaultFabHasSizeFromSpec() {
         rule
             .setMaterialContentForSizeAssertions {
-                FloatingActionButton(onClick = {}) {
-                    Icon(Icons.Filled.Favorite, null)
-                }
+                FloatingActionButton(onClick = {}) { Icon(Icons.Filled.Favorite, null) }
             }
             .assertIsSquareWithSize(56.dp)
     }
@@ -125,13 +118,11 @@ class FloatingActionButtonTest {
                 modifier = Modifier.testTag("FAB"),
                 text = { Text("Extended FAB Text") },
                 icon = { Icon(Icons.Filled.Favorite, null) },
-                onClick = {}
+                onClick = {},
             )
         }
 
-        rule.onNodeWithTag("FAB")
-            .assertHeightIsEqualTo(48.dp)
-            .assertWidthIsAtLeast(48.dp)
+        rule.onNodeWithTag("FAB").assertHeightIsEqualTo(48.dp).assertWidthIsAtLeast(48.dp)
     }
 
     @Test
@@ -140,13 +131,11 @@ class FloatingActionButtonTest {
             ExtendedFloatingActionButton(
                 modifier = Modifier.testTag("FAB"),
                 text = { Text(".") },
-                onClick = {}
+                onClick = {},
             )
         }
 
-        rule.onNodeWithTag("FAB")
-            .assertWidthIsEqualTo(48.dp)
-            .assertHeightIsEqualTo(48.dp)
+        rule.onNodeWithTag("FAB").assertWidthIsEqualTo(48.dp).assertHeightIsEqualTo(48.dp)
     }
 
     @Test
@@ -156,29 +145,22 @@ class FloatingActionButtonTest {
         rule.setMaterialContent {
             Column {
                 Spacer(
-                    Modifier
-                        .requiredSize(10.dp)
-                        .weight(1f)
-                        .onGloballyPositioned {
-                            item1Bounds = it.boundsInRoot()
-                        }
+                    Modifier.requiredSize(10.dp).weight(1f).onGloballyPositioned {
+                        item1Bounds = it.boundsInRoot()
+                    }
                 )
 
                 FloatingActionButton(
                     onClick = {},
-                    modifier = Modifier
-                        .weight(1f)
-                        .onGloballyPositioned {
+                    modifier =
+                        Modifier.weight(1f).onGloballyPositioned {
                             buttonBounds = it.boundsInRoot()
-                        }
+                        },
                 ) {
                     Text("Button")
                 }
 
-                Spacer(
-                    Modifier
-                        .requiredSize(10.dp)
-                        .weight(1f))
+                Spacer(Modifier.requiredSize(10.dp).weight(1f))
             }
         }
 
@@ -202,9 +184,7 @@ class FloatingActionButtonTest {
                     FloatingActionButton(
                         modifier = Modifier.testTag("myButton"),
                         onClick = {},
-                        elevation = FloatingActionButtonDefaults.elevation(
-                            defaultElevation = 0.dp
-                        )
+                        elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp),
                     ) {
                         Box(Modifier.size(10.dp, 10.dp))
                     }
@@ -212,14 +192,15 @@ class FloatingActionButtonTest {
             }
         }
 
-        rule.onNodeWithTag("myButton")
+        rule
+            .onNodeWithTag("myButton")
             .captureToImage()
             .assertShape(
                 density = rule.density,
                 shape = realShape,
                 shapeColor = fabColor,
                 backgroundColor = surface,
-                shapeOverlapPixelCount = with(rule.density) { 1.dp.toPx() }
+                antiAliasingGap = with(rule.density) { 1.dp.toPx() },
             )
     }
 
@@ -239,23 +220,22 @@ class FloatingActionButtonTest {
                     ExtendedFloatingActionButton(
                         modifier = Modifier.testTag("myButton"),
                         onClick = {},
-                        elevation = FloatingActionButtonDefaults.elevation(
-                            defaultElevation = 0.dp
-                        ),
-                        text = { Box(Modifier.size(10.dp, 50.dp)) }
+                        elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp),
+                        text = { Box(Modifier.size(10.dp, 50.dp)) },
                     )
                 }
             }
         }
 
-        rule.onNodeWithTag("myButton")
+        rule
+            .onNodeWithTag("myButton")
             .captureToImage()
             .assertShape(
                 density = rule.density,
                 shape = realShape,
                 shapeColor = fabColor,
                 backgroundColor = surface,
-                shapeOverlapPixelCount = with(rule.density) { 1.dp.toPx() }
+                antiAliasingGap = with(rule.density) { 1.dp.toPx() },
             )
     }
 
@@ -265,17 +245,8 @@ class FloatingActionButtonTest {
         var contentCoordinates: LayoutCoordinates? = null
         rule.setMaterialContent {
             Box {
-                FloatingActionButton(
-                    {},
-                    Modifier.onGloballyPositioned {
-                        buttonCoordinates = it
-                    }
-                ) {
-                    Box(
-                        Modifier
-                            .size(2.dp)
-                            .onGloballyPositioned { contentCoordinates = it }
-                    )
+                FloatingActionButton({}, Modifier.onGloballyPositioned { buttonCoordinates = it }) {
+                    Box(Modifier.size(2.dp).onGloballyPositioned { contentCoordinates = it })
                 }
             }
         }
@@ -301,14 +272,10 @@ class FloatingActionButtonTest {
             Box {
                 ExtendedFloatingActionButton(
                     text = {
-                        Box(
-                            Modifier
-                                .size(2.dp)
-                                .onGloballyPositioned { contentCoordinates = it }
-                        )
+                        Box(Modifier.size(2.dp).onGloballyPositioned { contentCoordinates = it })
                     },
                     onClick = {},
-                    modifier = Modifier.onGloballyPositioned { buttonCoordinates = it }
+                    modifier = Modifier.onGloballyPositioned { buttonCoordinates = it },
                 )
             }
         }
@@ -335,21 +302,13 @@ class FloatingActionButtonTest {
             Box {
                 ExtendedFloatingActionButton(
                     text = {
-                        Box(
-                            Modifier
-                                .size(2.dp)
-                                .onGloballyPositioned { textCoordinates = it }
-                        )
+                        Box(Modifier.size(2.dp).onGloballyPositioned { textCoordinates = it })
                     },
                     icon = {
-                        Box(
-                            Modifier
-                                .size(10.dp)
-                                .onGloballyPositioned { iconCoordinates = it }
-                        )
+                        Box(Modifier.size(10.dp).onGloballyPositioned { iconCoordinates = it })
                     },
                     onClick = {},
-                    modifier = Modifier.onGloballyPositioned { buttonCoordinates = it }
+                    modifier = Modifier.onGloballyPositioned { buttonCoordinates = it },
                 )
             }
         }
@@ -369,7 +328,7 @@ class FloatingActionButtonTest {
                 val halfPadding = 6.dp.roundToPx().toFloat()
                 assertWithinOnePixel(
                     iconBounds.center.x + iconBounds.width / 2 + halfPadding,
-                    textBounds.center.x - textBounds.width / 2 - halfPadding
+                    textBounds.center.x - textBounds.width / 2 - halfPadding,
                 )
             }
         }
@@ -385,27 +344,22 @@ class FloatingActionButtonTest {
         lateinit var elevation: State<Dp>
 
         rule.setMaterialContent {
-            val fabElevation = FloatingActionButtonDefaults.elevation(
-                defaultElevation = defaultElevation,
-                pressedElevation = pressedElevation,
-                hoveredElevation = hoveredElevation,
-                focusedElevation = focusedElevation
-            )
+            val fabElevation =
+                FloatingActionButtonDefaults.elevation(
+                    defaultElevation = defaultElevation,
+                    pressedElevation = pressedElevation,
+                    hoveredElevation = hoveredElevation,
+                    focusedElevation = focusedElevation,
+                )
 
             elevation = fabElevation.elevation(interactionSource)
         }
 
-        rule.runOnIdle {
-            assertThat(elevation.value).isEqualTo(defaultElevation)
-        }
+        rule.runOnIdle { assertThat(elevation.value).isEqualTo(defaultElevation) }
 
-        rule.runOnIdle {
-            interactionSource.tryEmit(PressInteraction.Press(Offset.Zero))
-        }
+        rule.runOnIdle { interactionSource.tryEmit(PressInteraction.Press(Offset.Zero)) }
 
-        rule.runOnIdle {
-            assertThat(elevation.value).isEqualTo(pressedElevation)
-        }
+        rule.runOnIdle { assertThat(elevation.value).isEqualTo(pressedElevation) }
     }
 
     @Test
@@ -418,27 +372,22 @@ class FloatingActionButtonTest {
         lateinit var elevation: State<Dp>
 
         rule.setMaterialContent {
-             val fabElevation = FloatingActionButtonDefaults.elevation(
-                defaultElevation = defaultElevation,
-                pressedElevation = pressedElevation,
-                hoveredElevation = hoveredElevation,
-                focusedElevation = focusedElevation
-            )
+            val fabElevation =
+                FloatingActionButtonDefaults.elevation(
+                    defaultElevation = defaultElevation,
+                    pressedElevation = pressedElevation,
+                    hoveredElevation = hoveredElevation,
+                    focusedElevation = focusedElevation,
+                )
 
             elevation = fabElevation.elevation(interactionSource)
         }
 
-        rule.runOnIdle {
-            assertThat(elevation.value).isEqualTo(defaultElevation)
-        }
+        rule.runOnIdle { assertThat(elevation.value).isEqualTo(defaultElevation) }
 
-        rule.runOnIdle {
-            defaultElevation = 5.dp
-        }
+        rule.runOnIdle { defaultElevation = 5.dp }
 
-        rule.runOnIdle {
-            assertThat(elevation.value).isEqualTo(5.dp)
-        }
+        rule.runOnIdle { assertThat(elevation.value).isEqualTo(5.dp) }
     }
 
     @Test
@@ -451,35 +400,26 @@ class FloatingActionButtonTest {
         lateinit var elevation: State<Dp>
 
         rule.setMaterialContent {
-            val fabElevation = FloatingActionButtonDefaults.elevation(
-                defaultElevation = defaultElevation,
-                pressedElevation = pressedElevation,
-                hoveredElevation = hoveredElevation,
-                focusedElevation = focusedElevation
-            )
+            val fabElevation =
+                FloatingActionButtonDefaults.elevation(
+                    defaultElevation = defaultElevation,
+                    pressedElevation = pressedElevation,
+                    hoveredElevation = hoveredElevation,
+                    focusedElevation = focusedElevation,
+                )
 
             elevation = fabElevation.elevation(interactionSource)
         }
 
-        rule.runOnIdle {
-            assertThat(elevation.value).isEqualTo(defaultElevation)
-        }
+        rule.runOnIdle { assertThat(elevation.value).isEqualTo(defaultElevation) }
 
-        rule.runOnIdle {
-            interactionSource.tryEmit(PressInteraction.Press(Offset.Zero))
-        }
+        rule.runOnIdle { interactionSource.tryEmit(PressInteraction.Press(Offset.Zero)) }
 
-        rule.runOnIdle {
-            assertThat(elevation.value).isEqualTo(pressedElevation)
-        }
+        rule.runOnIdle { assertThat(elevation.value).isEqualTo(pressedElevation) }
 
-        rule.runOnIdle {
-            pressedElevation = 5.dp
-        }
+        rule.runOnIdle { pressedElevation = 5.dp }
 
         // We are still pressed, so we should now show the updated value for the pressed state
-        rule.runOnIdle {
-            assertThat(elevation.value).isEqualTo(5.dp)
-        }
+        rule.runOnIdle { assertThat(elevation.value).isEqualTo(5.dp) }
     }
 }

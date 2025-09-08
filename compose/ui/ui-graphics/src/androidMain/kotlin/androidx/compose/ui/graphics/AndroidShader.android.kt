@@ -17,6 +17,7 @@
 package androidx.compose.ui.graphics
 
 import android.graphics.BitmapShader
+import android.graphics.ComposeShader
 import android.graphics.LinearGradient
 import android.graphics.RadialGradient
 import android.graphics.SweepGradient
@@ -32,7 +33,7 @@ internal actual fun ActualLinearGradientShader(
     to: Offset,
     colors: List<Color>,
     colorStops: List<Float>?,
-    tileMode: TileMode
+    tileMode: TileMode,
 ): Shader {
     validateColorStops(colors, colorStops)
     val numTransparentColors = countTransparentColors(colors)
@@ -43,7 +44,7 @@ internal actual fun ActualLinearGradientShader(
         to.y,
         makeTransparentColors(colors, numTransparentColors),
         makeTransparentStops(colorStops, colors, numTransparentColors),
-        tileMode.toAndroidTileMode()
+        tileMode.toAndroidTileMode(),
     )
 }
 
@@ -52,7 +53,7 @@ internal actual fun ActualRadialGradientShader(
     radius: Float,
     colors: List<Color>,
     colorStops: List<Float>?,
-    tileMode: TileMode
+    tileMode: TileMode,
 ): Shader {
     validateColorStops(colors, colorStops)
     val numTransparentColors = countTransparentColors(colors)
@@ -62,14 +63,14 @@ internal actual fun ActualRadialGradientShader(
         radius,
         makeTransparentColors(colors, numTransparentColors),
         makeTransparentStops(colorStops, colors, numTransparentColors),
-        tileMode.toAndroidTileMode()
+        tileMode.toAndroidTileMode(),
     )
 }
 
 internal actual fun ActualSweepGradientShader(
     center: Offset,
     colors: List<Color>,
-    colorStops: List<Float>?
+    colorStops: List<Float>?,
 ): Shader {
     validateColorStops(colors, colorStops)
     val numTransparentColors = countTransparentColors(colors)
@@ -84,19 +85,19 @@ internal actual fun ActualSweepGradientShader(
 internal actual fun ActualImageShader(
     image: ImageBitmap,
     tileModeX: TileMode,
-    tileModeY: TileMode
+    tileModeY: TileMode,
 ): Shader {
     return BitmapShader(
         image.asAndroidBitmap(),
         tileModeX.toAndroidTileMode(),
-        tileModeY.toAndroidTileMode()
+        tileModeY.toAndroidTileMode(),
     )
 }
 
 /**
- * Returns the number of transparent (alpha = 0) values that aren't at the beginning or
- * end of the gradient so that the color stops can be added. On O and newer devices,
- * this always returns 0 because no stops need to be added.
+ * Returns the number of transparent (alpha = 0) values that aren't at the beginning or end of the
+ * gradient so that the color stops can be added. On O and newer devices, this always returns 0
+ * because no stops need to be added.
  */
 @VisibleForTesting
 internal fun countTransparentColors(colors: List<Color>): Int {
@@ -114,23 +115,18 @@ internal fun countTransparentColors(colors: List<Color>): Int {
 }
 
 /**
- * There was a change in behavior between Android N and O with how
- * transparent colors are interpolated with skia gradients. More specifically
- * Android O treats all fully transparent colors the same regardless of the
- * rgb channels, however, Android N and older releases interpolated between
- * the color channels as well. Because Color.Transparent is transparent black,
- * this would introduce some muddy colors as part of gradients with transparency
- * for Android N and below.
- * In order to make gradient rendering consistent and match the behavior of Android O+,
- * detect whenever Color.Transparent is used and a stop matching the color of the previous
- * value, but alpha = 0 is added and another stop at the same point with the same color
- * as the following value, but with alpha = 0 is used.
+ * There was a change in behavior between Android N and O with how transparent colors are
+ * interpolated with skia gradients. More specifically Android O treats all fully transparent colors
+ * the same regardless of the rgb channels, however, Android N and older releases interpolated
+ * between the color channels as well. Because Color.Transparent is transparent black, this would
+ * introduce some muddy colors as part of gradients with transparency for Android N and below. In
+ * order to make gradient rendering consistent and match the behavior of Android O+, detect whenever
+ * Color.Transparent is used and a stop matching the color of the previous value, but alpha = 0 is
+ * added and another stop at the same point with the same color as the following value, but with
+ * alpha = 0 is used.
  */
 @VisibleForTesting
-internal fun makeTransparentColors(
-    colors: List<Color>,
-    numTransparentColors: Int
-): IntArray {
+internal fun makeTransparentColors(colors: List<Color>, numTransparentColors: Int): IntArray {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         // No change for Android O+, map the colors directly to their argb equivalent
         return IntArray(colors.size) { i -> colors[i].toArgb() }
@@ -168,7 +164,7 @@ internal fun makeTransparentColors(
 internal fun makeTransparentStops(
     stops: List<Float>?,
     colors: List<Color>,
-    numTransparentColors: Int
+    numTransparentColors: Int,
 ): FloatArray? {
     if (numTransparentColors == 0) {
         return stops?.toFloatArray()
@@ -192,14 +188,47 @@ private fun validateColorStops(colors: List<Color>, colorStops: List<Float>?) {
     if (colorStops == null) {
         if (colors.size < 2) {
             throw IllegalArgumentException(
-                "colors must have length of at least 2 if colorStops " +
-                    "is omitted."
+                "colors must have length of at least 2 if colorStops " + "is omitted."
             )
         }
     } else if (colors.size != colorStops.size) {
         throw IllegalArgumentException(
-            "colors and colorStops arguments must have" +
-                " equal length."
+            "colors and colorStops arguments must have" + " equal length."
         )
     }
 }
+
+internal actual class TransformShader {
+    private var aMatrix: android.graphics.Matrix? = null
+
+    private fun obtainMatrix(): android.graphics.Matrix =
+        aMatrix ?: android.graphics.Matrix().also { aMatrix = it }
+
+    actual fun transform(matrix: Matrix?) {
+        val tmp: android.graphics.Matrix?
+        if (matrix == null) {
+            tmp = null
+            aMatrix = null
+        } else {
+            tmp = obtainMatrix().apply { setFrom(matrix) }
+        }
+        // TODO(b/419811019): Handle the chase where the shader already had a matrix set.
+        shader?.setLocalMatrix(tmp)
+    }
+
+    actual var shader: Shader? = null
+        set(value) {
+            if (aMatrix != null) {
+                // TODO(b/419811019): Handle the chase where the shader already had a matrix set.
+                value?.setLocalMatrix(aMatrix)
+            }
+            field = value
+        }
+}
+
+internal actual fun ActualCompositeShader(dst: Shader, src: Shader, blendMode: BlendMode): Shader =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        ComposeShader(dst, src, blendMode.toAndroidBlendMode())
+    } else {
+        ComposeShader(dst, src, blendMode.toPorterDuffMode())
+    }

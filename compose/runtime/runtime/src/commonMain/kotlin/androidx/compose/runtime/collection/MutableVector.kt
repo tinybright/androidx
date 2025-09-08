@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-@file:Suppress("NOTHING_TO_INLINE", "UNCHECKED_CAST")
+@file:Suppress("NOTHING_TO_INLINE", "UNCHECKED_CAST", "KotlinRedundantDiagnosticSuppress")
 
 package androidx.compose.runtime.collection
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
+import kotlin.jvm.JvmField
 import kotlin.math.max
 
 /**
@@ -27,35 +28,30 @@ import kotlin.math.max
  * [ArrayList].
  */
 @OptIn(ExperimentalContracts::class)
-class MutableVector<T> @PublishedApi internal constructor(
-    @PublishedApi internal var content: Array<T?>,
-    size: Int
-) : RandomAccess {
-    /**
-     * Stores allocated [MutableList] representation of this vector.
-     */
+public class MutableVector<T>
+@PublishedApi
+internal constructor(@PublishedApi @JvmField internal var content: Array<T?>, size: Int) :
+    RandomAccess {
+    /** Stores allocated [MutableList] representation of this vector. */
     private var list: MutableList<T>? = null
 
-    /**
-     * The number of elements in the [MutableVector].
-     */
-    var size: Int = size
+    /** The number of elements in the [MutableVector]. */
+    public var size: Int = size
         private set
 
-    /**
-     * Returns the last valid index in the [MutableVector].
-     */
-    inline val lastIndex: Int get() = size - 1
+    /** Returns the last valid index in the [MutableVector]. */
+    public inline val lastIndex: Int
+        get() = size - 1
 
-    /**
-     * Returns an [IntRange] of the valid indices for this [MutableVector].
-     */
-    inline val indices: IntRange get() = 0..size - 1
+    /** Returns an [IntRange] of the valid indices for this [MutableVector]. */
+    public inline val indices: IntRange
+        get() = 0 until size
 
-    /**
-     * Adds [element] to the [MutableVector] and returns `true`.
-     */
-    fun add(element: T): Boolean {
+    // Added for compatibility with `content` previously defined without @JvmField
+    @PublishedApi internal fun getContent(): Array<T?> = content
+
+    /** Adds [element] to the [MutableVector] and returns `true`. */
+    public fun add(element: T): Boolean {
         ensureCapacity(size + 1)
         content[size] = element
         size++
@@ -63,18 +59,18 @@ class MutableVector<T> @PublishedApi internal constructor(
     }
 
     /**
-     * Adds [element] to the [MutableVector] at the given [index], shifting over any elements
-     * that are in the way.
+     * Adds [element] to the [MutableVector] at the given [index], shifting over any elements that
+     * are in the way.
      */
-    fun add(index: Int, element: T) {
+    public fun add(index: Int, element: T) {
         ensureCapacity(size + 1)
         val content = content
         if (index != size) {
-            content.copyInto(
+            content.fastCopyInto(
                 destination = content,
                 destinationOffset = index + 1,
                 startIndex = index,
-                endIndex = size
+                endIndex = size,
             )
         }
         content[index] = element
@@ -82,51 +78,53 @@ class MutableVector<T> @PublishedApi internal constructor(
     }
 
     /**
-     * Adds all [elements] to the [MutableVector] at the given [index], shifting over any
-     * elements that are in the way.
+     * Adds all [elements] to the [MutableVector] at the given [index], shifting over any elements
+     * that are in the way.
      */
-    fun addAll(index: Int, elements: List<T>): Boolean {
+    public fun addAll(index: Int, elements: List<T>): Boolean {
         if (elements.isEmpty()) return false
-        ensureCapacity(size + elements.size)
+        val elementsSize = elements.size
+        ensureCapacity(size + elementsSize)
         val content = content
         if (index != size) {
-            content.copyInto(
+            content.fastCopyInto(
                 destination = content,
-                destinationOffset = index + elements.size,
+                destinationOffset = index + elementsSize,
                 startIndex = index,
-                endIndex = size
+                endIndex = size,
             )
         }
         for (i in elements.indices) {
             content[index + i] = elements[i]
         }
-        size += elements.size
+        size += elementsSize
         return true
     }
 
     /**
-     * Adds all [elements] to the [MutableVector] at the given [index], shifting over any
-     * elements that are in the way.
+     * Adds all [elements] to the [MutableVector] at the given [index], shifting over any elements
+     * that are in the way.
      */
-    fun addAll(index: Int, elements: MutableVector<T>): Boolean {
-        if (elements.isEmpty()) return false
-        ensureCapacity(size + elements.size)
+    public fun addAll(index: Int, elements: MutableVector<T>): Boolean {
+        val elementsSize = elements.size
+        if (elementsSize == 0) return false
+        ensureCapacity(size + elementsSize)
         val content = content
         if (index != size) {
-            content.copyInto(
+            content.fastCopyInto(
                 destination = content,
-                destinationOffset = index + elements.size,
+                destinationOffset = index + elementsSize,
                 startIndex = index,
-                endIndex = size
+                endIndex = size,
             )
         }
-        elements.content.copyInto(
+        elements.content.fastCopyInto(
             destination = content,
             destinationOffset = index,
             startIndex = 0,
-            endIndex = elements.size
+            endIndex = elementsSize,
         )
-        size += elements.size
+        size += elementsSize
         return true
     }
 
@@ -134,7 +132,7 @@ class MutableVector<T> @PublishedApi internal constructor(
      * Adds all [elements] to the end of the [MutableVector] and returns `true` if the
      * [MutableVector] was changed.
      */
-    inline fun addAll(elements: List<T>): Boolean {
+    public inline fun addAll(elements: List<T>): Boolean {
         return addAll(size, elements)
     }
 
@@ -142,7 +140,7 @@ class MutableVector<T> @PublishedApi internal constructor(
      * Adds all [elements] to the end of the [MutableVector] and returns `true` if the
      * [MutableVector] was changed.
      */
-    inline fun addAll(elements: MutableVector<T>): Boolean {
+    public inline fun addAll(elements: MutableVector<T>): Boolean {
         return addAll(size, elements)
     }
 
@@ -150,42 +148,36 @@ class MutableVector<T> @PublishedApi internal constructor(
      * Adds all [elements] to the end of the [MutableVector] and returns `true` if the
      * [MutableVector] was changed.
      */
-    fun addAll(
-        @Suppress("ArrayReturn")
-        elements: Array<T>
-    ): Boolean {
-        if (elements.isEmpty()) {
+    public fun addAll(@Suppress("ArrayReturn") elements: Array<T>): Boolean {
+        val elementsSize = elements.size
+        if (elementsSize == 0) {
             return false
         }
-        ensureCapacity(size + elements.size)
-        elements.copyInto(
-            destination = content,
-            destinationOffset = size
-        )
-        size += elements.size
+        ensureCapacity(size + elementsSize)
+        elements.fastCopyInto(destination = content, destinationOffset = size, 0, elementsSize)
+        size += elementsSize
         return true
     }
 
     /**
-     * Adds all [elements] to the [MutableVector] at the given [index], shifting over any
-     * elements that are in the way.
+     * Adds all [elements] to the [MutableVector] at the given [index], shifting over any elements
+     * that are in the way.
      */
-    fun addAll(index: Int, elements: Collection<T>): Boolean {
+    public fun addAll(index: Int, elements: Collection<T>): Boolean {
         if (elements.isEmpty()) return false
-        ensureCapacity(size + elements.size)
+        val elementsSize = elements.size
+        ensureCapacity(size + elementsSize)
         val content = content
         if (index != size) {
-            content.copyInto(
+            content.fastCopyInto(
                 destination = content,
-                destinationOffset = index + elements.size,
+                destinationOffset = index + elementsSize,
                 startIndex = index,
-                endIndex = size
+                endIndex = size,
             )
         }
-        elements.forEachIndexed { i, item ->
-            content[index + i] = item
-        }
-        size += elements.size
+        elements.forEachIndexed { i, item -> content[index + i] = item }
+        size += elementsSize
         return true
     }
 
@@ -193,23 +185,17 @@ class MutableVector<T> @PublishedApi internal constructor(
      * Adds all [elements] to the end of the [MutableVector] and returns `true` if the
      * [MutableVector] was changed.
      */
-    fun addAll(elements: Collection<T>): Boolean {
+    public fun addAll(elements: Collection<T>): Boolean {
         return addAll(size, elements)
     }
 
-    /**
-     * Returns `true` if any of the elements give a `true` return value for [predicate].
-     */
-    inline fun any(predicate: (T) -> Boolean): Boolean {
+    /** Returns `true` if any of the elements give a `true` return value for [predicate]. */
+    public inline fun any(predicate: (T) -> Boolean): Boolean {
         contract { callsInPlace(predicate) }
+        val content = content as Array<T>
         val size = size
-        if (size > 0) {
-            var i = 0
-            val content = content as Array<T>
-            do {
-                if (predicate(content[i])) return true
-                i++
-            } while (i < size)
+        for (i in 0 until size) {
+            if (predicate(content[i])) return true
         }
         return false
     }
@@ -218,44 +204,33 @@ class MutableVector<T> @PublishedApi internal constructor(
      * Returns `true` if any of the elements give a `true` return value for [predicate] while
      * iterating in the reverse order.
      */
-    inline fun reversedAny(predicate: (T) -> Boolean): Boolean {
+    public inline fun reversedAny(predicate: (T) -> Boolean): Boolean {
         contract { callsInPlace(predicate) }
-        val size = size
-        if (size > 0) {
-            var i = size - 1
-            val content = content as Array<T>
-            do {
-                if (predicate(content[i])) return true
-                i--
-            } while (i >= 0)
+        val content = content as Array<T>
+        var i = size - 1
+        while (i >= 0) {
+            if (predicate(content[i])) return true
+            i--
         }
         return false
     }
 
-    /**
-     * Returns [MutableList] interface access to the [MutableVector].
-     */
-    fun asMutableList(): MutableList<T> {
-        return list ?: MutableVectorList(this).also {
-            list = it
-        }
+    /** Returns [MutableList] interface access to the [MutableVector]. */
+    public fun asMutableList(): MutableList<T> {
+        return list ?: MutableVectorList(this).also { list = it }
     }
 
-    /**
-     * Removes all elements in the [MutableVector].
-     */
-    fun clear() {
+    /** Removes all elements in the [MutableVector]. */
+    public fun clear() {
         val content = content
-        for (i in lastIndex downTo 0) {
+        for (i in 0 until size) {
             content[i] = null
         }
         size = 0
     }
 
-    /**
-     * Returns `true` if the [MutableVector] contains [element] or `false` otherwise.
-     */
-    operator fun contains(element: T): Boolean {
+    /** Returns `true` if the [MutableVector] contains [element] or `false` otherwise. */
+    public operator fun contains(element: T): Boolean {
         for (i in 0..lastIndex) {
             if (get(i) == element) return true
         }
@@ -263,10 +238,10 @@ class MutableVector<T> @PublishedApi internal constructor(
     }
 
     /**
-     * Returns `true` if the [MutableVector] contains all elements in [elements] or `false` if
-     * one or more are missing.
+     * Returns `true` if the [MutableVector] contains all elements in [elements] or `false` if one
+     * or more are missing.
      */
-    fun containsAll(elements: List<T>): Boolean {
+    public fun containsAll(elements: List<T>): Boolean {
         for (i in elements.indices) {
             if (!contains(elements[i])) return false
         }
@@ -274,21 +249,19 @@ class MutableVector<T> @PublishedApi internal constructor(
     }
 
     /**
-     * Returns `true` if the [MutableVector] contains all elements in [elements] or `false` if
-     * one or more are missing.
+     * Returns `true` if the [MutableVector] contains all elements in [elements] or `false` if one
+     * or more are missing.
      */
-    fun containsAll(elements: Collection<T>): Boolean {
-        elements.forEach {
-            if (!contains(it)) return false
-        }
+    public fun containsAll(elements: Collection<T>): Boolean {
+        elements.forEach { if (!contains(it)) return false }
         return true
     }
 
     /**
-     * Returns `true` if the [MutableVector] contains all elements in [elements] or `false` if
-     * one or more are missing.
+     * Returns `true` if the [MutableVector] contains all elements in [elements] or `false` if one
+     * or more are missing.
      */
-    fun containsAll(elements: MutableVector<T>): Boolean {
+    public fun containsAll(elements: MutableVector<T>): Boolean {
         for (i in elements.indices) {
             if (!contains(elements[i])) return false
         }
@@ -296,11 +269,10 @@ class MutableVector<T> @PublishedApi internal constructor(
     }
 
     /**
-     * Returns `true` if the contents of the [MutableVector] are the same or `false` if there
-     * is any difference. This uses equality comparisons on each element rather than reference
-     * equality.
+     * Returns `true` if the contents of the [MutableVector] are the same or `false` if there is any
+     * difference. This uses equality comparisons on each element rather than reference equality.
      */
-    fun contentEquals(other: MutableVector<T>): Boolean {
+    public fun contentEquals(other: MutableVector<T>): Boolean {
         if (other.size != size) {
             return false
         }
@@ -312,24 +284,30 @@ class MutableVector<T> @PublishedApi internal constructor(
         return true
     }
 
-    /**
-     * Ensures that there is enough space to store [capacity] elements in the [MutableVector].
-     */
-    fun ensureCapacity(capacity: Int) {
-        val oldContent = content
-        if (oldContent.size < capacity) {
-            val newSize = max(capacity, oldContent.size * 2)
-            content = oldContent.copyOf(newSize)
+    /** Ensures that there is enough space to store [capacity] elements in the [MutableVector]. */
+    public inline fun ensureCapacity(capacity: Int) {
+        if (content.size < capacity) {
+            resizeStorage(capacity)
         }
     }
 
+    @PublishedApi
+    internal fun resizeStorage(capacity: Int) {
+        val oldContent = content
+        val oldSize = oldContent.size
+        val newSize = max(capacity, oldSize * 2)
+        val newContent = arrayOfNulls<Any?>(newSize) as Array<T?>
+        oldContent.fastCopyInto(newContent, 0, 0, oldSize)
+        content = newContent
+    }
+
     /**
-     * Returns the first element in the [MutableVector] or throws a [NoSuchElementException] if
-     * it [isEmpty].
+     * Returns the first element in the [MutableVector] or throws a [NoSuchElementException] if it
+     * [isEmpty].
      */
-    fun first(): T {
+    public fun first(): T {
         if (isEmpty()) {
-            throw NoSuchElementException("MutableVector is empty.")
+            throwNoSuchElementException()
         }
         return get(0)
     }
@@ -338,259 +316,215 @@ class MutableVector<T> @PublishedApi internal constructor(
      * Returns the first element in the [MutableVector] for which [predicate] returns `true` or
      * throws [NoSuchElementException] if nothing matches.
      */
-    inline fun first(predicate: (T) -> Boolean): T {
+    public inline fun first(predicate: (T) -> Boolean): T {
         contract { callsInPlace(predicate) }
+        val content = content as Array<T>
         val size = size
-        if (size > 0) {
-            var i = 0
-            val content = content as Array<T>
-            do {
-                val item = content[i]
-                if (predicate(item)) return item
-                i++
-            } while (i < size)
+        for (i in 0 until size) {
+            val item = content[i]
+            if (predicate(item)) return item
         }
-        throwNoSuchElementException()
+        throwNoSuchElementException("MutableVector contains no element matching the predicate.")
     }
 
-    /**
-     * Returns the first element in the [MutableVector] or `null` if it [isEmpty].
-     */
-    inline fun firstOrNull() = if (isEmpty()) null else get(0)
+    @PublishedApi
+    internal inline fun throwNoSuchElementException(): Nothing =
+        throwNoSuchElementException("MutableVector is empty.")
+
+    @PublishedApi
+    internal fun throwNoSuchElementException(message: String): Nothing {
+        throw NoSuchElementException(message)
+    }
+
+    /** Returns the first element in the [MutableVector] or `null` if it [isEmpty]. */
+    public inline fun firstOrNull(): T? = if (isEmpty()) null else get(0)
 
     /**
      * Returns the first element in the [MutableVector] for which [predicate] returns `true` or
      * returns `null` if nothing matches.
      */
-    inline fun firstOrNull(predicate: (T) -> Boolean): T? {
+    public inline fun firstOrNull(predicate: (T) -> Boolean): T? {
         contract { callsInPlace(predicate) }
+        val content = content as Array<T>
         val size = size
-        if (size > 0) {
-            var i = 0
-            val content = content as Array<T>
-            do {
-                val item = content[i]
-                if (predicate(item)) return item
-                i++
-            } while (i < size)
+        for (i in 0 until size) {
+            val item = content[i]
+            if (predicate(item)) return item
         }
         return null
     }
 
     /**
-     * Accumulates values, starting with [initial], and applying [operation] to each element
-     * in the [MutableVector] in order.
+     * Accumulates values, starting with [initial], and applying [operation] to each element in the
+     * [MutableVector] in order.
      */
-    inline fun <R> fold(initial: R, operation: (acc: R, T) -> R): R {
+    public inline fun <R> fold(initial: R, operation: (acc: R, T) -> R): R {
         contract { callsInPlace(operation) }
         var acc = initial
+        val content = content as Array<T>
         val size = size
-        if (size > 0) {
-            var i = 0
-            val content = content as Array<T>
-            do {
-                acc = operation(acc, content[i])
-                i++
-            } while (i < size)
+        for (i in 0 until size) {
+            acc = operation(acc, content[i])
         }
         return acc
     }
 
     /**
-     * Accumulates values, starting with [initial], and applying [operation] to each element
-     * in the [MutableVector] in order.
+     * Accumulates values, starting with [initial], and applying [operation] to each element in the
+     * [MutableVector] in order.
      */
-    inline fun <R> foldIndexed(initial: R, operation: (index: Int, acc: R, T) -> R): R {
+    public inline fun <R> foldIndexed(initial: R, operation: (index: Int, acc: R, T) -> R): R {
         contract { callsInPlace(operation) }
         var acc = initial
+        val content = content as Array<T>
         val size = size
-        if (size > 0) {
-            var i = 0
-            val content = content as Array<T>
-            do {
-                acc = operation(i, acc, content[i])
-                i++
-            } while (i < size)
+        for (i in 0 until size) {
+            acc = operation(i, acc, content[i])
         }
         return acc
     }
 
     /**
-     * Accumulates values, starting with [initial], and applying [operation] to each element
-     * in the [MutableVector] in reverse order.
+     * Accumulates values, starting with [initial], and applying [operation] to each element in the
+     * [MutableVector] in reverse order.
      */
-    inline fun <R> foldRight(initial: R, operation: (T, acc: R) -> R): R {
+    public inline fun <R> foldRight(initial: R, operation: (T, acc: R) -> R): R {
         contract { callsInPlace(operation) }
         var acc = initial
-        val size = size
-        if (size > 0) {
-            var i = size - 1
-            val content = content as Array<T>
-            do {
-                acc = operation(content[i], acc)
-                i--
-            } while (i >= 0)
+        var i = size - 1
+        val content = content as Array<T>
+        if (i >= content.size) return acc
+        while (i >= 0) {
+            acc = operation(content[i], acc)
+            i--
         }
         return acc
     }
 
     /**
-     * Accumulates values, starting with [initial], and applying [operation] to each element
-     * in the [MutableVector] in reverse order.
+     * Accumulates values, starting with [initial], and applying [operation] to each element in the
+     * [MutableVector] in reverse order.
      */
-    inline fun <R> foldRightIndexed(initial: R, operation: (index: Int, T, acc: R) -> R): R {
+    public inline fun <R> foldRightIndexed(initial: R, operation: (index: Int, T, acc: R) -> R): R {
         contract { callsInPlace(operation) }
         var acc = initial
-        val size = size
-        if (size > 0) {
-            var i = size - 1
-            val content = content as Array<T>
-            do {
-                acc = operation(i, content[i], acc)
-                i--
-            } while (i >= 0)
+        var i = size - 1
+        val content = content as Array<T>
+        if (i >= content.size) return acc
+        while (i >= 0) {
+            acc = operation(i, content[i], acc)
+            i--
         }
         return acc
     }
 
-    /**
-     * Calls [block] for each element in the [MutableVector], in order.
-     */
-    inline fun forEach(block: (T) -> Unit) {
+    /** Calls [block] for each element in the [MutableVector], in order. */
+    public inline fun forEach(block: (T) -> Unit) {
         contract { callsInPlace(block) }
+        var i = 0
+        val content = content as Array<T>
         val size = size
-        if (size > 0) {
-            var i = 0
-            val content = content as Array<T>
-            do {
-                block(content[i])
-                i++
-            } while (i < size)
+        while (i < size) {
+            block(content[i])
+            i++
+        }
+    }
+
+    /** Calls [block] for each element in the [MutableVector] along with its index, in order. */
+    public inline fun forEachIndexed(block: (Int, T) -> Unit) {
+        contract { callsInPlace(block) }
+        var i = 0
+        val content = content as Array<T>
+        val size = size
+        while (i < size) {
+            block(i, content[i])
+            i++
+        }
+    }
+
+    /** Calls [block] for each element in the [MutableVector] in reverse order. */
+    public inline fun forEachReversed(block: (T) -> Unit) {
+        contract { callsInPlace(block) }
+        var i = size - 1
+        val content = content as Array<T>
+        if (i >= content.size) return
+        while (i >= 0) {
+            block(content[i])
+            i--
         }
     }
 
     /**
-     * Calls [block] for each element in the [MutableVector] along with its index, in order.
+     * Calls [block] for each element in the [MutableVector] along with its index, in reverse order.
      */
-    inline fun forEachIndexed(block: (Int, T) -> Unit) {
+    public inline fun forEachReversedIndexed(block: (Int, T) -> Unit) {
         contract { callsInPlace(block) }
-        val size = size
-        if (size > 0) {
-            var i = 0
-            val content = content as Array<T>
-            do {
-                block(i, content[i])
-                i++
-            } while (i < size)
+        var i = size - 1
+        val content = content as Array<T>
+        if (i >= content.size) return
+        while (i >= 0) {
+            block(i, content[i])
+            i--
         }
     }
 
-    /**
-     * Calls [block] for each element in the [MutableVector] in reverse order.
-     */
-    inline fun forEachReversed(block: (T) -> Unit) {
-        contract { callsInPlace(block) }
+    /** Returns the element at the given [index]. */
+    public inline operator fun get(index: Int): T = content[index] as T
+
+    /** Returns the index of [element] in the [MutableVector] or `-1` if [element] is not there. */
+    public fun indexOf(element: T): Int {
+        val content = content as Array<T>
         val size = size
-        if (size > 0) {
-            var i = size - 1
-            val content = content as Array<T>
-            do {
-                block(content[i])
-                i--
-            } while (i >= 0)
-        }
-    }
-
-    /**
-     * Calls [block] for each element in the [MutableVector] along with its index, in reverse
-     * order.
-     */
-    inline fun forEachReversedIndexed(block: (Int, T) -> Unit) {
-        contract { callsInPlace(block) }
-        if (size > 0) {
-            var i = size - 1
-            val content = content as Array<T>
-            do {
-                block(i, content[i])
-                i--
-            } while (i >= 0)
-        }
-    }
-
-    /**
-     * Returns the element at the given [index].
-     */
-    inline operator fun get(index: Int): T = content[index] as T
-
-    /**
-     * Returns the index of [element] in the [MutableVector] or `-1` if [element] is not there.
-     */
-    fun indexOf(element: T): Int {
-        val size = size
-        if (size > 0) {
-            var i = 0
-            val content = content as Array<T>
-            do {
-                if (element == content[i]) return i
-                i++
-            } while (i < size)
+        for (i in 0 until size) {
+            if (element == content[i]) return i
         }
         return -1
     }
 
     /**
-     * Returns the index if the first element in the [MutableVector] for which [predicate]
-     * returns `true`.
+     * Returns the index if the first element in the [MutableVector] for which [predicate] returns
+     * `true`.
      */
-    inline fun indexOfFirst(predicate: (T) -> Boolean): Int {
+    public inline fun indexOfFirst(predicate: (T) -> Boolean): Int {
         contract { callsInPlace(predicate) }
+        val content = content as Array<T>
         val size = size
-        if (size > 0) {
-            var i = 0
-            val content = content as Array<T>
-            do {
-                if (predicate(content[i])) return i
-                i++
-            } while (i < size)
+        for (i in 0 until size) {
+            if (predicate(content[i])) return i
         }
         return -1
     }
 
     /**
-     * Returns the index if the last element in the [MutableVector] for which [predicate]
-     * returns `true`.
+     * Returns the index if the last element in the [MutableVector] for which [predicate] returns
+     * `true`.
      */
-    inline fun indexOfLast(predicate: (T) -> Boolean): Int {
+    public inline fun indexOfLast(predicate: (T) -> Boolean): Int {
         contract { callsInPlace(predicate) }
-        val size = size
-        if (size > 0) {
-            var i = size - 1
-            val content = content as Array<T>
-            do {
+        var i = size - 1
+        val content = content as Array<T>
+        if (i < content.size) {
+            while (i >= 0) {
                 if (predicate(content[i])) return i
                 i--
-            } while (i >= 0)
+            }
         }
         return -1
     }
 
-    /**
-     * Returns `true` if the [MutableVector] has no elements in it or `false` otherwise.
-     */
-    fun isEmpty(): Boolean = size == 0
+    /** Returns `true` if the [MutableVector] has no elements in it or `false` otherwise. */
+    public inline fun isEmpty(): Boolean = size == 0
+
+    /** Returns `true` if there are elements in the [MutableVector] or `false` if it is empty. */
+    public inline fun isNotEmpty(): Boolean = size != 0
 
     /**
-     * Returns `true` if there are elements in the [MutableVector] or `false` if it is empty.
+     * Returns the last element in the [MutableVector] or throws a [NoSuchElementException] if it
+     * [isEmpty].
      */
-    fun isNotEmpty(): Boolean = size != 0
-
-    /**
-     * Returns the last element in the [MutableVector] or throws a [NoSuchElementException] if
-     * it [isEmpty].
-     */
-    fun last(): T {
+    public fun last(): T {
         if (isEmpty()) {
-            throw NoSuchElementException("MutableVector is empty.")
+            throwNoSuchElementException("MutableVector is empty.")
         }
         return get(lastIndex)
     }
@@ -599,78 +533,67 @@ class MutableVector<T> @PublishedApi internal constructor(
      * Returns the last element in the [MutableVector] for which [predicate] returns `true` or
      * throws [NoSuchElementException] if nothing matches.
      */
-    inline fun last(predicate: (T) -> Boolean): T {
+    public inline fun last(predicate: (T) -> Boolean): T {
         contract { callsInPlace(predicate) }
-        val size = size
-        if (size > 0) {
-            var i = size - 1
-            val content = content as Array<T>
-            do {
-                val item = content[i]
-                if (predicate(item)) return item
-                i--
-            } while (i >= 0)
+        var i = size - 1
+        val content = content as Array<T>
+        while (i >= 0) {
+            val item = content[i]
+            if (predicate(item)) return item
+            i--
         }
-        throwNoSuchElementException()
+        throwNoSuchElementException("MutableVector contains no element matching the predicate.")
     }
 
     /**
-     * Returns the index of the last element in the [MutableVector] that is the same as
-     * [element] or `-1` if no elements match.
+     * Returns the index of the last element in the [MutableVector] that is the same as [element] or
+     * `-1` if no elements match.
      */
-    fun lastIndexOf(element: T): Int {
-        val size = size
-        if (size > 0) {
-            var i = size - 1
-            val content = content as Array<T>
-            do {
-                if (element == content[i]) return i
-                i--
-            } while (i >= 0)
+    public fun lastIndexOf(element: T): Int {
+        var i = size - 1
+        val content = content as Array<T>
+        while (i >= 0) {
+            if (element == content[i]) return i
+            i--
         }
         return -1
     }
 
-    /**
-     * Returns the last element in the [MutableVector] or `null` if it [isEmpty].
-     */
-    inline fun lastOrNull() = if (isEmpty()) null else get(lastIndex)
+    /** Returns the last element in the [MutableVector] or `null` if it [isEmpty]. */
+    public inline fun lastOrNull(): T? = if (isEmpty()) null else get(lastIndex)
 
     /**
      * Returns the last element in the [MutableVector] for which [predicate] returns `true` or
      * returns `null` if nothing matches.
      */
-    inline fun lastOrNull(predicate: (T) -> Boolean): T? {
+    public inline fun lastOrNull(predicate: (T) -> Boolean): T? {
         contract { callsInPlace(predicate) }
-        val size = size
-        if (size > 0) {
-            var i = size - 1
-            val content = content as Array<T>
-            do {
-                val item = content[i]
-                if (predicate(item)) return item
-                i--
-            } while (i >= 0)
+        var i = size - 1
+        val content = content as Array<T>
+        while (i >= 0) {
+            val item = content[i]
+            if (predicate(item)) return item
+            i--
         }
         return null
     }
 
     /**
-     * Returns an [Array] of results of transforming each element in the [MutableVector]. The
-     * Array will be the same size as this.
+     * Returns an [Array] of results of transforming each element in the [MutableVector]. The Array
+     * will be the same size as this.
      */
     @Suppress("ArrayReturn")
-    inline fun <reified R> map(transform: (T) -> R): Array<R> {
+    public inline fun <reified R> map(transform: (T) -> R): Array<R> {
         contract { callsInPlace(transform) }
         return Array(size) { transform(get(it)) }
     }
 
     /**
-     * Returns an [Array] of results of transforming each element in the [MutableVector]. The
-     * Array will be the same size as this.
+     * Returns an [Array] of results of transforming each element in the [MutableVector]. The Array
+     * will be the same size as this.
      */
     @Suppress("ArrayReturn")
-    inline fun <reified R> mapIndexed(transform: (index: Int, T) -> R): Array<R> {
+    public inline fun <reified R> mapIndexed(transform: (index: Int, T) -> R): Array<R> {
         contract { callsInPlace(transform) }
         return Array(size) { transform(it, get(it)) }
     }
@@ -679,21 +602,19 @@ class MutableVector<T> @PublishedApi internal constructor(
      * Returns an [MutableVector] of results of transforming each element in the [MutableVector],
      * excluding those transformed values that are `null`.
      */
-    inline fun <reified R> mapIndexedNotNull(transform: (index: Int, T) -> R?): MutableVector<R> {
+    public inline fun <reified R> mapIndexedNotNull(
+        transform: (index: Int, T) -> R?
+    ): MutableVector<R> {
         contract { callsInPlace(transform) }
         val size = size
         val arr = arrayOfNulls<R>(size)
         var targetSize = 0
-        if (size > 0) {
-            val content = content as Array<T>
-            var i = 0
-            do {
-                val target = transform(i, content[i])
-                if (target != null) {
-                    arr[targetSize++] = target
-                }
-                i++
-            } while (i < size)
+        val content = content as Array<T>
+        for (i in 0 until size) {
+            val target = transform(i, content[i])
+            if (target != null) {
+                arr[targetSize++] = target
+            }
         }
         return MutableVector(arr, targetSize)
     }
@@ -702,45 +623,36 @@ class MutableVector<T> @PublishedApi internal constructor(
      * Returns an [MutableVector] of results of transforming each element in the [MutableVector],
      * excluding those transformed values that are `null`.
      */
-    inline fun <reified R> mapNotNull(transform: (T) -> R?): MutableVector<R> {
+    public inline fun <reified R> mapNotNull(transform: (T) -> R?): MutableVector<R> {
         contract { callsInPlace(transform) }
         val size = size
         val arr = arrayOfNulls<R>(size)
         var targetSize = 0
-        if (size > 0) {
-            val content = content as Array<T>
-            var i = 0
-            do {
-                val target = transform(content[i])
-                if (target != null) {
-                    arr[targetSize++] = target
-                }
-                i++
-            } while (i < size)
+        val content = content as Array<T>
+        for (i in 0 until size) {
+            val target = transform(content[i])
+            if (target != null) {
+                arr[targetSize++] = target
+            }
         }
         return MutableVector(arr, targetSize)
     }
 
-    /**
-     * [add] [element] to the [MutableVector].
-     */
-    inline operator fun plusAssign(element: T) {
+    /** [add] [element] to the [MutableVector]. */
+    public inline operator fun plusAssign(element: T) {
         add(element)
     }
 
-    /**
-     * [remove] [element] from the [MutableVector]
-     */
-    inline operator fun minusAssign(element: T) {
+    /** [remove] [element] from the [MutableVector] */
+    public inline operator fun minusAssign(element: T) {
         remove(element)
     }
 
     /**
-     * Removes [element] from the [MutableVector]. If [element] was in the [MutableVector]
-     * and was removed, `true` will be returned, or `false` will be returned if the element
-     * was not found.
+     * Removes [element] from the [MutableVector]. If [element] was in the [MutableVector] and was
+     * removed, `true` will be returned, or `false` will be returned if the element was not found.
      */
-    fun remove(element: T): Boolean {
+    public fun remove(element: T): Boolean {
         val index = indexOf(element)
         if (index >= 0) {
             removeAt(index)
@@ -752,7 +664,7 @@ class MutableVector<T> @PublishedApi internal constructor(
     /**
      * Removes all [elements] from the [MutableVector] and returns `true` if anything was removed.
      */
-    fun removeAll(elements: List<T>): Boolean {
+    public fun removeAll(elements: List<T>): Boolean {
         val initialSize = size
         for (i in elements.indices) {
             remove(elements[i])
@@ -763,10 +675,10 @@ class MutableVector<T> @PublishedApi internal constructor(
     /**
      * Removes all [elements] from the [MutableVector] and returns `true` if anything was removed.
      */
-    fun removeAll(elements: MutableVector<T>): Boolean {
+    public fun removeAll(elements: MutableVector<T>): Boolean {
         val initialSize = size
         for (i in 0..elements.lastIndex) {
-            remove(elements.get(i))
+            remove(elements[i])
         }
         return initialSize != size
     }
@@ -774,29 +686,25 @@ class MutableVector<T> @PublishedApi internal constructor(
     /**
      * Removes all [elements] from the [MutableVector] and returns `true` if anything was removed.
      */
-    fun removeAll(elements: Collection<T>): Boolean {
+    public fun removeAll(elements: Collection<T>): Boolean {
         if (elements.isEmpty()) {
             return false
         }
         val initialSize = size
-        elements.forEach {
-            remove(it)
-        }
+        elements.forEach { remove(it) }
         return initialSize != size
     }
 
-    /**
-     * Removes the element at the given [index] and returns it.
-     */
-    fun removeAt(index: Int): T {
+    /** Removes the element at the given [index] and returns it. */
+    public fun removeAt(index: Int): T {
         val content = content
         val item = content[index] as T
         if (index != lastIndex) {
-            content.copyInto(
+            content.fastCopyInto(
                 destination = content,
                 destinationOffset = index,
                 startIndex = index + 1,
-                endIndex = size
+                endIndex = size,
             )
         }
         size--
@@ -804,17 +712,15 @@ class MutableVector<T> @PublishedApi internal constructor(
         return item
     }
 
-    /**
-     * Removes items from index [start] (inclusive) to [end] (exclusive).
-     */
-    fun removeRange(start: Int, end: Int) {
+    /** Removes items from index [start] (inclusive) to [end] (exclusive). */
+    public fun removeRange(start: Int, end: Int) {
         if (end > start) {
             if (end < size) {
-                content.copyInto(
+                content.fastCopyInto(
                     destination = content,
                     destinationOffset = start,
                     startIndex = end,
-                    endIndex = size
+                    endIndex = size,
                 )
             }
             val newSize = size - (end - start)
@@ -831,10 +737,8 @@ class MutableVector<T> @PublishedApi internal constructor(
         size = newSize
     }
 
-    /**
-     * Removes items that satisfy [predicate]
-     */
-    inline fun removeIf(predicate: (T) -> Boolean) {
+    /** Removes items that satisfy [predicate] */
+    public inline fun removeIf(predicate: (T) -> Boolean) {
         var gap = 0
         val size = size
         for (i in 0 until size) {
@@ -851,10 +755,8 @@ class MutableVector<T> @PublishedApi internal constructor(
         setSize(size - gap)
     }
 
-    /**
-     * Keeps only [elements] in the [MutableVector] and removes all other values.
-     */
-    fun retainAll(elements: Collection<T>): Boolean {
+    /** Keeps only [elements] in the [MutableVector] and removes all other values. */
+    public fun retainAll(elements: Collection<T>): Boolean {
         val initialSize = size
         for (i in lastIndex downTo 0) {
             val item = get(i)
@@ -865,51 +767,36 @@ class MutableVector<T> @PublishedApi internal constructor(
         return initialSize != size
     }
 
-    /**
-     * Sets the value at [index] to [element].
-     */
-    operator fun set(index: Int, element: T): T {
+    /** Sets the value at [index] to [element]. */
+    public operator fun set(index: Int, element: T): T {
         val content = content
         val old = content[index] as T
         content[index] = element
         return old
     }
 
-    /**
-     * Sorts the [MutableVector] using [comparator] to order the items.
-     */
-    fun sortWith(comparator: Comparator<T>) {
+    /** Sorts the [MutableVector] using [comparator] to order the items. */
+    public fun sortWith(comparator: Comparator<T>) {
         (content as Array<T>).sortWith(comparator = comparator, fromIndex = 0, toIndex = size)
     }
 
     /**
-     * Returns the sum of all values produced by [selector] for each element in the
-     * [MutableVector].
+     * Returns the sum of all values produced by [selector] for each element in the [MutableVector].
      */
-    inline fun sumBy(selector: (T) -> Int): Int {
+    public inline fun sumBy(selector: (T) -> Int): Int {
         contract { callsInPlace(selector) }
         var sum = 0
-        val size = size
-        if (size > 0) {
-            val content = content as Array<T>
-            var i = 0
-            do {
-                sum += selector(content[i])
-                i++
-            } while (i < size)
+        val content = content as Array<T>
+        var i = 0
+        while (i < size) {
+            sum += selector(content[i])
+            i++
         }
         return sum
     }
 
-    @PublishedApi
-    internal fun throwNoSuchElementException(): Nothing {
-        throw NoSuchElementException("MutableVector contains no element matching the predicate.")
-    }
-
-    private class VectorListIterator<T>(
-        private val list: MutableList<T>,
-        private var index: Int
-    ) : MutableListIterator<T> {
+    private class VectorListIterator<T>(private val list: MutableList<T>, private var index: Int) :
+        MutableListIterator<T> {
 
         override fun hasNext(): Boolean {
             return index < list.size
@@ -951,9 +838,7 @@ class MutableVector<T> @PublishedApi internal constructor(
         }
     }
 
-    /**
-     * [MutableList] implementation for a [MutableVector], used in [asMutableList].
-     */
+    /** [MutableList] implementation for a [MutableVector], used in [asMutableList]. */
     private class MutableVectorList<T>(private val vector: MutableVector<T>) : MutableList<T> {
         override val size: Int
             get() = vector.size
@@ -1015,13 +900,13 @@ class MutableVector<T> @PublishedApi internal constructor(
 
     /**
      * A view into an underlying [MutableList] that directly accesses the underlying [MutableList].
-     * This is important for the implementation of [List.subList]. A change to the [SubList]
-     * also changes the referenced [MutableList].
+     * This is important for the implementation of [List.subList]. A change to the [SubList] also
+     * changes the referenced [MutableList].
      */
     private class SubList<T>(
         private val list: MutableList<T>,
         private val start: Int,
-        private var end: Int
+        private var end: Int,
     ) : MutableList<T> {
         override val size: Int
             get() = end - start
@@ -1083,14 +968,16 @@ class MutableVector<T> @PublishedApi internal constructor(
 
         override fun addAll(index: Int, elements: Collection<T>): Boolean {
             list.addAll(index + start, elements)
-            end += elements.size
-            return elements.size > 0
+            val size = elements.size
+            end += size
+            return size > 0
         }
 
         override fun addAll(elements: Collection<T>): Boolean {
             list.addAll(end, elements)
-            end += elements.size
-            return elements.size > 0
+            val size = elements.size
+            end += size
+            return size > 0
         }
 
         override fun clear() {
@@ -1118,9 +1005,7 @@ class MutableVector<T> @PublishedApi internal constructor(
 
         override fun removeAll(elements: Collection<T>): Boolean {
             val originalEnd = end
-            elements.forEach {
-                remove(it)
-            }
+            elements.forEach { remove(it) }
             return originalEnd != end
         }
 
@@ -1155,28 +1040,41 @@ class MutableVector<T> @PublishedApi internal constructor(
     }
 }
 
-private fun List<*>.checkIndex(index: Int) {
+internal fun List<*>.checkIndex(index: Int) {
     val size = size
     if (index < 0 || index >= size) {
-        throw IndexOutOfBoundsException("Index $index is out of bounds. " +
-            "The list has $size elements.")
+        throwListIndexOutOfBoundsException(index, size)
     }
 }
 
-private fun List<*>.checkSubIndex(fromIndex: Int, toIndex: Int) {
-    val size = size
+private fun throwListIndexOutOfBoundsException(index: Int, size: Int) {
+    throw IndexOutOfBoundsException("Index $index is out of bounds. The list has $size elements.")
+}
+
+internal fun List<*>.checkSubIndex(fromIndex: Int, toIndex: Int) {
     if (fromIndex > toIndex) {
-        throw IllegalArgumentException("Indices are out of order. fromIndex ($fromIndex) is " +
-            "greater than toIndex ($toIndex).")
+        throwReversedIndicesException(fromIndex, toIndex)
     }
     if (fromIndex < 0) {
-        throw IndexOutOfBoundsException("fromIndex ($fromIndex) is less than 0.")
+        throwNegativeIndexException(fromIndex)
     }
     if (toIndex > size) {
-        throw IndexOutOfBoundsException(
-            "toIndex ($toIndex) is more than than the list size ($size)"
-        )
+        throwOutOfRangeException(toIndex, size)
     }
+}
+
+private fun throwOutOfRangeException(toIndex: Int, size: Int) {
+    throw IndexOutOfBoundsException("toIndex ($toIndex) is more than than the list size ($size)")
+}
+
+private fun throwNegativeIndexException(fromIndex: Int) {
+    throw IndexOutOfBoundsException("fromIndex ($fromIndex) is less than 0.")
+}
+
+private fun throwReversedIndicesException(fromIndex: Int, toIndex: Int) {
+    throw IllegalArgumentException(
+        "Indices are out of order. fromIndex ($fromIndex) is greater than toIndex ($toIndex)."
+    )
 }
 
 /**
@@ -1184,8 +1082,8 @@ private fun List<*>.checkSubIndex(fromIndex: Int, toIndex: Int) {
  *
  * @see MutableVector.ensureCapacity
  */
-inline fun <reified T> MutableVector(capacity: Int = 16) =
-    MutableVector<T>(arrayOfNulls<T>(capacity), 0)
+public inline fun <reified T> MutableVector(capacity: Int = 16): MutableVector<T> =
+    MutableVector(arrayOfNulls<T>(capacity), 0)
 
 /**
  * Create a [MutableVector] with a given [size], initializing each element using the [init]
@@ -1194,26 +1092,24 @@ inline fun <reified T> MutableVector(capacity: Int = 16) =
  * [init] is called for each element in the [MutableVector], starting from the first one and should
  * return the value to be assigned to the element at its given index.
  */
+@Suppress("LEAKED_IN_PLACE_LAMBDA")
 @OptIn(ExperimentalContracts::class)
-inline fun <reified T> MutableVector(size: Int, noinline init: (Int) -> T): MutableVector<T> {
+public inline fun <reified T> MutableVector(
+    size: Int,
+    noinline init: (Int) -> T,
+): MutableVector<T> {
     contract { callsInPlace(init) }
     val arr = Array(size, init)
     return MutableVector(arr as Array<T?>, size)
 }
 
-/**
- * Creates an empty [MutableVector] with a [capacity][MutableVector.ensureCapacity] of 16.
- */
-inline fun <reified T> mutableVectorOf() =
-    MutableVector<T>()
+/** Creates an empty [MutableVector] with a [capacity][MutableVector.ensureCapacity] of 16. */
+public inline fun <reified T> mutableVectorOf(): MutableVector<T> = MutableVector<T>()
 
 /**
  * Creates a [MutableVector] with the given values. This will use the passed vararg [elements]
  * storage.
  */
-inline fun <reified T> mutableVectorOf(vararg elements: T): MutableVector<T> {
-    return MutableVector(
-        elements as Array<T?>,
-        elements.size
-    )
+public inline fun <reified T> mutableVectorOf(vararg elements: T): MutableVector<T> {
+    return MutableVector(elements as Array<T?>, elements.size)
 }

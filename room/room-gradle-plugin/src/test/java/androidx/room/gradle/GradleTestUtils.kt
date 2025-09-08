@@ -17,6 +17,7 @@
 package androidx.room.gradle
 
 import androidx.kruth.assertThat
+import androidx.testutils.gradle.ProjectSetupRule
 import java.io.File
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
@@ -24,15 +25,16 @@ import org.gradle.testkit.runner.TaskOutcome
 
 internal fun runGradle(
     vararg args: String,
-    projectDir: File,
-    expectFailure: Boolean = false
+    projectSetup: ProjectSetupRule,
+    expectFailure: Boolean = false,
 ): BuildResult {
-    val runner = GradleRunner.create()
-        .withProjectDir(projectDir)
-        .withPluginClasspath()
-        .withDebug(true)
-        // workaround for b/231154556
-        .withArguments("-Dorg.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m", *args)
+    val runner =
+        GradleRunner.create()
+            .withProjectDir(projectSetup.rootDir)
+            .withPluginClasspath()
+            .withDebug(false)
+            // workaround for b/231154556
+            .withArguments("-Dorg.gradle.jvmargs=-Xmx1g -XX:MaxMetaspaceSize=512m", *args)
     return if (expectFailure) {
         runner.buildAndFail()
     } else {

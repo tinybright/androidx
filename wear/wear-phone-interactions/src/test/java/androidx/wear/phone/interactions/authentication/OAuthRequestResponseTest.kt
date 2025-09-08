@@ -19,8 +19,8 @@ package androidx.wear.phone.interactions.authentication
 import android.content.Context
 import android.net.Uri
 import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.filters.SdkSuppress
 import androidx.wear.phone.interactions.WearPhoneInteractionsTestRunner
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.fail
@@ -36,7 +36,7 @@ import org.robolectric.shadows.ShadowPackageManager
 @RunWith(WearPhoneInteractionsTestRunner::class)
 @DoNotInstrument
 @Config(minSdk = 28)
-@RequiresApi(Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
 public class OAuthRequestResponseTest {
     internal companion object {
         private val context: Context = ApplicationProvider.getApplicationContext()
@@ -100,17 +100,18 @@ public class OAuthRequestResponseTest {
     public fun testRequestBuildSuccessWithSetters() {
         setSystemFeatureChina(false)
         val codeChallenge = CodeChallenge(CodeVerifier())
-        val requestBuilder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(Uri.parse(authProviderUrl))
-            .setClientId(clientId)
-            .setCodeChallenge(codeChallenge)
+        val requestBuilder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(Uri.parse(authProviderUrl))
+                .setClientId(clientId)
+                .setCodeChallenge(codeChallenge)
 
         checkBuildSuccess(
             requestBuilder,
             authProviderUrl,
             clientId,
             redirectUrlWithPackageName,
-            codeChallenge.value
+            codeChallenge.value,
         )
     }
 
@@ -118,17 +119,18 @@ public class OAuthRequestResponseTest {
     public fun testRequestBuildSuccessWithSetters_cn() {
         setSystemFeatureChina(true)
         val codeChallenge = CodeChallenge(CodeVerifier())
-        val requestBuilder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(Uri.parse(authProviderUrl))
-            .setClientId(clientId)
-            .setCodeChallenge(codeChallenge)
+        val requestBuilder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(Uri.parse(authProviderUrl))
+                .setClientId(clientId)
+                .setCodeChallenge(codeChallenge)
 
         checkBuildSuccess(
             requestBuilder,
             authProviderUrl,
             clientId,
             redirectUrlWithPackageName_cn,
-            codeChallenge.value
+            codeChallenge.value,
         )
     }
 
@@ -136,18 +138,19 @@ public class OAuthRequestResponseTest {
     public fun testRequestBuildSuccessWithCustomRedirectUri() {
         setSystemFeatureChina(false)
         val codeChallenge = CodeChallenge(CodeVerifier())
-        val requestBuilder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(Uri.parse(authProviderUrl))
-            .setClientId(clientId)
-            .setRedirectUrl(Uri.parse(customRedirectUrl))
-            .setCodeChallenge(codeChallenge)
+        val requestBuilder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(Uri.parse(authProviderUrl))
+                .setClientId(clientId)
+                .setRedirectUrl(Uri.parse(customRedirectUrl))
+                .setCodeChallenge(codeChallenge)
 
         checkBuildSuccess(
             requestBuilder,
             authProviderUrl,
             clientId,
             customRedirectUrlWithPackageName,
-            codeChallenge.value
+            codeChallenge.value,
         )
     }
 
@@ -155,18 +158,19 @@ public class OAuthRequestResponseTest {
     public fun testRequestBuildSuccessWithCustomRedirectUri_cn() {
         setSystemFeatureChina(true)
         val codeChallenge = CodeChallenge(CodeVerifier())
-        val requestBuilder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(Uri.parse(authProviderUrl))
-            .setClientId(clientId)
-            .setRedirectUrl(Uri.parse(customRedirectUrl))
-            .setCodeChallenge(codeChallenge)
+        val requestBuilder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(Uri.parse(authProviderUrl))
+                .setClientId(clientId)
+                .setRedirectUrl(Uri.parse(customRedirectUrl))
+                .setCodeChallenge(codeChallenge)
 
         checkBuildSuccess(
             requestBuilder,
             authProviderUrl,
             clientId,
             customRedirectUrlWithPackageName,
-            codeChallenge.value
+            codeChallenge.value,
         )
     }
 
@@ -174,69 +178,68 @@ public class OAuthRequestResponseTest {
     public fun testRequestBuildSuccessWithCompleteUrl() {
         setSystemFeatureChina(false)
         val codeChallenge = CodeChallenge(CodeVerifier())
-        val requestBuilder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(
-                Uri.parse(
-                    "$authProviderUrl?client_id=$clientId" +
-                        "&redirect_uri=$redirectUrlWithPackageName" +
-                        "&response_type=code" +
-                        "&code_challenge=${codeChallenge.value}" +
-                        "&code_challenge_method=S256"
+        val requestBuilder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(
+                    Uri.parse(
+                        "$authProviderUrl?client_id=$clientId" +
+                            "&redirect_uri=$redirectUrlWithPackageName" +
+                            "&response_type=code" +
+                            "&code_challenge=${codeChallenge.value}" +
+                            "&code_challenge_method=S256"
+                    )
                 )
-            )
 
         checkBuildSuccess(
             requestBuilder,
             authProviderUrl,
             clientId,
             redirectUrlWithPackageName,
-            codeChallenge.value
+            codeChallenge.value,
         )
     }
 
     @Test
     public fun testRequestBuildFailureWithoutAuthProviderUrl() {
         setSystemFeatureChina(false)
-        val builder = OAuthRequest.Builder(context)
-            .setClientId(clientId)
-            .setCodeChallenge(CodeChallenge(CodeVerifier()))
+        val builder =
+            OAuthRequest.Builder(context)
+                .setClientId(clientId)
+                .setCodeChallenge(CodeChallenge(CodeVerifier()))
 
-        checkBuildFailure(
-            builder,
-            "The request requires the auth provider url to be provided."
-        )
+        checkBuildFailure(builder, "The request requires the auth provider url to be provided.")
     }
 
     @Test
     public fun testRequestBuildFailureWithoutClientId() {
         setSystemFeatureChina(false)
-        val builder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(Uri.parse(authProviderUrl))
-            .setCodeChallenge(CodeChallenge(CodeVerifier()))
+        val builder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(Uri.parse(authProviderUrl))
+                .setCodeChallenge(CodeChallenge(CodeVerifier()))
 
         checkBuildFailure(
             builder,
             "The use of Proof Key for Code Exchange is required for authentication, " +
-                "please provide client_id in the request."
+                "please provide client_id in the request.",
         )
     }
 
     @Test
     public fun testRequestBuildFailureWithConflictedClientId() {
         setSystemFeatureChina(false)
-        val builder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(
-                Uri.parse("$authProviderUrl?client_id=XXX")
-            )
-            .setClientId(clientId)
-            .setCodeChallenge(CodeChallenge(CodeVerifier()))
+        val builder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(Uri.parse("$authProviderUrl?client_id=XXX"))
+                .setClientId(clientId)
+                .setCodeChallenge(CodeChallenge(CodeVerifier()))
 
         checkBuildFailure(
             builder,
             "The 'client_id' query param already exists in the authProviderUrl, " +
                 "expect to have the value of '$clientId', but " +
                 "'XXX' is given. Please correct it,  or leave it out " +
-                "to allow the request builder to append it automatically."
+                "to allow the request builder to append it automatically.",
         )
     }
 
@@ -244,33 +247,33 @@ public class OAuthRequestResponseTest {
     public fun testRequestBuildSuccessWithDuplicatedClientId() {
         setSystemFeatureChina(false)
         val codeChallenge = CodeChallenge(CodeVerifier())
-        val builder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(
-                Uri.parse("$authProviderUrl?client_id=$clientId")
-            )
-            .setClientId(clientId)
-            .setCodeChallenge(codeChallenge)
+        val builder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(Uri.parse("$authProviderUrl?client_id=$clientId"))
+                .setClientId(clientId)
+                .setCodeChallenge(codeChallenge)
 
         checkBuildSuccess(
             builder,
             authProviderUrl,
             clientId,
             redirectUrlWithPackageName,
-            codeChallenge.value
+            codeChallenge.value,
         )
     }
 
     @Test
     public fun testRequestBuildFailureWithoutCodeChallenge() {
         setSystemFeatureChina(false)
-        val builder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(Uri.parse(authProviderUrl))
-            .setClientId(clientId)
+        val builder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(Uri.parse(authProviderUrl))
+                .setClientId(clientId)
 
         checkBuildFailure(
             builder,
             "The use of Proof Key for Code Exchange is required for authentication, " +
-                "please provide code_challenge in the request."
+                "please provide code_challenge in the request.",
         )
     }
 
@@ -278,19 +281,18 @@ public class OAuthRequestResponseTest {
     public fun testRequestBuildFailureWithConflictedCodeChallenge() {
         setSystemFeatureChina(false)
         val codeChallenge = CodeChallenge(CodeVerifier())
-        val builder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(
-                Uri.parse("$authProviderUrl?code_challenge=XXX")
-            )
-            .setClientId(clientId)
-            .setCodeChallenge(codeChallenge)
+        val builder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(Uri.parse("$authProviderUrl?code_challenge=XXX"))
+                .setClientId(clientId)
+                .setCodeChallenge(codeChallenge)
 
         checkBuildFailure(
             builder,
             "The 'code_challenge' query param already exists in the authProviderUrl, " +
                 "expect to have the value of '${codeChallenge.value}', but " +
                 "'XXX' is given. Please correct it,  or leave it out " +
-                "to allow the request builder to append it automatically."
+                "to allow the request builder to append it automatically.",
         )
     }
 
@@ -298,38 +300,38 @@ public class OAuthRequestResponseTest {
     public fun testRequestBuildSuccessWithDuplicatedCodeChallenge() {
         setSystemFeatureChina(false)
         val codeChallenge = CodeChallenge(CodeVerifier())
-        val builder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(
-                Uri.parse("$authProviderUrl?code_challenge=${codeChallenge.value}")
-            )
-            .setClientId(clientId)
-            .setCodeChallenge(codeChallenge)
+        val builder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(
+                    Uri.parse("$authProviderUrl?code_challenge=${codeChallenge.value}")
+                )
+                .setClientId(clientId)
+                .setCodeChallenge(codeChallenge)
 
         checkBuildSuccess(
             builder,
             authProviderUrl,
             clientId,
             redirectUrlWithPackageName,
-            codeChallenge.value
+            codeChallenge.value,
         )
     }
 
     @Test
     public fun testRequestBuildFailureWithWrongResponseType() {
         setSystemFeatureChina(false)
-        val builder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(
-                Uri.parse("$authProviderUrl?response_type=XXX")
-            )
-            .setClientId(clientId)
-            .setCodeChallenge(CodeChallenge(CodeVerifier()))
+        val builder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(Uri.parse("$authProviderUrl?response_type=XXX"))
+                .setClientId(clientId)
+                .setCodeChallenge(CodeChallenge(CodeVerifier()))
 
         checkBuildFailure(
             builder,
             "The 'response_type' query param already exists in the authProviderUrl, " +
                 "expect to have the value of 'code', but " +
                 "'XXX' is given. Please correct it,  or leave it out " +
-                "to allow the request builder to append it automatically."
+                "to allow the request builder to append it automatically.",
         )
     }
 
@@ -337,38 +339,36 @@ public class OAuthRequestResponseTest {
     public fun testRequestBuildFailureWithDuplicatedResponseType() {
         setSystemFeatureChina(false)
         val codeChallenge = CodeChallenge(CodeVerifier())
-        val builder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(
-                Uri.parse("$authProviderUrl?response_type=code")
-            )
-            .setClientId(clientId)
-            .setCodeChallenge(codeChallenge)
+        val builder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(Uri.parse("$authProviderUrl?response_type=code"))
+                .setClientId(clientId)
+                .setCodeChallenge(codeChallenge)
 
         checkBuildSuccess(
             builder,
             authProviderUrl,
             clientId,
             redirectUrlWithPackageName,
-            codeChallenge.value
+            codeChallenge.value,
         )
     }
 
     @Test
     public fun testRequestBuildFailureWithWrongCodeChallengeMethod() {
         setSystemFeatureChina(false)
-        val builder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(
-                Uri.parse("$authProviderUrl?code_challenge_method=PLAIN")
-            )
-            .setClientId(clientId)
-            .setCodeChallenge(CodeChallenge(CodeVerifier()))
+        val builder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(Uri.parse("$authProviderUrl?code_challenge_method=PLAIN"))
+                .setClientId(clientId)
+                .setCodeChallenge(CodeChallenge(CodeVerifier()))
 
         checkBuildFailure(
             builder,
             "The 'code_challenge_method' query param already exists in the authProviderUrl, " +
                 "expect to have the value of 'S256', but " +
                 "'PLAIN' is given. Please correct it,  or leave it out " +
-                "to allow the request builder to append it automatically."
+                "to allow the request builder to append it automatically.",
         )
     }
 
@@ -376,19 +376,18 @@ public class OAuthRequestResponseTest {
     public fun testRequestBuildFailureWithDuplicatedCodeChallengeMethod() {
         setSystemFeatureChina(false)
         val codeChallenge = CodeChallenge(CodeVerifier())
-        val builder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(
-                Uri.parse("$authProviderUrl?code_challenge_method=S256")
-            )
-            .setClientId(clientId)
-            .setCodeChallenge(codeChallenge)
+        val builder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(Uri.parse("$authProviderUrl?code_challenge_method=S256"))
+                .setClientId(clientId)
+                .setCodeChallenge(codeChallenge)
 
         checkBuildSuccess(
             builder,
             authProviderUrl,
             clientId,
             redirectUrlWithPackageName,
-            codeChallenge.value
+            codeChallenge.value,
         )
     }
 
@@ -396,20 +395,21 @@ public class OAuthRequestResponseTest {
     public fun testRequestBuildFailureWithConflictedRedirectUri() {
         setSystemFeatureChina(false)
         val codeChallenge = CodeChallenge(CodeVerifier())
-        val builder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(
-                Uri.parse("$authProviderUrl?redirect_uri=$redirectUrlWithPackageName")
-            )
-            .setRedirectUrl(Uri.parse(customRedirectUrl))
-            .setClientId(clientId)
-            .setCodeChallenge(codeChallenge)
+        val builder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(
+                    Uri.parse("$authProviderUrl?redirect_uri=$redirectUrlWithPackageName")
+                )
+                .setRedirectUrl(Uri.parse(customRedirectUrl))
+                .setClientId(clientId)
+                .setCodeChallenge(codeChallenge)
 
         checkBuildFailure(
             builder,
             "The 'redirect_uri' query param already exists in the authProviderUrl, " +
                 "expect to have the value of '$customRedirectUrlWithPackageName', but " +
                 "'$redirectUrlWithPackageName' is given. Please correct it,  or leave it out " +
-                "to allow the request builder to append it automatically."
+                "to allow the request builder to append it automatically.",
         )
     }
 
@@ -423,16 +423,14 @@ public class OAuthRequestResponseTest {
 
     @Test
     public fun testErrorResponseBuild() {
-        val response1 = OAuthResponse.Builder()
-            .setErrorCode(RemoteAuthClient.ERROR_UNSUPPORTED)
-            .build()
+        val response1 =
+            OAuthResponse.Builder().setErrorCode(RemoteAuthClient.ERROR_UNSUPPORTED).build()
 
         assertThat(response1.errorCode).isEqualTo(RemoteAuthClient.ERROR_UNSUPPORTED)
         assertThat(response1.responseUrl).isNull()
 
-        val response2 = OAuthResponse.Builder()
-            .setErrorCode(RemoteAuthClient.ERROR_PHONE_UNAVAILABLE)
-            .build()
+        val response2 =
+            OAuthResponse.Builder().setErrorCode(RemoteAuthClient.ERROR_PHONE_UNAVAILABLE).build()
 
         assertThat(response2.errorCode).isEqualTo(RemoteAuthClient.ERROR_PHONE_UNAVAILABLE)
         assertThat(response2.responseUrl).isNull()
@@ -442,10 +440,11 @@ public class OAuthRequestResponseTest {
     public fun testGetRedirectUrl() {
         setSystemFeatureChina(false)
         val codeChallenge = CodeChallenge(CodeVerifier())
-        val builder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(Uri.parse(authProviderUrl))
-            .setClientId(clientId)
-            .setCodeChallenge(codeChallenge)
+        val builder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(Uri.parse(authProviderUrl))
+                .setClientId(clientId)
+                .setCodeChallenge(codeChallenge)
 
         // Building should always be successful and it's already tested in the previous tests, so
         // no need for try-catch block as in #checkBuildFailure.
@@ -457,10 +456,11 @@ public class OAuthRequestResponseTest {
     public fun testGetRedirectUrl_cn() {
         setSystemFeatureChina(true)
         val codeChallenge = CodeChallenge(CodeVerifier())
-        val builder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(Uri.parse(authProviderUrl))
-            .setClientId(clientId)
-            .setCodeChallenge(codeChallenge)
+        val builder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(Uri.parse(authProviderUrl))
+                .setClientId(clientId)
+                .setCodeChallenge(codeChallenge)
 
         // Building should always be successful and it's already tested in the previous tests, so
         // no need for try-catch block as in #checkBuildFailure.
@@ -472,11 +472,12 @@ public class OAuthRequestResponseTest {
     public fun testGetRedirectUrlWithCustomRedirectUri() {
         setSystemFeatureChina(false)
         val codeChallenge = CodeChallenge(CodeVerifier())
-        val builder = OAuthRequest.Builder(context)
-            .setAuthProviderUrl(Uri.parse(authProviderUrl))
-            .setClientId(clientId)
-            .setRedirectUrl(Uri.parse(customRedirectUrl))
-            .setCodeChallenge(codeChallenge)
+        val builder =
+            OAuthRequest.Builder(context)
+                .setAuthProviderUrl(Uri.parse(authProviderUrl))
+                .setClientId(clientId)
+                .setRedirectUrl(Uri.parse(customRedirectUrl))
+                .setCodeChallenge(codeChallenge)
 
         // Building should always be successful and it's already tested in the previous tests, so
         // no need for try-catch block as in #checkBuildFailure.
@@ -486,8 +487,11 @@ public class OAuthRequestResponseTest {
 
     @Test
     public fun testGetRedirectUrl_builtWithConstructor() {
-        val requestUrl = Uri.parse(authProviderUrl).buildUpon()
-            .appendQueryParameter(OAuthRequest.REDIRECT_URI_KEY, customRedirectUrl).build()
+        val requestUrl =
+            Uri.parse(authProviderUrl)
+                .buildUpon()
+                .appendQueryParameter(OAuthRequest.REDIRECT_URI_KEY, customRedirectUrl)
+                .build()
         val request = OAuthRequest(appPackageName, requestUrl)
 
         assertThat(request.redirectUrl).isEqualTo(customRedirectUrl)

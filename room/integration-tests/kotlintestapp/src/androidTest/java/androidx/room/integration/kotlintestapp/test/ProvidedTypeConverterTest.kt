@@ -18,6 +18,7 @@ package androidx.room.integration.kotlintestapp.test
 import android.content.Context
 import androidx.kruth.assertThat
 import androidx.kruth.assertWithMessage
+import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Entity
 import androidx.room.Insert
@@ -53,10 +54,11 @@ class ProvidedTypeConverterTest {
     @Test
     fun testProvidedTypeConverter() {
         val context: Context = ApplicationProvider.getApplicationContext()
-        val db = Room.inMemoryDatabaseBuilder(context, TestDatabaseWithConverter::class.java)
-            .addTypeConverter(UUIDConverter())
-            .addTypeConverter(TimeStampConverter())
-            .build()
+        val db =
+            Room.inMemoryDatabaseBuilder(context, TestDatabaseWithConverterOne::class.java)
+                .addTypeConverter(UUIDConverter())
+                .addTypeConverter(TimeStampConverter())
+                .build()
         val pet: Pet = TestUtil.createPet(3)
         pet.mName = "pet"
         db.petDao().insertOrReplace(pet)
@@ -67,15 +69,32 @@ class ProvidedTypeConverterTest {
     }
 
     @Test
+    fun testSharedProvidedTypeConverter() {
+        val context: Context = ApplicationProvider.getApplicationContext()
+        val db =
+            Room.inMemoryDatabaseBuilder(context, TestDatabaseWithConverterTwo::class.java)
+                .addTypeConverter(UUIDConverter())
+                .addTypeConverter(TimeStampConverter())
+                .build()
+        val pet: Pet = TestUtil.createPet(3)
+        db.petRobotDao().putPet(pet)
+
+        val robot = Robot(UUID.randomUUID(), UUID.randomUUID())
+        db.petRobotDao().putRobot(robot)
+        db.close()
+    }
+
+    @Test
     fun testMissingProvidedTypeConverterInstance() {
         val context: Context = ApplicationProvider.getApplicationContext()
         try {
             val db =
-                Room.inMemoryDatabaseBuilder(context, TestDatabaseWithConverter::class.java).build()
+                Room.inMemoryDatabaseBuilder(context, TestDatabaseWithConverterOne::class.java)
+                    .build()
             val pet: Pet = TestUtil.createPet(3)
             pet.mName = "pet"
             db.petDao().insertOrReplace(pet)
-            assertWithMessage("Show have thrown an IllegalArgumentException").fail()
+            assertWithMessage("Should have thrown an IllegalArgumentException").fail()
         } catch (throwable: Throwable) {
             assertThat(throwable).isInstanceOf<IllegalArgumentException>()
         }
@@ -85,13 +104,14 @@ class ProvidedTypeConverterTest {
     fun testMissingProvidedTypeConverterAnnotation() {
         val context: Context = ApplicationProvider.getApplicationContext()
         try {
-            val db: TestDatabase = Room.inMemoryDatabaseBuilder(context, TestDatabase::class.java)
-                .addTypeConverter(TimeStampConverter())
-                .build()
+            val db: TestDatabase =
+                Room.inMemoryDatabaseBuilder(context, TestDatabase::class.java)
+                    .addTypeConverter(TimeStampConverter())
+                    .build()
             val pet: Pet = TestUtil.createPet(3)
             pet.mName = "pet"
             db.petDao().insertOrReplace(pet)
-            assertWithMessage("Show have thrown an IllegalArgumentException").fail()
+            assertWithMessage("Should have thrown an IllegalArgumentException").fail()
         } catch (throwable: Throwable) {
             assertThat(throwable).isInstanceOf<IllegalArgumentException>()
         }
@@ -100,53 +120,66 @@ class ProvidedTypeConverterTest {
     @Test
     fun differentSerializerForTheSameClassInDifferentDatabases() {
         val context: Context = ApplicationProvider.getApplicationContext()
-        val db1 = Room
-            .inMemoryDatabaseBuilder(context, ProvidedTypeConverterNameLastNameDb::class.java)
-            .addTypeConverter(NameLastNameSerializer())
-            .build()
-        val db2 = Room
-            .inMemoryDatabaseBuilder(context, ProvidedTypeConverterLastNameNameDb::class.java)
-            .addTypeConverter(LastNameNameSerializer())
-            .build()
-        val entity1 = ProvidedTypeConverterEntity(
-            1,
-            Username("foo1", "bar1")
-        )
-        val entity2 = ProvidedTypeConverterEntity(
-            2,
-            Username("foo2", "bar2")
-        )
+        val db1 =
+            Room.inMemoryDatabaseBuilder(context, ProvidedTypeConverterNameLastNameDb::class.java)
+                .addTypeConverter(NameLastNameSerializer())
+                .build()
+        val db2 =
+            Room.inMemoryDatabaseBuilder(context, ProvidedTypeConverterLastNameNameDb::class.java)
+                .addTypeConverter(LastNameNameSerializer())
+                .build()
+        val entity1 = ProvidedTypeConverterEntity(1, Username("foo1", "bar1"))
+        val entity2 = ProvidedTypeConverterEntity(2, Username("foo2", "bar2"))
         db1.dao().insert(entity1)
         db2.dao().insert(entity2)
         assertThat(db1.dao()[1]).isEqualTo(entity1)
         assertThat(db2.dao()[2]).isEqualTo(entity2)
         assertThat(db1.dao().getRawUsername(1)).isEqualTo("foo1-bar1")
         assertThat(db2.dao().getRawUsername(2)).isEqualTo("bar2-foo2")
+        db1.close()
+        db2.close()
     }
 
     @Database(
         entities = [Pet::class, Toy::class, PetUser::class, Robot::class, Hivemind::class],
         views = [PetWithUser::class],
         version = 1,
-        exportSchema = false
+        exportSchema = false,
     )
     @TypeConverters(TimeStampConverter::class, UUIDConverter::class)
-    internal abstract class TestDatabaseWithConverter : RoomDatabase() {
+    internal abstract class TestDatabaseWithConverterOne : RoomDatabase() {
         abstract fun petDao(): PetDao
+
         abstract fun robotsDao(): RobotsDao
+
+        abstract fun petRobotDao(): PetRobotDao
+    }
+
+    @Database(entities = [Pet::class, Robot::class], version = 1, exportSchema = false)
+    @TypeConverters(TimeStampConverter::class, UUIDConverter::class)
+    internal abstract class TestDatabaseWithConverterTwo : RoomDatabase() {
+        abstract fun petRobotDao(): PetRobotDao
+    }
+
+    /**
+     * A DAOs that uses two type converters that are shared with other DAOs. Used to validate the
+     * runtime validation of provided type converters.
+     */
+    @Dao
+    interface PetRobotDao {
+        @Insert fun putPet(pet: Pet)
+
+        @Insert fun putRobot(robot: Robot)
     }
 
     @Database(entities = [ProvidedTypeConverterEntity::class], version = 1, exportSchema = false)
-    @TypeConverters(
-        NameLastNameSerializer::class
-    )
+    @TypeConverters(NameLastNameSerializer::class)
     internal abstract class ProvidedTypeConverterNameLastNameDb : ProvidedTypeConverterEntityDb()
 
     @Database(entities = [ProvidedTypeConverterEntity::class], version = 1, exportSchema = false)
-    @TypeConverters(
-        LastNameNameSerializer::class
-    )
+    @TypeConverters(LastNameNameSerializer::class)
     internal abstract class ProvidedTypeConverterLastNameNameDb : ProvidedTypeConverterEntityDb()
+
     internal abstract class ProvidedTypeConverterEntityDb : RoomDatabase() {
         abstract fun dao(): ProvidedTypeConverterEntity.Dao
     }
@@ -199,8 +232,7 @@ class ProvidedTypeConverterTest {
 
         @androidx.room.Dao
         interface Dao {
-            @Insert
-            fun insert(entity: ProvidedTypeConverterEntity)
+            @Insert fun insert(entity: ProvidedTypeConverterEntity)
 
             @Query("SELECT mUsername FROM ProvidedTypeConverterEntity WHERE mId = :id")
             fun getRawUsername(id: Int): String?
@@ -210,9 +242,7 @@ class ProvidedTypeConverterTest {
         }
     }
 
-    /**
-     * Class that is serialized differently based on database
-     */
+    /** Class that is serialized differently based on database */
     class Username(val name: String, val lastName: String) {
 
         override fun equals(other: Any?): Boolean {
@@ -232,9 +262,7 @@ class ProvidedTypeConverterTest {
         @TypeConverter
         fun fromString(input: String): Username {
             val sections = input.split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-            return Username(
-                sections[0], sections[1]
-            )
+            return Username(sections[0], sections[1])
         }
 
         @TypeConverter
@@ -248,9 +276,7 @@ class ProvidedTypeConverterTest {
         @TypeConverter
         fun fromString(input: String): Username {
             val sections = input.split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-            return Username(
-                sections[1], sections[0]
-            )
+            return Username(sections[1], sections[0])
         }
 
         @TypeConverter

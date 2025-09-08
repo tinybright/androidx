@@ -18,9 +18,6 @@ package androidx.collection
 
 import androidx.collection.internal.binarySearch
 import androidx.collection.internal.idealIntArraySize
-import kotlin.jvm.JvmField
-import kotlin.jvm.JvmOverloads
-import kotlin.jvm.JvmSynthetic
 import kotlin.math.min
 
 private val DELETED = Any()
@@ -57,23 +54,10 @@ private val DELETED = Any()
  *   initial capacity of 0, the sparse array will be initialized with a light-weight representation
  *   not requiring any additional array allocations.
  */
-public expect open class SparseArrayCompat<E>
-@JvmOverloads
-public constructor(initialCapacity: Int = 10) {
-    @JvmSynthetic // Hide from Java callers.
-    @JvmField
+public expect open class SparseArrayCompat<E> public constructor(initialCapacity: Int = 10) {
     internal var garbage: Boolean
-
-    @JvmSynthetic // Hide from Java callers.
-    @JvmField
     internal var keys: IntArray
-
-    @JvmSynthetic // Hide from Java callers.
-    @JvmField
     internal var values: Array<Any?>
-
-    @JvmSynthetic // Hide from Java callers.
-    @JvmField
     internal var size: Int
 
     /**
@@ -165,14 +149,18 @@ public constructor(initialCapacity: Int = 10) {
     public open fun isEmpty(): Boolean
 
     /**
-     * Given an index in the range `0...size()-1`, returns the key from the [index]th key-value
+     * Given an index in the range `0...[size]-1`, returns the key from the [index]th key-value
      * mapping that this SparseArray stores.
+     *
+     * @throws IndexOutOfBoundsException if index is not within `0..[size]-1`
      */
     public open fun keyAt(index: Int): Int
 
     /**
-     * Given an index in the range `0...size()-1`, returns the value from the [index]th key-value
+     * Given an index in the range `0...[size]-1`, returns the value from the [index]th key-value
      * mapping that this SparseArray stores.
+     *
+     * @throws IndexOutOfBoundsException if index is not within `0..[size]-1`
      */
     public open fun valueAt(index: Int): E
 
@@ -241,12 +229,14 @@ private inline fun <E, T : E?> SparseArrayCompat<E>.internalGet(key: Int, defaul
 
 @Suppress("NOTHING_TO_INLINE")
 internal fun <E> SparseArrayCompat<E>.commonGet(key: Int): E? {
-    return internalGet(key, null)
+    // TODO(b/375562182) revert the change done here in aosp/375562182 after lib targets K2
+    return internalGet<E, E?>(key, null)
 }
 
 @Suppress("NOTHING_TO_INLINE")
 internal fun <E> SparseArrayCompat<E>.commonGet(key: Int, defaultValue: E): E {
-    return internalGet(key, defaultValue)
+    // TODO(b/375562182) revert the change done here in aosp/375562182 after lib targets K2
+    return internalGet<E, E>(key, defaultValue)
 }
 
 @Suppress("NOTHING_TO_INLINE")
@@ -303,7 +293,7 @@ internal inline fun <E> SparseArrayCompat<E>.commonReplace(key: Int, value: E): 
 internal inline fun <E> SparseArrayCompat<E>.commonReplace(
     key: Int,
     oldValue: E,
-    newValue: E
+    newValue: E,
 ): Boolean {
     val index = indexOfKey(key)
     if (index >= 0) {
@@ -401,6 +391,9 @@ internal inline fun <E> SparseArrayCompat<E>.commonKeyAt(index: Int): Int {
     if (garbage) {
         gc()
     }
+    if (index >= size || index < 0) {
+        throw CollectionPlatformUtils.createIndexOutOfBoundsException()
+    }
     return keys[index]
 }
 
@@ -409,10 +402,11 @@ internal inline fun <E> SparseArrayCompat<E>.commonValueAt(index: Int): E {
     if (garbage) {
         gc()
     }
-
-    // TODO(b/219834506): Check for OOB and throw instead of potentially casting a null value to
-    //  a non-null type.
-    @Suppress("UNCHECKED_CAST") return values[index] as E
+    if (index >= size || index < 0) {
+        throw CollectionPlatformUtils.createIndexOutOfBoundsException()
+    }
+    @Suppress("UNCHECKED_CAST")
+    return values[index] as E
 }
 
 @Suppress("NOTHING_TO_INLINE")

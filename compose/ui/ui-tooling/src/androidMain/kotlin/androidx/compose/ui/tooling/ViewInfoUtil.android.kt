@@ -20,43 +20,35 @@ import androidx.compose.ui.tooling.data.UiToolingDataApi
 import androidx.compose.ui.unit.IntRect
 
 @OptIn(UiToolingDataApi::class)
-private fun List<ViewInfo>.filterTree(
-    filter: (ViewInfo) -> Boolean = { true }
-): List<ViewInfo> =
-        flatMap {
-            val acceptedNodes =
-                it.children.filterTree(filter).flatMap { child ->
-                    if (child.location == null)
-                        child.children
-                    else listOf(child)
-                }
+private fun List<ViewInfo>.filterTree(filter: (ViewInfo) -> Boolean = { true }): List<ViewInfo> =
+    flatMap {
+        val acceptedNodes =
+            it.children.filterTree(filter).flatMap { child ->
+                if (child.location == null) child.children else listOf(child)
+            }
 
-            if (filter(it)) {
-                listOf(ViewInfo(
+        if (filter(it)) {
+            listOf(
+                ViewInfo(
                     it.fileName,
                     it.lineNumber,
                     it.bounds,
                     it.location,
                     acceptedNodes,
-                    it.layoutInfo
-                ))
-            } else {
-                // Create a fake node to attach the children to
-                listOf(ViewInfo(
-                    "<root>",
-                    -1,
-                    IntRect.Zero,
-                    null,
-                    acceptedNodes,
-                    null
-                ))
-            }
+                    it.layoutInfo,
+                    it.name,
+                )
+            )
+        } else {
+            // Create a fake node to attach the children to
+            listOf(ViewInfo("<root>", -1, IntRect.Zero, null, acceptedNodes, null, null))
         }
+    }
 
 @OptIn(UiToolingDataApi::class)
 internal fun List<ViewInfo>.toDebugString(
     indentation: Int = 0,
-    filter: (ViewInfo) -> Boolean = { true }
+    filter: (ViewInfo) -> Boolean = { true },
 ): String {
     val indentString = ".".repeat(indentation)
     val builder = StringBuilder()
@@ -66,11 +58,9 @@ internal fun List<ViewInfo>.toDebugString(
         .forEach {
             if (it.location != null)
                 builder.appendLine("$indentString|${it.fileName}:${it.lineNumber}")
-            else
-                builder.appendLine("$indentString|<root>")
+            else builder.appendLine("$indentString|<root>")
 
-            val childrenString = it.children
-                .toDebugString(indentation + 1, filter).trim()
+            val childrenString = it.children.toDebugString(indentation + 1, filter).trim()
             if (childrenString.isNotEmpty()) builder.appendLine(childrenString)
         }
 

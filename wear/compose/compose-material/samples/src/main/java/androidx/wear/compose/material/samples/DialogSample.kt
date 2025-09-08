@@ -17,7 +17,6 @@
 package androidx.wear.compose.material.samples
 
 import androidx.annotation.Sampled
-import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
 import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
@@ -61,7 +60,7 @@ fun AlertDialogSample() {
         Column(
             modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Chip(
                 onClick = { showDialog = true },
@@ -84,8 +83,7 @@ fun AlertDialogSample() {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_airplanemode_active_24px),
                         contentDescription = "airplane",
-                        modifier = Modifier.size(24.dp)
-                            .wrapContentSize(align = Alignment.Center),
+                        modifier = Modifier.size(24.dp).wrapContentSize(align = Alignment.Center),
                     )
                 },
                 title = { Text(text = "Example Title Text", textAlign = TextAlign.Center) },
@@ -93,7 +91,7 @@ fun AlertDialogSample() {
                     Text(
                         text = "Message content goes here",
                         textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.body2
+                        style = MaterialTheme.typography.body2,
                     )
                 },
             ) {
@@ -116,7 +114,6 @@ fun AlertDialogSample() {
     }
 }
 
-@OptIn(ExperimentalAnimationGraphicsApi::class)
 @Sampled
 @Composable
 fun ConfirmationDialogSample() {
@@ -125,7 +122,7 @@ fun ConfirmationDialogSample() {
         Column(
             modifier = Modifier.fillMaxSize().padding(horizontal = 25.dp),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Chip(
                 onClick = { showDialog = true },
@@ -139,7 +136,8 @@ fun ConfirmationDialogSample() {
             Confirmation(
                 onTimeout = { showDialog = false },
                 icon = {
-                    // Initially, animation is static and shown at the start position (atEnd = false).
+                    // Initially, animation is static and shown at the start position (atEnd =
+                    // false).
                     // Then, we use the EffectAPI to trigger a state change to atEnd = true,
                     // which plays the animation from start to end.
                     var atEnd by remember { mutableStateOf(false) }
@@ -150,7 +148,7 @@ fun ConfirmationDialogSample() {
                     Image(
                         painter = rememberAnimatedVectorPainter(animation, atEnd),
                         contentDescription = "Open on phone",
-                        modifier = Modifier.size(48.dp)
+                        modifier = Modifier.size(48.dp),
                     )
                 },
                 durationMillis = 3000,
@@ -173,23 +171,30 @@ fun AlertWithButtons() {
             )
         },
         title = { Text("Title text displayed here", textAlign = TextAlign.Center) },
-        negativeButton = { Button(
-            colors = ButtonDefaults.secondaryButtonColors(),
-            onClick = {
-                /* Do something e.g. navController.popBackStack()*/
-            }) {
-            Text("No")
-        } },
-        positiveButton = { Button(onClick = {
-            /* Do something e.g. navController.popBackStack()*/
-        }) { Text("Yes") } },
-        contentPadding =
-            PaddingValues(start = 10.dp, end = 10.dp, top = 24.dp, bottom = 32.dp),
+        negativeButton = {
+            Button(
+                colors = ButtonDefaults.secondaryButtonColors(),
+                onClick = {
+                    /* Do something e.g. navController.popBackStack()*/
+                },
+            ) {
+                Text("No")
+            }
+        },
+        positiveButton = {
+            Button(
+                onClick = {
+                    /* Do something e.g. navController.popBackStack()*/
+                }
+            ) {
+                Text("Yes")
+            }
+        },
+        contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 24.dp, bottom = 32.dp),
     ) {
         Text(
-            text = "Body text displayed here " +
-                   "(swipe right to dismiss)",
-            textAlign = TextAlign.Center
+            text = "Body text displayed here " + "(swipe right to dismiss)",
+            textAlign = TextAlign.Center,
         )
     }
 }
@@ -210,10 +215,9 @@ fun AlertWithChips() {
         title = { Text(text = "Example Title Text", textAlign = TextAlign.Center) },
         message = {
             Text(
-                text = "Message content goes here " +
-                    "(swipe right to dismiss)",
+                text = "Message content goes here " + "(swipe right to dismiss)",
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.body2
+                style = MaterialTheme.typography.body2,
             )
         },
     ) {
@@ -234,7 +238,6 @@ fun AlertWithChips() {
     }
 }
 
-@OptIn(ExperimentalAnimationGraphicsApi::class)
 @Sampled
 @Composable
 fun ConfirmationWithAnimation() {
@@ -255,15 +258,14 @@ fun ConfirmationWithAnimation() {
             Image(
                 painter = rememberAnimatedVectorPainter(animation, atEnd),
                 contentDescription = "Open on phone",
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(48.dp),
             )
         },
         durationMillis = animation.totalDuration * 2L,
     ) {
         Text(
-            text = "Body text displayed here " +
-                "(swipe right to dismiss)",
-            textAlign = TextAlign.Center
+            text = "Body text displayed here " + "(swipe right to dismiss)",
+            textAlign = TextAlign.Center,
         )
     }
 }

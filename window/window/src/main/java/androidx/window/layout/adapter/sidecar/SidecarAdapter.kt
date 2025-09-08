@@ -37,15 +37,13 @@ import androidx.window.sidecar.SidecarDisplayFeature.TYPE_HINGE
 import androidx.window.sidecar.SidecarWindowLayoutInfo
 import java.lang.reflect.InvocationTargetException
 
-/**
- * A class for translating Sidecar data classes.
- */
+/** A class for translating Sidecar data classes. */
 // TODO(b/206055949) convert to strict validation.
 internal class SidecarAdapter(private val verificationMode: VerificationMode = QUIET) {
 
     fun translate(
         sidecarDisplayFeatures: List<SidecarDisplayFeature>,
-        deviceState: SidecarDeviceState
+        deviceState: SidecarDeviceState,
     ): List<DisplayFeature> {
         return sidecarDisplayFeatures.mapNotNull { sidecarFeature ->
             translate(sidecarFeature, deviceState)
@@ -54,7 +52,7 @@ internal class SidecarAdapter(private val verificationMode: VerificationMode = Q
 
     fun translate(
         extensionInfo: SidecarWindowLayoutInfo?,
-        state: SidecarDeviceState
+        state: SidecarDeviceState,
     ): WindowLayoutInfo {
         if (extensionInfo == null) {
             return WindowLayoutInfo(emptyList())
@@ -69,7 +67,7 @@ internal class SidecarAdapter(private val verificationMode: VerificationMode = Q
 
     fun isEqualSidecarDeviceState(
         first: SidecarDeviceState?,
-        second: SidecarDeviceState?
+        second: SidecarDeviceState?,
     ): Boolean {
         if (first == second) {
             return true
@@ -87,7 +85,7 @@ internal class SidecarAdapter(private val verificationMode: VerificationMode = Q
 
     fun isEqualSidecarWindowLayoutInfo(
         first: SidecarWindowLayoutInfo?,
-        second: SidecarWindowLayoutInfo?
+        second: SidecarWindowLayoutInfo?,
     ): Boolean {
         if (first == second) {
             return true
@@ -105,7 +103,7 @@ internal class SidecarAdapter(private val verificationMode: VerificationMode = Q
 
     private fun isEqualSidecarDisplayFeatures(
         first: List<SidecarDisplayFeature>?,
-        second: List<SidecarDisplayFeature>?
+        second: List<SidecarDisplayFeature>?,
     ): Boolean {
         if (first === second) {
             return true
@@ -131,7 +129,7 @@ internal class SidecarAdapter(private val verificationMode: VerificationMode = Q
 
     private fun isEqualSidecarDisplayFeature(
         first: SidecarDisplayFeature?,
-        second: SidecarDisplayFeature?
+        second: SidecarDisplayFeature?,
     ): Boolean {
         if (first == second) {
             return true
@@ -153,44 +151,48 @@ internal class SidecarAdapter(private val verificationMode: VerificationMode = Q
     }
 
     /**
-     * Converts the display feature from extension. Can return `null` if there is an issue
-     * with the value passed from extension.
+     * Converts the display feature from extension. Can return `null` if there is an issue with the
+     * value passed from extension.
      */
     internal fun translate(
         feature: SidecarDisplayFeature,
-        deviceState: SidecarDeviceState
+        deviceState: SidecarDeviceState,
     ): DisplayFeature? {
-        val checkedFeature = feature.startSpecification(TAG, verificationMode)
-            .require("Type must be either TYPE_FOLD or TYPE_HINGE") {
-                type == TYPE_FOLD || type == TYPE_HINGE
-            }
-            .require("Feature bounds must not be 0") { rect.width() != 0 || rect.height() != 0 }
-            .require("TYPE_FOLD must have 0 area") {
-                if (type == TYPE_FOLD) {
-                    rect.width() == 0 || rect.height() == 0
-                } else {
-                    true
+        val checkedFeature =
+            feature
+                .startSpecification(TAG, verificationMode)
+                .require("Type must be either TYPE_FOLD or TYPE_HINGE") {
+                    type == TYPE_FOLD || type == TYPE_HINGE
+                }
+                .require("Feature bounds must not be 0") { rect.width() != 0 || rect.height() != 0 }
+                .require("TYPE_FOLD must have 0 area") {
+                    if (type == TYPE_FOLD) {
+                        rect.width() == 0 || rect.height() == 0
+                    } else {
+                        true
+                    }
+                }
+                .require("Feature be pinned to either left or top") {
+                    rect.left == 0 || rect.top == 0
+                }
+                .compute() ?: return null
+        val type =
+            when (checkedFeature.type) {
+                TYPE_FOLD -> FOLD
+                TYPE_HINGE -> HINGE
+                else -> {
+                    return null
                 }
             }
-            .require("Feature be pinned to either left or top") {
-                rect.left == 0 || rect.top == 0
+        val state =
+            when (getSidecarDevicePosture(deviceState)) {
+                SidecarDeviceState.POSTURE_CLOSED,
+                SidecarDeviceState.POSTURE_UNKNOWN,
+                SidecarDeviceState.POSTURE_FLIPPED -> return null
+                SidecarDeviceState.POSTURE_HALF_OPENED -> FoldingFeature.State.HALF_OPENED
+                SidecarDeviceState.POSTURE_OPENED -> FoldingFeature.State.FLAT
+                else -> FoldingFeature.State.FLAT
             }
-            .compute() ?: return null
-        val type = when (checkedFeature.type) {
-            TYPE_FOLD -> FOLD
-            TYPE_HINGE -> HINGE
-            else -> {
-                return null
-            }
-        }
-        val state = when (getSidecarDevicePosture(deviceState)) {
-            SidecarDeviceState.POSTURE_CLOSED,
-            SidecarDeviceState.POSTURE_UNKNOWN,
-            SidecarDeviceState.POSTURE_FLIPPED -> return null
-            SidecarDeviceState.POSTURE_HALF_OPENED -> FoldingFeature.State.HALF_OPENED
-            SidecarDeviceState.POSTURE_OPENED -> FoldingFeature.State.FLAT
-            else -> FoldingFeature.State.FLAT
-        }
         return HardwareFoldingFeature(Bounds(feature.rect), type, state)
     }
 
@@ -205,9 +207,8 @@ internal class SidecarAdapter(private val verificationMode: VerificationMode = Q
                 return info.displayFeatures ?: emptyList()
             } catch (error: NoSuchFieldError) {
                 try {
-                    val methodGetFeatures = SidecarWindowLayoutInfo::class.java.getMethod(
-                        "getDisplayFeatures"
-                    )
+                    val methodGetFeatures =
+                        SidecarWindowLayoutInfo::class.java.getMethod("getDisplayFeatures")
                     @Suppress("UNCHECKED_CAST")
                     return methodGetFeatures.invoke(info) as List<SidecarDisplayFeature>
                 } catch (e: NoSuchMethodException) {
@@ -232,15 +233,16 @@ internal class SidecarAdapter(private val verificationMode: VerificationMode = Q
         @VisibleForTesting
         fun setSidecarDisplayFeatures(
             info: SidecarWindowLayoutInfo,
-            displayFeatures: List<SidecarDisplayFeature?>
+            displayFeatures: List<SidecarDisplayFeature?>,
         ) {
             try {
                 info.displayFeatures = displayFeatures
             } catch (error: NoSuchFieldError) {
                 try {
-                    val methodSetFeatures = SidecarWindowLayoutInfo::class.java.getMethod(
-                        "setDisplayFeatures", MutableList::class.java
-                    )
+                    val methodSetFeatures =
+                        SidecarWindowLayoutInfo::class
+                            .java
+                            .getMethod("setDisplayFeatures", MutableList::class.java)
                     methodSetFeatures.invoke(info, displayFeatures)
                 } catch (e: NoSuchMethodException) {
                     if (DEBUG) {
@@ -260,8 +262,9 @@ internal class SidecarAdapter(private val verificationMode: VerificationMode = Q
 
         internal fun getSidecarDevicePosture(sidecarDeviceState: SidecarDeviceState): Int {
             val rawPosture = getRawSidecarDevicePosture(sidecarDeviceState)
-            return if (rawPosture < SidecarDeviceState.POSTURE_UNKNOWN ||
-                rawPosture > SidecarDeviceState.POSTURE_FLIPPED
+            return if (
+                rawPosture < SidecarDeviceState.POSTURE_UNKNOWN ||
+                    rawPosture > SidecarDeviceState.POSTURE_FLIPPED
             ) {
                 SidecarDeviceState.POSTURE_UNKNOWN
             } else {
@@ -304,10 +307,10 @@ internal class SidecarAdapter(private val verificationMode: VerificationMode = Q
                 sidecarDeviceState.posture = posture
             } catch (error: NoSuchFieldError) {
                 try {
-                    val methodSetPosture = SidecarDeviceState::class.java.getMethod(
-                        "setPosture",
-                        Int::class.javaPrimitiveType
-                    )
+                    val methodSetPosture =
+                        SidecarDeviceState::class
+                            .java
+                            .getMethod("setPosture", Int::class.javaPrimitiveType)
                     methodSetPosture.invoke(sidecarDeviceState, posture)
                 } catch (e: NoSuchMethodException) {
                     if (DEBUG) {

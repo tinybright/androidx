@@ -52,14 +52,11 @@ import androidx.compose.ui.text.substring
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 
+@Suppress("DEPRECATION")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BasicSecureTextFieldDemos() {
-    Column(
-        Modifier
-            .imePadding()
-            .verticalScroll(rememberScrollState())
-    ) {
+    Column(Modifier.imePadding().verticalScroll(rememberScrollState())) {
         val clipboardManager = LocalClipboardManager.current
         Button(onClick = { clipboardManager.setText(AnnotatedString("\uD801\uDC37")) }) {
             Text("Copy surrogate pair \"\uD801\uDC37\"")
@@ -92,7 +89,7 @@ fun BasicSecureTextFieldDemo(textObfuscationMode: TextObfuscationMode) {
     BasicSecureTextField(
         state = state,
         textObfuscationMode = textObfuscationMode,
-        modifier = demoTextFieldModifiers
+        modifier = demoTextFieldModifiers,
     )
 }
 
@@ -108,9 +105,10 @@ fun ChangingMaskDemo(textObfuscationMode: TextObfuscationMode) {
             modifier = demoTextFieldModifiers,
             inputTransformation = {
                 // only handle single character insertion, reject everything else
-                val isSingleCharacterInsertion = changes.changeCount == 1 &&
-                    changes.getRange(0).length == 1 &&
-                    changes.getOriginalRange(0).length == 0
+                val isSingleCharacterInsertion =
+                    changes.changeCount == 1 &&
+                        changes.getRange(0).length == 1 &&
+                        changes.getOriginalRange(0).length == 0
 
                 if (!isSingleCharacterInsertion) {
                     revertAllChanges()
@@ -118,21 +116,18 @@ fun ChangingMaskDemo(textObfuscationMode: TextObfuscationMode) {
                     replace(
                         start = 0,
                         end = length,
-                        text = asCharSequence()
-                            .substring(changes.getRange(0))
+                        text = asCharSequence().substring(changes.getRange(0)),
                     )
                 }
             },
-            outputTransformation = {
-                insert(0, "Enter mask character: ")
-            }
+            outputTransformation = { insert(0, "Enter mask character: ") },
         )
     }
     BasicSecureTextField(
         state = passwordState,
         textObfuscationMode = textObfuscationMode,
         textObfuscationCharacter = maskState.text[0],
-        modifier = demoTextFieldModifiers
+        modifier = demoTextFieldModifiers,
     )
 }
 
@@ -147,11 +142,9 @@ fun NumberPasswordDemo() {
                 revertAllChanges()
             }
         },
-        keyboardOptions = KeyboardOptions(
-            autoCorrectEnabled = false,
-            keyboardType = KeyboardType.NumberPassword
-        ),
-        modifier = demoTextFieldModifiers
+        keyboardOptions =
+            KeyboardOptions(autoCorrectEnabled = false, keyboardType = KeyboardType.NumberPassword),
+        modifier = demoTextFieldModifiers,
     )
 }
 
@@ -163,25 +156,22 @@ fun PasswordToggleVisibilityDemo() {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         BasicSecureTextField(
             state = state,
-            textObfuscationMode = if (visible) {
-                TextObfuscationMode.Visible
-            } else {
-                TextObfuscationMode.RevealLastTyped
-            },
-            modifier = Modifier
-                .weight(1f)
-                .padding(6.dp)
-                .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
-                .padding(6.dp)
+            textObfuscationMode =
+                if (visible) {
+                    TextObfuscationMode.Visible
+                } else {
+                    TextObfuscationMode.RevealLastTyped
+                },
+            modifier =
+                Modifier.weight(1f)
+                    .padding(6.dp)
+                    .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
+                    .padding(6.dp),
         )
         if (visible) {
-            TextButton(onClick = { visible = false }) {
-                Text("Hide")
-            }
+            TextButton(onClick = { visible = false }) { Text("Hide") }
         } else {
-            TextButton(onClick = { visible = true }) {
-                Text("Show")
-            }
+            TextButton(onClick = { visible = true }) { Text("Show") }
         }
     }
 }

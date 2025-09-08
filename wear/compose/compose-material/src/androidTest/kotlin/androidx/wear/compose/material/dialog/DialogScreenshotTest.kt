@@ -15,7 +15,6 @@
  */
 package androidx.wear.compose.material
 
-import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,17 +41,14 @@ import org.junit.runner.RunWith
 
 @MediumTest
 @RunWith(AndroidJUnit4::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 class DialogScreenshotTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(SCREENSHOT_GOLDEN_PATH)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(SCREENSHOT_GOLDEN_PATH)
 
-    @get:Rule
-    val testName = TestName()
+    @get:Rule val testName = TestName()
 
     @Test
     fun alert_title_body_and_buttons() = verifyScreenshot {
@@ -61,24 +57,14 @@ class DialogScreenshotTest {
                 Text(
                     text = "Power off",
                     textAlign = TextAlign.Center,
-                    color = MaterialTheme.colors.onBackground
+                    color = MaterialTheme.colors.onBackground,
                 )
             },
             negativeButton = {
-                Button(
-                    onClick = {},
-                    colors = ButtonDefaults.secondaryButtonColors()
-                ) {
-                    Text("No")
-                }
+                Button(onClick = {}, colors = ButtonDefaults.secondaryButtonColors()) { Text("No") }
             },
             positiveButton = {
-                Button(
-                    onClick = {},
-                    colors = ButtonDefaults.primaryButtonColors()
-                ) {
-                    Text("Yes")
-                }
+                Button(onClick = {}, colors = ButtonDefaults.primaryButtonColors()) { Text("Yes") }
             },
             modifier = Modifier.testTag(TEST_TAG),
         ) {
@@ -99,24 +85,14 @@ class DialogScreenshotTest {
                 Text(
                     text = "Allow access to location?",
                     textAlign = TextAlign.Center,
-                    color = MaterialTheme.colors.onBackground
+                    color = MaterialTheme.colors.onBackground,
                 )
             },
             negativeButton = {
-                Button(
-                    onClick = {},
-                    colors = ButtonDefaults.secondaryButtonColors()
-                ) {
-                    Text("No")
-                }
+                Button(onClick = {}, colors = ButtonDefaults.secondaryButtonColors()) { Text("No") }
             },
             positiveButton = {
-                Button(
-                    onClick = {},
-                    colors = ButtonDefaults.primaryButtonColors()
-                ) {
-                    Text("Yes")
-                }
+                Button(onClick = {}, colors = ButtonDefaults.primaryButtonColors()) { Text("Yes") }
             },
             modifier = Modifier.testTag(TEST_TAG),
         )
@@ -126,10 +102,12 @@ class DialogScreenshotTest {
     fun alert_icon_title_and_chip() = verifyScreenshot {
         Alert(
             icon = { TestIcon() },
-            title = { Text(
-                text = "Grant location permission to use this app",
-                textAlign = TextAlign.Center
-            ) },
+            title = {
+                Text(
+                    text = "Grant location permission to use this app",
+                    textAlign = TextAlign.Center,
+                )
+            },
             modifier = Modifier.testTag(TEST_TAG),
         ) {
             item {
@@ -148,8 +126,10 @@ class DialogScreenshotTest {
         Alert(
             verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.Top),
             title = {
-                Row(modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
                     Text(text = "Title that is quite long", textAlign = TextAlign.Center)
                 }
             },
@@ -157,7 +137,7 @@ class DialogScreenshotTest {
                 Text(
                     text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                     textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.body2
+                    style = MaterialTheme.typography.body2,
                 )
             },
             modifier = Modifier.testTag(TEST_TAG),
@@ -175,26 +155,16 @@ class DialogScreenshotTest {
 
     @Test
     fun confirmation() = verifyScreenshot {
-        Confirmation(
-            onTimeout = {},
-            icon = { TestIcon() },
-            modifier = Modifier.testTag(TEST_TAG),
-        ) {
-            Text(
-                text = "Success",
-                textAlign = TextAlign.Center
-            )
+        Confirmation(onTimeout = {}, icon = { TestIcon() }, modifier = Modifier.testTag(TEST_TAG)) {
+            Text(text = "Success", textAlign = TextAlign.Center)
         }
     }
 
-    private fun verifyScreenshot(
-        content: @Composable () -> Unit
-    ) {
-        rule.setContentWithTheme {
-             content()
-        }
+    private fun verifyScreenshot(content: @Composable () -> Unit) {
+        rule.setContentWithTheme { ScreenConfiguration(SCREEN_SIZE_LARGE) { content() } }
 
-        rule.onNodeWithTag(TEST_TAG)
+        rule
+            .onNodeWithTag(TEST_TAG)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, testName.methodName)
     }

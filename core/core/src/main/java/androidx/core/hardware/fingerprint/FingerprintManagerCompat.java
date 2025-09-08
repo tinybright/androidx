@@ -24,12 +24,11 @@ import android.os.Build;
 import android.os.CancellationSignal;
 import android.os.Handler;
 
-import androidx.annotation.DoNotInline;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.annotation.RequiresPermission;
 import androidx.annotation.RestrictTo;
+
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.security.Signature;
 
@@ -52,8 +51,7 @@ public class FingerprintManagerCompat {
     private final Context mContext;
 
     /** Get a {@link FingerprintManagerCompat} instance for a provided context. */
-    @NonNull
-    public static FingerprintManagerCompat from(@NonNull Context context) {
+    public static @NonNull FingerprintManagerCompat from(@NonNull Context context) {
         return new FingerprintManagerCompat(context);
     }
 
@@ -68,12 +66,8 @@ public class FingerprintManagerCompat {
      */
     @RequiresPermission(Manifest.permission.USE_FINGERPRINT)
     public boolean hasEnrolledFingerprints() {
-        if (Build.VERSION.SDK_INT >= 23) {
-            final FingerprintManager fp = getFingerprintManagerOrNull(mContext);
-            return (fp != null) && Api23Impl.hasEnrolledFingerprints(fp);
-        } else {
-            return false;
-        }
+        final FingerprintManager fp = getFingerprintManagerOrNull(mContext);
+        return (fp != null) && Api23Impl.hasEnrolledFingerprints(fp);
     }
 
     /**
@@ -83,12 +77,8 @@ public class FingerprintManagerCompat {
      */
     @RequiresPermission(Manifest.permission.USE_FINGERPRINT)
     public boolean isHardwareDetected() {
-        if (Build.VERSION.SDK_INT >= 23) {
-            final FingerprintManager fp = getFingerprintManagerOrNull(mContext);
-            return (fp != null) && Api23Impl.isHardwareDetected(fp);
-        } else {
-            return false;
-        }
+        final FingerprintManager fp = getFingerprintManagerOrNull(mContext);
+        return (fp != null) && Api23Impl.isHardwareDetected(fp);
     }
 
     /**
@@ -111,7 +101,7 @@ public class FingerprintManagerCompat {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @RequiresPermission(Manifest.permission.USE_FINGERPRINT)
     public void authenticate(@Nullable CryptoObject crypto, int flags,
-            @Nullable androidx.core.os.CancellationSignal cancel,
+            androidx.core.os.@Nullable CancellationSignal cancel,
             @NonNull AuthenticationCallback callback,
             @Nullable Handler handler) {
         authenticate(crypto, flags,
@@ -137,32 +127,26 @@ public class FingerprintManagerCompat {
     public void authenticate(@Nullable CryptoObject crypto, int flags,
             @Nullable CancellationSignal cancel, @NonNull AuthenticationCallback callback,
             @Nullable Handler handler) {
-        if (Build.VERSION.SDK_INT >= 23) {
-            final FingerprintManager fp = getFingerprintManagerOrNull(mContext);
-            if (fp != null) {
-                Api23Impl.authenticate(fp, wrapCryptoObject(crypto), cancel, flags,
-                        wrapCallback(callback), handler);
-            }
+        final FingerprintManager fp = getFingerprintManagerOrNull(mContext);
+        if (fp != null) {
+            Api23Impl.authenticate(fp, wrapCryptoObject(crypto), cancel, flags,
+                    wrapCallback(callback), handler);
         }
     }
 
-    @Nullable
-    @RequiresApi(23)
-    private static FingerprintManager getFingerprintManagerOrNull(@NonNull Context context) {
+    private static @Nullable FingerprintManager getFingerprintManagerOrNull(
+            @NonNull Context context) {
         return Api23Impl.getFingerprintManagerOrNull(context);
     }
 
-    @RequiresApi(23)
     private static FingerprintManager.CryptoObject wrapCryptoObject(CryptoObject cryptoObject) {
         return Api23Impl.wrapCryptoObject(cryptoObject);
     }
 
-    @RequiresApi(23)
     static CryptoObject unwrapCryptoObject(FingerprintManager.CryptoObject cryptoObject) {
         return Api23Impl.unwrapCryptoObject(cryptoObject);
     }
 
-    @RequiresApi(23)
     private static FingerprintManager.AuthenticationCallback wrapCallback(
             final AuthenticationCallback callback) {
         return new FingerprintManager.AuthenticationCallback() {
@@ -222,22 +206,19 @@ public class FingerprintManagerCompat {
          * Get {@link Signature} object.
          * @return {@link Signature} object or null if this doesn't contain one.
          */
-        @Nullable
-        public Signature getSignature() { return mSignature; }
+        public @Nullable Signature getSignature() { return mSignature; }
 
         /**
          * Get {@link Cipher} object.
          * @return {@link Cipher} object or null if this doesn't contain one.
          */
-        @Nullable
-        public Cipher getCipher() { return mCipher; }
+        public @Nullable Cipher getCipher() { return mCipher; }
 
         /**
          * Get {@link Mac} object.
          * @return {@link Mac} object or null if this doesn't contain one.
          */
-        @Nullable
-        public Mac getMac() { return mMac; }
+        public @Nullable Mac getMac() { return mMac; }
     }
 
     /**
@@ -256,8 +237,7 @@ public class FingerprintManagerCompat {
          * @return crypto object provided to {@link FingerprintManagerCompat#authenticate(
          *         CryptoObject, int, CancellationSignal, AuthenticationCallback, Handler)}.
          */
-        @NonNull
-        public CryptoObject getCryptoObject() { return mCryptoObject; }
+        public @NonNull CryptoObject getCryptoObject() { return mCryptoObject; }
     }
 
     /**
@@ -297,26 +277,22 @@ public class FingerprintManagerCompat {
         public void onAuthenticationFailed() { }
     }
 
-    @RequiresApi(23)
     static class Api23Impl {
         private Api23Impl() {
             // This class is not instantiable.
         }
 
         @RequiresPermission(Manifest.permission.USE_FINGERPRINT)
-        @DoNotInline
         static boolean hasEnrolledFingerprints(Object fingerprintManager) {
             return ((FingerprintManager) fingerprintManager).hasEnrolledFingerprints();
         }
 
         @RequiresPermission(Manifest.permission.USE_FINGERPRINT)
-        @DoNotInline
         static boolean isHardwareDetected(Object fingerprintManager) {
             return ((FingerprintManager) fingerprintManager).isHardwareDetected();
         }
 
         @RequiresPermission(Manifest.permission.USE_FINGERPRINT)
-        @DoNotInline
         static void authenticate(Object fingerprintManager, Object crypto,
                 CancellationSignal cancel, int flags, Object callback, Handler handler) {
             ((FingerprintManager) fingerprintManager).authenticate(
@@ -324,17 +300,15 @@ public class FingerprintManagerCompat {
                     (FingerprintManager.AuthenticationCallback) callback, handler);
         }
 
-        @DoNotInline
         static FingerprintManager.CryptoObject getCryptoObject(Object authenticationResult) {
             return ((FingerprintManager.AuthenticationResult) authenticationResult)
                     .getCryptoObject();
         }
 
-        @DoNotInline
         public static FingerprintManager getFingerprintManagerOrNull(Context context) {
             if (Build.VERSION.SDK_INT == 23) {
                 return context.getSystemService(FingerprintManager.class);
-            } else if (Build.VERSION.SDK_INT > 23 && context.getPackageManager()
+            } else if (context.getPackageManager()
                     .hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
                 return context.getSystemService(FingerprintManager.class);
             } else {
@@ -342,7 +316,6 @@ public class FingerprintManagerCompat {
             }
         }
 
-        @DoNotInline
         public static FingerprintManager.CryptoObject wrapCryptoObject(CryptoObject cryptoObject) {
             if (cryptoObject == null) {
                 return null;
@@ -357,7 +330,6 @@ public class FingerprintManagerCompat {
             }
         }
 
-        @DoNotInline
         public static CryptoObject unwrapCryptoObject(Object cryptoObjectObj) {
             FingerprintManager.CryptoObject cryptoObject =
                     (FingerprintManager.CryptoObject) cryptoObjectObj;

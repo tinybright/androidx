@@ -22,9 +22,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Unit tests for [MatcherUtils].
- */
+/** Unit tests for [MatcherUtils]. */
 class MatcherUtilsTest {
 
     @Test
@@ -42,7 +40,7 @@ class MatcherUtilsTest {
         assertTrue(
             areComponentsMatching(
                 FAKE_ACTIVITY_COMPONENT_INFO,
-                PACKAGE_WILDCARD_ACTIVITY_COMPONENT_INFO
+                PACKAGE_WILDCARD_ACTIVITY_COMPONENT_INFO,
             )
         )
     }
@@ -52,17 +50,15 @@ class MatcherUtilsTest {
         assertTrue(
             areComponentsMatching(
                 FAKE_ACTIVITY_COMPONENT_INFO,
-                CLASS_WILDCARD_ACTIVITY_COMPONENT_INFO
+                CLASS_WILDCARD_ACTIVITY_COMPONENT_INFO,
             )
         )
     }
 
     @Test
     fun areComponentsMatching_falseIfDifferent() {
-        val nonMatchingActivityComponentInfo = ActivityComponentInfo(
-            "other.$FAKE_PACKAGE",
-            "Other$FAKE_CLASS"
-        )
+        val nonMatchingActivityComponentInfo =
+            ActivityComponentInfo("other.$FAKE_PACKAGE", "Other$FAKE_CLASS")
         assertFalse(
             areComponentsMatching(FAKE_ACTIVITY_COMPONENT_INFO, nonMatchingActivityComponentInfo)
         )
@@ -74,13 +70,9 @@ class MatcherUtilsTest {
         private const val WILDCARD = "*"
         private val WILDCARD_ACTIVITY_COMPONENT_INFO = ActivityComponentInfo(WILDCARD, WILDCARD)
         private val FAKE_ACTIVITY_COMPONENT_INFO = ActivityComponentInfo(FAKE_PACKAGE, FAKE_CLASS)
-        private val PACKAGE_WILDCARD_ACTIVITY_COMPONENT_INFO = ActivityComponentInfo(
-            WILDCARD,
-            FAKE_CLASS
-        )
-        private val CLASS_WILDCARD_ACTIVITY_COMPONENT_INFO = ActivityComponentInfo(
-            FAKE_PACKAGE,
-            WILDCARD
-        )
+        private val PACKAGE_WILDCARD_ACTIVITY_COMPONENT_INFO =
+            ActivityComponentInfo(WILDCARD, FAKE_CLASS)
+        private val CLASS_WILDCARD_ACTIVITY_COMPONENT_INFO =
+            ActivityComponentInfo(FAKE_PACKAGE, WILDCARD)
     }
 }

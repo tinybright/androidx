@@ -16,16 +16,15 @@
 package androidx.stableaidl.internal.incremental
 
 import com.google.common.annotations.VisibleForTesting
-import com.google.common.base.Charsets
 import com.google.common.collect.Lists
 import java.io.File
 import java.io.IOException
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 
 /**
- * Holds dependency information, including the main compiled file, secondary input files
- * (usually headers), and output files.
- *
+ * Holds dependency information, including the main compiled file, secondary input files (usually
+ * headers), and output files.
  *
  * Cloned from `com.android.builder.internal.incremental.DependencyData`.
  */
@@ -55,14 +54,18 @@ class DependencyData internal constructor() {
         OUTPUT,
         MAIN,
         SECONDARY,
-        DONE
+        DONE,
     }
 
     override fun toString(): String {
         return "DependencyData{" +
-            "mMainFile='" + mainFile + '\'' +
-            ", mSecondaryFiles=" + mSecondaryFiles +
-            ", mOutputFiles=" + mOutputFiles +
+            "mMainFile='" +
+            mainFile +
+            '\'' +
+            ", mSecondaryFiles=" +
+            mSecondaryFiles +
+            ", mOutputFiles=" +
+            mOutputFiles +
             '}'
     }
 
@@ -78,9 +81,8 @@ class DependencyData internal constructor() {
             if (!dependencyFile.isFile()) {
                 return null
             }
-            Files.lines(dependencyFile.toPath(), Charsets.UTF_8).use { lines ->
-                return processDependencyData(
-                    Iterable { lines.iterator() })
+            Files.lines(dependencyFile.toPath(), StandardCharsets.UTF_8).use { lines ->
+                return processDependencyData(Iterable { lines.iterator() })
             }
         }
 
@@ -110,11 +112,12 @@ class DependencyData internal constructor() {
 
                 // detect : at the end indicating a parse mode change *after* we process this line.
                 if (line.endsWith(":")) {
-                    nextMode = if (parseMode == ParseMode.SECONDARY) {
-                        ParseMode.DONE
-                    } else {
-                        ParseMode.MAIN
-                    }
+                    nextMode =
+                        if (parseMode == ParseMode.SECONDARY) {
+                            ParseMode.DONE
+                        } else {
+                            ParseMode.MAIN
+                        }
                     line = line.substring(0, line.length - 1).trim { it <= ' ' }
                 }
                 if (nextMode == ParseMode.DONE) {

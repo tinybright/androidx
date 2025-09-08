@@ -34,7 +34,7 @@ import kotlinx.coroutines.selects.select
 
 internal suspend fun expectingScrolls(
     rule: ComposeTestRule,
-    block: suspend ScrollExpecter.() -> Unit
+    block: suspend ScrollExpecter.() -> Unit,
 ) {
     coroutineScope {
         val scrollExpecter = ScrollExpecter(this, rule::awaitIdle)
@@ -44,7 +44,7 @@ internal suspend fun expectingScrolls(
 
 internal class ScrollExpecter(
     private val coroutineScope: CoroutineScope,
-    private val awaitIdle: suspend () -> Unit
+    private val awaitIdle: suspend () -> Unit,
 ) {
     private val scrollRequests = Channel<ScrollRequest>(capacity = Channel.RENDEZVOUS)
 
@@ -56,10 +56,7 @@ internal class ScrollExpecter(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun expectScrollRequest(
-        expectedOffset: Offset,
-        consume: Offset = expectedOffset
-    ) {
+    suspend fun expectScrollRequest(expectedOffset: Offset, consume: Offset = expectedOffset) {
         coroutineScope.launch {
             val request = select {
                 scrollRequests.onReceive { it }
@@ -80,13 +77,15 @@ internal class ScrollExpecter(
                     request.getOrNull()?.let(::add)
                 } while (request.isSuccess)
             }
-            fail("Expected no scroll requests, but had ${requests.size}: " +
-                requests.joinToString { it.requestedOffset.toString() })
+            fail(
+                "Expected no scroll requests, but had ${requests.size}: " +
+                    requests.joinToString { it.requestedOffset.toString() }
+            )
         }
     }
 
     private data class ScrollRequest(
         val requestedOffset: Offset,
-        val consumeScroll: (Offset) -> Unit
+        val consumeScroll: (Offset) -> Unit,
     )
 }

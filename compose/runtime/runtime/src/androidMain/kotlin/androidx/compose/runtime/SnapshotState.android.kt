@@ -23,14 +23,12 @@ import androidx.compose.runtime.snapshots.SnapshotMutableState
 
 internal actual fun <T> createSnapshotMutableState(
     value: T,
-    policy: SnapshotMutationPolicy<T>
+    policy: SnapshotMutationPolicy<T>,
 ): SnapshotMutableState<T> = ParcelableSnapshotMutableState(value, policy)
 
 @SuppressLint("BanParcelableUsage")
-private class ParcelableSnapshotMutableState<T>(
-    value: T,
-    policy: SnapshotMutationPolicy<T>
-) : SnapshotMutableStateImpl<T>(value, policy), Parcelable {
+private class ParcelableSnapshotMutableState<T>(value: T, policy: SnapshotMutationPolicy<T>) :
+    SnapshotMutableStateImpl<T>(value, policy), Parcelable {
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeValue(value)
@@ -39,9 +37,10 @@ private class ParcelableSnapshotMutableState<T>(
                 neverEqualPolicy<Any?>() -> PolicyNeverEquals
                 structuralEqualityPolicy<Any?>() -> PolicyStructuralEquality
                 referentialEqualityPolicy<Any?>() -> PolicyReferentialEquality
-                else -> throw IllegalStateException(
-                    "Only known types of MutableState's SnapshotMutationPolicy are supported"
-                )
+                else ->
+                    throw IllegalStateException(
+                        "Only known types of MutableState's SnapshotMutationPolicy are supported"
+                    )
             }
         )
     }
@@ -61,7 +60,7 @@ private class ParcelableSnapshotMutableState<T>(
             object : Parcelable.ClassLoaderCreator<ParcelableSnapshotMutableState<Any?>> {
                 override fun createFromParcel(
                     parcel: Parcel,
-                    loader: ClassLoader?
+                    loader: ClassLoader?,
                 ): ParcelableSnapshotMutableState<Any?> {
                     val value = parcel.readValue(loader ?: javaClass.classLoader)
                     val policyIndex = parcel.readInt()
@@ -71,10 +70,11 @@ private class ParcelableSnapshotMutableState<T>(
                             PolicyNeverEquals -> neverEqualPolicy()
                             PolicyStructuralEquality -> structuralEqualityPolicy()
                             PolicyReferentialEquality -> referentialEqualityPolicy()
-                            else -> throw IllegalStateException(
-                                "Unsupported MutableState policy $policyIndex was restored"
-                            )
-                        }
+                            else ->
+                                throw IllegalStateException(
+                                    "Unsupported MutableState policy $policyIndex was restored"
+                                )
+                        },
                     )
                 }
 

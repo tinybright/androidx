@@ -21,7 +21,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.database.SQLException;
 
-import androidx.annotation.NonNull;
 import androidx.room.migration.Migration;
 import androidx.room.testing.MigrationTestHelper;
 import androidx.room.util.TableInfo;
@@ -30,6 +29,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.jspecify.annotations.NonNull;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,6 +73,8 @@ public class AutoMigrationTest {
         );
         final TableInfo info = TableInfo.read(db, AutoMigrationDb.Entity1.TABLE_NAME);
         assertThat(info.columns.size()).isEqualTo(3);
+
+        db.close();
     }
 
     @Test
@@ -114,6 +116,8 @@ public class AutoMigrationTest {
                 ),
                 EmbeddedAutoMigrationDb.EmbeddedEntity1.TABLE_NAME);
         assertThat(info.columns.size()).isEqualTo(3);
+
+        db.close();
     }
 
     /**
@@ -144,6 +148,7 @@ public class AutoMigrationTest {
                 true,
                 MIGRATION_1_0
         );
+        db.close();
     }
 
     private static final Migration MIGRATION_1_2 = new Migration(1, 2) {

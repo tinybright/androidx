@@ -59,40 +59,40 @@ object FontScaleConverterFactory {
                 /* scaleKey= */ 1.15f,
                 FontScaleConverterTable(
                     floatArrayOf(8f, 10f, 12f, 14f, 18f, 20f, 24f, 30f, 100f),
-                    floatArrayOf(9.2f, 11.5f, 13.8f, 16.4f, 19.8f, 21.8f, 25.2f, 30f, 100f)
-                )
+                    floatArrayOf(9.2f, 11.5f, 13.8f, 16.4f, 19.8f, 21.8f, 25.2f, 30f, 100f),
+                ),
             )
             putInto(
                 sLookupTables,
                 /* scaleKey= */ 1.3f,
                 FontScaleConverterTable(
                     floatArrayOf(8f, 10f, 12f, 14f, 18f, 20f, 24f, 30f, 100f),
-                    floatArrayOf(10.4f, 13f, 15.6f, 18.8f, 21.6f, 23.6f, 26.4f, 30f, 100f)
-                )
+                    floatArrayOf(10.4f, 13f, 15.6f, 18.8f, 21.6f, 23.6f, 26.4f, 30f, 100f),
+                ),
             )
             putInto(
                 sLookupTables,
                 /* scaleKey= */ 1.5f,
                 FontScaleConverterTable(
                     floatArrayOf(8f, 10f, 12f, 14f, 18f, 20f, 24f, 30f, 100f),
-                    floatArrayOf(12f, 15f, 18f, 22f, 24f, 26f, 28f, 30f, 100f)
-                )
+                    floatArrayOf(12f, 15f, 18f, 22f, 24f, 26f, 28f, 30f, 100f),
+                ),
             )
             putInto(
                 sLookupTables,
                 /* scaleKey= */ 1.8f,
                 FontScaleConverterTable(
                     floatArrayOf(8f, 10f, 12f, 14f, 18f, 20f, 24f, 30f, 100f),
-                    floatArrayOf(14.4f, 18f, 21.6f, 24.4f, 27.6f, 30.8f, 32.8f, 34.8f, 100f)
-                )
+                    floatArrayOf(14.4f, 18f, 21.6f, 24.4f, 27.6f, 30.8f, 32.8f, 34.8f, 100f),
+                ),
             )
             putInto(
                 sLookupTables,
                 /* scaleKey= */ 2f,
                 FontScaleConverterTable(
                     floatArrayOf(8f, 10f, 12f, 14f, 18f, 20f, 24f, 30f, 100f),
-                    floatArrayOf(16f, 20f, 24f, 26f, 30f, 34f, 36f, 38f, 100f)
-                )
+                    floatArrayOf(16f, 20f, 24f, 26f, 30f, 34f, 36f, 38f, 100f),
+                ),
             )
         }
         val minScaleBeforeCurvesApplied = getScaleFromKey(sLookupTables.keyAt(0)) - 0.01f
@@ -105,9 +105,7 @@ object FontScaleConverterFactory {
      * Returns true if non-linear font scaling curves would be in effect for the given scale, false
      * if the scaling would follow a linear curve or for no scaling.
      *
-     *
-     * Example usage:
-     * `isNonLinearFontScalingActive(getResources().getConfiguration().fontScale)`
+     * Example usage: `isNonLinearFontScalingActive(getResources().getConfiguration().fontScale)`
      */
     @AnyThread
     fun isNonLinearFontScalingActive(fontScale: Float): Boolean {
@@ -118,7 +116,6 @@ object FontScaleConverterFactory {
      * Finds a matching FontScaleConverter for the given fontScale factor.
      *
      * @param fontScale the scale factor, usually from [Configuration.fontScale].
-     *
      * @return a converter for the given scale, or null if non-linear scaling should not be used.
      */
     @AnyThread
@@ -145,8 +142,7 @@ object FontScaleConverterFactory {
             // them a straight linear table instead.
             // This works because when FontScaleConverter encounters a size beyond its bounds, it
             // calculates a linear fontScale factor using the ratio of the last element pair.
-            val converter =
-                FontScaleConverterTable(floatArrayOf(1f), floatArrayOf(fontScale))
+            val converter = FontScaleConverterTable(floatArrayOf(1f), floatArrayOf(fontScale))
 
             // Cache for next time.
             put(fontScale, converter)
@@ -160,27 +156,24 @@ object FontScaleConverterFactory {
                 startScale = 1f
                 startTable = FontScaleConverterTable(CommonFontSizes, CommonFontSizes)
             } else {
-                startScale = getScaleFromKey(
-                    sLookupTables.keyAt(lowerIndex)
-                )
+                startScale = getScaleFromKey(sLookupTables.keyAt(lowerIndex))
                 startTable = sLookupTables.valueAt(lowerIndex)
             }
-            val endScale = getScaleFromKey(
-                sLookupTables.keyAt(higherIndex)
-            )
+            val endScale = getScaleFromKey(sLookupTables.keyAt(higherIndex))
             val interpolationPoint =
                 MathUtils.constrainedMap(
                     rangeMin = 0f,
                     rangeMax = 1f,
                     startScale,
                     endScale,
-                    fontScale
+                    fontScale,
                 )
-            val converter = createInterpolatedTableBetween(
-                startTable,
-                sLookupTables.valueAt(higherIndex),
-                interpolationPoint
-            )
+            val converter =
+                createInterpolatedTableBetween(
+                    startTable,
+                    sLookupTables.valueAt(higherIndex),
+                    interpolationPoint,
+                )
 
             // Cache for next time.
             put(fontScale, converter)
@@ -191,7 +184,7 @@ object FontScaleConverterFactory {
     private fun createInterpolatedTableBetween(
         start: FontScaleConverter,
         end: FontScaleConverter,
-        interpolationPoint: Float
+        interpolationPoint: Float,
     ): FontScaleConverter {
         val dpInterpolated = FloatArray(CommonFontSizes.size)
         for (i in CommonFontSizes.indices) {
@@ -223,7 +216,7 @@ object FontScaleConverterFactory {
     private fun putInto(
         table: SparseArrayCompat<FontScaleConverter>,
         scaleKey: Float,
-        fontScaleConverter: FontScaleConverter
+        fontScaleConverter: FontScaleConverter,
     ) {
         table.put(getKey(scaleKey), fontScaleConverter)
     }

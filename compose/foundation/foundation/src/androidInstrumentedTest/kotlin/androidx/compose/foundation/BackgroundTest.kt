@@ -20,6 +20,7 @@ import android.os.Build
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -45,11 +46,15 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.ValueElement
 import androidx.compose.ui.platform.isDebugInspectorInfoEnabled
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import androidx.test.filters.SdkSuppress
@@ -65,22 +70,24 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class BackgroundTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     private val contentTag = "Content"
+    private val semanticsTag = "semantics-test-tag"
 
-    private val rtlAwareShape = object : Shape {
-        override fun createOutline(
-            size: Size,
-            layoutDirection: LayoutDirection,
-            density: Density
-        ) = if (layoutDirection == LayoutDirection.Ltr) {
-            RectangleShape.createOutline(size, layoutDirection, density)
-        } else {
-            CircleShape.createOutline(size, layoutDirection, density)
+    private val rtlAwareShape =
+        object : Shape {
+            override fun createOutline(
+                size: Size,
+                layoutDirection: LayoutDirection,
+                density: Density,
+            ) =
+                if (layoutDirection == LayoutDirection.Ltr) {
+                    RectangleShape.createOutline(size, layoutDirection, density)
+                } else {
+                    CircleShape.createOutline(size, layoutDirection, density)
+                }
         }
-    }
 
     @Before
     fun before() {
@@ -97,15 +104,10 @@ class BackgroundTest {
         rule.setContent {
             SemanticParent {
                 Box(
-                    Modifier
-                        .size(40f.toDp())
-                        .background(Color.Magenta),
-                    contentAlignment = Alignment.Center
+                    Modifier.size(40f.toDp()).background(Color.Magenta),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Box(
-                        Modifier
-                            .size(20f.toDp())
-                            .background(Color.White))
+                    Box(Modifier.size(20f.toDp()).background(Color.White))
                 }
             }
         }
@@ -114,9 +116,8 @@ class BackgroundTest {
             density = rule.density,
             backgroundColor = Color.Magenta,
             shape = RectangleShape,
-            shapeSizeX = 20.0f,
-            shapeSizeY = 20.0f,
-            shapeColor = Color.White
+            shapeSize = Size(20f, 20f),
+            shapeColor = Color.White,
         )
     }
 
@@ -125,16 +126,10 @@ class BackgroundTest {
         rule.setContent {
             SemanticParent {
                 Box(
-                    Modifier
-                        .size(40f.toDp())
-                        .background(Color.Magenta),
-                    contentAlignment = Alignment.Center
+                    Modifier.size(40f.toDp()).background(Color.Magenta),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Box(
-                        Modifier
-                            .size(20f.toDp())
-                            .background(SolidColor(Color.White))
-                    )
+                    Box(Modifier.size(20f.toDp()).background(SolidColor(Color.White)))
                 }
             }
         }
@@ -143,9 +138,8 @@ class BackgroundTest {
             density = rule.density,
             backgroundColor = Color.Magenta,
             shape = RectangleShape,
-            shapeSizeX = 20.0f,
-            shapeSizeY = 20.0f,
-            shapeColor = Color.White
+            shapeSize = Size(20f, 20f),
+            shapeColor = Color.White,
         )
     }
 
@@ -154,8 +148,7 @@ class BackgroundTest {
         rule.setContent {
             SemanticParent {
                 Box(
-                    Modifier
-                        .size(40f.toDp())
+                    Modifier.size(40f.toDp())
                         .background(Color.Magenta)
                         .background(color = Color.White, shape = CircleShape)
                 )
@@ -167,7 +160,7 @@ class BackgroundTest {
             backgroundColor = Color.Magenta,
             shape = CircleShape,
             shapeColor = Color.White,
-            shapeOverlapPixelCount = 2.0f
+            antiAliasingGap = 2.0f,
         )
     }
 
@@ -176,13 +169,9 @@ class BackgroundTest {
         rule.setContent {
             SemanticParent {
                 Box(
-                    Modifier
-                        .size(40f.toDp())
+                    Modifier.size(40f.toDp())
                         .background(Color.Magenta)
-                        .background(
-                            brush = SolidColor(Color.White),
-                            shape = CircleShape
-                        )
+                        .background(brush = SolidColor(Color.White), shape = CircleShape)
                 )
             }
         }
@@ -192,7 +181,97 @@ class BackgroundTest {
             backgroundColor = Color.Magenta,
             shape = CircleShape,
             shapeColor = Color.White,
-            shapeOverlapPixelCount = 2.0f
+            antiAliasingGap = 2.0f,
+        )
+    }
+
+    @Test
+    fun background_changeColor() {
+        var color by mutableStateOf(Color.White)
+
+        rule.setContent {
+            SemanticParent { Box(Modifier.size(40f.toDp()).background(color = color)) }
+        }
+
+        val bitmap = rule.onNodeWithTag(contentTag).captureToImage()
+        bitmap.assertShape(
+            density = rule.density,
+            shape = RectangleShape,
+            shapeColor = Color.White,
+            backgroundColor = null,
+        )
+
+        color = Color.Magenta
+        rule.waitForIdle()
+
+        val bitmap2 = rule.onNodeWithTag(contentTag).captureToImage()
+        bitmap2.assertShape(
+            density = rule.density,
+            shape = RectangleShape,
+            shapeColor = Color.Magenta,
+            backgroundColor = null,
+        )
+    }
+
+    @Test
+    fun background_changeBrush() {
+        var brush by mutableStateOf(SolidColor(Color.White))
+
+        rule.setContent {
+            SemanticParent { Box(Modifier.size(40f.toDp()).background(brush = brush)) }
+        }
+
+        val bitmap = rule.onNodeWithTag(contentTag).captureToImage()
+        bitmap.assertShape(
+            density = rule.density,
+            shape = RectangleShape,
+            shapeColor = Color.White,
+            backgroundColor = null,
+        )
+
+        brush = SolidColor(Color.Magenta)
+        rule.waitForIdle()
+
+        val bitmap2 = rule.onNodeWithTag(contentTag).captureToImage()
+        bitmap2.assertShape(
+            density = rule.density,
+            shape = RectangleShape,
+            shapeColor = Color.Magenta,
+            backgroundColor = null,
+        )
+    }
+
+    @Test
+    fun background_changeAlpha() {
+        var alpha by mutableStateOf(1f)
+
+        rule.setContent {
+            SemanticParent {
+                Box(
+                    Modifier.size(40f.toDp())
+                        .background(Color.Magenta)
+                        .background(brush = SolidColor(Color.White), alpha = alpha)
+                )
+            }
+        }
+
+        val bitmap = rule.onNodeWithTag(contentTag).captureToImage()
+        bitmap.assertShape(
+            density = rule.density,
+            shape = RectangleShape,
+            shapeColor = Color.White,
+            backgroundColor = null,
+        )
+
+        alpha = 0f
+        rule.waitForIdle()
+
+        val bitmap2 = rule.onNodeWithTag(contentTag).captureToImage()
+        bitmap2.assertShape(
+            density = rule.density,
+            shape = RectangleShape,
+            shapeColor = Color.Magenta,
+            backgroundColor = null,
         )
     }
 
@@ -203,8 +282,7 @@ class BackgroundTest {
         rule.setContent {
             SemanticParent {
                 Box(
-                    Modifier
-                        .size(40f.toDp())
+                    Modifier.size(40f.toDp())
                         .background(Color.Magenta)
                         .background(color = Color.White, shape = shape)
                 )
@@ -217,7 +295,7 @@ class BackgroundTest {
             backgroundColor = Color.Magenta,
             shape = RoundedCornerShape(10f),
             shapeColor = Color.White,
-            shapeOverlapPixelCount = 2.0f
+            antiAliasingGap = 2.0f,
         )
 
         shape = CircleShape
@@ -229,7 +307,7 @@ class BackgroundTest {
             backgroundColor = Color.Magenta,
             shape = CircleShape,
             shapeColor = Color.White,
-            shapeOverlapPixelCount = 2.0f
+            antiAliasingGap = 2.0f,
         )
     }
 
@@ -237,25 +315,25 @@ class BackgroundTest {
     fun background_changeOutline_differentPaths_observableShape() {
         var roundCorners by mutableStateOf(false)
 
-        val shape = object : Shape {
-            override fun createOutline(
-                size: Size,
-                layoutDirection: LayoutDirection,
-                density: Density
-            ): Outline {
-                return if (roundCorners) {
-                    RoundedCornerShape(50f).createOutline(size, layoutDirection, density)
-                } else {
-                    RectangleShape.createOutline(size, layoutDirection, density)
+        val shape =
+            object : Shape {
+                override fun createOutline(
+                    size: Size,
+                    layoutDirection: LayoutDirection,
+                    density: Density,
+                ): Outline {
+                    return if (roundCorners) {
+                        RoundedCornerShape(50f).createOutline(size, layoutDirection, density)
+                    } else {
+                        RectangleShape.createOutline(size, layoutDirection, density)
+                    }
                 }
             }
-        }
 
         rule.setContent {
             SemanticParent {
                 Box(
-                    Modifier
-                        .size(40f.toDp())
+                    Modifier.size(40f.toDp())
                         .background(Color.Magenta)
                         .background(color = Color.White, shape = shape)
                 )
@@ -268,7 +346,7 @@ class BackgroundTest {
             backgroundColor = Color.Magenta,
             shape = RectangleShape,
             shapeColor = Color.White,
-            shapeOverlapPixelCount = 2.0f
+            antiAliasingGap = 2.0f,
         )
 
         roundCorners = true
@@ -280,7 +358,7 @@ class BackgroundTest {
             backgroundColor = Color.Magenta,
             shape = RoundedCornerShape(50f),
             shapeColor = Color.White,
-            shapeOverlapPixelCount = 2.0f
+            antiAliasingGap = 2.0f,
         )
 
         roundCorners = false
@@ -292,7 +370,7 @@ class BackgroundTest {
             backgroundColor = Color.Magenta,
             shape = RectangleShape,
             shapeColor = Color.White,
-            shapeOverlapPixelCount = 2.0f
+            antiAliasingGap = 2.0f,
         )
     }
 
@@ -301,28 +379,29 @@ class BackgroundTest {
         var roundCorners by mutableStateOf(false)
 
         val path = Path()
-        val shape = object : Shape {
-            override fun createOutline(
-                size: Size,
-                layoutDirection: LayoutDirection,
-                density: Density
-            ): Outline {
-                val outlineToAdd = if (roundCorners) {
-                    RoundedCornerShape(50f).createOutline(size, layoutDirection, density)
-                } else {
-                    RectangleShape.createOutline(size, layoutDirection, density)
+        val shape =
+            object : Shape {
+                override fun createOutline(
+                    size: Size,
+                    layoutDirection: LayoutDirection,
+                    density: Density,
+                ): Outline {
+                    val outlineToAdd =
+                        if (roundCorners) {
+                            RoundedCornerShape(50f).createOutline(size, layoutDirection, density)
+                        } else {
+                            RectangleShape.createOutline(size, layoutDirection, density)
+                        }
+                    path.reset()
+                    path.addOutline(outlineToAdd)
+                    return Outline.Generic(path)
                 }
-                path.reset()
-                path.addOutline(outlineToAdd)
-                return Outline.Generic(path)
             }
-        }
 
         rule.setContent {
             SemanticParent {
                 Box(
-                    Modifier
-                        .size(40f.toDp())
+                    Modifier.size(40f.toDp())
                         .background(Color.Magenta)
                         .background(color = Color.White, shape = shape)
                 )
@@ -335,7 +414,7 @@ class BackgroundTest {
             backgroundColor = Color.Magenta,
             shape = RectangleShape,
             shapeColor = Color.White,
-            shapeOverlapPixelCount = 2.0f
+            antiAliasingGap = 2.0f,
         )
 
         roundCorners = true
@@ -347,7 +426,7 @@ class BackgroundTest {
             backgroundColor = Color.Magenta,
             shape = RoundedCornerShape(50f),
             shapeColor = Color.White,
-            shapeOverlapPixelCount = 2.0f
+            antiAliasingGap = 2.0f,
         )
 
         roundCorners = false
@@ -359,7 +438,7 @@ class BackgroundTest {
             backgroundColor = Color.Magenta,
             shape = RectangleShape,
             shapeColor = Color.White,
-            shapeOverlapPixelCount = 2.0f
+            antiAliasingGap = 2.0f,
         )
     }
 
@@ -369,13 +448,9 @@ class BackgroundTest {
             SemanticParent {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     Box(
-                        Modifier
-                            .size(40f.toDp())
+                        Modifier.size(40f.toDp())
                             .background(Color.Magenta)
-                            .background(
-                                brush = SolidColor(Color.White),
-                                shape = rtlAwareShape
-                            )
+                            .background(brush = SolidColor(Color.White), shape = rtlAwareShape)
                     )
                 }
             }
@@ -386,7 +461,7 @@ class BackgroundTest {
             backgroundColor = Color.Magenta,
             shape = CircleShape,
             shapeColor = Color.White,
-            shapeOverlapPixelCount = 2.0f
+            antiAliasingGap = 2.0f,
         )
     }
 
@@ -397,28 +472,25 @@ class BackgroundTest {
             SemanticParent {
                 CompositionLocalProvider(LocalLayoutDirection provides direction.value) {
                     Box(
-                        Modifier
-                            .size(40f.toDp())
+                        Modifier.size(40f.toDp())
                             .background(Color.Magenta)
-                            .background(
-                                brush = SolidColor(Color.White),
-                                shape = rtlAwareShape
-                            )
+                            .background(brush = SolidColor(Color.White), shape = rtlAwareShape)
                     )
                 }
             }
         }
 
-        rule.runOnIdle {
-            direction.value = LayoutDirection.Rtl
-        }
-        rule.onNodeWithTag(contentTag).captureToImage().assertShape(
-            density = rule.density,
-            backgroundColor = Color.Magenta,
-            shape = CircleShape,
-            shapeColor = Color.White,
-            shapeOverlapPixelCount = 2.0f
-        )
+        rule.runOnIdle { direction.value = LayoutDirection.Rtl }
+        rule
+            .onNodeWithTag(contentTag)
+            .captureToImage()
+            .assertShape(
+                density = rule.density,
+                backgroundColor = Color.Magenta,
+                shape = CircleShape,
+                shapeColor = Color.White,
+                antiAliasingGap = 2.0f,
+            )
     }
 
     @Test
@@ -426,10 +498,11 @@ class BackgroundTest {
         val modifier = Modifier.background(Color.Magenta) as InspectableValue
         assertThat(modifier.nameFallback).isEqualTo("background")
         assertThat(modifier.valueOverride).isEqualTo(Color.Magenta)
-        assertThat(modifier.inspectableElements.asIterable()).containsExactly(
-            ValueElement("color", Color.Magenta),
-            ValueElement("shape", RectangleShape)
-        )
+        assertThat(modifier.inspectableElements.asIterable())
+            .containsExactly(
+                ValueElement("color", Color.Magenta),
+                ValueElement("shape", RectangleShape),
+            )
     }
 
     @Test
@@ -437,11 +510,12 @@ class BackgroundTest {
         val modifier = Modifier.background(SolidColor(Color.Red)) as InspectableValue
         assertThat(modifier.nameFallback).isEqualTo("background")
         assertThat(modifier.valueOverride).isNull()
-        assertThat(modifier.inspectableElements.asIterable()).containsExactly(
-            ValueElement("alpha", 1.0f),
-            ValueElement("brush", SolidColor(Color.Red)),
-            ValueElement("shape", RectangleShape)
-        )
+        assertThat(modifier.inspectableElements.asIterable())
+            .containsExactly(
+                ValueElement("alpha", 1.0f),
+                ValueElement("brush", SolidColor(Color.Red)),
+                ValueElement("shape", RectangleShape),
+            )
     }
 
     @Test
@@ -469,10 +543,130 @@ class BackgroundTest {
         }
     }
 
+    @Test
+    fun rectangleShape_setsShapeSemanticsProperty() {
+        rule.setContent {
+            SemanticParent {
+                Box(
+                    Modifier.size(10.dp)
+                        .background(color = Color.White, shape = RectangleShape)
+                        .testTag(semanticsTag)
+                )
+            }
+        }
+
+        rule
+            .onNodeWithTag(semanticsTag)
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Shape, RectangleShape))
+    }
+
+    @Test
+    fun roundedCornerShape_setsShapeSemanticsProperty() {
+        rule.setContent {
+            SemanticParent {
+                Box(
+                    Modifier.size(10.dp)
+                        .background(color = Color.White, shape = RoundedCornerShape(1.dp))
+                        .testTag(semanticsTag)
+                )
+            }
+        }
+
+        rule
+            .onNodeWithTag(semanticsTag)
+            .assert(
+                SemanticsMatcher.expectValue(SemanticsProperties.Shape, RoundedCornerShape(1.dp))
+            )
+    }
+
+    @Test
+    fun genericShape_setsShapeSemanticsProperty() {
+        rule.setContent {
+            SemanticParent {
+                Box(
+                    Modifier.size(10.dp)
+                        .background(color = Color.White, shape = CutCornerShape(2.dp))
+                        .testTag(semanticsTag)
+                )
+            }
+        }
+
+        rule
+            .onNodeWithTag(semanticsTag)
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Shape, CutCornerShape(2.dp)))
+    }
+
+    @Test
+    fun shapeChange_fromRectangle_invalidatesSemanticsProperty() {
+        var shape by mutableStateOf(RectangleShape)
+        rule.setContent {
+            SemanticParent {
+                Box(
+                    Modifier.size(10.dp)
+                        .background(color = Color.White, shape = shape)
+                        .testTag(semanticsTag)
+                )
+            }
+        }
+        rule
+            .onNodeWithTag(semanticsTag)
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Shape, RectangleShape))
+
+        rule.runOnIdle { shape = CircleShape }
+
+        rule
+            .onNodeWithTag(semanticsTag)
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Shape, CircleShape))
+    }
+
+    @Test
+    fun shapeChange_toRectangle_invalidatesSemanticsProperty() {
+        var shape: Shape by mutableStateOf(CircleShape)
+        rule.setContent {
+            SemanticParent {
+                Box(
+                    Modifier.size(10.dp)
+                        .background(color = Color.White, shape = shape)
+                        .testTag(semanticsTag)
+                )
+            }
+        }
+        rule
+            .onNodeWithTag(semanticsTag)
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Shape, CircleShape))
+
+        rule.runOnIdle { shape = RectangleShape }
+
+        rule
+            .onNodeWithTag(semanticsTag)
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Shape, RectangleShape))
+    }
+
+    @Test
+    fun shapeChange_betweenNonRectangles_invalidatesSemanticsProperty() {
+        var shape: Shape by mutableStateOf(CircleShape)
+        rule.setContent {
+            SemanticParent {
+                Box(
+                    Modifier.size(10.dp)
+                        .background(color = Color.White, shape = shape)
+                        .testTag(semanticsTag)
+                )
+            }
+        }
+        rule
+            .onNodeWithTag(semanticsTag)
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Shape, CircleShape))
+
+        rule.runOnIdle { shape = CutCornerShape(2.dp) }
+
+        rule
+            .onNodeWithTag(semanticsTag)
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Shape, CutCornerShape(2.dp)))
+    }
+
     @Composable
     private fun SemanticParent(content: @Composable Density.() -> Unit) {
-        Box(Modifier.testTag(contentTag)) {
-            LocalDensity.current.content()
-        }
+        Box(Modifier.testTag(contentTag)) { LocalDensity.current.content() }
     }
 }

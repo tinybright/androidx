@@ -18,18 +18,17 @@ package androidx.core.view.contentcapture;
 
 import static android.os.Build.VERSION.SDK_INT;
 
-import android.os.Bundle;
 import android.view.View;
 import android.view.ViewStructure;
 import android.view.autofill.AutofillId;
 import android.view.contentcapture.ContentCaptureSession;
 
-import androidx.annotation.DoNotInline;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.ViewStructureCompat;
+
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -56,8 +55,7 @@ public class ContentCaptureSessionCompat {
      * @return wrapped class
      */
     @RequiresApi(29)
-    @NonNull
-    public static ContentCaptureSessionCompat toContentCaptureSessionCompat(
+    public static @NonNull ContentCaptureSessionCompat toContentCaptureSessionCompat(
             @NonNull ContentCaptureSession contentCaptureSession, @NonNull View host) {
         return new ContentCaptureSessionCompat(contentCaptureSession, host);
     }
@@ -72,8 +70,7 @@ public class ContentCaptureSessionCompat {
      * @see ContentCaptureSessionCompat#toContentCaptureSessionCompat(ContentCaptureSession, View)
      */
     @RequiresApi(29)
-    @NonNull
-    public ContentCaptureSession toContentCaptureSession() {
+    public @NonNull ContentCaptureSession toContentCaptureSession() {
         return (ContentCaptureSession) mWrappedObj;
     }
 
@@ -104,8 +101,7 @@ public class ContentCaptureSessionCompat {
      *
      * @return {@link AutofillId} for the virtual child
      */
-    @Nullable
-    public AutofillId newAutofillId(long virtualChildId) {
+    public @Nullable AutofillId newAutofillId(long virtualChildId) {
         if (SDK_INT >= 29) {
             return Api29Impl.newAutofillId(
                     (ContentCaptureSession) mWrappedObj,
@@ -131,8 +127,7 @@ public class ContentCaptureSessionCompat {
      *
      * @return a new {@link ViewStructure} that can be used for Content Capture purposes.
      */
-    @Nullable
-    public ViewStructureCompat newVirtualViewStructure(
+    public @Nullable ViewStructureCompat newVirtualViewStructure(
             @NonNull AutofillId parentId, long virtualId) {
         if (SDK_INT >= 29) {
             return ViewStructureCompat.toViewStructureCompat(
@@ -164,7 +159,7 @@ public class ContentCaptureSessionCompat {
         } else if (SDK_INT >= 29) {
             ViewStructure treeAppearing = Api29Impl.newViewStructure(
                     (ContentCaptureSession) mWrappedObj, mView);
-            Api23Impl.getExtras(treeAppearing).putBoolean(KEY_VIEW_TREE_APPEARING, true);
+            treeAppearing.getExtras().putBoolean(KEY_VIEW_TREE_APPEARING, true);
             Api29Impl.notifyViewAppeared((ContentCaptureSession) mWrappedObj, treeAppearing);
 
             for (int i = 0; i < appearedNodes.size(); i++) {
@@ -174,7 +169,7 @@ public class ContentCaptureSessionCompat {
 
             ViewStructure treeAppeared = Api29Impl.newViewStructure(
                     (ContentCaptureSession) mWrappedObj, mView);
-            Api23Impl.getExtras(treeAppeared).putBoolean(KEY_VIEW_TREE_APPEARED, true);
+            treeAppeared.getExtras().putBoolean(KEY_VIEW_TREE_APPEARED, true);
             Api29Impl.notifyViewAppeared((ContentCaptureSession) mWrappedObj, treeAppeared);
         }
     }
@@ -195,7 +190,7 @@ public class ContentCaptureSessionCompat {
      *
      * @param virtualIds ids of the virtual children.
      */
-    public void notifyViewsDisappeared(@NonNull long[] virtualIds) {
+    public void notifyViewsDisappeared(long @NonNull [] virtualIds) {
         if (SDK_INT >= 34) {
             Api29Impl.notifyViewsDisappeared(
                     (ContentCaptureSession) mWrappedObj,
@@ -204,7 +199,7 @@ public class ContentCaptureSessionCompat {
         } else if (SDK_INT >= 29) {
             ViewStructure treeAppearing = Api29Impl.newViewStructure(
                     (ContentCaptureSession) mWrappedObj, mView);
-            Api23Impl.getExtras(treeAppearing).putBoolean(KEY_VIEW_TREE_APPEARING, true);
+            treeAppearing.getExtras().putBoolean(KEY_VIEW_TREE_APPEARING, true);
             Api29Impl.notifyViewAppeared((ContentCaptureSession) mWrappedObj, treeAppearing);
 
             Api29Impl.notifyViewsDisappeared(
@@ -214,7 +209,7 @@ public class ContentCaptureSessionCompat {
 
             ViewStructure treeAppeared = Api29Impl.newViewStructure(
                     (ContentCaptureSession) mWrappedObj, mView);
-            Api23Impl.getExtras(treeAppeared).putBoolean(KEY_VIEW_TREE_APPEARED, true);
+            treeAppeared.getExtras().putBoolean(KEY_VIEW_TREE_APPEARED, true);
             Api29Impl.notifyViewAppeared((ContentCaptureSession) mWrappedObj, treeAppeared);
         }
     }
@@ -243,7 +238,6 @@ public class ContentCaptureSessionCompat {
             // This class is not instantiable.
         }
 
-        @DoNotInline
         static void notifyViewsAppeared(
                 ContentCaptureSession contentCaptureSession, List<ViewStructure> appearedNodes) {
             contentCaptureSession.notifyViewsAppeared(appearedNodes);
@@ -255,53 +249,35 @@ public class ContentCaptureSessionCompat {
             // This class is not instantiable.
         }
 
-        @DoNotInline
         static void notifyViewsDisappeared(
                 ContentCaptureSession contentCaptureSession, AutofillId hostId, long[] virtualIds) {
             contentCaptureSession.notifyViewsDisappeared(hostId, virtualIds);
         }
 
-        @DoNotInline
         static void notifyViewAppeared(
                 ContentCaptureSession contentCaptureSession, ViewStructure node) {
             contentCaptureSession.notifyViewAppeared(node);
         }
-        @DoNotInline
         static ViewStructure newViewStructure(
                 ContentCaptureSession contentCaptureSession, View view) {
             return contentCaptureSession.newViewStructure(view);
         }
 
-        @DoNotInline
         static ViewStructure newVirtualViewStructure(ContentCaptureSession contentCaptureSession,
                 AutofillId parentId, long virtualId) {
             return contentCaptureSession.newVirtualViewStructure(parentId, virtualId);
         }
 
 
-        @DoNotInline
         static AutofillId newAutofillId(ContentCaptureSession contentCaptureSession,
                 AutofillId hostId, long virtualChildId) {
             return contentCaptureSession.newAutofillId(hostId, virtualChildId);
         }
 
-        @DoNotInline
         public static void notifyViewTextChanged(ContentCaptureSession contentCaptureSession,
                 AutofillId id, CharSequence charSequence) {
             contentCaptureSession.notifyViewTextChanged(id, charSequence);
 
         }
-    }
-    @RequiresApi(23)
-    private static class Api23Impl {
-        private Api23Impl() {
-            // This class is not instantiable.
-        }
-
-        @DoNotInline
-        static Bundle getExtras(ViewStructure viewStructure) {
-            return viewStructure.getExtras();
-        }
-
     }
 }

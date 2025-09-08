@@ -31,157 +31,126 @@ import androidx.hardware.SyncFenceImpl
 import androidx.hardware.SyncFenceV33
 import java.util.concurrent.Executor
 
-/**
- * Implementation of [SurfaceControlImpl] that wraps the SDK's [SurfaceControl] API.
- */
+/** Implementation of [SurfaceControlImpl] that wraps the SDK's [SurfaceControl] API. */
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-internal class SurfaceControlV33 internal constructor(
-    internal val surfaceControl: SurfaceControl
-) : SurfaceControlImpl {
+internal class SurfaceControlV33 internal constructor(internal val surfaceControl: SurfaceControl) :
+    SurfaceControlImpl {
 
-    /**
-     * See [SurfaceControlImpl.isValid]
-     */
+    /** See [SurfaceControlImpl.isValid] */
     override fun isValid(): Boolean = surfaceControl.isValid
 
-    /**
-     * See [SurfaceControlImpl.release]
-     */
+    /** See [SurfaceControlImpl.release] */
     override fun release() {
         surfaceControl.release()
     }
 
-    /**
-     * See [SurfaceControlImpl.Builder]
-     */
+    /** See [SurfaceControlImpl.Builder] */
     class Builder : SurfaceControlImpl.Builder {
 
         private val builder = SurfaceControl.Builder()
 
-        /**
-         * See [SurfaceControlImpl.Builder.setParent]
-         */
+        /** See [SurfaceControlImpl.Builder.setParent] */
         override fun setParent(surfaceView: SurfaceView): SurfaceControlImpl.Builder {
             builder.setParent(surfaceView.surfaceControl)
             return this
         }
 
-        /**
-         * See [SurfaceControlImpl.Builder.setParent]
-         */
+        /** See [SurfaceControlImpl.Builder.setParent] */
         override fun setParent(surfaceControl: SurfaceControlCompat): SurfaceControlImpl.Builder {
             builder.setParent(surfaceControl.scImpl.asFrameworkSurfaceControl())
             return this
         }
 
-        /**
-         * See [SurfaceControlImpl.Builder.setName]
-         */
+        /** See [SurfaceControlImpl.Builder.setName] */
         override fun setName(name: String): Builder {
             builder.setName(name)
             return this
         }
 
-        /**
-         * See [SurfaceControlImpl.Builder.build]
-         */
+        /** See [SurfaceControlImpl.Builder.build] */
         override fun build(): SurfaceControlImpl = SurfaceControlV33(builder.build())
     }
 
-    /**
-     * See [SurfaceControlImpl.Transaction]
-     */
+    /** See [SurfaceControlImpl.Transaction] */
     class Transaction : SurfaceControlImpl.Transaction {
 
         private val mTransaction = SurfaceControl.Transaction()
 
-        /**
-         * See [SurfaceControlImpl.Transaction.setOpaque]
-         */
+        /** See [SurfaceControlImpl.Transaction.setOpaque] */
         override fun setOpaque(
             surfaceControl: SurfaceControlImpl,
-            isOpaque: Boolean
+            isOpaque: Boolean,
         ): SurfaceControlImpl.Transaction {
             mTransaction.setOpaque(surfaceControl.asFrameworkSurfaceControl(), isOpaque)
             return this
         }
 
-        /**
-         * See [SurfaceControlImpl.Transaction.setVisibility]
-         */
+        /** See [SurfaceControlImpl.Transaction.setVisibility] */
         override fun setVisibility(
             surfaceControl: SurfaceControlImpl,
-            visible: Boolean
+            visible: Boolean,
         ): SurfaceControlImpl.Transaction {
             mTransaction.setVisibility(surfaceControl.asFrameworkSurfaceControl(), visible)
             return this
         }
 
-        /**
-         * See [SurfaceControlImpl.Transaction.setBuffer]
-         */
+        /** See [SurfaceControlImpl.Transaction.setBuffer] */
         override fun setBuffer(
             surfaceControl: SurfaceControlImpl,
             buffer: HardwareBuffer?,
             fence: SyncFenceImpl?,
-            releaseCallback: ((SyncFenceCompat) -> Unit)?
+            releaseCallback: ((SyncFenceCompat) -> Unit)?,
         ): Transaction {
             mTransaction.setBuffer(
                 surfaceControl.asFrameworkSurfaceControl(),
                 buffer,
-                fence?.asSyncFence()
+                fence?.asSyncFence(),
             ) { syncFence ->
                 releaseCallback?.invoke(SyncFenceCompat(syncFence))
             }
             return this
         }
 
-        /**
-         * See [SurfaceControlImpl.Transaction.setLayer]
-         */
+        /** See [SurfaceControlImpl.Transaction.setLayer] */
         override fun setLayer(
             surfaceControl: SurfaceControlImpl,
-            z: Int
+            z: Int,
         ): SurfaceControlImpl.Transaction {
             mTransaction.setLayer(surfaceControl.asFrameworkSurfaceControl(), z)
             return this
         }
 
-        /**
-         * See [SurfaceControlImpl.Transaction.reparent]
-         */
+        /** See [SurfaceControlImpl.Transaction.reparent] */
         override fun reparent(
             surfaceControl: SurfaceControlImpl,
-            newParent: SurfaceControlImpl?
+            newParent: SurfaceControlImpl?,
         ): Transaction {
             mTransaction.reparent(
                 surfaceControl.asFrameworkSurfaceControl(),
-                newParent?.asFrameworkSurfaceControl()
+                newParent?.asFrameworkSurfaceControl(),
             )
             return this
         }
 
-        /**
-         * See [SurfaceControlImpl.Transaction.reparent]
-         */
+        /** See [SurfaceControlImpl.Transaction.reparent] */
         override fun reparent(
             surfaceControl: SurfaceControlImpl,
-            attachedSurfaceControl: AttachedSurfaceControl
+            attachedSurfaceControl: AttachedSurfaceControl,
         ): SurfaceControlImpl.Transaction {
-            val reparentTransaction = attachedSurfaceControl
-                .buildReparentTransaction(surfaceControl.asFrameworkSurfaceControl())
+            val reparentTransaction =
+                attachedSurfaceControl.buildReparentTransaction(
+                    surfaceControl.asFrameworkSurfaceControl()
+                )
             if (reparentTransaction != null) {
                 mTransaction.merge(reparentTransaction)
             }
             return this
         }
 
-        /**
-         * See [SurfaceControlImpl.Transaction.addTransactionCommittedListener]
-         */
+        /** See [SurfaceControlImpl.Transaction.addTransactionCommittedListener] */
         override fun addTransactionCommittedListener(
             executor: Executor,
-            listener: SurfaceControlCompat.TransactionCommittedListener
+            listener: SurfaceControlCompat.TransactionCommittedListener,
         ): SurfaceControlImpl.Transaction {
             mTransaction.addTransactionCommittedListener(executor) {
                 listener.onTransactionCommitted()
@@ -189,92 +158,78 @@ internal class SurfaceControlV33 internal constructor(
             return this
         }
 
-        /**
-         * See [SurfaceControlImpl.Transaction.setDamageRegion]
-         */
+        /** See [SurfaceControlImpl.Transaction.setDamageRegion] */
         override fun setDamageRegion(
             surfaceControl: SurfaceControlImpl,
-            region: Region?
+            region: Region?,
         ): SurfaceControlImpl.Transaction {
             mTransaction.setDamageRegion(surfaceControl.asFrameworkSurfaceControl(), region)
             return this
         }
 
-        /**
-         * See [SurfaceControlImpl.Transaction.setAlpha]
-         */
+        /** See [SurfaceControlImpl.Transaction.setAlpha] */
         override fun setAlpha(
             surfaceControl: SurfaceControlImpl,
-            alpha: Float
+            alpha: Float,
         ): SurfaceControlImpl.Transaction {
             mTransaction.setAlpha(surfaceControl.asFrameworkSurfaceControl(), alpha)
             return this
         }
 
-        /**
-         * See [SurfaceControlImpl.Transaction.setCrop]
-         */
+        /** See [SurfaceControlImpl.Transaction.setCrop] */
         override fun setCrop(
             surfaceControl: SurfaceControlImpl,
-            crop: Rect?
+            crop: Rect?,
         ): SurfaceControlImpl.Transaction {
             mTransaction.setCrop(surfaceControl.asFrameworkSurfaceControl(), crop)
             return this
         }
 
-        /**
-         * See [SurfaceControlImpl.Transaction.setPosition]
-         */
+        /** See [SurfaceControlImpl.Transaction.setPosition] */
         override fun setPosition(
             surfaceControl: SurfaceControlImpl,
             x: Float,
-            y: Float
+            y: Float,
         ): SurfaceControlImpl.Transaction {
             mTransaction.setPosition(surfaceControl.asFrameworkSurfaceControl(), x, y)
             return this
         }
 
-        /**
-         * See [SurfaceControlImpl.Transaction.setScale]
-         */
+        /** See [SurfaceControlImpl.Transaction.setScale] */
         override fun setScale(
             surfaceControl: SurfaceControlImpl,
             scaleX: Float,
-            scaleY: Float
+            scaleY: Float,
         ): SurfaceControlImpl.Transaction {
             mTransaction.setScale(surfaceControl.asFrameworkSurfaceControl(), scaleX, scaleY)
             return this
         }
 
-        /**
-         * See [SurfaceControlImpl.Transaction.setBufferTransform]
-         */
+        /** See [SurfaceControlImpl.Transaction.setBufferTransform] */
         override fun setBufferTransform(
             surfaceControl: SurfaceControlImpl,
-            @SurfaceControlCompat.Companion.BufferTransform transformation: Int
+            @SurfaceControlCompat.Companion.BufferTransform transformation: Int,
         ): SurfaceControlImpl.Transaction {
             mTransaction.setBufferTransform(
                 surfaceControl.asFrameworkSurfaceControl(),
-                transformation
+                transformation,
             )
             return this
         }
 
-        /**
-         * See [SurfaceControlCompat.Transaction.setExtendedRangeBrightness]
-         */
+        /** See [SurfaceControlCompat.Transaction.setExtendedRangeBrightness] */
         @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
         override fun setExtendedRangeBrightness(
             surfaceControl: SurfaceControlImpl,
             currentBufferRatio: Float,
-            desiredRatio: Float
+            desiredRatio: Float,
         ): SurfaceControlImpl.Transaction {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 SurfaceControlTransactionVerificationHelperV34.setExtendedRangeBrightness(
                     mTransaction,
                     surfaceControl.asFrameworkSurfaceControl(),
                     currentBufferRatio,
-                    desiredRatio
+                    desiredRatio,
                 )
                 return this
             } else {
@@ -284,18 +239,16 @@ internal class SurfaceControlV33 internal constructor(
             }
         }
 
-        /**
-         * See [SurfaceControlCompat.Transaction.setDataSpace]
-         */
+        /** See [SurfaceControlCompat.Transaction.setDataSpace] */
         override fun setDataSpace(
             surfaceControl: SurfaceControlImpl,
-            dataSpace: Int
+            dataSpace: Int,
         ): SurfaceControlImpl.Transaction {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 SurfaceControlTransactionVerificationHelperV33.setDataSpace(
                     mTransaction,
                     surfaceControl.asFrameworkSurfaceControl(),
-                    dataSpace
+                    dataSpace,
                 )
             } else {
                 throw UnsupportedOperationException(
@@ -309,7 +262,7 @@ internal class SurfaceControlV33 internal constructor(
             scImpl: SurfaceControlImpl,
             frameRate: Float,
             compatibility: Int,
-            changeFrameRateStrategy: Int
+            changeFrameRateStrategy: Int,
         ): Transaction {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 SurfaceControlVerificationHelperV31.setFrameRate(
@@ -317,14 +270,14 @@ internal class SurfaceControlV33 internal constructor(
                     scImpl.asFrameworkSurfaceControl(),
                     frameRate,
                     compatibility,
-                    changeFrameRateStrategy
+                    changeFrameRateStrategy,
                 )
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 SurfaceControlVerificationHelperV30.setFrameRate(
                     mTransaction,
                     scImpl.asFrameworkSurfaceControl(),
                     frameRate,
-                    compatibility
+                    compatibility,
                 )
             }
             return this
@@ -334,29 +287,23 @@ internal class SurfaceControlV33 internal constructor(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 SurfaceControlVerificationHelperV34.clearFrameRate(
                     mTransaction,
-                    scImpl.asFrameworkSurfaceControl()
+                    scImpl.asFrameworkSurfaceControl(),
                 )
             }
             return this
         }
 
-        /**
-         * See [SurfaceControlImpl.Transaction.commit]
-         */
+        /** See [SurfaceControlImpl.Transaction.commit] */
         override fun commit() {
             mTransaction.apply()
         }
 
-        /**
-         * See [SurfaceControlImpl.Transaction.close]
-         */
+        /** See [SurfaceControlImpl.Transaction.close] */
         override fun close() {
             mTransaction.close()
         }
 
-        /**
-         * See [SurfaceControlImpl.Transaction.commitTransactionOnDraw]
-         */
+        /** See [SurfaceControlImpl.Transaction.commitTransactionOnDraw] */
         override fun commitTransactionOnDraw(attachedSurfaceControl: AttachedSurfaceControl) {
             attachedSurfaceControl.applyTransactionOnDraw(mTransaction)
         }
@@ -365,8 +312,9 @@ internal class SurfaceControlV33 internal constructor(
             if (this is SyncFenceV33) {
                 mSyncFence
             } else {
-                throw
-                IllegalArgumentException("Expected SyncFenceCompat implementation for API level 33")
+                throw IllegalArgumentException(
+                    "Expected SyncFenceCompat implementation for API level 33"
+                )
             }
     }
 
@@ -383,12 +331,11 @@ internal class SurfaceControlV33 internal constructor(
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 private object SurfaceControlTransactionVerificationHelperV34 {
 
-    @androidx.annotation.DoNotInline
     fun setExtendedRangeBrightness(
         transaction: Transaction,
         surfaceControl: SurfaceControl,
         currentBufferRatio: Float,
-        desiredRatio: Float
+        desiredRatio: Float,
     ) {
         transaction.setExtendedRangeBrightness(surfaceControl, currentBufferRatio, desiredRatio)
     }
@@ -397,7 +344,6 @@ private object SurfaceControlTransactionVerificationHelperV34 {
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 private object SurfaceControlTransactionVerificationHelperV33 {
 
-    @androidx.annotation.DoNotInline
     fun setDataSpace(transaction: Transaction, surfaceControl: SurfaceControl, dataspace: Int) {
         transaction.setDataSpace(surfaceControl, dataspace)
     }
@@ -405,13 +351,12 @@ private object SurfaceControlTransactionVerificationHelperV33 {
 
 @RequiresApi(Build.VERSION_CODES.S)
 private object SurfaceControlVerificationHelperV31 {
-    @androidx.annotation.DoNotInline
     fun setFrameRate(
         transaction: Transaction,
         surfaceControl: SurfaceControl,
         frameRate: Float,
         compatibility: Int,
-        strategy: Int
+        strategy: Int,
     ) {
         transaction.setFrameRate(surfaceControl, frameRate, compatibility, strategy)
     }
@@ -419,12 +364,11 @@ private object SurfaceControlVerificationHelperV31 {
 
 @RequiresApi(Build.VERSION_CODES.R)
 private object SurfaceControlVerificationHelperV30 {
-    @androidx.annotation.DoNotInline
     fun setFrameRate(
         transaction: Transaction,
         surfaceControl: SurfaceControl,
         frameRate: Float,
-        compatibility: Int
+        compatibility: Int,
     ) {
         transaction.setFrameRate(surfaceControl, frameRate, compatibility)
     }
@@ -433,11 +377,7 @@ private object SurfaceControlVerificationHelperV30 {
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 private object SurfaceControlVerificationHelperV34 {
 
-    @androidx.annotation.DoNotInline
-    fun clearFrameRate(
-        transaction: Transaction,
-        surfaceControl: SurfaceControl
-    ) {
+    fun clearFrameRate(transaction: Transaction, surfaceControl: SurfaceControl) {
         transaction.clearFrameRate(surfaceControl)
     }
 }

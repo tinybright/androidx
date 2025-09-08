@@ -23,15 +23,13 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 
-/**
- * Fragment used to show arguments to a nested Deep Link
- */
+/** Fragment used to show arguments to a nested Deep Link */
 class LeafFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         return inflater.inflate(R.layout.leaf_fragment, container, false)
     }

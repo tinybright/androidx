@@ -18,9 +18,7 @@ package androidx.room.compiler.processing
 
 import javax.tools.Diagnostic
 
-/**
- * Logging interface for the processor
- */
+/** Logging interface for the processor */
 abstract class XMessager {
     private val watchers = mutableListOf<XMessager>()
 
@@ -43,11 +41,7 @@ abstract class XMessager {
      * @param msg The actual message to report to the compiler
      * @param element The element with whom the message should be associated with
      */
-    final fun printMessage(
-        kind: Diagnostic.Kind,
-        msg: String,
-        element: XElement,
-    ) {
+    final fun printMessage(kind: Diagnostic.Kind, msg: String, element: XElement) {
         printMsg(kind, msg, element)
     }
 
@@ -84,7 +78,7 @@ abstract class XMessager {
         msg: String,
         element: XElement,
         annotation: XAnnotation,
-        annotationValue: XAnnotationValue
+        annotationValue: XAnnotationValue,
     ) {
         printMsg(kind, msg, element, annotation, annotationValue)
     }
@@ -94,11 +88,9 @@ abstract class XMessager {
         msg: String,
         element: XElement? = null,
         annotation: XAnnotation? = null,
-        annotationValue: XAnnotationValue? = null
+        annotationValue: XAnnotationValue? = null,
     ) {
-        watchers.forEach {
-            it.printMsg(kind, msg, element, annotation, annotationValue)
-        }
+        watchers.forEach { it.printMsg(kind, msg, element, annotation, annotationValue) }
         onPrintMessage(kind, msg, element, annotation, annotationValue)
     }
 
@@ -107,7 +99,7 @@ abstract class XMessager {
         msg: String,
         element: XElement? = null,
         annotation: XAnnotation? = null,
-        annotationValue: XAnnotationValue? = null
+        annotationValue: XAnnotationValue? = null,
     )
 
     fun addMessageWatcher(watcher: XMessager) {

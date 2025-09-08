@@ -15,7 +15,6 @@
  */
 package androidx.fragment.testapp.kittenfragmenttransitions
 
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -29,15 +28,10 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.Fade
 
-/**
- * Displays a grid of pictures
- */
+/** Displays a grid of pictures */
 class GridFragment : Fragment(R.layout.kitten_fragment_grid) {
 
-    override fun onViewCreated(
-        view: View,
-        savedInstanceState: Bundle?
-    ) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         view.findViewById<RecyclerView>(R.id.recyclerview).apply {
             adapter = KittenGridAdapter(callback)
             layoutManager = GridLayoutManager(context, 2)
@@ -46,24 +40,16 @@ class GridFragment : Fragment(R.layout.kitten_fragment_grid) {
         exitTransition = Fade()
         // View is created so postpone the transition
         postponeEnterTransition()
-        OneShotPreDrawListener.add(view.parent as ViewGroup) {
-            startPostponedEnterTransition()
-        }
+        OneShotPreDrawListener.add(view.parent as ViewGroup) { startPostponedEnterTransition() }
     }
 
     private val callback = { holder: KittenViewHolder, position: Int ->
         val kittenNumber = position % 6 + 1
         val kittenDetails = newInstance(kittenNumber)
-        // Note that we need the API version check here because the actual transition
-        // classes(e.g. Fade) are not in the support library and are only available in API 21+.
-        // The methods we are calling on the Fragment ARE available in the support library
-        // (though they don't do anything on API < 21)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            kittenDetails.sharedElementEnterTransition = DetailsTransition()
-            kittenDetails.enterTransition = Fade()
-            exitTransition = Fade()
-            kittenDetails.sharedElementReturnTransition = DetailsTransition()
-        }
+        kittenDetails.sharedElementEnterTransition = DetailsTransition()
+        kittenDetails.enterTransition = Fade()
+        exitTransition = Fade()
+        kittenDetails.sharedElementReturnTransition = DetailsTransition()
         val radioReplace = requireActivity().findViewById<RadioButton>(R.id.radioButton1)
         if (radioReplace.isChecked) {
             parentFragmentManager.commit {

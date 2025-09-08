@@ -20,7 +20,6 @@ import android.content.Context
 import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
-import androidx.test.filters.SdkSuppress
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import java.io.File
@@ -33,7 +32,6 @@ import org.junit.runner.RunWith
 
 @MediumTest
 @RunWith(AndroidJUnit4::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.LOLLIPOP)
 class SafeLibLoaderTest {
     private lateinit var context: Context
     private lateinit var allowedLibDir: File
@@ -103,8 +101,10 @@ class SafeLibLoaderTest {
     private fun copyRealLibTo(dstDir: File): File =
         dstDir.resolve(libFileName).also { dstFile ->
             val srcZip = ZipFile(File(context.applicationInfo.publicSourceDir))
-            val libEntry = srcZip.entries().asSequence()
-                .single { entry -> entry.name.matches(Regex(".*lib/$abi/$libFileName")) }
+            val libEntry =
+                srcZip.entries().asSequence().single { entry ->
+                    entry.name.matches(Regex(".*lib/$abi/$libFileName"))
+                }
             srcZip.getInputStream(libEntry).use { src ->
                 dstFile.outputStream().use { dst -> src.copyTo(dst) }
             }

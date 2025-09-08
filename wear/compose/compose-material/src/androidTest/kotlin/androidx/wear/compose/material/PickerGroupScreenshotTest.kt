@@ -16,7 +16,6 @@
 
 package androidx.wear.compose.material
 
-import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -46,59 +45,42 @@ import org.junit.runner.RunWith
 
 @MediumTest
 @RunWith(AndroidJUnit4::class)
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.O)
+@SdkSuppress(minSdkVersion = 35, maxSdkVersion = 35)
 class PickerGroupScreenshotTest {
 
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
-    @get:Rule
-    val screenshotRule = AndroidXScreenshotTestRule(SCREENSHOT_GOLDEN_PATH)
+    @get:Rule val screenshotRule = AndroidXScreenshotTestRule(SCREENSHOT_GOLDEN_PATH)
 
-    @get:Rule
-    val testName = TestName()
+    @get:Rule val testName = TestName()
 
     private val screenHeight = 150.dp
 
-    @Test
-    fun pickerGroup() = verifyScreenshot {
-        samplePickerGroup()
-    }
+    @Test fun pickerGroup() = verifyScreenshot { samplePickerGroup() }
 
     @Test
-    fun pickerGroup_withAutoCentering() = verifyScreenshot {
-        samplePickerGroup(autoCenter = true)
-    }
+    fun pickerGroup_withAutoCentering() = verifyScreenshot { samplePickerGroup(autoCenter = true) }
 
     @Test
     fun pickerGroup_withManyColumns_withAutoCentering() = verifyScreenshot {
-        samplePickerGroup(
-            pickerCount = 5,
-            autoCenter = true
-        )
+        samplePickerGroup(pickerCount = 5, autoCenter = true)
     }
 
     @Test
     fun pickerGroup_withRtlAndManyColumns_withAutoCentering() =
         verifyScreenshot(layoutDirection = LayoutDirection.Rtl) {
-            samplePickerGroup(
-                pickerCount = 5,
-                autoCenter = true
-            )
-    }
+            samplePickerGroup(pickerCount = 5, autoCenter = true)
+        }
 
     @Composable
-    private fun samplePickerGroup(
-        pickerCount: Int = 2,
-        autoCenter: Boolean = false
-    ) {
+    private fun samplePickerGroup(pickerCount: Int = 2, autoCenter: Boolean = false) {
         Box(
-            modifier = Modifier
-                .height(screenHeight)
-                .fillMaxWidth()
-                .background(MaterialTheme.colors.background)
-                .testTag(TEST_TAG),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier.height(screenHeight)
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colors.background)
+                    .testTag(TEST_TAG),
+            contentAlignment = Alignment.Center,
         ) {
             PickerGroup(
                 pickers = getPickerColumns(pickerCount),
@@ -114,24 +96,24 @@ class PickerGroupScreenshotTest {
 
     private fun verifyScreenshot(
         layoutDirection: LayoutDirection = LayoutDirection.Ltr,
-        content: @Composable () -> Unit
+        content: @Composable () -> Unit,
     ) {
         rule.setContentWithTheme {
-            CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
-                content()
-            }
+            CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) { content() }
         }
         rule.waitForIdle()
 
-        rule.onNodeWithTag(TEST_TAG)
+        rule
+            .onNodeWithTag(TEST_TAG)
             .captureToImage()
             .assertAgainstGolden(screenshotRule, testName.methodName)
     }
 
-    private fun getPickerColumns(count: Int): Array<PickerGroupItem> = Array(count) {
-        PickerGroupItem(
-            pickerState = PickerState(10),
-            option = { optionIndex, _ -> Text("%02d".format(optionIndex)) }
-        )
-    }
+    private fun getPickerColumns(count: Int): Array<PickerGroupItem> =
+        Array(count) {
+            PickerGroupItem(
+                pickerState = PickerState(10),
+                option = { optionIndex, _ -> Text("%02d".format(optionIndex)) },
+            )
+        }
 }

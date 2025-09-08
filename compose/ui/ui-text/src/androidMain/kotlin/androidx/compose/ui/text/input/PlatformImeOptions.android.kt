@@ -21,13 +21,11 @@ import androidx.compose.runtime.Immutable
 /**
  * Used to configure Android platform IME options.
  *
- * @param privateImeOptions defines a [String] for supplying additional information options that
- * are private to a particular IME implementation.
+ * @param privateImeOptions defines a [String] for supplying additional information options that are
+ *   private to a particular IME implementation.
  */
 @Immutable
-actual class PlatformImeOptions(
-    val privateImeOptions: String? = null,
-) {
+actual class PlatformImeOptions(val privateImeOptions: String? = null) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is PlatformImeOptions) return false

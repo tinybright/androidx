@@ -51,22 +51,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
-private val items = listOf(
-    "Cupcake",
-    "Donut",
-    "Eclair",
-    "Froyo",
-    "Gingerbread",
-    "Honeycomb",
-    "Ice cream sandwich",
-    "Jelly bean",
-    "KitKat",
-    "Lollipop",
-    "Marshmallow",
-    "Nougat",
-    "Oreo",
-    "Pie"
-)
+private val items =
+    listOf(
+        "Cupcake",
+        "Donut",
+        "Eclair",
+        "Froyo",
+        "Gingerbread",
+        "Honeycomb",
+        "Ice cream sandwich",
+        "Jelly bean",
+        "KitKat",
+        "Lollipop",
+        "Marshmallow",
+        "Nougat",
+        "Oreo",
+        "Pie",
+    )
 
 @Composable
 fun SwipeToDismissDemo() {
@@ -76,77 +77,89 @@ fun SwipeToDismissDemo() {
     // will animate to red if you're swiping left or green if you're swiping right. When you let
     // go, the item will animate out of the way if you're swiping left (like deleting an email) or
     // back to its default position if you're swiping right (like marking an email as read/unread).
+    val scope = rememberCoroutineScope()
     LazyColumn {
         items(items) { item ->
             var unread by remember { mutableStateOf(false) }
             val scope = rememberCoroutineScope()
 
-            val dismissState = rememberSwipeToDismissBoxState(
-                confirmValueChange = {
-                    if (it == SwipeToDismissBoxValue.StartToEnd) unread = !unread
-                    it != SwipeToDismissBoxValue.StartToEnd
-                },
-                positionalThreshold = { distance -> distance * .25f }
-            )
+            val dismissState =
+                rememberSwipeToDismissBoxState(
+                    positionalThreshold = { distance -> distance * .25f }
+                )
             SwipeToDismissBox(
                 state = dismissState,
                 modifier = Modifier.padding(vertical = 4.dp),
                 backgroundContent = {
                     val direction = dismissState.dismissDirection
-                    val color by animateColorAsState(
-                        when (dismissState.targetValue) {
-                            SwipeToDismissBoxValue.Settled -> Color.LightGray
-                            SwipeToDismissBoxValue.StartToEnd -> Color.Green
-                            SwipeToDismissBoxValue.EndToStart -> Color.Red
+                    val color by
+                        animateColorAsState(
+                            when (dismissState.targetValue) {
+                                SwipeToDismissBoxValue.Settled -> Color.LightGray
+                                SwipeToDismissBoxValue.StartToEnd -> Color.Green
+                                SwipeToDismissBoxValue.EndToStart -> Color.Red
+                            }
+                        )
+                    val alignment =
+                        when (direction) {
+                            SwipeToDismissBoxValue.StartToEnd,
+                            SwipeToDismissBoxValue.Settled -> Alignment.CenterStart
+                            SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
                         }
-                    )
-                    val alignment = when (direction) {
-                        SwipeToDismissBoxValue.StartToEnd,
-                        SwipeToDismissBoxValue.Settled -> Alignment.CenterStart
-                        SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
-                    }
-                    val icon = when (direction) {
-                        SwipeToDismissBoxValue.StartToEnd,
-                        SwipeToDismissBoxValue.Settled -> Icons.Default.Done
-                        SwipeToDismissBoxValue.EndToStart -> Icons.Default.Delete
-                    }
-                    val scale by animateFloatAsState(
-                        if (dismissState.targetValue == SwipeToDismissBoxValue.Settled)
-                            0.75f else 1f
-                    )
+                    val icon =
+                        when (direction) {
+                            SwipeToDismissBoxValue.StartToEnd,
+                            SwipeToDismissBoxValue.Settled -> Icons.Default.Done
+                            SwipeToDismissBoxValue.EndToStart -> Icons.Default.Delete
+                        }
+                    val scale by
+                        animateFloatAsState(
+                            if (dismissState.targetValue == SwipeToDismissBoxValue.Settled) 0.75f
+                            else 1f
+                        )
                     Box(
-                        Modifier
-                            .fillMaxSize()
-                            .background(color)
-                            .padding(horizontal = 20.dp),
-                        contentAlignment = alignment
+                        Modifier.fillMaxSize().background(color).padding(horizontal = 20.dp),
+                        contentAlignment = alignment,
                     ) {
                         Icon(
                             icon,
                             contentDescription = "Localized description",
-                            modifier = Modifier.scale(scale)
+                            modifier = Modifier.scale(scale),
                         )
                     }
-                }
+                },
+                onDismiss = { dismissDirection ->
+                    if (dismissDirection == SwipeToDismissBoxValue.StartToEnd) {
+                        unread = !unread
+                        scope.launch { dismissState.reset() }
+                    }
+                },
             ) {
                 Card {
                     ListItem(
                         headlineContent = {
                             Text(item, fontWeight = if (unread) FontWeight.Bold else null)
                         },
-                        modifier = Modifier.semantics {
-                            // Provide accessible alternatives to swipe actions.
-                            val label = if (unread) "Mark Read" else "Mark Unread"
-                            customActions = listOf(
-                                CustomAccessibilityAction(label) { unread = !unread; true },
-                                CustomAccessibilityAction("Delete") {
-                                    scope.launch {
-                                        dismissState.dismiss(SwipeToDismissBoxValue.EndToStart)
-                                    }
-                                    true
-                                }
-                            )
-                        },
+                        modifier =
+                            Modifier.semantics {
+                                // Provide accessible alternatives to swipe actions.
+                                val label = if (unread) "Mark Read" else "Mark Unread"
+                                customActions =
+                                    listOf(
+                                        CustomAccessibilityAction(label) {
+                                            unread = !unread
+                                            true
+                                        },
+                                        CustomAccessibilityAction("Delete") {
+                                            scope.launch {
+                                                dismissState.dismiss(
+                                                    SwipeToDismissBoxValue.EndToStart
+                                                )
+                                            }
+                                            true
+                                        },
+                                    )
+                            },
                         supportingContent = { Text("Swipe me left or right!") },
                     )
                 }

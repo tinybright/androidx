@@ -34,14 +34,15 @@ import androidx.glance.appwidget.unit.ResourceCheckableColorProvider
 // Translates a RadioButton composable to a RadioButton View.
 internal fun RemoteViews.translateEmittableRadioButton(
     translationContext: TranslationContext,
-    element: EmittableRadioButton
+    element: EmittableRadioButton,
 ) {
 
-    val layout = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        LayoutType.RadioButton
-    } else {
-        LayoutType.RadioButtonBackport
-    }
+    val layout =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            LayoutType.RadioButton
+        } else {
+            LayoutType.RadioButtonBackport
+        }
 
     val context = translationContext.context
     val viewDef = insertView(translationContext, layout, element.modifier)
@@ -49,11 +50,7 @@ internal fun RemoteViews.translateEmittableRadioButton(
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         textViewId = viewDef.mainViewId
-        CompoundButtonApi31Impl.setCompoundButtonChecked(
-            this,
-            viewDef.mainViewId,
-            element.checked
-        )
+        CompoundButtonApi31Impl.setCompoundButtonChecked(this, viewDef.mainViewId, element.checked)
         when (val colors = element.colors.radio) {
             is CheckedUncheckedColorProvider -> {
                 val (day, night) = colors.toDayNightColorStateList(context)

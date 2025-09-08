@@ -68,6 +68,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextGeometricTransform
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.style.TextMotion
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.em
@@ -86,8 +87,7 @@ import org.junit.runner.RunWith
 @OptIn(InternalPlatformTextApi::class)
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class
-AndroidParagraphTest {
+class AndroidParagraphTest {
     // This sample font provides the following features:
     // 1. The width of most of visible characters equals to font size.
     // 2. The LTR/RTL characters are rendered as ▶/◀.
@@ -101,26 +101,27 @@ AndroidParagraphTest {
         with(defaultDensity) {
             val fontSize = 50.sp
             for (text in arrayOf("abc\ndef", "\u05D0\u05D1\u05D2\n\u05D3\u05D4\u05D5")) {
-                val paragraphAndroid = simpleParagraph(
-                    text = text,
-                    style = TextStyle(
-                        fontSize = fontSize,
-                        fontFamily = basicFontFamily
-                    ),
-                    // 2 chars width
-                    width = 2 * fontSize.toPx()
-                )
+                val paragraphAndroid =
+                    simpleParagraph(
+                        text = text,
+                        style = TextStyle(fontSize = fontSize, fontFamily = basicFontFamily),
+                        // 2 chars width
+                        width = 2 * fontSize.toPx(),
+                    )
 
                 val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
                 textPaint.textSize = fontSize.toPx()
-                textPaint.typeface = UncachedFontFamilyResolver(context)
-                    .resolve(BASIC_MEASURE_FONT.toFontFamily()).value as Typeface
+                textPaint.typeface =
+                    UncachedFontFamilyResolver(context)
+                        .resolve(BASIC_MEASURE_FONT.toFontFamily())
+                        .value as Typeface
 
-                val layout = TextLayout(
-                    charSequence = text,
-                    width = ceil(paragraphAndroid.width),
-                    textPaint = textPaint
-                )
+                val layout =
+                    TextLayout(
+                        charSequence = text,
+                        width = ceil(paragraphAndroid.width),
+                        textPaint = textPaint,
+                    )
 
                 assertThat(paragraphAndroid.bitmap()).isEqualToBitmap(layout.bitmap())
             }
@@ -132,11 +133,12 @@ AndroidParagraphTest {
         val text = "abcde"
         val spanStyle = SpanStyle(color = Color(0xFF0000FF))
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence).hasSpan(ForegroundColorSpan::class, 0, text.length)
     }
@@ -146,11 +148,12 @@ AndroidParagraphTest {
         val text = "abcde"
         val spanStyle = SpanStyle(color = Color(0xFF0000FF))
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence).hasSpan(ForegroundColorSpan::class, 0, "abc".length)
     }
@@ -161,14 +164,16 @@ AndroidParagraphTest {
         val spanStyle = SpanStyle(color = Color(0xFF0000FF))
         val spanStyleOverwrite = SpanStyle(color = Color(0xFF00FF00))
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(
-                AnnotatedString.Range(spanStyle, 0, text.length),
-                AnnotatedString.Range(spanStyleOverwrite, 0, "abc".length)
-            ),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles =
+                    listOf(
+                        AnnotatedString.Range(spanStyle, 0, text.length),
+                        AnnotatedString.Range(spanStyleOverwrite, 0, "abc".length),
+                    ),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence).hasSpan(ForegroundColorSpan::class, 0, text.length)
         assertThat(paragraph.charSequence).hasSpan(ForegroundColorSpan::class, 0, "abc".length)
@@ -181,11 +186,12 @@ AndroidParagraphTest {
         val brush = Brush.linearGradient(listOf(Color.Black, Color.White))
         val spanStyle = SpanStyle(brush = brush)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence).hasSpan(ShaderBrushSpan::class, 0, text.length) {
             it.shaderBrush == brush
@@ -198,11 +204,12 @@ AndroidParagraphTest {
         val brush = SolidColor(Color.Red)
         val spanStyle = SpanStyle(brush = brush)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence).hasSpan(ForegroundColorSpan::class, 0, text.length)
     }
@@ -213,11 +220,12 @@ AndroidParagraphTest {
         val brush = Brush.linearGradient(listOf(Color.Black, Color.White))
         val spanStyle = SpanStyle(brush = brush)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence).hasSpan(ShaderBrushSpan::class, 0, "abc".length) {
             it.shaderBrush == brush
@@ -232,12 +240,13 @@ AndroidParagraphTest {
             val spanStyle = SpanStyle(brush = brush)
             val fontSize = 10.sp
 
-            val paragraph = simpleParagraph(
-                text = text,
-                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
-                width = 100.0f,
-                style = TextStyle(fontSize = fontSize, fontFamily = basicFontFamily)
-            )
+            val paragraph =
+                simpleParagraph(
+                    text = text,
+                    spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
+                    width = 100.0f,
+                    style = TextStyle(fontSize = fontSize, fontFamily = basicFontFamily),
+                )
 
             assertThat(paragraph.charSequence).hasSpan(ShaderBrushSpan::class, 0, "abc".length) {
                 it.size == Size(100.0f, fontSize.toPx())
@@ -250,17 +259,18 @@ AndroidParagraphTest {
         val text = "abcde"
         val spanStyle = SpanStyle(textDecoration = TextDecoration.LineThrough)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence.toString()).isEqualTo(text)
         assertThat(paragraph.charSequence).hasSpan(
             spanClazz = TextDecorationSpan::class,
             start = 0,
-            end = text.length
+            end = text.length,
         ) {
             !it.isUnderlineText && it.isStrikethroughText
         }
@@ -271,17 +281,18 @@ AndroidParagraphTest {
         val text = "abcde"
         val spanStyle = SpanStyle(textDecoration = TextDecoration.Underline)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence.toString()).isEqualTo(text)
         assertThat(paragraph.charSequence).hasSpan(
             spanClazz = TextDecorationSpan::class,
             start = 0,
-            end = text.length
+            end = text.length,
         ) {
             it.isUnderlineText && !it.isStrikethroughText
         }
@@ -292,17 +303,18 @@ AndroidParagraphTest {
         val text = "abcde"
         val spanStyle = SpanStyle(textDecoration = TextDecoration.LineThrough)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence.toString()).isEqualTo(text)
         assertThat(paragraph.charSequence).hasSpan(
             spanClazz = TextDecorationSpan::class,
             start = 0,
-            end = "abc".length
+            end = "abc".length,
         ) {
             !it.isUnderlineText && it.isStrikethroughText
         }
@@ -313,17 +325,18 @@ AndroidParagraphTest {
         val text = "abcde"
         val spanStyle = SpanStyle(textDecoration = TextDecoration.Underline)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence.toString()).isEqualTo(text)
         assertThat(paragraph.charSequence).hasSpan(
             spanClazz = TextDecorationSpan::class,
             start = 0,
-            end = "abc".length
+            end = "abc".length,
         ) {
             it.isUnderlineText && !it.isStrikethroughText
         }
@@ -332,21 +345,21 @@ AndroidParagraphTest {
     @Test
     fun testStyle_setTextDecoration_withLineThroughAndUnderline() {
         val text = "abcde"
-        val spanStyle = SpanStyle(
-            textDecoration = TextDecoration.LineThrough + TextDecoration.Underline
-        )
+        val spanStyle =
+            SpanStyle(textDecoration = TextDecoration.LineThrough + TextDecoration.Underline)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence.toString()).isEqualTo(text)
         assertThat(paragraph.charSequence).hasSpan(
             spanClazz = TextDecorationSpan::class,
             start = 0,
-            end = "abc".length
+            end = "abc".length,
         ) {
             it.isUnderlineText && it.isStrikethroughText
         }
@@ -360,11 +373,12 @@ AndroidParagraphTest {
             val paragraphWidth = text.length * fontSize.toPx()
             val spanStyle = SpanStyle(fontSize = fontSize)
 
-            val paragraph = simpleParagraph(
-                text = text,
-                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
-                width = paragraphWidth
-            )
+            val paragraph =
+                simpleParagraph(
+                    text = text,
+                    spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
+                    width = paragraphWidth,
+                )
 
             assertThat(paragraph.charSequence).hasSpan(AbsoluteSizeSpan::class, 0, text.length) {
                 it.size == fontSize.toPx().roundToInt() && !it.dip
@@ -380,11 +394,12 @@ AndroidParagraphTest {
             val paragraphWidth = text.length * fontSize.toPx()
             val spanStyle = SpanStyle(fontSize = fontSize)
 
-            val paragraph = simpleParagraph(
-                text = text,
-                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
-                width = paragraphWidth
-            )
+            val paragraph =
+                simpleParagraph(
+                    text = text,
+                    spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
+                    width = paragraphWidth,
+                )
 
             assertThat(paragraph.charSequence).hasSpan(AbsoluteSizeSpan::class, 0, "abc".length)
         }
@@ -400,14 +415,16 @@ AndroidParagraphTest {
             val spanStyle = SpanStyle(fontSize = fontSize)
             val spanStyleOverwrite = SpanStyle(fontSize = fontSizeOverwrite)
 
-            val paragraph = simpleParagraph(
-                text = text,
-                spanStyles = listOf(
-                    AnnotatedString.Range(spanStyle, 0, text.length),
-                    AnnotatedString.Range(spanStyleOverwrite, 0, "abc".length)
-                ),
-                width = paragraphWidth
-            )
+            val paragraph =
+                simpleParagraph(
+                    text = text,
+                    spanStyles =
+                        listOf(
+                            AnnotatedString.Range(spanStyle, 0, text.length),
+                            AnnotatedString.Range(spanStyleOverwrite, 0, "abc".length),
+                        ),
+                    width = paragraphWidth,
+                )
 
             assertThat(paragraph.charSequence).hasSpan(AbsoluteSizeSpan::class, 0, text.length)
             assertThat(paragraph.charSequence).hasSpan(AbsoluteSizeSpan::class, 0, "abc".length)
@@ -422,11 +439,12 @@ AndroidParagraphTest {
         val fontSizeScale = 2.0.em
         val spanStyle = SpanStyle(fontSize = fontSizeScale)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence).hasSpan(RelativeSizeSpan::class, 0, text.length) {
             it.sizeChange == fontSizeScale.value
@@ -439,11 +457,12 @@ AndroidParagraphTest {
         val fontSizeScale = 2.0f.em
         val spanStyle = SpanStyle(fontSize = fontSizeScale)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence).hasSpan(RelativeSizeSpan::class, 0, "abc".length) {
             it.sizeChange == fontSizeScale.value
@@ -456,11 +475,12 @@ AndroidParagraphTest {
         val letterSpacing = 2.0f
         val spanStyle = SpanStyle(letterSpacing = letterSpacing.em)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence.toString()).isEqualTo(text)
         assertThat(paragraph.charSequence).hasSpan(LetterSpacingSpanEm::class, 0, text.length)
@@ -471,11 +491,12 @@ AndroidParagraphTest {
         val text = "abcde"
         val spanStyle = SpanStyle(letterSpacing = 2.em)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence.toString()).isEqualTo(text)
         assertThat(paragraph.charSequence).hasSpan(LetterSpacingSpanEm::class, 0, "abc".length)
@@ -487,14 +508,16 @@ AndroidParagraphTest {
         val spanStyle = SpanStyle(letterSpacing = 2.em)
         val spanStyleOverwrite = SpanStyle(letterSpacing = 3.em)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(
-                AnnotatedString.Range(spanStyle, 0, text.length),
-                AnnotatedString.Range(spanStyleOverwrite, 0, "abc".length)
-            ),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles =
+                    listOf(
+                        AnnotatedString.Range(spanStyle, 0, text.length),
+                        AnnotatedString.Range(spanStyleOverwrite, 0, "abc".length),
+                    ),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence.toString()).isEqualTo(text)
         assertThat(paragraph.charSequence).hasSpan(LetterSpacingSpanEm::class, 0, text.length)
@@ -508,17 +531,18 @@ AndroidParagraphTest {
         val color = Color(0xFF0000FF)
         val spanStyle = SpanStyle(background = color)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence.toString()).isEqualTo(text)
-        assertThat(paragraph.charSequence)
-            .hasSpan(BackgroundColorSpan::class, 0, text.length) { span ->
-                span.backgroundColor == color.toArgb()
-            }
+        assertThat(paragraph.charSequence).hasSpan(BackgroundColorSpan::class, 0, text.length) {
+            span ->
+            span.backgroundColor == color.toArgb()
+        }
     }
 
     @Test
@@ -527,17 +551,18 @@ AndroidParagraphTest {
         val color = Color(0xFF0000FF)
         val spanStyle = SpanStyle(background = color)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence.toString()).isEqualTo(text)
-        assertThat(paragraph.charSequence)
-            .hasSpan(BackgroundColorSpan::class, 0, "abc".length) { span ->
-                span.backgroundColor == color.toArgb()
-            }
+        assertThat(paragraph.charSequence).hasSpan(BackgroundColorSpan::class, 0, "abc".length) {
+            span ->
+            span.backgroundColor == color.toArgb()
+        }
     }
 
     @Test
@@ -548,28 +573,33 @@ AndroidParagraphTest {
         val colorOverwrite = Color(0xFF00FF00)
         val spanStyleOverwrite = SpanStyle(background = colorOverwrite)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(
-                AnnotatedString.Range(spanStyle, 0, text.length),
-                AnnotatedString.Range(spanStyleOverwrite, 0, "abc".length)
-            ),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles =
+                    listOf(
+                        AnnotatedString.Range(spanStyle, 0, text.length),
+                        AnnotatedString.Range(spanStyleOverwrite, 0, "abc".length),
+                    ),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence.toString()).isEqualTo(text)
-        assertThat(paragraph.charSequence)
-            .hasSpan(BackgroundColorSpan::class, 0, text.length) { span ->
-                span.backgroundColor == color.toArgb()
-            }
-        assertThat(paragraph.charSequence)
-            .hasSpan(BackgroundColorSpan::class, 0, "abc".length) { span ->
-                span.backgroundColor == colorOverwrite.toArgb()
-            }
-        assertThat(paragraph.charSequence)
-            .hasSpanOnTop(BackgroundColorSpan::class, 0, "abc".length) { span ->
-                span.backgroundColor == colorOverwrite.toArgb()
-            }
+        assertThat(paragraph.charSequence).hasSpan(BackgroundColorSpan::class, 0, text.length) {
+            span ->
+            span.backgroundColor == color.toArgb()
+        }
+        assertThat(paragraph.charSequence).hasSpan(BackgroundColorSpan::class, 0, "abc".length) {
+            span ->
+            span.backgroundColor == colorOverwrite.toArgb()
+        }
+        assertThat(paragraph.charSequence).hasSpanOnTop(
+            BackgroundColorSpan::class,
+            0,
+            "abc".length,
+        ) { span ->
+            span.backgroundColor == colorOverwrite.toArgb()
+        }
     }
 
     @Test
@@ -578,11 +608,12 @@ AndroidParagraphTest {
         val localeList = LocaleList("en-US")
         val spanStyle = SpanStyle(localeList = localeList)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence).hasSpan(LocaleSpan::class, 0, text.length)
     }
@@ -593,11 +624,12 @@ AndroidParagraphTest {
         val localeList = LocaleList("en-US")
         val spanStyle = SpanStyle(localeList = localeList)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence).hasSpan(LocaleSpan::class, 0, "abc".length)
     }
@@ -608,14 +640,16 @@ AndroidParagraphTest {
         val spanStyle = SpanStyle(localeList = LocaleList("en-US"))
         val spanStyleOverwrite = SpanStyle(localeList = LocaleList("ja-JP"))
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(
-                AnnotatedString.Range(spanStyle, 0, text.length),
-                AnnotatedString.Range(spanStyleOverwrite, 0, "abc".length)
-            ),
-            width = 100.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles =
+                    listOf(
+                        AnnotatedString.Range(spanStyle, 0, text.length),
+                        AnnotatedString.Range(spanStyleOverwrite, 0, "abc".length),
+                    ),
+                width = 100.0f,
+            )
 
         assertThat(paragraph.charSequence).hasSpan(LocaleSpan::class, 0, text.length)
         assertThat(paragraph.charSequence).hasSpan(LocaleSpan::class, 0, "abc".length)
@@ -627,11 +661,12 @@ AndroidParagraphTest {
         val text = "abcde"
         val spanStyle = SpanStyle(baselineShift = BaselineShift.Subscript)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
-            width = 100.0f // width is not important
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
+                width = 100.0f, // width is not important
+            )
 
         assertThat(paragraph.charSequence).hasSpan(BaselineShiftSpan::class, 0, text.length)
     }
@@ -641,11 +676,12 @@ AndroidParagraphTest {
         val text = "abcde"
         val spanStyle = SpanStyle(baselineShift = BaselineShift.Superscript)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
-            width = 100.0f // width is not important
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
+                width = 100.0f, // width is not important
+            )
 
         assertThat(paragraph.charSequence).hasSpan(BaselineShiftSpan::class, 0, "abc".length)
     }
@@ -654,17 +690,18 @@ AndroidParagraphTest {
     fun testAnnotatedString_setBaselineShiftTwice_LastOneOnTop() {
         val text = "abcde"
         val spanStyle = SpanStyle(baselineShift = BaselineShift.Subscript)
-        val spanStyleOverwrite =
-            SpanStyle(baselineShift = BaselineShift.Superscript)
+        val spanStyleOverwrite = SpanStyle(baselineShift = BaselineShift.Superscript)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(
-                AnnotatedString.Range(spanStyle, 0, text.length),
-                AnnotatedString.Range(spanStyleOverwrite, 0, "abc".length)
-            ),
-            width = 100.0f // width is not important
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles =
+                    listOf(
+                        AnnotatedString.Range(spanStyle, 0, text.length),
+                        AnnotatedString.Range(spanStyleOverwrite, 0, "abc".length),
+                    ),
+                width = 100.0f, // width is not important
+            )
 
         assertThat(paragraph.charSequence).hasSpan(BaselineShiftSpan::class, 0, text.length)
         assertThat(paragraph.charSequence).hasSpan(BaselineShiftSpan::class, 0, "abc".length)
@@ -676,11 +713,12 @@ AndroidParagraphTest {
         val text = "abcde"
         val spanStyle = SpanStyle(textGeometricTransform = TextGeometricTransform())
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
-            width = 100.0f // width is not important
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
+                width = 100.0f, // width is not important
+            )
 
         assertThat(paragraph.charSequence).hasSpan(ScaleXSpan::class, 0, text.length) {
             it.scaleX == 1.0f
@@ -688,7 +726,7 @@ AndroidParagraphTest {
         assertThat(paragraph.charSequence).hasSpan(
             spanClazz = SkewXSpan::class,
             start = 0,
-            end = text.length
+            end = text.length,
         ) {
             it.skewX == 0.0f
         }
@@ -698,17 +736,14 @@ AndroidParagraphTest {
     fun testAnnotatedString_setTextGeometricTransformWithScaleX() {
         val text = "abcde"
         val scaleX = 0.5f
-        val spanStyle = SpanStyle(
-            textGeometricTransform = TextGeometricTransform(
-                scaleX = scaleX
-            )
-        )
+        val spanStyle = SpanStyle(textGeometricTransform = TextGeometricTransform(scaleX = scaleX))
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
-            width = 100.0f // width is not important
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
+                width = 100.0f, // width is not important
+            )
 
         assertThat(paragraph.charSequence).hasSpan(ScaleXSpan::class, 0, text.length) {
             it.scaleX == scaleX
@@ -724,11 +759,12 @@ AndroidParagraphTest {
         val skewX = 1f
         val spanStyle = SpanStyle(textGeometricTransform = TextGeometricTransform(skewX = skewX))
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
-            width = 100.0f // width is not important
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
+                width = 100.0f, // width is not important
+            )
 
         assertThat(paragraph.charSequence).hasSpan(SkewXSpan::class, 0, text.length) {
             it.skewX == skewX
@@ -744,16 +780,20 @@ AndroidParagraphTest {
         val firstLine = 40
         val restLine = 20
 
-        val paragraph = simpleParagraph(
-            text = text,
-            textIndent = TextIndent(firstLine.sp, restLine.sp),
-            width = 100.0f // width is not important
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                textIndent = TextIndent(firstLine.sp, restLine.sp),
+                width = 100.0f, // width is not important
+            )
 
-        assertThat(paragraph.charSequence)
-            .hasSpan(LeadingMarginSpan.Standard::class, 0, text.length) {
-                it.getLeadingMargin(true) == firstLine && it.getLeadingMargin(false) == restLine
-            }
+        assertThat(paragraph.charSequence).hasSpan(
+            LeadingMarginSpan.Standard::class,
+            0,
+            text.length,
+        ) {
+            it.getLeadingMargin(true) == firstLine && it.getLeadingMargin(false) == restLine
+        }
     }
 
     @Test
@@ -764,45 +804,46 @@ AndroidParagraphTest {
         val radius = 3.0f
         val spanStyle = SpanStyle(shadow = Shadow(color, offset, radius))
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(
-                AnnotatedString.Range(spanStyle, start = 0, end = text.length)
-            ),
-            width = 100.0f // width is not important
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, start = 0, end = text.length)),
+                width = 100.0f, // width is not important
+            )
 
-        assertThat(paragraph.charSequence)
-            .hasSpan(ShadowSpan::class, start = 0, end = text.length) {
-                return@hasSpan it.color == color.toArgb() &&
-                    it.offsetX == offset.x &&
-                    it.offsetY == offset.y &&
-                    it.radius == radius
-            }
+        assertThat(paragraph.charSequence).hasSpan(
+            ShadowSpan::class,
+            start = 0,
+            end = text.length,
+        ) {
+            return@hasSpan it.color == color.toArgb() &&
+                it.offsetX == offset.x &&
+                it.offsetY == offset.y &&
+                it.radius == radius
+        }
     }
 
     @Test
     fun testAnnotatedString_setShadow_withZeroBlur() {
         val text = "abcde"
-        val spanStyle = SpanStyle(
-            shadow = Shadow(
-                color = Color(0xFF00FF00),
-                offset = Offset(1f, 2f),
-                blurRadius = 0f
+        val spanStyle =
+            SpanStyle(
+                shadow = Shadow(color = Color(0xFF00FF00), offset = Offset(1f, 2f), blurRadius = 0f)
             )
-        )
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(
-                AnnotatedString.Range(spanStyle, start = 0, end = text.length)
-            ),
-            width = 100.0f // width is not important
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, start = 0, end = text.length)),
+                width = 100.0f, // width is not important
+            )
 
-        assertThat(paragraph.charSequence)
-            .hasSpan(ShadowSpan::class, start = 0, end = text.length) {
-                return@hasSpan it.radius == Float.MIN_VALUE
-            }
+        assertThat(paragraph.charSequence).hasSpan(
+            ShadowSpan::class,
+            start = 0,
+            end = text.length,
+        ) {
+            return@hasSpan it.radius == Float.MIN_VALUE
+        }
     }
 
     @Test
@@ -810,55 +851,57 @@ AndroidParagraphTest {
         val text = "abcde"
         val width = 100.0f // width is not important
 
-        val shadow = Shadow(
-            color = Color(0xFF00FF00),
-            offset = Offset(1f, 2f),
-            blurRadius = 0f
-        )
+        val shadow = Shadow(color = Color(0xFF00FF00), offset = Offset(1f, 2f), blurRadius = 0f)
 
         val textStyle = TextStyle(fontSize = 8.sp)
 
-        val paragraphNoShadow = simpleParagraph(
-            text = text,
-            style = textStyle,
-            spanStyles = listOf(),
-            width = width
-        )
+        val paragraphNoShadow =
+            simpleParagraph(text = text, style = textStyle, spanStyles = listOf(), width = width)
 
-        val paragraphZeroBlur = simpleParagraph(
-            text = text,
-            style = textStyle,
-            spanStyles = listOf(
-                AnnotatedString.Range(SpanStyle(shadow = shadow), start = 0, end = text.length)
-            ),
-            width = width
-        )
+        val paragraphZeroBlur =
+            simpleParagraph(
+                text = text,
+                style = textStyle,
+                spanStyles =
+                    listOf(
+                        AnnotatedString.Range(
+                            SpanStyle(shadow = shadow),
+                            start = 0,
+                            end = text.length,
+                        )
+                    ),
+                width = width,
+            )
 
-        val paragraphFloatMinBlur = simpleParagraph(
-            text = text,
-            style = textStyle,
-            spanStyles = listOf(
-                AnnotatedString.Range(
-                    SpanStyle(shadow = shadow.copy(blurRadius = Float.MIN_VALUE)),
-                    start = 0,
-                    end = text.length
-                )
-            ),
-            width = width
-        )
+        val paragraphFloatMinBlur =
+            simpleParagraph(
+                text = text,
+                style = textStyle,
+                spanStyles =
+                    listOf(
+                        AnnotatedString.Range(
+                            SpanStyle(shadow = shadow.copy(blurRadius = Float.MIN_VALUE)),
+                            start = 0,
+                            end = text.length,
+                        )
+                    ),
+                width = width,
+            )
 
-        val paragraphOneBlur = simpleParagraph(
-            text = text,
-            style = textStyle,
-            spanStyles = listOf(
-                AnnotatedString.Range(
-                    SpanStyle(shadow = shadow.copy(blurRadius = 1f)),
-                    start = 0,
-                    end = text.length
-                )
-            ),
-            width = width
-        )
+        val paragraphOneBlur =
+            simpleParagraph(
+                text = text,
+                style = textStyle,
+                spanStyles =
+                    listOf(
+                        AnnotatedString.Range(
+                            SpanStyle(shadow = shadow.copy(blurRadius = 1f)),
+                            start = 0,
+                            end = text.length,
+                        )
+                    ),
+                width = width,
+            )
 
         assertThat(paragraphZeroBlur.bitmap()).isNotEqualToBitmap(paragraphNoShadow.bitmap())
         assertThat(paragraphZeroBlur.bitmap()).isEqualToBitmap(paragraphFloatMinBlur.bitmap())
@@ -876,33 +919,40 @@ AndroidParagraphTest {
         val colorOverwrite = Color(0xFF0000FF)
         val offsetOverwrite = Offset(3f, 2f)
         val radiusOverwrite = 1.0f
-        val spanStyleOverwrite = SpanStyle(
-            shadow = Shadow(colorOverwrite, offsetOverwrite, radiusOverwrite)
-        )
+        val spanStyleOverwrite =
+            SpanStyle(shadow = Shadow(colorOverwrite, offsetOverwrite, radiusOverwrite))
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(
-                AnnotatedString.Range(spanStyle, start = 0, end = text.length),
-                AnnotatedString.Range(spanStyleOverwrite, start = 0, end = "abc".length)
-            ),
-            width = 100.0f // width is not important
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles =
+                    listOf(
+                        AnnotatedString.Range(spanStyle, start = 0, end = text.length),
+                        AnnotatedString.Range(spanStyleOverwrite, start = 0, end = "abc".length),
+                    ),
+                width = 100.0f, // width is not important
+            )
 
-        assertThat(paragraph.charSequence)
-            .hasSpan(ShadowSpan::class, start = 0, end = text.length) {
-                return@hasSpan it.color == color.toArgb() &&
-                    it.offsetX == offset.x &&
-                    it.offsetY == offset.y &&
-                    it.radius == radius
-            }
-        assertThat(paragraph.charSequence)
-            .hasSpanOnTop(ShadowSpan::class, start = 0, end = "abc".length) {
-                return@hasSpanOnTop it.color == colorOverwrite.toArgb() &&
-                    it.offsetX == offsetOverwrite.x &&
-                    it.offsetY == offsetOverwrite.y &&
-                    it.radius == radiusOverwrite
-            }
+        assertThat(paragraph.charSequence).hasSpan(
+            ShadowSpan::class,
+            start = 0,
+            end = text.length,
+        ) {
+            return@hasSpan it.color == color.toArgb() &&
+                it.offsetX == offset.x &&
+                it.offsetY == offset.y &&
+                it.radius == radius
+        }
+        assertThat(paragraph.charSequence).hasSpanOnTop(
+            ShadowSpan::class,
+            start = 0,
+            end = "abc".length,
+        ) {
+            return@hasSpanOnTop it.color == colorOverwrite.toArgb() &&
+                it.offsetX == offsetOverwrite.x &&
+                it.offsetY == offsetOverwrite.y &&
+                it.radius == radiusOverwrite
+        }
     }
 
     @Test
@@ -912,30 +962,23 @@ AndroidParagraphTest {
         val strokeMiter = 4f
         val strokeCap = StrokeCap.Round
         val strokeJoin = StrokeJoin.Bevel
-        val spanStyle = SpanStyle(drawStyle = Stroke(
-            strokeWidth,
-            strokeMiter,
-            strokeCap,
-            strokeJoin
-        ))
+        val spanStyle =
+            SpanStyle(drawStyle = Stroke(strokeWidth, strokeMiter, strokeCap, strokeJoin))
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(
-                AnnotatedString.Range(spanStyle, start = 0, end = text.length)
-            ),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, start = 0, end = text.length)),
+                width = 0.0f,
+            )
 
-        assertThat(paragraph.charSequence)
-            .hasSpan(DrawStyleSpan::class, start = 0, end = text.length) {
-                return@hasSpan it.drawStyle == Stroke(
-                    strokeWidth,
-                    strokeMiter,
-                    strokeCap,
-                    strokeJoin
-                )
-            }
+        assertThat(paragraph.charSequence).hasSpan(
+            DrawStyleSpan::class,
+            start = 0,
+            end = text.length,
+        ) {
+            return@hasSpan it.drawStyle == Stroke(strokeWidth, strokeMiter, strokeCap, strokeJoin)
+        }
     }
 
     @Test
@@ -945,36 +988,31 @@ AndroidParagraphTest {
         val strokeMiter = 4f
         val strokeCap = StrokeCap.Round
         val strokeJoin = StrokeJoin.Bevel
-        val strokeSpanStyle = SpanStyle(drawStyle = Stroke(
-            strokeWidth,
-            strokeMiter,
-            strokeCap,
-            strokeJoin
-        ))
+        val strokeSpanStyle =
+            SpanStyle(drawStyle = Stroke(strokeWidth, strokeMiter, strokeCap, strokeJoin))
         val fillSpanStyle = SpanStyle(drawStyle = Fill)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(
-                AnnotatedString.Range(strokeSpanStyle, start = 0, end = text.length),
-                AnnotatedString.Range(fillSpanStyle, start = 1, end = 3)
-            ),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles =
+                    listOf(
+                        AnnotatedString.Range(strokeSpanStyle, start = 0, end = text.length),
+                        AnnotatedString.Range(fillSpanStyle, start = 1, end = 3),
+                    ),
+                width = 0.0f,
+            )
 
-        assertThat(paragraph.charSequence)
-            .hasSpan(DrawStyleSpan::class, start = 0, end = text.length) {
-                return@hasSpan it.drawStyle == Stroke(
-                    strokeWidth,
-                    strokeMiter,
-                    strokeCap,
-                    strokeJoin
-                )
-            }
-        assertThat(paragraph.charSequence)
-            .hasSpanOnTop(DrawStyleSpan::class, start = 1, end = 3) {
-                return@hasSpanOnTop it.drawStyle == Fill
-            }
+        assertThat(paragraph.charSequence).hasSpan(
+            DrawStyleSpan::class,
+            start = 0,
+            end = text.length,
+        ) {
+            return@hasSpan it.drawStyle == Stroke(strokeWidth, strokeMiter, strokeCap, strokeJoin)
+        }
+        assertThat(paragraph.charSequence).hasSpanOnTop(DrawStyleSpan::class, start = 1, end = 3) {
+            return@hasSpanOnTop it.drawStyle == Fill
+        }
     }
 
     @Test
@@ -983,11 +1021,12 @@ AndroidParagraphTest {
         val fontFeatureSettings = "\"kern\" 0"
         val spanStyle = SpanStyle(fontFeatureSettings = fontFeatureSettings)
 
-        val paragraph = simpleParagraph(
-            text = text,
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
-            width = 100.0f // width is not important
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, "abc".length)),
+                width = 100.0f, // width is not important
+            )
 
         assertThat(paragraph.charSequence).hasSpan(FontFeatureSpan::class, 0, "abc".length) {
             it.fontFeatureSettings == fontFeatureSettings
@@ -997,10 +1036,7 @@ AndroidParagraphTest {
     @Test
     @MediumTest
     fun testEmptyFontFamily() {
-        val paragraph = simpleParagraph(
-            text = "abc",
-            width = Float.MAX_VALUE
-        )
+        val paragraph = simpleParagraph(text = "abc", width = Float.MAX_VALUE)
 
         assertThat(paragraph.textPaint.typeface).isNull()
     }
@@ -1008,14 +1044,12 @@ AndroidParagraphTest {
     @Test
     @MediumTest
     fun testEmptyFontFamily_withBoldFontWeightSelection() {
-        val paragraph = simpleParagraph(
-            text = "abc",
-            style = TextStyle(
-                fontFamily = null,
-                fontWeight = FontWeight.Bold
-            ),
-            width = Float.MAX_VALUE
-        )
+        val paragraph =
+            simpleParagraph(
+                text = "abc",
+                style = TextStyle(fontFamily = null, fontWeight = FontWeight.Bold),
+                width = Float.MAX_VALUE,
+            )
         val typeface = paragraph.textPaint.typeface
         assertThat(typeface).isNotNull()
         assertThat(typeface.isBold).isTrue()
@@ -1025,14 +1059,12 @@ AndroidParagraphTest {
     @Test
     @MediumTest
     fun testEmptyFontFamily_withFontStyleSelection() {
-        val paragraph = simpleParagraph(
-            text = "abc",
-            style = TextStyle(
-                fontFamily = null,
-                fontStyle = FontStyle.Italic
-            ),
-            width = Float.MAX_VALUE
-        )
+        val paragraph =
+            simpleParagraph(
+                text = "abc",
+                style = TextStyle(fontFamily = null, fontStyle = FontStyle.Italic),
+                width = Float.MAX_VALUE,
+            )
 
         val typeface = paragraph.textPaint.typeface
         assertThat(typeface).isNotNull()
@@ -1045,13 +1077,12 @@ AndroidParagraphTest {
     fun testFontFamily_withGenericFamilyName() {
         val fontFamily = FontFamily.SansSerif
 
-        val paragraph = simpleParagraph(
-            text = "abc",
-            style = TextStyle(
-                fontFamily = fontFamily
-            ),
-            width = Float.MAX_VALUE
-        )
+        val paragraph =
+            simpleParagraph(
+                text = "abc",
+                style = TextStyle(fontFamily = fontFamily),
+                width = Float.MAX_VALUE,
+            )
 
         val typeface = paragraph.textPaint.typeface
         assertThat(typeface).isNotNull()
@@ -1063,16 +1094,16 @@ AndroidParagraphTest {
     @MediumTest
     fun testFontFamily_withCustomFont() {
         val typefaceLoader = AsyncTestTypefaceLoader()
-        val expectedTypeface: Typeface = UncachedFontFamilyResolver(context)
-            .resolve(BASIC_MEASURE_FONT.toFontFamily()).value as Typeface
+        val expectedTypeface: Typeface =
+            UncachedFontFamilyResolver(context).resolve(BASIC_MEASURE_FONT.toFontFamily()).value
+                as Typeface
         val font = BlockingFauxFont(typefaceLoader, expectedTypeface)
-        val paragraph = simpleParagraph(
-            text = "abc",
-            style = TextStyle(
-                fontFamily = font.toFontFamily()
-            ),
-            width = Float.MAX_VALUE
-        )
+        val paragraph =
+            simpleParagraph(
+                text = "abc",
+                style = TextStyle(fontFamily = font.toFontFamily()),
+                width = Float.MAX_VALUE,
+            )
 
         val typeface: Typeface = paragraph.textPaint.typeface
 
@@ -1085,15 +1116,13 @@ AndroidParagraphTest {
             val text = "abc"
             val fontSize = 20.sp
             val paragraphWidth = (text.length - 1) * fontSize.toPx()
-            val paragraph = simpleParagraph(
-                text = text,
-                style = TextStyle(
-                    fontFamily = basicFontFamily,
-                    fontSize = fontSize
-                ),
-                ellipsis = true,
-                width = paragraphWidth
-            )
+            val paragraph =
+                simpleParagraph(
+                    text = text,
+                    style = TextStyle(fontFamily = basicFontFamily, fontSize = fontSize),
+                    overflow = TextOverflow.Ellipsis,
+                    width = paragraphWidth,
+                )
 
             for (i in 0 until paragraph.lineCount) {
                 assertThat(paragraph.isLineEllipsized(i)).isFalse()
@@ -1108,16 +1137,14 @@ AndroidParagraphTest {
             val fontSize = 100.sp
             // Note that on API 21, if the next line only contains 1 character, ellipsis won't work
             val paragraphWidth = (text.length - 1.5f) * fontSize.toPx()
-            val paragraph = simpleParagraph(
-                text = text,
-                ellipsis = true,
-                maxLines = 1,
-                style = TextStyle(
-                    fontFamily = basicFontFamily,
-                    fontSize = fontSize
-                ),
-                width = paragraphWidth
-            )
+            val paragraph =
+                simpleParagraph(
+                    text = text,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    style = TextStyle(fontFamily = basicFontFamily, fontSize = fontSize),
+                    width = paragraphWidth,
+                )
 
             assertThat(paragraph.isLineEllipsized(0)).isTrue()
         }
@@ -1130,16 +1157,14 @@ AndroidParagraphTest {
             val fontSize = 100.sp
             val paragraphWidth = (text.length - 1) * fontSize.toPx()
             val maxLines = ceil(text.length * fontSize.toPx() / paragraphWidth).toInt()
-            val paragraph = simpleParagraph(
-                text = text,
-                ellipsis = true,
-                maxLines = maxLines,
-                style = TextStyle(
-                    fontFamily = basicFontFamily,
-                    fontSize = fontSize
-                ),
-                width = paragraphWidth
-            )
+            val paragraph =
+                simpleParagraph(
+                    text = text,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = maxLines,
+                    style = TextStyle(fontFamily = basicFontFamily, fontSize = fontSize),
+                    width = paragraphWidth,
+                )
 
             for (i in 0 until paragraph.lineCount) {
                 assertThat(paragraph.isLineEllipsized(i)).isFalse()
@@ -1152,16 +1177,14 @@ AndroidParagraphTest {
         with(defaultDensity) {
             val text = "This is a text"
             val fontSize = 30.sp
-            val paragraph = simpleParagraph(
-                text = text,
-                ellipsis = true,
-                style = TextStyle(
-                    fontFamily = basicFontFamily,
-                    fontSize = fontSize
-                ),
-                width = 4 * fontSize.toPx(),
-                height = 6 * fontSize.toPx(),
-            )
+            val paragraph =
+                simpleParagraph(
+                    text = text,
+                    overflow = TextOverflow.Ellipsis,
+                    style = TextStyle(fontFamily = basicFontFamily, fontSize = fontSize),
+                    width = 4 * fontSize.toPx(),
+                    height = 6 * fontSize.toPx(),
+                )
 
             for (i in 0 until paragraph.lineCount) {
                 assertThat(paragraph.isLineEllipsized(i)).isFalse()
@@ -1174,16 +1197,14 @@ AndroidParagraphTest {
         with(defaultDensity) {
             val text = "This is a text"
             val fontSize = 30.sp
-            val paragraph = simpleParagraph(
-                text = text,
-                ellipsis = true,
-                style = TextStyle(
-                    fontFamily = basicFontFamily,
-                    fontSize = fontSize
-                ),
-                width = 4 * fontSize.toPx(),
-                height = 2.2f * fontSize.toPx(), // fits 2 lines
-            )
+            val paragraph =
+                simpleParagraph(
+                    text = text,
+                    overflow = TextOverflow.Ellipsis,
+                    style = TextStyle(fontFamily = basicFontFamily, fontSize = fontSize),
+                    width = 4 * fontSize.toPx(),
+                    height = 2.2f * fontSize.toPx(), // fits 2 lines
+                )
 
             assertThat(paragraph.lineCount).isEqualTo(2)
             assertThat(paragraph.isLineEllipsized(paragraph.lineCount - 1)).isTrue()
@@ -1191,20 +1212,18 @@ AndroidParagraphTest {
     }
 
     @Test
-    fun testEllipsis_withLimitedHeight_ellipsisFalse_doesNotEllipsis() {
+    fun testEllipsis_withLimitedHeight_overflowNotEllipsis_doesNotEllipsis() {
         with(defaultDensity) {
             val text = "This is a text"
             val fontSize = 30.sp
-            val paragraph = simpleParagraph(
-                text = text,
-                ellipsis = false,
-                style = TextStyle(
-                    fontFamily = basicFontFamily,
-                    fontSize = fontSize
-                ),
-                width = 4 * fontSize.toPx(),
-                height = 2.2f * fontSize.toPx(), // fits 2 lines
-            )
+            val paragraph =
+                simpleParagraph(
+                    text = text,
+                    overflow = TextOverflow.Clip,
+                    style = TextStyle(fontFamily = basicFontFamily, fontSize = fontSize),
+                    width = 4 * fontSize.toPx(),
+                    height = 2.2f * fontSize.toPx(), // fits 2 lines
+                )
 
             for (i in 0 until paragraph.lineCount) {
                 assertThat(paragraph.isLineEllipsized(i)).isFalse()
@@ -1217,17 +1236,15 @@ AndroidParagraphTest {
         with(defaultDensity) {
             val text = "This is a text"
             val fontSize = 30.sp
-            val paragraph = simpleParagraph(
-                text = text,
-                ellipsis = true,
-                style = TextStyle(
-                    fontFamily = basicFontFamily,
-                    fontSize = fontSize
-                ),
-                width = 4 * fontSize.toPx(),
-                height = 2.2f * fontSize.toPx(), // fits 2 lines
-                maxLines = 5
-            )
+            val paragraph =
+                simpleParagraph(
+                    text = text,
+                    overflow = TextOverflow.Ellipsis,
+                    style = TextStyle(fontFamily = basicFontFamily, fontSize = fontSize),
+                    width = 4 * fontSize.toPx(),
+                    height = 2.2f * fontSize.toPx(), // fits 2 lines
+                    maxLines = 5,
+                )
 
             assertThat(paragraph.lineCount).isEqualTo(2)
             assertThat(paragraph.isLineEllipsized(paragraph.lineCount - 1)).isTrue()
@@ -1239,17 +1256,15 @@ AndroidParagraphTest {
         with(defaultDensity) {
             val text = "This is a text"
             val fontSize = 30.sp
-            val paragraph = simpleParagraph(
-                text = text,
-                ellipsis = true,
-                style = TextStyle(
-                    fontFamily = basicFontFamily,
-                    fontSize = fontSize
-                ),
-                width = 4 * fontSize.toPx(),
-                height = 4 * fontSize.toPx(),
-                maxLines = 2
-            )
+            val paragraph =
+                simpleParagraph(
+                    text = text,
+                    overflow = TextOverflow.Ellipsis,
+                    style = TextStyle(fontFamily = basicFontFamily, fontSize = fontSize),
+                    width = 4 * fontSize.toPx(),
+                    height = 4 * fontSize.toPx(),
+                    maxLines = 2,
+                )
 
             assertThat(paragraph.lineCount).isEqualTo(2)
             assertThat(paragraph.isLineEllipsized(paragraph.lineCount - 1)).isTrue()
@@ -1261,16 +1276,14 @@ AndroidParagraphTest {
         with(defaultDensity) {
             val text = "This is a text"
             val fontSize = 30.sp
-            val paragraph = simpleParagraph(
-                text = text,
-                ellipsis = true,
-                style = TextStyle(
-                    fontFamily = basicFontFamily,
-                    fontSize = fontSize
-                ),
-                width = 4 * fontSize.toPx(),
-                height = fontSize.toPx() / 4
-            )
+            val paragraph =
+                simpleParagraph(
+                    text = text,
+                    overflow = TextOverflow.Ellipsis,
+                    style = TextStyle(fontFamily = basicFontFamily, fontSize = fontSize),
+                    width = 4 * fontSize.toPx(),
+                    height = fontSize.toPx() / 4,
+                )
 
             assertThat(paragraph.didExceedMaxLines).isTrue()
             assertThat(paragraph.lineCount).isEqualTo(1)
@@ -1283,33 +1296,71 @@ AndroidParagraphTest {
         with(defaultDensity) {
             val text = "This is a text"
             val fontSize = 30.sp
-            val paragraph = simpleParagraph(
-                text = text,
-                spanStyles = listOf(
-                    AnnotatedString.Range(SpanStyle(fontSize = fontSize * 2), 0, 2)
-                ),
-                ellipsis = true,
-                style = TextStyle(
-                    fontFamily = basicFontFamily,
-                    fontSize = fontSize
-                ),
-                width = 4 * fontSize.toPx(),
-                height = 2.2f * fontSize.toPx() // fits 2 lines
-            )
+            val paragraph =
+                simpleParagraph(
+                    text = text,
+                    spanStyles =
+                        listOf(AnnotatedString.Range(SpanStyle(fontSize = fontSize * 2), 0, 2)),
+                    overflow = TextOverflow.Ellipsis,
+                    style = TextStyle(fontFamily = basicFontFamily, fontSize = fontSize),
+                    width = 4 * fontSize.toPx(),
+                    height = 2.2f * fontSize.toPx(), // fits 2 lines
+                )
 
             assertThat(paragraph.lineCount).isEqualTo(1)
             assertThat(paragraph.isLineEllipsized(paragraph.lineCount - 1)).isTrue()
         }
     }
+
+    // Experimentally verified that start ellipsis doesn't work same way on API 22
+    @Test
+    fun testEllipsis_withMaxLinesOne_doesStartEllipsis() {
+        with(defaultDensity) {
+            val text = "abcde"
+            val fontSize = 100.sp
+            val paragraphWidth = (text.length - 2f) * fontSize.toPx()
+            val paragraph =
+                simpleParagraph(
+                    text = text,
+                    overflow = TextOverflow.StartEllipsis,
+                    maxLines = 1,
+                    style = TextStyle(fontFamily = basicFontFamily, fontSize = fontSize),
+                    width = paragraphWidth,
+                )
+
+            assertThat(paragraph.isLineEllipsized(0)).isTrue()
+            assertThat(paragraph.getLineEllipsisOffset(0)).isEqualTo(0)
+            assertThat(paragraph.getLineEllipsisCount(0)).isEqualTo(3)
+        }
+    }
+
+    @Test
+    fun testEllipsis_withMaxLinesOne_doesMiddleEllipsis() {
+        with(defaultDensity) {
+            val text = "abcde"
+            val fontSize = 100.sp
+            val paragraphWidth = (text.length - 2f) * fontSize.toPx()
+            val paragraph =
+                simpleParagraph(
+                    text = text,
+                    overflow = TextOverflow.MiddleEllipsis,
+                    maxLines = 1,
+                    style = TextStyle(fontFamily = basicFontFamily, fontSize = fontSize),
+                    width = paragraphWidth,
+                )
+
+            assertThat(paragraph.isLineEllipsized(0)).isTrue()
+            assertThat(paragraph.getLineEllipsisOffset(0)).isEqualTo(1)
+            assertThat(paragraph.getLineEllipsisCount(0)).isEqualTo(3)
+        }
+    }
+
     @Test
     fun testSpanStyle_fontSize_appliedOnTextPaint() {
         with(defaultDensity) {
             val fontSize = 100.sp
-            val paragraph = simpleParagraph(
-                text = "",
-                style = TextStyle(fontSize = fontSize),
-                width = 0.0f
-            )
+            val paragraph =
+                simpleParagraph(text = "", style = TextStyle(fontSize = fontSize), width = 0.0f)
 
             assertThat(paragraph.textPaint.textSize).isEqualTo(fontSize.toPx())
         }
@@ -1320,11 +1371,8 @@ AndroidParagraphTest {
         val platformLocale = java.util.Locale.JAPANESE
         val localeList = LocaleList(platformLocale.toLanguageTag())
 
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(localeList = localeList),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(text = "", style = TextStyle(localeList = localeList), width = 0.0f)
 
         assertThat(paragraph.textPaint.textLocale.language).isEqualTo(platformLocale.language)
         assertThat(paragraph.textPaint.textLocale.country).isEqualTo(platformLocale.country)
@@ -1333,11 +1381,7 @@ AndroidParagraphTest {
     @Test
     fun testSpanStyle_color_appliedOnTextPaint() {
         val color = Color(0x12345678)
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(color = color),
-            width = 0.0f
-        )
+        val paragraph = simpleParagraph(text = "", style = TextStyle(color = color), width = 0.0f)
 
         assertThat(paragraph.textPaint.color).isEqualTo(color.toArgb())
     }
@@ -1345,11 +1389,7 @@ AndroidParagraphTest {
     @Test
     fun testSpanStyle_brush_appliedOnTextPaint() {
         val brush = Brush.horizontalGradient(listOf(Color.Red, Color.Blue)) as ShaderBrush
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(brush = brush),
-            width = 1.0f
-        )
+        val paragraph = simpleParagraph(text = "", style = TextStyle(brush = brush), width = 1.0f)
 
         assertThat(paragraph.textPaint.shader).isNotNull()
     }
@@ -1357,11 +1397,12 @@ AndroidParagraphTest {
     @Test
     fun testTextStyle_letterSpacingInEm_appliedOnTextPaint() {
         val letterSpacing = 2
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(letterSpacing = letterSpacing.em),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = "",
+                style = TextStyle(letterSpacing = letterSpacing.em),
+                width = 0.0f,
+            )
 
         assertThat(paragraph.textPaint.letterSpacing).isEqualTo((letterSpacing))
     }
@@ -1374,28 +1415,33 @@ AndroidParagraphTest {
             append("abc")
             pop()
         }
-        val paragraph = simpleParagraph(
-            text = annotatedText.text,
-            spanStyles = annotatedText.spanStyles,
-            style = TextStyle(letterSpacing = letterSpacing.sp),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = annotatedText.text,
+                spanStyles = annotatedText.spanStyles,
+                style = TextStyle(letterSpacing = letterSpacing.sp),
+                width = 0.0f,
+            )
 
-        assertThat(paragraph.charSequence)
-            .hasSpan(LetterSpacingSpanPx::class, 0, annotatedText.length) {
-                it.letterSpacing == letterSpacing
-            }
+        assertThat(paragraph.charSequence).hasSpan(
+            LetterSpacingSpanPx::class,
+            0,
+            annotatedText.length,
+        ) {
+            it.letterSpacing == letterSpacing
+        }
     }
 
     @Test
     fun testTextStyle_letterSpacingInSp_noSpan_whenNoAnnoattions() {
         val letterSpacing = 5f
         val annotatedText = "abc"
-        val paragraph = simpleParagraph(
-            text = annotatedText,
-            style = TextStyle(letterSpacing = letterSpacing.sp),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = annotatedText,
+                style = TextStyle(letterSpacing = letterSpacing.sp),
+                width = 0.0f,
+            )
 
         assertThat(paragraph.charSequence).doesNotHaveSpan(LetterSpacingSpanPx::class)
     }
@@ -1403,11 +1449,12 @@ AndroidParagraphTest {
     @Test
     fun testSpanStyle_fontFeatureSettings_appliedOnTextPaint() {
         val fontFeatureSettings = "\"kern\" 0"
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(fontFeatureSettings = fontFeatureSettings),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = "",
+                style = TextStyle(fontFeatureSettings = fontFeatureSettings),
+                width = 0.0f,
+            )
 
         assertThat(paragraph.textPaint.fontFeatureSettings).isEqualTo(fontFeatureSettings)
     }
@@ -1415,15 +1462,12 @@ AndroidParagraphTest {
     @Test
     fun testSpanStyle_scaleX_appliedOnTextPaint() {
         val scaleX = 0.5f
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(
-                textGeometricTransform = TextGeometricTransform(
-                    scaleX = scaleX
-                )
-            ),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = "",
+                style = TextStyle(textGeometricTransform = TextGeometricTransform(scaleX = scaleX)),
+                width = 0.0f,
+            )
 
         assertThat(paragraph.textPaint.textScaleX).isEqualTo(scaleX)
     }
@@ -1431,26 +1475,24 @@ AndroidParagraphTest {
     @Test
     fun testSpanStyle_skewX_appliedOnTextPaint() {
         val skewX = 0.5f
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(
-                textGeometricTransform = TextGeometricTransform(
-                    skewX = skewX
-                )
-            ),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = "",
+                style = TextStyle(textGeometricTransform = TextGeometricTransform(skewX = skewX)),
+                width = 0.0f,
+            )
 
         assertThat(paragraph.textPaint.textSkewX).isEqualTo(skewX)
     }
 
     @Test
     fun testSpanStyle_textDecoration_underline_appliedOnTextPaint() {
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(textDecoration = TextDecoration.Underline),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = "",
+                style = TextStyle(textDecoration = TextDecoration.Underline),
+                width = 0.0f,
+            )
 
         assertThat(paragraph.textPaint.isUnderlineText).isTrue()
     }
@@ -1458,38 +1500,45 @@ AndroidParagraphTest {
     @Test
     fun testSpanStyle_textDecoration_underline_appliedAsSpan() {
         val text = "abc"
-        val paragraph = simpleParagraph(
-            text = text,
-            style = TextStyle(textDecoration = TextDecoration.Underline),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                style = TextStyle(textDecoration = TextDecoration.Underline),
+                width = 0.0f,
+            )
 
         assertThat(paragraph.charSequence).hasSpan(CharacterStyle::class, 0, text.length)
     }
 
     @Test
     fun testSpanStyle_textDecoration_lineThrough_appliedOnTextPaint() {
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(textDecoration = TextDecoration.LineThrough),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = "",
+                style = TextStyle(textDecoration = TextDecoration.LineThrough),
+                width = 0.0f,
+            )
 
         assertThat(paragraph.textPaint.isStrikeThruText).isTrue()
     }
 
     @Test
     fun testSpanStyle_drawStyle_stroke_appliedOnTextPaint() {
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(drawStyle = Stroke(
-                width = 8f,
-                miter = 6f,
-                cap = StrokeCap.Round,
-                join = StrokeJoin.Bevel
-            )),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = "",
+                style =
+                    TextStyle(
+                        drawStyle =
+                            Stroke(
+                                width = 8f,
+                                miter = 6f,
+                                cap = StrokeCap.Round,
+                                join = StrokeJoin.Bevel,
+                            )
+                    ),
+                width = 0.0f,
+            )
 
         assertThat(paragraph.textPaint.style).isEqualTo(Paint.Style.STROKE)
         assertThat(paragraph.textPaint.strokeWidth).isEqualTo(8f)
@@ -1500,11 +1549,8 @@ AndroidParagraphTest {
 
     @Test
     fun testSpanStyle_drawStyle_fill_appliedOnTextPaint() {
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(drawStyle = Fill),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(text = "", style = TextStyle(drawStyle = Fill), width = 0.0f)
 
         assertThat(paragraph.textPaint.style).isEqualTo(Paint.Style.FILL)
     }
@@ -1515,25 +1561,19 @@ AndroidParagraphTest {
         // therefore we cannot apply them on paint, have to use spans.
         val text = "abc"
         val color = Color(0x12345678)
-        val paragraph = simpleParagraph(
-            text = text,
-            style = TextStyle(background = color),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(text = text, style = TextStyle(background = color), width = 0.0f)
 
-        assertThat(paragraph.charSequence)
-            .hasSpan(BackgroundColorSpan::class, 0, text.length) { span ->
-                span.backgroundColor == color.toArgb()
-            }
+        assertThat(paragraph.charSequence).hasSpan(BackgroundColorSpan::class, 0, text.length) {
+            span ->
+            span.backgroundColor == color.toArgb()
+        }
     }
 
     @Test
     fun testPaint_can_change_TextDecoration_to_Underline() {
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(textDecoration = null),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(text = "", style = TextStyle(textDecoration = null), width = 0.0f)
         assertThat(paragraph.textPaint.isUnderlineText).isFalse()
 
         val canvas = Canvas(android.graphics.Canvas())
@@ -1543,13 +1583,12 @@ AndroidParagraphTest {
 
     @Test
     fun testPaint_can_change_TextDecoration_to_None() {
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(
-                textDecoration = TextDecoration.Underline
-            ),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = "",
+                style = TextStyle(textDecoration = TextDecoration.Underline),
+                width = 0.0f,
+            )
         assertThat(paragraph.textPaint.isUnderlineText).isTrue()
 
         val canvas = Canvas(android.graphics.Canvas())
@@ -1559,13 +1598,12 @@ AndroidParagraphTest {
 
     @Test
     fun testPaint_TextDecoration_null_should_have_no_effect() {
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(
-                textDecoration = TextDecoration.Underline
-            ),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = "",
+                style = TextStyle(textDecoration = TextDecoration.Underline),
+                width = 0.0f,
+            )
         assertThat(paragraph.textPaint.isUnderlineText).isTrue()
 
         val canvas = Canvas(android.graphics.Canvas())
@@ -1575,11 +1613,8 @@ AndroidParagraphTest {
 
     @Test
     fun testPaint_can_change_DrawStyle_to_Stroke() {
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(drawStyle = null),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(text = "", style = TextStyle(drawStyle = null), width = 0.0f)
         assertThat(paragraph.textPaint.style).isEqualTo(Paint.Style.FILL)
 
         val stroke = Stroke(width = 4f, miter = 2f, cap = StrokeCap.Square, join = StrokeJoin.Bevel)
@@ -1595,11 +1630,8 @@ AndroidParagraphTest {
 
     @Test
     fun testPaint_can_change_DrawStyle_to_Fill() {
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(drawStyle = Stroke(8f)),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(text = "", style = TextStyle(drawStyle = Stroke(8f)), width = 0.0f)
         assertThat(paragraph.textPaint.style).isEqualTo(Paint.Style.STROKE)
         assertThat(paragraph.textPaint.strokeWidth).isEqualTo(8f)
 
@@ -1610,11 +1642,8 @@ AndroidParagraphTest {
 
     @Test
     fun testPaint_null_drawStyle_should_be_noop() {
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(drawStyle = Stroke(8f)),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(text = "", style = TextStyle(drawStyle = Stroke(8f)), width = 0.0f)
         assertThat(paragraph.textPaint.style).isEqualTo(Paint.Style.STROKE)
         assertThat(paragraph.textPaint.strokeWidth).isEqualTo(8f)
 
@@ -1626,10 +1655,7 @@ AndroidParagraphTest {
 
     @Test
     fun testPaint_cannot_change_blendMode_permanently() {
-        val paragraph = simpleParagraph(
-            text = "",
-            width = 0.0f
-        )
+        val paragraph = simpleParagraph(text = "", width = 0.0f)
         assertThat(paragraph.textPaint.blendMode).isEqualTo(BlendMode.SrcOver)
 
         val canvas = Canvas(android.graphics.Canvas())
@@ -1640,11 +1666,7 @@ AndroidParagraphTest {
     @SdkSuppress(minSdkVersion = 29)
     @Test
     fun testPaint_can_change_Shadow() {
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(shadow = null),
-            width = 0.0f
-        )
+        val paragraph = simpleParagraph(text = "", style = TextStyle(shadow = null), width = 0.0f)
 
         assertThat(paragraph.textPaint.shadowLayerColor).isEqualTo(0)
         assertThat(paragraph.textPaint.shadowLayerDx).isEqualTo(0f)
@@ -1659,7 +1681,7 @@ AndroidParagraphTest {
 
         paragraph.paint(
             canvas,
-            shadow = Shadow(color = color, offset = Offset(dx, dy), blurRadius = radius)
+            shadow = Shadow(color = color, offset = Offset(dx, dy), blurRadius = radius),
         )
         assertThat(paragraph.textPaint.shadowLayerColor).isEqualTo(color.toArgb())
         assertThat(paragraph.textPaint.shadowLayerDx).isEqualTo(dx)
@@ -1675,13 +1697,12 @@ AndroidParagraphTest {
         val radius = 3f
         val color = Color.Red
 
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(
-                shadow = Shadow(color, Offset(dx, dy), radius)
-            ),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = "",
+                style = TextStyle(shadow = Shadow(color, Offset(dx, dy), radius)),
+                width = 0.0f,
+            )
 
         assertThat(paragraph.textPaint.shadowLayerDx).isEqualTo(dx)
         assertThat(paragraph.textPaint.shadowLayerDy).isEqualTo(dy)
@@ -1704,13 +1725,12 @@ AndroidParagraphTest {
         val radius = 3f
         val color = Color.Red
 
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(
-                shadow = Shadow(color, Offset(dx, dy), radius)
-            ),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = "",
+                style = TextStyle(shadow = Shadow(color, Offset(dx, dy), radius)),
+                width = 0.0f,
+            )
 
         assertThat(paragraph.textPaint.shadowLayerDx).isEqualTo(dx)
         assertThat(paragraph.textPaint.shadowLayerDy).isEqualTo(dy)
@@ -1728,11 +1748,7 @@ AndroidParagraphTest {
     @SdkSuppress(minSdkVersion = 29)
     @Test
     fun testPaint_shadow_blur_with_zero_resets_to_float_min() {
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(shadow = null),
-            width = 0.0f
-        )
+        val paragraph = simpleParagraph(text = "", style = TextStyle(shadow = null), width = 0.0f)
 
         assertThat(paragraph.textPaint.shadowLayerRadius).isEqualTo(0f)
 
@@ -1744,7 +1760,7 @@ AndroidParagraphTest {
 
         paragraph.paint(
             canvas,
-            shadow = Shadow(color = color, offset = Offset(dx, dy), blurRadius = radius)
+            shadow = Shadow(color = color, offset = Offset(dx, dy), blurRadius = radius),
         )
 
         assertThat(paragraph.textPaint.shadowLayerRadius).isEqualTo(Float.MIN_VALUE)
@@ -1756,38 +1772,35 @@ AndroidParagraphTest {
         val width = 100f
         val fontSize = 8.sp
 
-        val shadow = Shadow(
-            color = Color(0xFF00FF00),
-            offset = Offset(1f, 2f),
-            blurRadius = 0f
-        )
+        val shadow = Shadow(color = Color(0xFF00FF00), offset = Offset(1f, 2f), blurRadius = 0f)
 
-        val paragraphNoShadow = simpleParagraph(
-            text = text,
-            style = TextStyle(fontSize = fontSize),
-            width = width
-        )
+        val paragraphNoShadow =
+            simpleParagraph(text = text, style = TextStyle(fontSize = fontSize), width = width)
 
-        val paragraphZeroBlur = simpleParagraph(
-            text = text,
-            style = TextStyle(fontSize = fontSize, shadow = shadow),
-            width = width
-        )
+        val paragraphZeroBlur =
+            simpleParagraph(
+                text = text,
+                style = TextStyle(fontSize = fontSize, shadow = shadow),
+                width = width,
+            )
 
-        val paragraphFloatMinBlur = simpleParagraph(
-            text = text,
-            style = TextStyle(
-                fontSize = fontSize,
-                shadow = shadow.copy(blurRadius = Float.MIN_VALUE)
-            ),
-            width = width
-        )
+        val paragraphFloatMinBlur =
+            simpleParagraph(
+                text = text,
+                style =
+                    TextStyle(
+                        fontSize = fontSize,
+                        shadow = shadow.copy(blurRadius = Float.MIN_VALUE),
+                    ),
+                width = width,
+            )
 
-        val paragraphOneBlur = simpleParagraph(
-            text = text,
-            style = TextStyle(fontSize = fontSize, shadow = shadow.copy(blurRadius = 1f)),
-            width = width
-        )
+        val paragraphOneBlur =
+            simpleParagraph(
+                text = text,
+                style = TextStyle(fontSize = fontSize, shadow = shadow.copy(blurRadius = 1f)),
+                width = width,
+            )
 
         assertThat(paragraphZeroBlur.bitmap()).isNotEqualToBitmap(paragraphNoShadow.bitmap())
         assertThat(paragraphZeroBlur.bitmap()).isEqualToBitmap(paragraphFloatMinBlur.bitmap())
@@ -1798,11 +1811,8 @@ AndroidParagraphTest {
     fun testPaint_can_change_Color() {
         val color1 = Color.Red
 
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(color = Color.Red),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(text = "", style = TextStyle(color = Color.Red), width = 0.0f)
         assertThat(paragraph.textPaint.color).isEqualTo(color1.toArgb())
 
         val color2 = Color.Yellow
@@ -1815,11 +1825,8 @@ AndroidParagraphTest {
     fun testPaint_cannot_change_Color_to_Unspecified() {
         val color1 = Color.Red
 
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(color = Color.Red),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(text = "", style = TextStyle(color = Color.Red), width = 0.0f)
         assertThat(paragraph.textPaint.color).isEqualTo(color1.toArgb())
 
         val color2 = Color.Unspecified
@@ -1832,11 +1839,8 @@ AndroidParagraphTest {
     fun testPaint_can_change_Color_to_Transparent() {
         val color1 = Color.Red
 
-        val paragraph = simpleParagraph(
-            text = "",
-            style = TextStyle(color = Color.Red),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(text = "", style = TextStyle(color = Color.Red), width = 0.0f)
         assertThat(paragraph.textPaint.color).isEqualTo(color1.toArgb())
 
         val color2 = Color.Transparent
@@ -1851,25 +1855,23 @@ AndroidParagraphTest {
         // therefore we cannot apply them on paint, have to use spans.
         val text = "abc"
         val baselineShift = BaselineShift.Subscript
-        val paragraph = simpleParagraph(
-            text = text,
-            style = TextStyle(baselineShift = baselineShift),
-            width = 0.0f
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                style = TextStyle(baselineShift = baselineShift),
+                width = 0.0f,
+            )
 
-        assertThat(paragraph.charSequence)
-            .hasSpan(BaselineShiftSpan::class, 0, text.length) { span ->
-                span.multiplier == BaselineShift.Subscript.multiplier
-            }
+        assertThat(paragraph.charSequence).hasSpan(BaselineShiftSpan::class, 0, text.length) { span
+            ->
+            span.multiplier == BaselineShift.Subscript.multiplier
+        }
     }
 
     @Test
     fun locale_isDefaultLocaleIfNotProvided() {
         val text = "abc"
-        val paragraph = simpleParagraph(
-            text = text,
-            width = Float.MAX_VALUE
-        )
+        val paragraph = simpleParagraph(text = text, width = Float.MAX_VALUE)
 
         assertThat(paragraph.textLocale.toLanguageTag())
             .isEqualTo(java.util.Locale.getDefault().toLanguageTag())
@@ -1879,11 +1881,12 @@ AndroidParagraphTest {
     fun locale_isSetOnParagraphImpl_enUS() {
         val localeList = LocaleList("en-US")
         val text = "abc"
-        val paragraph = simpleParagraph(
-            text = text,
-            style = TextStyle(localeList = localeList),
-            width = Float.MAX_VALUE
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                style = TextStyle(localeList = localeList),
+                width = Float.MAX_VALUE,
+            )
 
         assertThat(paragraph.textLocale.toLanguageTag()).isEqualTo("en-US")
     }
@@ -1892,11 +1895,12 @@ AndroidParagraphTest {
     fun locale_isSetOnParagraphImpl_jpJP() {
         val localeList = LocaleList("ja-JP")
         val text = "abc"
-        val paragraph = simpleParagraph(
-            text = text,
-            style = TextStyle(localeList = localeList),
-            width = Float.MAX_VALUE
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                style = TextStyle(localeList = localeList),
+                width = Float.MAX_VALUE,
+            )
 
         assertThat(paragraph.textLocale.toLanguageTag()).isEqualTo("ja-JP")
     }
@@ -1905,11 +1909,12 @@ AndroidParagraphTest {
     fun locale_noCountryCode_isSetOnParagraphImpl() {
         val localeList = LocaleList("ja")
         val text = "abc"
-        val paragraph = simpleParagraph(
-            text = text,
-            style = TextStyle(localeList = localeList),
-            width = Float.MAX_VALUE
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                style = TextStyle(localeList = localeList),
+                width = Float.MAX_VALUE,
+            )
 
         assertThat(paragraph.textLocale.toLanguageTag()).isEqualTo("ja")
     }
@@ -1919,23 +1924,22 @@ AndroidParagraphTest {
         val text = "A"
 
         @Suppress("DEPRECATION")
-        val style = TextStyle(
-            fontSize = 20.sp,
-            platformStyle = PlatformTextStyle(includeFontPadding = true)
-        )
+        val style =
+            TextStyle(
+                fontSize = 20.sp,
+                platformStyle = PlatformTextStyle(includeFontPadding = true),
+            )
 
-        val paragraphPaddingTrue = simpleParagraph(
-            text = text,
-            style = style,
-            width = Float.MAX_VALUE
-        )
+        val paragraphPaddingTrue =
+            simpleParagraph(text = text, style = style, width = Float.MAX_VALUE)
 
         @Suppress("DEPRECATION")
-        val paragraphPaddingFalse = simpleParagraph(
-            text = text,
-            style = style.copy(platformStyle = PlatformTextStyle(includeFontPadding = false)),
-            width = Float.MAX_VALUE
-        )
+        val paragraphPaddingFalse =
+            simpleParagraph(
+                text = text,
+                style = style.copy(platformStyle = PlatformTextStyle(includeFontPadding = false)),
+                width = Float.MAX_VALUE,
+            )
 
         assertThat(paragraphPaddingTrue.height).isNotEqualTo(paragraphPaddingFalse.height)
     }
@@ -1946,10 +1950,10 @@ AndroidParagraphTest {
         AndroidParagraph(
             text = "",
             style = TextStyle(),
-            spanStyles = listOf(),
+            annotations = listOf(),
             placeholders = listOf(),
             maxLines = Int.MAX_VALUE,
-            ellipsis = true,
+            overflow = TextOverflow.Ellipsis,
             constraints = minWidthConstraints,
             fontFamilyResolver = UncachedFontFamilyResolver(context),
             density = defaultDensity,
@@ -1962,10 +1966,10 @@ AndroidParagraphTest {
         AndroidParagraph(
             text = "",
             style = TextStyle(),
-            spanStyles = listOf(),
+            annotations = listOf(),
             placeholders = listOf(),
             maxLines = Int.MAX_VALUE,
-            ellipsis = true,
+            overflow = TextOverflow.Ellipsis,
             constraints = minHeightConstraints,
             fontFamilyResolver = UncachedFontFamilyResolver(context),
             density = defaultDensity,
@@ -1976,21 +1980,25 @@ AndroidParagraphTest {
     fun shaderBrushSpan_createsShaderOnlyOnce() {
         val fontSize = 20
         val text = "abcdef"
-        val shaderBrush = object : ShaderBrush() {
-            var callCount = 0
-            private val brush = Brush.linearGradient(listOf(Color.Red, Color.Blue)) as ShaderBrush
-            override fun createShader(size: Size): android.graphics.Shader {
-                callCount++
-                return brush.createShader(size)
+        val shaderBrush =
+            object : ShaderBrush() {
+                var callCount = 0
+                private val brush =
+                    Brush.linearGradient(listOf(Color.Red, Color.Blue)) as ShaderBrush
+
+                override fun createShader(size: Size): android.graphics.Shader {
+                    callCount++
+                    return brush.createShader(size)
+                }
             }
-        }
         val spanStyle = SpanStyle(brush = shaderBrush)
-        val paragraph = simpleParagraph(
-            text = "abcdef",
-            width = 2f * fontSize * text.length,
-            style = TextStyle(fontSize = fontSize.sp),
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, 2))
-        )
+        val paragraph =
+            simpleParagraph(
+                text = "abcdef",
+                width = 2f * fontSize * text.length,
+                style = TextStyle(fontSize = fontSize.sp),
+                spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, 2)),
+            )
 
         // Call paint on paragraph multiple times
         repeat(5) { paragraph.bitmap() }
@@ -1998,46 +2006,50 @@ AndroidParagraphTest {
     }
 
     @Test
-    fun drawText_withUnderlineStyle_equalToUnderlinePaint() = with(defaultDensity) {
-        val fontSize = 30.sp
-        val fontSizeInPx = fontSize.toPx()
-        val text = "レンズ(単焦点)"
-        val spanStyle = SpanStyle(textDecoration = TextDecoration.Underline)
-        val paragraph = simpleParagraph(
-            text = text,
-            style = TextStyle(fontSize = fontSize),
-            spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
-            width = fontSizeInPx * 20
-        )
+    fun drawText_withUnderlineStyle_equalToUnderlinePaint() =
+        with(defaultDensity) {
+            val fontSize = 30.sp
+            val fontSizeInPx = fontSize.toPx()
+            val text = "レンズ(単焦点)"
+            val spanStyle = SpanStyle(textDecoration = TextDecoration.Underline)
+            val paragraph =
+                simpleParagraph(
+                    text = text,
+                    style = TextStyle(fontSize = fontSize),
+                    spanStyles = listOf(AnnotatedString.Range(spanStyle, 0, text.length)),
+                    width = fontSizeInPx * 20,
+                )
 
-        val paragraph2 = simpleParagraph(
-            text = text,
-            style = TextStyle(
-                fontSize = fontSize,
-                textDecoration = TextDecoration.Underline
-            ),
-            width = fontSizeInPx * 20
-        )
+            val paragraph2 =
+                simpleParagraph(
+                    text = text,
+                    style =
+                        TextStyle(fontSize = fontSize, textDecoration = TextDecoration.Underline),
+                    width = fontSizeInPx * 20,
+                )
 
-        val bitmapWithSpan = paragraph.bitmap()
-        // Our text rendering stack relies on the fact that given textstyle is also passed to draw
-        // functions of TextLayoutResult, MultiParagraph, Paragraph. If Underline is not specified
-        // here, it would be removed while drawing the MultiParagraph. We are simply mimicking
-        // what TextPainter does.
-        val bitmapNoSpan = paragraph2.bitmap(textDecoration = TextDecoration.Underline)
+            val bitmapWithSpan = paragraph.bitmap()
+            // Our text rendering stack relies on the fact that given textstyle is also passed to
+            // draw
+            // functions of TextLayoutResult, MultiParagraph, Paragraph. If Underline is not
+            // specified
+            // here, it would be removed while drawing the MultiParagraph. We are simply mimicking
+            // what TextPainter does.
+            val bitmapNoSpan = paragraph2.bitmap(textDecoration = TextDecoration.Underline)
 
-        assertThat(bitmapWithSpan).isEqualToBitmap(bitmapNoSpan)
-    }
+            assertThat(bitmapWithSpan).isEqualToBitmap(bitmapNoSpan)
+        }
 
     @Test
     fun textMotionStatic_setsCorrectFlagsOnTextPaint() {
         val textMotion = TextMotion.Static
         val text = "abc"
-        val paragraph = simpleParagraph(
-            text = text,
-            style = TextStyle(textMotion = textMotion),
-            width = Float.MAX_VALUE
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                style = TextStyle(textMotion = textMotion),
+                width = Float.MAX_VALUE,
+            )
 
         assertThat(paragraph.textPaint.flags and TextPaint.LINEAR_TEXT_FLAG).isEqualTo(0)
         assertThat(paragraph.textPaint.flags and TextPaint.SUBPIXEL_TEXT_FLAG).isEqualTo(0)
@@ -2048,11 +2060,12 @@ AndroidParagraphTest {
     fun textMotionAnimated_setsCorrectFlagsOnTextPaint() {
         val textMotion = TextMotion.Animated
         val text = "abc"
-        val paragraph = simpleParagraph(
-            text = text,
-            style = TextStyle(textMotion = textMotion),
-            width = Float.MAX_VALUE
-        )
+        val paragraph =
+            simpleParagraph(
+                text = text,
+                style = TextStyle(textMotion = textMotion),
+                width = Float.MAX_VALUE,
+            )
 
         assertThat(paragraph.textPaint.flags and TextPaint.LINEAR_TEXT_FLAG)
             .isEqualTo(TextPaint.LINEAR_TEXT_FLAG)
@@ -2066,29 +2079,23 @@ AndroidParagraphTest {
         spanStyles: List<AnnotatedString.Range<SpanStyle>> = listOf(),
         textIndent: TextIndent? = null,
         textAlign: TextAlign = TextAlign.Unspecified,
-        ellipsis: Boolean = false,
+        overflow: TextOverflow = TextOverflow.Clip,
         maxLines: Int = Int.MAX_VALUE,
         width: Float,
         height: Float = Float.POSITIVE_INFINITY,
         style: TextStyle? = null,
-        fontFamilyResolver: FontFamily.Resolver = UncachedFontFamilyResolver(context)
+        fontFamilyResolver: FontFamily.Resolver = UncachedFontFamilyResolver(context),
     ): AndroidParagraph {
         return AndroidParagraph(
             text = text,
-            spanStyles = spanStyles,
+            annotations = spanStyles,
             placeholders = listOf(),
-            style = TextStyle(
-                textAlign = textAlign,
-                textIndent = textIndent
-            ).merge(style),
+            style = TextStyle(textAlign = textAlign, textIndent = textIndent).merge(style),
             maxLines = maxLines,
-            ellipsis = ellipsis,
-            constraints = Constraints(
-                maxWidth = width.ceilToInt(),
-                maxHeight = height.ceilToInt()
-            ),
+            overflow = overflow,
+            constraints = Constraints(maxWidth = width.ceilToInt(), maxHeight = height.ceilToInt()),
             density = Density(density = 1f),
-            fontFamilyResolver = fontFamilyResolver
+            fontFamilyResolver = fontFamilyResolver,
         )
     }
 }

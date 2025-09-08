@@ -54,7 +54,7 @@ class SessionMutexTest {
         backgroundScope.launch(start = CoroutineStart.UNDISPATCHED) {
             mutex.withSessionCancellingPrevious(
                 sessionInitializer = { TestSession(it, "hello") },
-                session = { awaitCancellation() }
+                session = { awaitCancellation() },
             )
         }
 
@@ -67,7 +67,7 @@ class SessionMutexTest {
         launch(start = CoroutineStart.UNDISPATCHED) {
             mutex.withSessionCancellingPrevious(
                 sessionInitializer = { TestSession(it, "hello") },
-                session = { awaitCancellation() }
+                session = { awaitCancellation() },
             )
         }
         assertThat(mutex.currentSession).isNotNull()
@@ -75,7 +75,7 @@ class SessionMutexTest {
         backgroundScope.launch(start = CoroutineStart.UNDISPATCHED) {
             mutex.withSessionCancellingPrevious(
                 sessionInitializer = { TestSession(it, "world") },
-                session = { awaitCancellation() }
+                session = { awaitCancellation() },
             )
         }
 
@@ -89,7 +89,7 @@ class SessionMutexTest {
         launch(start = CoroutineStart.UNDISPATCHED) {
             mutex.withSessionCancellingPrevious(
                 sessionInitializer = { TestSession(it, "hello") },
-                session = { finalizer.join() }
+                session = { finalizer.join() },
             )
         }
         assertThat(mutex.currentSession).isNotNull()
@@ -111,7 +111,7 @@ class SessionMutexTest {
                     session = {
                         finalizer.join()
                         throw TestException()
-                    }
+                    },
                 )
             }
         }
@@ -126,12 +126,13 @@ class SessionMutexTest {
 
     @Test
     fun currentSessionIsClearedAfterSessionIsCancelled() = runTest {
-        val sessionJob = launch(start = CoroutineStart.UNDISPATCHED) {
-            mutex.withSessionCancellingPrevious(
-                sessionInitializer = { TestSession(it, "hello") },
-                session = { awaitCancellation() }
-            )
-        }
+        val sessionJob =
+            launch(start = CoroutineStart.UNDISPATCHED) {
+                mutex.withSessionCancellingPrevious(
+                    sessionInitializer = { TestSession(it, "hello") },
+                    session = { awaitCancellation() },
+                )
+            }
         assertThat(mutex.currentSession).isNotNull()
         assertThat(mutex.currentSession!!.value).isEqualTo("hello")
 
@@ -146,7 +147,7 @@ class SessionMutexTest {
         val exception = assertFails {
             mutex.withSessionCancellingPrevious(
                 sessionInitializer = { throw TestException() },
-                session = { fail() }
+                session = { fail() },
             )
         }
 
@@ -158,7 +159,7 @@ class SessionMutexTest {
         val exception = assertFails {
             mutex.withSessionCancellingPrevious(
                 sessionInitializer = ::TestSession,
-                session = { throw TestException() }
+                session = { throw TestException() },
             )
         }
 
@@ -167,10 +168,11 @@ class SessionMutexTest {
 
     @Test
     fun sessionReturnValue() = runTest {
-        val result = mutex.withSessionCancellingPrevious(
-            sessionInitializer = ::TestSession,
-            session = { "hello" }
-        )
+        val result =
+            mutex.withSessionCancellingPrevious(
+                sessionInitializer = ::TestSession,
+                session = { "hello" },
+            )
         assertThat(result).isEqualTo("hello")
     }
 
@@ -178,9 +180,7 @@ class SessionMutexTest {
     fun sessionInitializerValueIsPassedToSession() = runTest {
         mutex.withSessionCancellingPrevious(
             sessionInitializer = { TestSession(it, "hello") },
-            session = {
-                assertThat(it.value).isEqualTo("hello")
-            }
+            session = { assertThat(it.value).isEqualTo("hello") },
         )
     }
 
@@ -194,7 +194,7 @@ class SessionMutexTest {
                     assertThat(it.coroutineContext.job.isChildOf(outerJob)).isTrue()
                     TestSession(it)
                 },
-                session = {}
+                session = {},
             )
         }
     }
@@ -205,7 +205,7 @@ class SessionMutexTest {
         val result = async {
             mutex.withSessionCancellingPrevious(
                 sessionInitializer = ::TestSession,
-                session = { producer.await() }
+                session = { producer.await() },
             )
         }
         advanceUntilIdle()
@@ -221,16 +221,13 @@ class SessionMutexTest {
         val firstSessionJob = launch {
             mutex.withSessionCancellingPrevious(
                 sessionInitializer = ::TestSession,
-                session = { awaitCancellation() }
+                session = { awaitCancellation() },
             )
         }
         advanceUntilIdle()
         assertThat(firstSessionJob.isCompleted).isFalse()
 
-        mutex.withSessionCancellingPrevious(
-            sessionInitializer = ::TestSession,
-            session = {}
-        )
+        mutex.withSessionCancellingPrevious(sessionInitializer = ::TestSession, session = {})
 
         assertThat(firstSessionJob.isCancelled).isTrue()
     }
@@ -250,11 +247,9 @@ class SessionMutexTest {
                     expect(0)
                     suspendCancellableCoroutine<Nothing> { continuation ->
                         // This is ran synchronously by whoever calls cancel.
-                        continuation.invokeOnCancellation {
-                            expect(3)
-                        }
+                        continuation.invokeOnCancellation { expect(3) }
                     }
-                }
+                },
             )
         }
         advanceUntilIdle()
@@ -265,9 +260,7 @@ class SessionMutexTest {
                     expect(2)
                     TestSession(it)
                 },
-                session = {
-                    expect(5)
-                }
+                session = { expect(5) },
             )
         }
 
@@ -297,7 +290,7 @@ class SessionMutexTest {
                             expect(2)
                         }
                     }
-                }
+                },
             )
         }
         advanceUntilIdle()
@@ -306,9 +299,7 @@ class SessionMutexTest {
                 expect(1)
                 TestSession(it)
             },
-            session = {
-                expect(3)
-            }
+            session = { expect(3) },
         )
 
         expect(4)
@@ -327,11 +318,9 @@ class SessionMutexTest {
                     try {
                         awaitCancellation()
                     } finally {
-                        withContext(NonCancellable) {
-                            finalizer.join()
-                        }
+                        withContext(NonCancellable) { finalizer.join() }
                     }
-                }
+                },
             )
         }
         advanceUntilIdle()
@@ -342,9 +331,7 @@ class SessionMutexTest {
                     secondSessionInitialized = true
                     TestSession(it)
                 },
-                session = {
-                    secondSessionStarted = true
-                }
+                session = { secondSessionStarted = true },
             )
         }
 
@@ -373,10 +360,7 @@ class SessionMutexTest {
         return false
     }
 
-    private data class TestSession(
-        val coroutineScope: CoroutineScope,
-        var value: String = ""
-    )
+    private data class TestSession(val coroutineScope: CoroutineScope, var value: String = "")
 
     private class TestException : RuntimeException()
 }

@@ -29,57 +29,47 @@ import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 
-/**
- * reproduces b/203594733
- */
+/** reproduces b/203594733 */
 public class CachedPageEventFlowLeakTest {
     private val gcHelper = GarbageCollectionTestHelper()
 
-    private data class Item(
-        val generation: Int,
-        val pagePos: Int
-    )
+    private data class Item(val generation: Int, val pagePos: Int)
 
     private var sourceGeneration = 0
-    private val pager = Pager(
-        config = PagingConfig(
-            pageSize = 10,
-            initialLoadSize = 20
-        ),
-        pagingSourceFactory = {
-            val generation = sourceGeneration++
-            object : PagingSource<Int, Item>() {
-                override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Item> {
-                    return LoadResult.Page(
-                        data = (0 until params.loadSize).map {
-                            Item(
-                                generation = generation,
-                                pagePos = it
-                            )
-                        },
-                        prevKey = (params.key ?: 0) - 1,
-                        nextKey = (params.key ?: 0) + 1
-                    )
-                }
+    private val pager =
+        Pager(
+            config = PagingConfig(pageSize = 10, initialLoadSize = 20),
+            pagingSourceFactory = {
+                val generation = sourceGeneration++
+                object : PagingSource<Int, Item>() {
+                    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Item> {
+                        return LoadResult.Page(
+                            data =
+                                (0 until params.loadSize).map {
+                                    Item(generation = generation, pagePos = it)
+                                },
+                            prevKey = (params.key ?: 0) - 1,
+                            nextKey = (params.key ?: 0) + 1,
+                        )
+                    }
 
-                override fun getRefreshKey(state: PagingState<Int, Item>): Int? {
-                    return null
+                    override fun getRefreshKey(state: PagingState<Int, Item>): Int? {
+                        return null
+                    }
                 }
+            },
+        )
+
+    private val tracker =
+        object : ActiveFlowTracker {
+            override fun onNewCachedEventFlow(cachedPageEventFlow: CachedPageEventFlow<*>) {
+                gcHelper.track(cachedPageEventFlow)
             }
-        }
-    )
 
-    private val tracker = object : ActiveFlowTracker {
-        override fun onNewCachedEventFlow(cachedPageEventFlow: CachedPageEventFlow<*>) {
-            gcHelper.track(cachedPageEventFlow)
-        }
+            override suspend fun onStart(flowType: ActiveFlowTracker.FlowType) {}
 
-        override suspend fun onStart(flowType: ActiveFlowTracker.FlowType) {
+            override suspend fun onComplete(flowType: ActiveFlowTracker.FlowType) {}
         }
-
-        override suspend fun onComplete(flowType: ActiveFlowTracker.FlowType) {
-        }
-    }
 
     private suspend fun <T : Any> collectPages(
         flow: Flow<PagingData<T>>,
@@ -92,14 +82,12 @@ public class CachedPageEventFlowLeakTest {
          * If true, this method will stop collecting once it reached the desired generation number.
          * Otherwise, it will never return and keep collecting forever.
          */
-        finishCollecting: Boolean
+        finishCollecting: Boolean,
     ) {
         // collect expected generations to generate garbage
         var remaining = generationCount
         flow
-            .takeWhile {
-                !finishCollecting || remaining > 0
-            }
+            .takeWhile { !finishCollecting || remaining > 0 }
             .collectLatest { pagingData ->
                 val willInvalidate = remaining-- > 0
                 if (willInvalidate) {
@@ -140,7 +128,7 @@ public class CachedPageEventFlowLeakTest {
             flow = flow,
             generationCount = 20,
             doneInvalidating = null,
-            finishCollecting = true
+            finishCollecting = true,
         )
         gcHelper.assertLiveObjects(
             // see b/204125064
@@ -148,7 +136,7 @@ public class CachedPageEventFlowLeakTest {
             // to be able to find anchor for the new position but we don't clear it yet. It can
             // only be cleared after the new generation loads a page.
             Item::class to 20,
-            CachedPageEventFlow::class to 1
+            CachedPageEventFlow::class to 1,
         )
         scope.cancel()
     }
@@ -160,7 +148,7 @@ public class CachedPageEventFlowLeakTest {
             flow = pager.flow,
             generationCount = 10,
             doneInvalidating = null,
-            finishCollecting = true
+            finishCollecting = true,
         )
         gcHelper.assertEverythingIsCollected()
     }
@@ -175,7 +163,7 @@ public class CachedPageEventFlowLeakTest {
                 flow = pager.flow,
                 generationCount = 10,
                 doneInvalidating = doneInvalidating,
-                finishCollecting = false
+                finishCollecting = false,
             )
         }
         // make sure we collected enough generations
@@ -203,7 +191,7 @@ public class CachedPageEventFlowLeakTest {
                 flow = flow,
                 generationCount = 10,
                 doneInvalidating = doneInvalidating,
-                finishCollecting = false
+                finishCollecting = false,
             )
         }
         // make sure we collected enough generations
@@ -214,7 +202,7 @@ public class CachedPageEventFlowLeakTest {
             // to be able to find anchor for the new position but we don't clear it yet. It can
             // only be cleared after the new generation loads a page.
             Item::class to 20,
-            CachedPageEventFlow::class to 1
+            CachedPageEventFlow::class to 1,
         )
         collection.cancelAndJoin()
     }

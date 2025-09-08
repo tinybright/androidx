@@ -37,15 +37,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Benchmark for Wear Compose ToggleChip.
- */
+/** Benchmark for Wear Compose ToggleChip. */
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 class ToggleChipBenchmark {
 
-    @get:Rule
-    val benchmarkRule = ComposeBenchmarkRule()
+    @get:Rule val benchmarkRule = ComposeBenchmarkRule()
 
     private val toggleChipCaseFactory = { ToggleChipTestCase() }
 
@@ -97,7 +94,7 @@ internal class ToggleChipTestCase : LayeredComposeTestCase() {
             toggleControl = {
                 Icon(
                     imageVector = ToggleChipDefaults.checkboxIcon(checked = true),
-                    contentDescription = null
+                    contentDescription = null,
                 )
             },
             onClick = {},
@@ -106,8 +103,6 @@ internal class ToggleChipTestCase : LayeredComposeTestCase() {
 
     @Composable
     override fun ContentWrappers(content: @Composable () -> Unit) {
-        MaterialTheme {
-            content()
-        }
+        MaterialTheme { content() }
     }
 }

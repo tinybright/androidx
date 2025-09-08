@@ -26,13 +26,14 @@ public const val LOG_TAG: String = "Paging"
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public expect object PagingLogger {
     public fun isLoggable(level: Int): Boolean
+
     public fun log(level: Int, message: String, tr: Throwable? = null)
 }
 
 public inline fun log(
     @IntRange(from = VERBOSE.toLong(), to = DEBUG.toLong()) level: Int,
     tr: Throwable? = null,
-    block: () -> String
+    block: () -> String,
 ) {
     val logger = PagingLogger
     if (logger.isLoggable(level)) {

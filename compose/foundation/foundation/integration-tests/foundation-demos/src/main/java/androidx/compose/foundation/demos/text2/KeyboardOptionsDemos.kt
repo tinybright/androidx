@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalFoundationApi::class)
-
 package androidx.compose.foundation.demos.text2
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.demos.text.TagLine
 import androidx.compose.foundation.demos.text.fontSize8
@@ -75,16 +72,13 @@ private fun Item(keyboardType: KeyboardType) {
 private fun EditLine(
     keyboardType: KeyboardType = KeyboardType.Text,
     imeAction: ImeAction = ImeAction.Default,
-    text: String = ""
+    text: String = "",
 ) {
     val state = remember { TextFieldState(text) }
     BasicTextField(
         modifier = demoTextFieldModifiers,
         state = state,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = keyboardType,
-            imeAction = imeAction
-        ),
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
         textStyle = TextStyle(fontSize = fontSize8),
     )
 }
@@ -99,9 +93,7 @@ private fun ShowKeyboardOnFocus(showKeyboardOnFocus: Boolean) {
         BasicTextField(
             modifier = demoTextFieldModifiers.focusRequester(focusRequester),
             state = state,
-            keyboardOptions = KeyboardOptions(
-                showKeyboardOnFocus = showKeyboardOnFocus
-            )
+            keyboardOptions = KeyboardOptions(showKeyboardOnFocus = showKeyboardOnFocus),
         )
         Button(onClick = { focusRequester.requestFocus() }) {
             BasicText("Focus me", style = LocalTextStyle.current)
@@ -118,15 +110,13 @@ private fun HintLocaleDemo(localeList: LocaleList) {
         BasicTextField(
             modifier = demoTextFieldModifiers,
             state = state,
-            keyboardOptions = KeyboardOptions(
-                hintLocales = localeList
-            )
+            keyboardOptions = KeyboardOptions(hintLocales = localeList),
         )
     }
 }
 
-val demoTextFieldModifiers = Modifier
-    .fillMaxWidth()
-    .padding(6.dp)
-    .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
-    .padding(6.dp)
+val demoTextFieldModifiers =
+    Modifier.fillMaxWidth()
+        .padding(6.dp)
+        .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
+        .padding(6.dp)

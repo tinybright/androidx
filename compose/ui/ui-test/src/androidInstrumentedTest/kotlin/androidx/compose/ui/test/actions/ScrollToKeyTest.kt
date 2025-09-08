@@ -16,8 +16,10 @@
 
 package androidx.compose.ui.test.actions
 
+import android.os.Looper
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -29,9 +31,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.indexForKey
 import androidx.compose.ui.semantics.scrollToIndex
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.SemanticsNodeInteraction
-import androidx.compose.ui.test.addGlobalAssertion
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.test.hasScrollToKeyAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -39,7 +39,8 @@ import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
-import com.google.common.truth.Truth.assertThat
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,10 +48,10 @@ import org.junit.runner.RunWith
 @MediumTest
 @RunWith(AndroidJUnit4::class)
 class ScrollToKeyTest {
-    @get:Rule
-    val rule = createComposeRule()
+    @get:Rule val rule = createComposeRule()
 
     private fun key(index: Int): String = "key_$index"
+
     private fun tag(index: Int): String = "tag_$index"
 
     @Test
@@ -84,8 +85,8 @@ class ScrollToKeyTest {
 
         // ScrollToKey "hello"
         expectError<IllegalArgumentException>(
-            expectedMessage = "Failed to scroll to the item identified by \"hello\", " +
-                "couldn't find the key."
+            expectedMessage =
+                "Failed to scroll to the item identified by \"hello\", " + "couldn't find the key."
         ) {
             rule.onNode(hasScrollToKeyAction()).performScrollToKey("hello")
         }
@@ -94,15 +95,14 @@ class ScrollToKeyTest {
     @Test
     fun missingSemantics_ScrollToIndex() {
         // Setup a node without ScrollToIndex, but with IndexForKey
-        rule.setContent {
-            Spacer(Modifier.testTag("tag").semantics { indexForKey { 0 } })
-        }
+        rule.setContent { Spacer(Modifier.testTag("tag").semantics { indexForKey { 0 } }) }
 
         // Verify that it doesn't support performScrollToKey
         rule.onNode(hasScrollToKeyAction()).assertDoesNotExist()
         expectError<AssertionError>(
-            expectedMessage = "Failed to scroll to the item identified by \"1\", " +
-                "the node is missing \\[ScrollToIndex\\].*"
+            expectedMessage =
+                "Failed to scroll to the item identified by \"1\", " +
+                    "the node is missing \\[ScrollToIndex\\].*"
         ) {
             rule.onNodeWithTag("tag").performScrollToKey(1)
         }
@@ -111,41 +111,54 @@ class ScrollToKeyTest {
     @Test
     fun missingSemantics_IndexForKey() {
         // Setup a node without IndexForKey, but with ScrollToIndex
-        rule.setContent {
-            Spacer(Modifier.testTag("tag").semantics { scrollToIndex { true } })
-        }
+        rule.setContent { Spacer(Modifier.testTag("tag").semantics { scrollToIndex { true } }) }
 
         // Verify that it doesn't support performScrollToKey
         rule.onNode(hasScrollToKeyAction()).assertDoesNotExist()
         expectError<AssertionError>(
-            expectedMessage = "Failed to scroll to the item identified by \"1\", " +
-                "the node is missing \\[IndexForKey\\].*"
+            expectedMessage =
+                "Failed to scroll to the item identified by \"1\", " +
+                    "the node is missing \\[IndexForKey\\].*"
         ) {
             rule.onNodeWithTag("tag").performScrollToKey(1)
         }
     }
 
     @Test
-    @ExperimentalTestApi
-    fun scrollToKey_withGlobalAssertion() {
-        rule.setContent { LazyColumnContent() }
-        var capturedSni: SemanticsNodeInteraction? = null
-        addGlobalAssertion(/* name= */ "Capture SNI") { sni -> capturedSni = sni }
+    fun performScrollToKey_invokesActionOnOnUiThread() {
+        val wasActionOnUIThread = AtomicBoolean(false)
+        val targetIndex = 50
+        val tag = "LazyColumnTag"
+        rule.setContent {
+            LazyColumn(
+                modifier =
+                    Modifier.height(200.dp).semantics {
+                        testTag = tag
+                        scrollToIndex {
+                            val isOnUiThread =
+                                Thread.currentThread() == Looper.getMainLooper().thread
+                            wasActionOnUIThread.set(isOnUiThread)
+                            true
+                        }
+                    }
+            ) {
+                items(count = 100, key = { key(it) }) {
+                    Spacer(Modifier.requiredHeight(20.dp).fillMaxWidth())
+                }
+            }
+        }
 
-        // ScrollToKey "key_1"
-        val sni = rule.onNode(hasScrollToKeyAction())
-        sni.performScrollToKey("key_1")
-
-        assertThat(capturedSni).isEqualTo(sni)
+        rule.onNodeWithTag(tag).performScrollToKey("key_$targetIndex")
+        assertTrue(
+            wasActionOnUIThread.get(),
+            "The scroll action, triggered by performScrollToKey, did not occur on the UI thread.",
+        )
     }
 
     @Composable
     fun LazyColumnContent() {
         LazyColumn(Modifier.requiredSize(100.dp)) {
-            items(
-                items = List(20) { it },
-                key = { key(it) }
-            ) {
+            items(items = List(20) { it }, key = { key(it) }) {
                 Spacer(Modifier.requiredHeight(30.dp).fillMaxWidth().testTag(tag(it)))
             }
         }

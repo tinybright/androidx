@@ -34,34 +34,26 @@ import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 
-/**
- * TypeConverters for WorkManager enums and classes.
- */
-object WorkTypeConverters {
-    /**
-     * Integer identifiers that map to [WorkInfo.State].
-     */
-    object StateIds {
-        const val ENQUEUED = 0
-        const val RUNNING = 1
-        const val SUCCEEDED = 2
-        const val FAILED = 3
-        const val BLOCKED = 4
-        const val CANCELLED = 5
-        const val COMPLETED_STATES = "($SUCCEEDED, $FAILED, $CANCELLED)"
+/** TypeConverters for WorkManager enums and classes. */
+public object WorkTypeConverters {
+    /** Integer identifiers that map to [WorkInfo.State]. */
+    public object StateIds {
+        public const val ENQUEUED: Int = 0
+        public const val RUNNING: Int = 1
+        public const val SUCCEEDED: Int = 2
+        public const val FAILED: Int = 3
+        public const val BLOCKED: Int = 4
+        public const val CANCELLED: Int = 5
+        public const val COMPLETED_STATES: String = "($SUCCEEDED, $FAILED, $CANCELLED)"
     }
 
-    /**
-     * Integer identifiers that map to [BackoffPolicy].
-     */
+    /** Integer identifiers that map to [BackoffPolicy]. */
     private object BackoffPolicyIds {
         const val EXPONENTIAL = 0
         const val LINEAR = 1
     }
 
-    /**
-     * Integer identifiers that map to [NetworkType].
-     */
+    /** Integer identifiers that map to [NetworkType]. */
     private object NetworkTypeIds {
         const val NOT_REQUIRED = 0
         const val CONNECTED = 1
@@ -71,9 +63,7 @@ object WorkTypeConverters {
         const val TEMPORARILY_UNMETERED = 5
     }
 
-    /**
-     * Integer identifiers that map to [OutOfQuotaPolicy].
-     */
+    /** Integer identifiers that map to [OutOfQuotaPolicy]. */
     private object OutOfPolicyIds {
         const val RUN_AS_NON_EXPEDITED_WORK_REQUEST = 0
         const val DROP_WORK_REQUEST = 1
@@ -87,7 +77,7 @@ object WorkTypeConverters {
      */
     @JvmStatic
     @TypeConverter
-    fun stateToInt(state: WorkInfo.State): Int {
+    public fun stateToInt(state: WorkInfo.State): Int {
         return when (state) {
             WorkInfo.State.ENQUEUED -> StateIds.ENQUEUED
             WorkInfo.State.RUNNING -> StateIds.RUNNING
@@ -106,7 +96,7 @@ object WorkTypeConverters {
      */
     @JvmStatic
     @TypeConverter
-    fun intToState(value: Int): WorkInfo.State {
+    public fun intToState(value: Int): WorkInfo.State {
         return when (value) {
             StateIds.ENQUEUED -> WorkInfo.State.ENQUEUED
             StateIds.RUNNING -> WorkInfo.State.RUNNING
@@ -126,7 +116,7 @@ object WorkTypeConverters {
      */
     @JvmStatic
     @TypeConverter
-    fun backoffPolicyToInt(backoffPolicy: BackoffPolicy): Int {
+    public fun backoffPolicyToInt(backoffPolicy: BackoffPolicy): Int {
         return when (backoffPolicy) {
             BackoffPolicy.EXPONENTIAL -> BackoffPolicyIds.EXPONENTIAL
             BackoffPolicy.LINEAR -> BackoffPolicyIds.LINEAR
@@ -141,7 +131,7 @@ object WorkTypeConverters {
      */
     @JvmStatic
     @TypeConverter
-    fun intToBackoffPolicy(value: Int): BackoffPolicy {
+    public fun intToBackoffPolicy(value: Int): BackoffPolicy {
         return when (value) {
             BackoffPolicyIds.EXPONENTIAL -> BackoffPolicy.EXPONENTIAL
             BackoffPolicyIds.LINEAR -> BackoffPolicy.LINEAR
@@ -157,7 +147,7 @@ object WorkTypeConverters {
      */
     @JvmStatic
     @TypeConverter
-    fun networkTypeToInt(networkType: NetworkType): Int {
+    public fun networkTypeToInt(networkType: NetworkType): Int {
         return when (networkType) {
             NetworkType.NOT_REQUIRED -> NetworkTypeIds.NOT_REQUIRED
             NetworkType.CONNECTED -> NetworkTypeIds.CONNECTED
@@ -167,8 +157,7 @@ object WorkTypeConverters {
             else -> {
                 if (Build.VERSION.SDK_INT >= 30 && networkType == NetworkType.TEMPORARILY_UNMETERED)
                     NetworkTypeIds.TEMPORARILY_UNMETERED
-                else
-                    throw IllegalArgumentException("Could not convert $networkType to int")
+                else throw IllegalArgumentException("Could not convert $networkType to int")
             }
         }
     }
@@ -181,7 +170,7 @@ object WorkTypeConverters {
      */
     @JvmStatic
     @TypeConverter
-    fun intToNetworkType(value: Int): NetworkType {
+    public fun intToNetworkType(value: Int): NetworkType {
         return when (value) {
             NetworkTypeIds.NOT_REQUIRED -> NetworkType.NOT_REQUIRED
             NetworkTypeIds.CONNECTED -> NetworkType.CONNECTED
@@ -204,7 +193,7 @@ object WorkTypeConverters {
      */
     @JvmStatic
     @TypeConverter
-    fun outOfQuotaPolicyToInt(policy: OutOfQuotaPolicy): Int {
+    public fun outOfQuotaPolicyToInt(policy: OutOfQuotaPolicy): Int {
         return when (policy) {
             OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST ->
                 OutOfPolicyIds.RUN_AS_NON_EXPEDITED_WORK_REQUEST
@@ -220,7 +209,7 @@ object WorkTypeConverters {
      */
     @JvmStatic
     @TypeConverter
-    fun intToOutOfQuotaPolicy(value: Int): OutOfQuotaPolicy {
+    public fun intToOutOfQuotaPolicy(value: Int): OutOfQuotaPolicy {
         return when (value) {
             OutOfPolicyIds.RUN_AS_NON_EXPEDITED_WORK_REQUEST ->
                 OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST
@@ -231,12 +220,13 @@ object WorkTypeConverters {
 
     /**
      * Converts a set of [Constraints.ContentUriTrigger]s to byte array representation
+     *
      * @param triggers the list of [Constraints.ContentUriTrigger]s to convert
      * @return corresponding byte array representation
      */
     @JvmStatic
     @TypeConverter
-    fun setOfTriggersToByteArray(triggers: Set<ContentUriTrigger>): ByteArray {
+    public fun setOfTriggersToByteArray(triggers: Set<ContentUriTrigger>): ByteArray {
         if (triggers.isEmpty()) {
             return ByteArray(0)
         }
@@ -255,12 +245,13 @@ object WorkTypeConverters {
 
     /**
      * Converts a byte array to set of [ContentUriTrigger]s
+     *
      * @param bytes byte array representation to convert
      * @return set of [ContentUriTrigger]
      */
     @JvmStatic
     @TypeConverter
-    fun byteArrayToSetOfTriggers(bytes: ByteArray): Set<ContentUriTrigger> {
+    public fun byteArrayToSetOfTriggers(bytes: ByteArray): Set<ContentUriTrigger> {
         val triggers = mutableSetOf<ContentUriTrigger>()
         if (bytes.isEmpty()) {
             // bytes will be null if there are no Content Uri Triggers

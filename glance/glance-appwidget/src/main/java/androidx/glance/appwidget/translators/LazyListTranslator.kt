@@ -45,11 +45,7 @@ internal fun RemoteViews.translateEmittableLazyColumn(
     element: EmittableLazyColumn,
 ) {
     val viewDef = insertView(translationContext, LayoutType.List, element.modifier)
-    translateEmittableLazyList(
-        translationContext,
-        element,
-        viewDef,
-    )
+    translateEmittableLazyList(translationContext, element, viewDef)
 }
 
 private fun RemoteViews.translateEmittableLazyList(
@@ -66,37 +62,42 @@ private fun RemoteViews.translateEmittableLazyList(
             translationContext.context,
             0,
             Intent(),
-            FILL_IN_COMPONENT
-                or FLAG_MUTABLE
-                or FLAG_UPDATE_CURRENT
-                or FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT,
+            FILL_IN_COMPONENT or
+                FLAG_MUTABLE or
+                FLAG_UPDATE_CURRENT or
+                FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT,
             element.activityOptions,
-        )
+        ),
     )
-    val items = RemoteCollectionItems.Builder().apply {
-        val childContext = translationContext.forLazyCollection(viewDef.mainViewId)
-        element.children.foldIndexed(false) { position, previous, itemEmittable ->
-            itemEmittable as EmittableLazyListItem
-            val itemId = itemEmittable.itemId
-            addItem(
-                itemId,
-                translateComposition(
-                    childContext.forLazyViewItem(position, LazyListItemStartingViewId),
-                    listOf(itemEmittable),
-                    translationContext.layoutConfiguration?.addLayout(itemEmittable) ?: -1,
-                )
-            )
-            // If the user specifies any explicit ids, we assume the list to be stable
-            previous || (itemId > ReservedItemIdRangeEnd)
-        }.let { setHasStableIds(it) }
-        setViewTypeCount(TopLevelLayoutsCount)
-    }.build()
+    val items =
+        RemoteCollectionItems.Builder()
+            .apply {
+                val childContext = translationContext.forLazyCollection(viewDef.mainViewId)
+                element.children
+                    .foldIndexed(false) { position, previous, itemEmittable ->
+                        itemEmittable as EmittableLazyListItem
+                        val itemId = itemEmittable.itemId
+                        addItem(
+                            itemId,
+                            translateComposition(
+                                childContext.forLazyViewItem(position, LazyListItemStartingViewId),
+                                listOf(itemEmittable),
+                                translationContext.layoutConfiguration?.addLayout(itemEmittable)
+                                    ?: -1,
+                            ),
+                        )
+                        // If the user specifies any explicit ids, we assume the list to be stable
+                        previous || (itemId > ReservedItemIdRangeEnd)
+                    }
+                    .let { setHasStableIds(it) }
+                setViewTypeCount(TopLevelLayoutsCount)
+            }
+            .build()
     setRemoteAdapter(
-        translationContext.context,
-        translationContext.appWidgetId,
+        translationContext,
         viewDef.mainViewId,
         translationContext.layoutSize.toSizeString(),
-        items
+        items,
     )
     applyModifiers(translationContext, this, element.modifier, viewDef)
 }
@@ -109,7 +110,7 @@ private fun RemoteViews.translateEmittableLazyList(
 // support interaction animations in immediate children, e.g. checkboxes,  pre-S
 internal fun RemoteViews.translateEmittableLazyListItem(
     translationContext: TranslationContext,
-    element: EmittableLazyListItem
+    element: EmittableLazyListItem,
 ) {
     require(element.children.size == 1 && element.alignment == Alignment.CenterStart) {
         "Lazy list items can only have a single child align at the center start of the view. " +

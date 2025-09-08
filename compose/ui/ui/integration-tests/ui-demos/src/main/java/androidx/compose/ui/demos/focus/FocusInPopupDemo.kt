@@ -48,9 +48,7 @@ fun FocusInPopupDemo() {
     Column(Modifier.background(if (windowInfo.isWindowFocused) White else LightGray)) {
         Text("Click the button to show the popup. Click outside the popup to dismiss it.")
         Spacer(Modifier.requiredHeight(10.dp))
-        Button(onClick = { showPopup = true }) {
-            Text("Show Popup")
-        }
+        Button(onClick = { showPopup = true }) { Text("Show Popup") }
 
         Spacer(Modifier.requiredHeight(50.dp))
 
@@ -62,7 +60,7 @@ fun FocusInPopupDemo() {
             Popup(
                 alignment = Alignment.Center,
                 properties = PopupProperties(focusable = true),
-                onDismissRequest = { showPopup = false }
+                onDismissRequest = { showPopup = false },
             ) {
                 Column(Modifier.background(White)) {
                     Text("Click this text field to bring the popup in focus")

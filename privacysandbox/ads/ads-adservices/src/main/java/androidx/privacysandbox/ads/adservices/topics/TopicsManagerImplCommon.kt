@@ -31,7 +31,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 @SuppressLint("NewApi")
 @RequiresExtension(extension = SdkExtensions.AD_SERVICES, version = 4)
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 9)
-open class TopicsManagerImplCommon(
+public open class TopicsManagerImplCommon(
     private val mTopicsManager: android.adservices.topics.TopicsManager
 ) : TopicsManager() {
     @DoNotInline
@@ -43,13 +43,8 @@ open class TopicsManagerImplCommon(
     @RequiresPermission(AdServicesPermissions.ACCESS_ADSERVICES_TOPICS)
     private suspend fun getTopicsAsyncInternal(
         getTopicsRequest: android.adservices.topics.GetTopicsRequest
-    ): android.adservices.topics.GetTopicsResponse = suspendCancellableCoroutine { continuation
-        ->
-        mTopicsManager.getTopics(
-            getTopicsRequest,
-            Runnable::run,
-            continuation.asOutcomeReceiver()
-        )
+    ): android.adservices.topics.GetTopicsResponse = suspendCancellableCoroutine { continuation ->
+        mTopicsManager.getTopics(getTopicsRequest, Runnable::run, continuation.asOutcomeReceiver())
     }
 
     internal open fun convertRequest(

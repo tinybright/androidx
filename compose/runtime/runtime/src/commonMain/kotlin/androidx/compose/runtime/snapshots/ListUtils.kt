@@ -16,12 +16,13 @@
 
 package androidx.compose.runtime.snapshots
 
+import androidx.collection.ObjectList
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
 /**
- * Iterates through a [List] using the index and calls [action] for each item.
- * This does not allocate an iterator like [Iterable.forEach].
+ * Iterates through a [List] using the index and calls [action] for each item. This does not
+ * allocate an iterator like [Iterable.forEach].
  *
  * **Do not use for collections that come from public APIs**, since they may not support random
  * access in an efficient way, and this method may actually be a lot slower. Only use for
@@ -38,6 +39,20 @@ internal inline fun <T> List<T>.fastForEach(action: (T) -> Unit) {
 }
 
 /**
+ * Iterates through an [ObjectList] using the index and calls [action] for each item. This does not
+ * allocate an iterator like [Iterable.forEach].
+ */
+@Suppress("BanInlineOptIn") // Treat Kotlin Contracts as non-experimental.
+@OptIn(ExperimentalContracts::class)
+internal inline fun <T> ObjectList<T>.fastForEach(action: (T) -> Unit) {
+    contract { callsInPlace(action) }
+    for (index in indices) {
+        val item = get(index)
+        action(item)
+    }
+}
+
+/**
  * Returns a [Set] of all elements.
  *
  * The returned set preserves the element iteration order of the original collection.
@@ -46,13 +61,12 @@ internal inline fun <T> List<T>.fastForEach(action: (T) -> Unit) {
  * access in an efficient way, and this method may actually be a lot slower. Only use for
  * collections that are created by code we control and are known to support random access.
  */
-internal fun <T> List<T>.fastToSet(): Set<T> = HashSet<T>(size).also { set ->
-    fastForEach { item -> set.add(item) }
-}
+internal fun <T> List<T>.fastToSet(): Set<T> =
+    HashSet<T>(size).also { set -> fastForEach { item -> set.add(item) } }
 
 /**
- * Iterates through a [List] using the index and calls [action] for each item.
- * This does not allocate an iterator like [Iterable.forEachIndexed].
+ * Iterates through a [List] using the index and calls [action] for each item. This does not
+ * allocate an iterator like [Iterable.forEachIndexed].
  *
  * **Do not use for collections that come from public APIs**, since they may not support random
  * access in an efficient way, and this method may actually be a lot slower. Only use for
@@ -69,8 +83,8 @@ internal inline fun <T> List<T>.fastForEachIndexed(action: (Int, T) -> Unit) {
 }
 
 /**
- * Returns a list containing the results of applying the given [transform] function
- * to each element in the original collection.
+ * Returns a list containing the results of applying the given [transform] function to each element
+ * in the original collection.
  *
  * **Do not use for collections that come from public APIs**, since they may not support random
  * access in an efficient way, and this method may actually be a lot slower. Only use for
@@ -81,9 +95,7 @@ internal inline fun <T> List<T>.fastForEachIndexed(action: (Int, T) -> Unit) {
 internal inline fun <T, R> List<T>.fastMap(transform: (T) -> R): List<R> {
     contract { callsInPlace(transform) }
     val target = ArrayList<R>(size)
-    fastForEach {
-        target += transform(it)
-    }
+    fastForEach { target += transform(it) }
     return target
 }
 
@@ -91,10 +103,16 @@ internal inline fun <T, R> List<T>.fastMap(transform: (T) -> R): List<R> {
 @OptIn(ExperimentalContracts::class)
 internal inline fun <T> List<T>.fastAny(predicate: (T) -> Boolean): Boolean {
     contract { callsInPlace(predicate) }
-    fastForEach {
-        if (predicate(it)) return true
-    }
+    fastForEach { if (predicate(it)) return true }
     return false
+}
+
+@Suppress("BanInlineOptIn") // Treat Kotlin Contracts as non-experimental.
+@OptIn(ExperimentalContracts::class)
+internal inline fun <T> List<T>.fastNone(predicate: (T) -> Boolean): Boolean {
+    contract { callsInPlace(predicate) }
+    fastForEach { if (predicate(it)) return false }
+    return true
 }
 
 /**
@@ -114,18 +132,17 @@ internal inline fun <T> List<T>.fastAll(predicate: (T) -> Boolean): Boolean {
 
 @Suppress("BanInlineOptIn") // Treat Kotlin Contracts as non-experimental.
 @OptIn(ExperimentalContracts::class)
-internal inline fun <T, K> List<T>.fastGroupBy(
-    keySelector: (T) -> K
-): Map<K, List<T>> {
+internal inline fun <T, K> List<T>.fastGroupBy(keySelector: (T) -> K): Map<K, List<T>> {
     contract { callsInPlace(keySelector) }
     val destination = HashMap<K, ArrayList<T>>(size)
     fastForEach {
         val key = keySelector(it)
-        val list = destination.getOrPut(key) { ArrayList<T>() }
+        val list = destination.getOrPut(key) { ArrayList() }
         list.add(it)
     }
     return destination
 }
+
 /**
  * Creates a string from all the elements separated using [separator] and using the given [prefix]
  * and [postfix] if supplied.
@@ -144,19 +161,19 @@ internal fun <T> List<T>.fastJoinToString(
     postfix: CharSequence = "",
     limit: Int = -1,
     truncated: CharSequence = "...",
-    transform: ((T) -> CharSequence)? = null
+    transform: ((T) -> CharSequence)? = null,
 ): String {
     return fastJoinTo(StringBuilder(), separator, prefix, postfix, limit, truncated, transform)
         .toString()
 }
 
 /**
- * Appends the string from all the elements separated using [separator] and using the given
- * [prefix] and [postfix] if supplied.
+ * Appends the string from all the elements separated using [separator] and using the given [prefix]
+ * and [postfix] if supplied.
  *
- * If the collection could be huge, you can specify a non-negative value of [limit], in which
- * case only the first [limit] elements will be appended, followed by the [truncated] string
- * (which defaults to "...").
+ * If the collection could be huge, you can specify a non-negative value of [limit], in which case
+ * only the first [limit] elements will be appended, followed by the [truncated] string (which
+ * defaults to "...").
  *
  * **Do not use for collections that come from public APIs**, since they may not support random
  * access in an efficient way, and this method may actually be a lot slower. Only use for
@@ -169,7 +186,7 @@ private fun <T, A : Appendable> List<T>.fastJoinTo(
     postfix: CharSequence = "",
     limit: Int = -1,
     truncated: CharSequence = "...",
-    transform: ((T) -> CharSequence)? = null
+    transform: ((T) -> CharSequence)? = null,
 ): A {
     buffer.append(prefix)
     var count = 0
@@ -185,9 +202,7 @@ private fun <T, A : Appendable> List<T>.fastJoinTo(
     return buffer
 }
 
-/**
- * Copied from Appendable.kt
- */
+/** Copied from Appendable.kt */
 private fun <T> Appendable.appendElement(element: T, transform: ((T) -> CharSequence)?) {
     when {
         transform != null -> append(transform(element))
@@ -198,8 +213,8 @@ private fun <T> Appendable.appendElement(element: T, transform: ((T) -> CharSequ
 }
 
 /**
- * Returns a list containing the results of applying the given [transform] function
- * to each element in the original collection.
+ * Returns a list containing the results of applying the given [transform] function to each element
+ * in the original collection.
  *
  * **Do not use for collections that come from public APIs**, since they may not support random
  * access in an efficient way, and this method may actually be a lot slower. Only use for
@@ -210,16 +225,15 @@ private fun <T> Appendable.appendElement(element: T, transform: ((T) -> CharSequ
 internal inline fun <T, R> List<T>.fastMapNotNull(transform: (T) -> R?): List<R> {
     contract { callsInPlace(transform) }
     val target = ArrayList<R>(size)
-    fastForEach { e ->
-        transform(e)?.let { target += it }
-    }
+    fastForEach { e -> transform(e)?.let { target += it } }
     return target
 }
 
 /**
  * Returns a list containing only elements matching the given [predicate].
- * @param [predicate] function that takes the index of an element and the element itself
- * and returns the result of predicate evaluation on the element.
+ *
+ * @param [predicate] function that takes the index of an element and the element itself and returns
+ *   the result of predicate evaluation on the element.
  *
  * **Do not use for collections that come from public APIs**, since they may not support random
  * access in an efficient way, and this method may actually be a lot slower. Only use for
@@ -230,8 +244,6 @@ internal inline fun <T, R> List<T>.fastMapNotNull(transform: (T) -> R?): List<R>
 internal inline fun <T> List<T>.fastFilterIndexed(predicate: (index: Int, T) -> Boolean): List<T> {
     contract { callsInPlace(predicate) }
     val target = ArrayList<T>(size)
-    fastForEachIndexed { index, e ->
-        if (predicate(index, e)) target += e
-    }
+    fastForEachIndexed { index, e -> if (predicate(index, e)) target += e }
     return target
 }

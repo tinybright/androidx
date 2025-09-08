@@ -22,10 +22,10 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.os.Binder;
 
-import androidx.annotation.DoNotInline;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Helper for accessing features in {@link android.app.AppOpsManager}.
@@ -64,22 +64,12 @@ public final class AppOpsManagerCompat {
 
     /**
      * Gets the app op name associated with a given permission.
-     * <p>
-     * <strong>Compatibility</strong>
-     * <ul>
-     * <li>On API 22 and lower, this method always returns {@code null}
-     * </ul>
      *
      * @param permission The permission.
      * @return The app op associated with the permission or null.
      */
-    @Nullable
-    public static String permissionToOp(@NonNull String permission) {
-        if (SDK_INT >= 23) {
-            return Api23Impl.permissionToOp(permission);
-        } else {
-            return null;
-        }
+    public static @Nullable String permissionToOp(@NonNull String permission) {
+        return AppOpsManager.permissionToOp(permission);
     }
 
     /**
@@ -88,11 +78,6 @@ public final class AppOpsManagerCompat {
      * that these two match, and if not, return {@link #MODE_IGNORED}.  If this call
      * succeeds, the last execution time of the operation for this app will be updated to
      * the current time.
-     * <p>
-     * <strong>Compatibility</strong>
-     * <ul>
-     * <li>On API 18 and lower, this method always returns {@link #MODE_IGNORED}
-     * </ul>
      * @param context Your context.
      * @param op The operation to note.  One of the OPSTR_* constants.
      * @param uid The user id of the application attempting to perform the operation.
@@ -112,11 +97,6 @@ public final class AppOpsManagerCompat {
     /**
      * Like {@link #noteOp} but instead of throwing a {@link SecurityException} it
      * returns {@link #MODE_ERRORED}.
-     * <p>
-     * <strong>Compatibility</strong>
-     * <ul>
-     * <li>On API 18 and lower, this method always returns {@link #MODE_IGNORED}
-     * </ul>
      */
     public static int noteOpNoThrow(@NonNull Context context, @NonNull String op, int uid,
             @NonNull String packageName) {
@@ -133,11 +113,6 @@ public final class AppOpsManagerCompat {
      * package name match, and if not, return {@link #MODE_IGNORED}. If this call
      * succeeds, the last execution time of the operation for the proxied app and
      * your app will be updated to the current time.
-     * <p>
-     * <strong>Compatibility</strong>
-     * <ul>
-     * <li>On API 22 and lower, this method always returns {@link #MODE_IGNORED}
-     * </ul>
      * @param context Your context.
      * @param op The operation to note.  One of the OPSTR_* constants.
      * @param proxiedPackageName The name of the application calling into the proxy application.
@@ -148,38 +123,24 @@ public final class AppOpsManagerCompat {
      */
     public static int noteProxyOp(@NonNull Context context, @NonNull String op,
             @NonNull String proxiedPackageName) {
-        if (SDK_INT >= 23) {
-            AppOpsManager appOpsManager = Api23Impl.getSystemService(context, AppOpsManager.class);
-            return Api23Impl.noteProxyOp(appOpsManager, op, proxiedPackageName);
-        } else {
-            return MODE_IGNORED;
-        }
+        AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
+        return appOpsManager.noteProxyOp(op, proxiedPackageName);
     }
 
     /**
      * Like {@link #noteProxyOp(Context, String, String)} but instead
      * of throwing a {@link SecurityException} it returns {@link #MODE_ERRORED}.
-     * <p>
-     * <strong>Compatibility</strong>
-     * <ul>
-     * <li>On API 22 and lower, this method always returns {@link #MODE_IGNORED}
-     * </ul>
      */
     public static int noteProxyOpNoThrow(@NonNull Context context, @NonNull String op,
             @NonNull String proxiedPackageName) {
-        if (SDK_INT >= 23) {
-            AppOpsManager appOpsManager = Api23Impl.getSystemService(context, AppOpsManager.class);
-            return Api23Impl.noteProxyOpNoThrow(appOpsManager, op, proxiedPackageName);
-        } else {
-            return MODE_IGNORED;
-        }
+        AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
+        return appOpsManager.noteProxyOpNoThrow(op, proxiedPackageName);
     }
 
     /**
      * Check op for both proxy and proxied packages. Do a quick check for whether an application
      * might be able to perform an operation. This is not a security check.
-     * On API 23-28, fallback to {@link #noteProxyOpNoThrow(Context, String, String)}
-     * On API 22 and lower, this method always returns {@link #MODE_IGNORED}
+     * On API 28 and lower, fallback to {@link #noteProxyOpNoThrow(Context, String, String)}
      * @param context Your context.
      * @param proxyUid The uid of the proxy application.
      * @param op The operation to note.  One of the OPSTR_* constants.
@@ -220,7 +181,6 @@ public final class AppOpsManagerCompat {
         /**
          * Return the AppOpsManager system service.
          */
-        @DoNotInline
         static @Nullable AppOpsManager getSystemService(@NonNull Context context) {
             return context.getSystemService(AppOpsManager.class);
         }
@@ -228,7 +188,6 @@ public final class AppOpsManagerCompat {
         /**
          * Use the AppOpsManager to perform checkOp().
          */
-        @DoNotInline
         static int checkOpNoThrow(@Nullable AppOpsManager appOpsManager,
                 @NonNull String op, int uid, @NonNull String packageName) {
             if (appOpsManager == null) {
@@ -241,37 +200,8 @@ public final class AppOpsManagerCompat {
         /**
          * Return the packageName from the context.
          */
-        @DoNotInline
         static @NonNull String getOpPackageName(@NonNull Context context) {
             return context.getOpPackageName();
-        }
-    }
-
-    @RequiresApi(23)
-    static class Api23Impl {
-        private Api23Impl() {
-            // This class is not instantiable.
-        }
-
-        @DoNotInline
-        static String permissionToOp(String permission) {
-            return AppOpsManager.permissionToOp(permission);
-        }
-
-        @DoNotInline
-        static <T> T getSystemService(Context context, Class<T> serviceClass) {
-            return context.getSystemService(serviceClass);
-        }
-
-        @DoNotInline
-        static int noteProxyOp(AppOpsManager appOpsManager, String op, String proxiedPackageName) {
-            return appOpsManager.noteProxyOp(op, proxiedPackageName);
-        }
-
-        @DoNotInline
-        static int noteProxyOpNoThrow(AppOpsManager appOpsManager, String op,
-                String proxiedPackageName) {
-            return appOpsManager.noteProxyOpNoThrow(op, proxiedPackageName);
         }
     }
 }
