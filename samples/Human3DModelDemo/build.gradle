@@ -1,0 +1,22 @@
+/**
+ * Sample 3D Human Body Model Viewer with Joint Manipulation
+ * Displays a 3D human model and allows joint manipulation with 33 keypoint output
+ */
+plugins {
+    id("AndroidXPlugin")
+    id("com.android.application")
+    id("kotlin-android")
+}
+
+dependencies {
+    api(libs.kotlinStdlib)
+    implementation(project(":appcompat:appcompat"))
+    implementation(project(":core:core"))
+    implementation(project(":fragment:fragment"))
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    api(libs.material)
+}
+
+android {
+    namespace "com.example.human3dmodel"
+}

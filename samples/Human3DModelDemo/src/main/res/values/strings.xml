@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">3D Human Model Demo</string>
+    <string name="keypoints_label">33 Keypoints Data:</string>
+    <string name="reset_pose">Reset Pose</string>
+    <string name="joint_rotation_instructions">Drag joints to rotate them</string>
+</resources>
